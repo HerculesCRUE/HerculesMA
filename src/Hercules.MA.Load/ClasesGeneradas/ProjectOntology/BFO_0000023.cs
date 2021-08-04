@@ -12,8 +12,9 @@ using GnossBase;
 using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using ParticipationType = ParticipationTypeOntology.ParticipationType;
-using ContributionGrade = ContributionGradeOntology.ContributionGrade;
+using ParticipationType = ParticipationtypeOntology.ParticipationType;
+using ContributionGrade = ContributiongradeOntology.ContributionGrade;
+using DedicationRegime = DedicationregimeOntology.DedicationRegime;
 using Person = PersonOntology.Person;
 
 namespace ProjectOntology

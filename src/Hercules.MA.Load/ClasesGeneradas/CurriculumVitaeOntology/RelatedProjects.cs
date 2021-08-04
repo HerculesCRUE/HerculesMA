@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using Project = ProjectOntology.Project;
 
-namespace CurriculumVitaeOntology
+namespace CurriculumvitaeOntology
 {
 	public class RelatedProjects : GnossOCBase
 	{

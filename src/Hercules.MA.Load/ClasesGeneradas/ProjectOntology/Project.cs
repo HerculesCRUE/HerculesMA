@@ -13,7 +13,7 @@ using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using Organization = OrganizationOntology.Organization;
-using GeographicRegion = GeographicRegionOntology.GeographicRegion;
+using GeographicRegion = GeographicregionOntology.GeographicRegion;
 using Modality = ModalityOntology.Modality;
 
 namespace ProjectOntology
@@ -582,7 +582,7 @@ namespace ProjectOntology
 		public override List<string> ToSearchGraphTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> \"Project\" . ");
+			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> \"project\" . ");
 			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/type> \"http://vivoweb.org/ontology/core#Project\" . ");
 			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasfechapublicacion> {DateTime.Now.ToString("yyyyMMddHHmmss")} . ");
 			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hastipodoc> \"5\" . ");

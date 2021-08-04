@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using Feature = FeatureOntology.Feature;
 
-namespace CurriculumVitaeOntology
+namespace CurriculumvitaeOntology
 {
 	public class Address : GnossOCBase
 	{
@@ -25,15 +25,15 @@ namespace CurriculumVitaeOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
-			SemanticPropertyModel propVcard_hasCountryName = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasCountryName");
-			if(propVcard_hasCountryName != null && propVcard_hasCountryName.PropertyValues.Count > 0)
-			{
-				this.Vcard_hasCountryName = new Feature(propVcard_hasCountryName.PropertyValues[0].RelatedEntity,idiomaUsuario);
-			}
 			SemanticPropertyModel propVcard_hasRegion = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasRegion");
 			if(propVcard_hasRegion != null && propVcard_hasRegion.PropertyValues.Count > 0)
 			{
 				this.Vcard_hasRegion = new Feature(propVcard_hasRegion.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
+			SemanticPropertyModel propVcard_hasCountryName = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasCountryName");
+			if(propVcard_hasCountryName != null && propVcard_hasCountryName.PropertyValues.Count > 0)
+			{
+				this.Vcard_hasCountryName = new Feature(propVcard_hasCountryName.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			SemanticPropertyModel propRoh_hasProvince = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/hasProvince");
 			if(propRoh_hasProvince != null && propRoh_hasProvince.PropertyValues.Count > 0)
@@ -48,15 +48,15 @@ namespace CurriculumVitaeOntology
 
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"País")]
-		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasCountryName")]
-		public  Feature Vcard_hasCountryName  { get; set;} 
-		public string IdVcard_hasCountryName  { get; set;} 
-
 		[LABEL(LanguageEnum.es,"C. Autón./Reg.")]
 		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasRegion")]
 		public  Feature Vcard_hasRegion  { get; set;} 
 		public string IdVcard_hasRegion  { get; set;} 
+
+		[LABEL(LanguageEnum.es,"País")]
+		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasCountryName")]
+		public  Feature Vcard_hasCountryName  { get; set;} 
+		public string IdVcard_hasCountryName  { get; set;} 
 
 		[LABEL(LanguageEnum.es,"Provincia")]
 		[RDFProperty("http://w3id.org/roh/hasProvince")]
@@ -83,8 +83,8 @@ namespace CurriculumVitaeOntology
 		internal override void GetProperties()
 		{
 			base.GetProperties();
-			propList.Add(new StringOntologyProperty("vcard:hasCountryName", this.IdVcard_hasCountryName));
 			propList.Add(new StringOntologyProperty("vcard:hasRegion", this.IdVcard_hasRegion));
+			propList.Add(new StringOntologyProperty("vcard:hasCountryName", this.IdVcard_hasCountryName));
 			propList.Add(new StringOntologyProperty("roh:hasProvince", this.IdRoh_hasProvince));
 			propList.Add(new StringOntologyProperty("vcard:postal_code", this.Vcard_postal_code));
 			propList.Add(new StringOntologyProperty("vcard:extended_address", this.Vcard_extended_address));

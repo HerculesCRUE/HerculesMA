@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using Feature = FeatureOntology.Feature;
 
-namespace CurriculumVitaeOntology
+namespace CurriculumvitaeOntology
 {
 	public class PersonalData : GnossOCBase
 	{
@@ -25,6 +25,16 @@ namespace CurriculumVitaeOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
+			SemanticPropertyModel propSchema_nationality = pSemCmsModel.GetPropertyByPath("http://www.schema.org/nationality");
+			if(propSchema_nationality != null && propSchema_nationality.PropertyValues.Count > 0)
+			{
+				this.Schema_nationality = new Feature(propSchema_nationality.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
+			SemanticPropertyModel propVcard_address = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#address");
+			if(propVcard_address != null && propVcard_address.PropertyValues.Count > 0)
+			{
+				this.Vcard_address = new Address(propVcard_address.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
 			SemanticPropertyModel propRoh_hasFax = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/hasFax");
 			if(propRoh_hasFax != null && propRoh_hasFax.PropertyValues.Count > 0)
 			{
@@ -46,16 +56,6 @@ namespace CurriculumVitaeOntology
 			if(propRoh_birthplace != null && propRoh_birthplace.PropertyValues.Count > 0)
 			{
 				this.Roh_birthplace = new Address(propRoh_birthplace.PropertyValues[0].RelatedEntity,idiomaUsuario);
-			}
-			SemanticPropertyModel propSchema_nationality = pSemCmsModel.GetPropertyByPath("http://www.schema.org/nationality");
-			if(propSchema_nationality != null && propSchema_nationality.PropertyValues.Count > 0)
-			{
-				this.Schema_nationality = new Feature(propSchema_nationality.PropertyValues[0].RelatedEntity,idiomaUsuario);
-			}
-			SemanticPropertyModel propVcard_address = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#address");
-			if(propVcard_address != null && propVcard_address.PropertyValues.Count > 0)
-			{
-				this.Vcard_address = new Address(propVcard_address.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			this.Vcard_hasTelephone = new List<TelephoneType>();
 			SemanticPropertyModel propVcard_hasTelephone = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasTelephone");
@@ -88,6 +88,15 @@ namespace CurriculumVitaeOntology
 
 		public OntologyEntity Entity { get; set; }
 
+		[LABEL(LanguageEnum.es,"Nacionalidad")]
+		[RDFProperty("http://www.schema.org/nationality")]
+		public  Feature Schema_nationality  { get; set;} 
+		public string IdSchema_nationality  { get; set;} 
+
+		[LABEL(LanguageEnum.es,"Dirección de contacto")]
+		[RDFProperty("https://www.w3.org/2006/vcard/ns#address")]
+		public  Address Vcard_address { get; set;}
+
 		[LABEL(LanguageEnum.es,"Fax")]
 		[RDFProperty("http://w3id.org/roh/hasFax")]
 		public  TelephoneType Roh_hasFax { get; set;}
@@ -99,15 +108,6 @@ namespace CurriculumVitaeOntology
 		[LABEL(LanguageEnum.es,"Lugar de nacimiento")]
 		[RDFProperty("http://w3id.org/roh/birthplace")]
 		public  Address Roh_birthplace { get; set;}
-
-		[LABEL(LanguageEnum.es,"Nacionalidad")]
-		[RDFProperty("http://www.schema.org/nationality")]
-		public  Feature Schema_nationality  { get; set;} 
-		public string IdSchema_nationality  { get; set;} 
-
-		[LABEL(LanguageEnum.es,"Dirección de contacto")]
-		[RDFProperty("https://www.w3.org/2006/vcard/ns#address")]
-		public  Address Vcard_address { get; set;}
 
 		[LABEL(LanguageEnum.es,"Teléfono fijo")]
 		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasTelephone")]
@@ -159,6 +159,12 @@ namespace CurriculumVitaeOntology
 		{
 			base.GetEntities();
 			entList = new List<OntologyEntity>();
+			if(Vcard_address!=null){
+				Vcard_address.GetProperties();
+				Vcard_address.GetEntities();
+				OntologyEntity entityVcard_address = new OntologyEntity("https://www.w3.org/2006/vcard/ns#Address", "https://www.w3.org/2006/vcard/ns#Address", "vcard:address", Vcard_address.propList, Vcard_address.entList);
+				entList.Add(entityVcard_address);
+			}
 			if(Roh_hasFax!=null){
 				Roh_hasFax.GetProperties();
 				Roh_hasFax.GetEntities();
@@ -179,12 +185,6 @@ namespace CurriculumVitaeOntology
 				Roh_birthplace.GetEntities();
 				OntologyEntity entityRoh_birthplace = new OntologyEntity("https://www.w3.org/2006/vcard/ns#Address", "https://www.w3.org/2006/vcard/ns#Address", "roh:birthplace", Roh_birthplace.propList, Roh_birthplace.entList);
 				entList.Add(entityRoh_birthplace);
-			}
-			if(Vcard_address!=null){
-				Vcard_address.GetProperties();
-				Vcard_address.GetEntities();
-				OntologyEntity entityVcard_address = new OntologyEntity("https://www.w3.org/2006/vcard/ns#Address", "https://www.w3.org/2006/vcard/ns#Address", "vcard:address", Vcard_address.propList, Vcard_address.entList);
-				entList.Add(entityVcard_address);
 			}
 			if(Vcard_hasTelephone!=null){
 				foreach(TelephoneType prop in Vcard_hasTelephone){
@@ -221,6 +221,7 @@ namespace CurriculumVitaeOntology
 			List<ImageAction> actionListimg = new List<ImageAction>();
 			actionListimg.Add(new ImageAction(0,234, ImageTransformationType.Crop, 100));
 			pResource.AttachImage(this.Foaf_img, actionListimg,"foaf:img", true, this.GetExtension(this.Foaf_img), this.Entity);
+			this.Vcard_address.AddImages(pResource);
 			this.Roh_hasFax.AddImages(pResource);
 			if(Vivo_researcherId!=null){
 				foreach (Document prop in Vivo_researcherId)
@@ -229,7 +230,6 @@ namespace CurriculumVitaeOntology
 				}
 			}
 			this.Roh_birthplace.AddImages(pResource);
-			this.Vcard_address.AddImages(pResource);
 			if(Vcard_hasTelephone!=null){
 				foreach (TelephoneType prop in Vcard_hasTelephone)
 			{

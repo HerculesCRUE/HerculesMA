@@ -44,7 +44,10 @@ namespace ModalityOntology
 			base.GetProperties();
 			foreach (LanguageEnum LanguageEnum in Enum.GetValues(typeof(LanguageEnum)))
 			{
-				propList.Add(new StringOntologyProperty("dc:title", this.Dc_title[LanguageEnum], LanguageEnum.ToString()));
+				if (Dc_title.ContainsKey(LanguageEnum))
+				{
+					propList.Add(new StringOntologyProperty("dc:title", this.Dc_title[LanguageEnum], LanguageEnum.ToString()));
+				}
 			}
 			propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
 		}

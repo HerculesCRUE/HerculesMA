@@ -13,7 +13,7 @@ using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
-namespace OrganizationTypeOntology
+namespace OrganizationtypeOntology
 {
 	public class OrganizationType : GnossOCBase
 	{
@@ -87,7 +87,7 @@ namespace OrganizationTypeOntology
 
 		public override string GetURI(ResourceApi resourceAPI)
 		{
-			return $"{resourceAPI.GraphsUrl}items/OrganizationTypeOntology_{ResourceID}_{ArticleID}";
+			return $"{resourceAPI.GraphsUrl}items/OrganizationtypeOntology_{ResourceID}_{ArticleID}";
 		}
 
 		internal void AddResourceTitle(ComplexOntologyResource resource)

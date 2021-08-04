@@ -62,7 +62,10 @@ namespace FeatureOntology
 			propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
 			foreach (LanguageEnum LanguageEnum in Enum.GetValues(typeof(LanguageEnum)))
 			{
-				propList.Add(new StringOntologyProperty("gn:name", this.Gn_name[LanguageEnum], LanguageEnum.ToString()));
+				if (Gn_name.ContainsKey(LanguageEnum))
+				{
+					propList.Add(new StringOntologyProperty("gn:name", this.Gn_name[LanguageEnum], LanguageEnum.ToString()));
+				}
 			}
 			propList.Add(new StringOntologyProperty("gn:featureCode", this.Gn_featureCode));
 		}

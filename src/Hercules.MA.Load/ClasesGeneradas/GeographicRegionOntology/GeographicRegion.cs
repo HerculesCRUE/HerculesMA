@@ -13,7 +13,7 @@ using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
-namespace GeographicRegionOntology
+namespace GeographicregionOntology
 {
 	public class GeographicRegion : GnossOCBase
 	{
@@ -87,7 +87,7 @@ namespace GeographicRegionOntology
 
 		public override string GetURI(ResourceApi resourceAPI)
 		{
-			return $"{resourceAPI.GraphsUrl}items/GeographicRegionOntology_{ResourceID}_{ArticleID}";
+			return $"{resourceAPI.GraphsUrl}items/GeographicregionOntology_{ResourceID}_{ArticleID}";
 		}
 
 		internal void AddResourceTitle(ComplexOntologyResource resource)

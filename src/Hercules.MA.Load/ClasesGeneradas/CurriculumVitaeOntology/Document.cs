@@ -13,7 +13,7 @@ using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
-namespace CurriculumVitaeOntology
+namespace CurriculumvitaeOntology
 {
 	public class Document : GnossOCBase
 	{

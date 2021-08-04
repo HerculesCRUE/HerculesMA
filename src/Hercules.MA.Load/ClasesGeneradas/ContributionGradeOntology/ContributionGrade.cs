@@ -13,7 +13,7 @@ using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
-namespace ContributionGradeOntology
+namespace ContributiongradeOntology
 {
 	public class ContributionGrade : GnossOCBase
 	{
@@ -44,7 +44,10 @@ namespace ContributionGradeOntology
 			base.GetProperties();
 			foreach (LanguageEnum LanguageEnum in Enum.GetValues(typeof(LanguageEnum)))
 			{
-				propList.Add(new StringOntologyProperty("dc:title", this.Dc_title[LanguageEnum], LanguageEnum.ToString()));
+				if (Dc_title.ContainsKey(LanguageEnum))
+				{
+					propList.Add(new StringOntologyProperty("dc:title", this.Dc_title[LanguageEnum], LanguageEnum.ToString()));
+				}
 			}
 			propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
 		}
@@ -112,7 +115,7 @@ namespace ContributionGradeOntology
 
 		public override string GetURI(ResourceApi resourceAPI)
 		{
-			return $"{resourceAPI.GraphsUrl}items/ContributionGradeOntology_{ResourceID}_{ArticleID}";
+			return $"{resourceAPI.GraphsUrl}items/ContributiongradeOntology_{ResourceID}_{ArticleID}";
 		}
 
 		internal void AddResourceTitle(ComplexOntologyResource resource)

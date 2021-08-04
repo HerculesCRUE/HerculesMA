@@ -1,11 +1,12 @@
-﻿using ContributionGradeOntology;
+﻿using ContributiongradeOntology;
 using FeatureOntology;
+using DedicationregimeOntology;
 using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
 using Hercules.MA.Load.Models.CVN;
 using ModalityOntology;
-using ParticipationTypeOntology;
+using ParticipationtypeOntology;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,12 +31,13 @@ namespace Hercules.MA.Load
         private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config");
 
         //Identificadores de las tablas.
-        private static string idPaises = "ISO_3166";
-        private static string idRegiones = "CVN_REGION";
-        private static string idProvincias = "CVN_PROVINCE";       
-        private static string idParticipationType = "CVN_PARTICIPATION_A";
-        private static string idContributionGrade = "CVN_PARTICIPATION_B";
-        private static string idModalidad = "CVN_PROJECT_C";
+        private static readonly string idPaises = "ISO_3166";
+        private static readonly string idRegiones = "CVN_REGION";
+        private static readonly string idProvincias = "CVN_PROVINCE";
+        private static readonly string idParticipationType = "CVN_PARTICIPATION_A";
+        private static readonly string idContributionGrade = "CVN_PARTICIPATION_B";
+        private static readonly string idModalidad = "CVN_PROJECT_C";
+        private static readonly string idDedicationRegime = "CVN_DEDICATION_A";
 
         /// <summary>
         /// Método para cargar las entidades secundarias.
@@ -48,25 +50,27 @@ namespace Hercules.MA.Load
             XmlSerializer serializer = new XmlSerializer(typeof(ReferenceTables));
             ReferenceTables tablas = (ReferenceTables)serializer.Deserialize(new StringReader(documento.InnerXml));
 
-            //Elimina los datos anteriormente cargados.
-            EliminarDatosCargados("http://www.geonames.org/ontology#Feature", "Feature.owl");
-            EliminarDatosCargados("http://w3id.org/roh/Modality", "Modality.owl");
-            EliminarDatosCargados("http://w3id.org/roh/ContributionGrade", "ContributionGrade.owl");
-            EliminarDatosCargados("http://w3id.org/roh/ParticipationType", "ParticipationType.owl");
-
             //Carga de entidades secundarias.
-            CargarFeatures(tablas);
-            CargarModality(tablas);
-            CargarContributionGrade(tablas);
-            CargarParticipationType(tablas);
+            CargarFeatures(tablas, "feature");
+            CargarModality(tablas, "modality");
+            CargarContributionGrade(tablas, "contributiongrade");
+            CargarParticipationType(tablas, "participationtype");
+            CargarDedicationRegime(tablas, "dedicationregime");
         }
 
         /// <summary>
         /// Carga la entidad secundaria Feature.
         /// </summary>
         /// <param name="pTablas">Tablas con los datos a obtener.</param>
-        private static void CargarFeatures(ReferenceTables pTablas)
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarFeatures(ReferenceTables pTablas, string pOntology)
         {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://www.geonames.org/ontology#Feature", pOntology);
+
             //Obtención de los objetos a cargar.
             List<Feature> features = new List<Feature>();
             features = ObtenerDatosFeature(pTablas, idPaises, "PCLD", features);
@@ -123,6 +127,7 @@ namespace Hercules.MA.Load
                         }
                     }
 
+                    //Se asigna el identificador del padre al hijo (País --> Región y Región --> Provincia).
                     switch (pId)
                     {
                         case "ADM1":
@@ -147,8 +152,15 @@ namespace Hercules.MA.Load
         /// Carga la entidad secundaria Modality.
         /// </summary>
         /// <param name="pTablas">Tablas con los datos a obtener.</param>
-        private static void CargarModality(ReferenceTables pTablas)
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarModality(ReferenceTables pTablas, string pOntology)
         {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/Modality", pOntology);
+
             //Obtención de los objetos a cargar.
             List<Modality> modalities = new List<Modality>();
             modalities = ObtenerDatosModality(pTablas, idModalidad, modalities);
@@ -202,8 +214,15 @@ namespace Hercules.MA.Load
         /// Carga la entidad secundaria ContributionGrade.
         /// </summary>
         /// <param name="pTablas">Tablas con los datos a obtener.</param>
-        private static void CargarContributionGrade(ReferenceTables pTablas)
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarContributionGrade(ReferenceTables pTablas, string pOntology)
         {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ContributionGrade", pOntology);
+
             //Obtención de los objetos a cargar.
             List<ContributionGrade> contributions = new List<ContributionGrade>();
             contributions = ObtenerDatosContributionGrade(pTablas, idContributionGrade, contributions);
@@ -257,8 +276,15 @@ namespace Hercules.MA.Load
         /// Carga la entidad secundaria ParticipationType.
         /// </summary>
         /// <param name="pTablas">Tablas con los datos a obtener.</param>
-        private static void CargarParticipationType(ReferenceTables pTablas)
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarParticipationType(ReferenceTables pTablas, string pOntology)
         {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ParticipationType", pOntology);
+
             //Obtención de los objetos a cargar.
             List<ParticipationType> participations = new List<ParticipationType>();
             participations = ObtenerDatosParticipationType(pTablas, idParticipationType, participations);
@@ -309,6 +335,68 @@ namespace Hercules.MA.Load
         }
 
         /// <summary>
+        /// Carga la entidad secundaria DedicationRegime.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarDedicationRegime(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/DedicationRegime", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<DedicationRegime> dedications = new List<DedicationRegime>();
+            dedications = ObtenerDatosDedicationRegime(pTablas, idDedicationRegime, dedications);
+
+            //Carga.
+            foreach (DedicationRegime dedication in dedications)
+            {
+                mResourceApi.LoadSecondaryResource(dedication.ToGnossApiResource(mResourceApi, dedication.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos DedicationRegime a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDedicationRegime">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<DedicationRegime> ObtenerDatosDedicationRegime(ReferenceTables pTablas, string pCodigoTabla, List<DedicationRegime> pListaDedicationRegime)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    DedicationRegime dedication = new DedicationRegime();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail dedicacion in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[dedicacion.lang];
+                        string nombre = dedicacion.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    dedication.Dc_identifier = identificador;
+                    dedication.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaDedicationRegime.Add(dedication);
+                }
+            }
+
+            return pListaDedicationRegime;
+        }
+
+        /// <summary>
         /// Elimina los datos del grafo.
         /// </summary>
         /// <param name="pRdfType">RdfType del recurso a borrar.</param>
@@ -325,6 +413,7 @@ namespace Hercules.MA.Load
             //Obtiene las URLs de los recursos a borrar.
             List<string> listaUrlSecundarias = new List<string>();
             SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, pOntology);
+
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
