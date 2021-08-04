@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Gnoss.ApiWrapper;
+using Gnoss.ApiWrapper.ApiModel;
+using Gnoss.ApiWrapper.Model;
 using Hercules.MA.Load.Models.UMU;
 
 namespace Hercules.MA.Load
@@ -16,10 +19,13 @@ namespace Hercules.MA.Load
         //Directorio de lectura.
         private static string inputFolder = "Dataset/UMU";
 
+        // Resource API.
+        private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config");
+
         /// <summary>
         /// Método para cargar las entidades principales.
         /// </summary>
-        public static void CargarEntidadesPrincipales() 
+        public static void CargarEntidadesPrincipales()
         {
             //Lectura de datos XML.   
             List<AreasUnescoProyectos> areasUnescoProyectos = LeerAreasUnescoProyectos(inputFolder + "/Areas UNESCO Proyectos.xml");
@@ -35,6 +41,7 @@ namespace Hercules.MA.Load
             List<DirectoresTesis> directoresTesis = LeerDirectoresTesis(inputFolder + "/Directores tesis.xml");
             List<EquipoProyecto> equiposProyectos = LeerEquiposProyectos(inputFolder + "/Equipos proyectos.xml");
             List<Exposicion> exposiciones = LeerExposiciones(inputFolder + "/Exposiciones.xml");
+            List<Feature> features = LeerFeatures();
             List<FechaEquipoProyecto> fechasEquiposProyectos = LeerFechasEquiposProyectos(inputFolder + "/Fechas equipos proyectos.xml");
             List<FechaProyecto> fechasProyectos = LeerFechasProyectos(inputFolder + "/Fechas proyectos.xml");
             List<GrupoInvestigacion> gruposInvestigacion = LeerGruposInvestigacion(inputFolder + "/Grupos de investigacion.xml");
@@ -50,8 +57,127 @@ namespace Hercules.MA.Load
             List<Tesis> tesis = LeerTesis(inputFolder + "/Tesis.xml");
             List<TipoParticipacionGrupo> tipoParticipacionGrupos = LeerTipoParticipacionGrupos(inputFolder + "/Tipo participacion grupo.xml");
             List<TiposEventos> tiposEventos = LeerTiposEventos(inputFolder + "/Tipos eventos.xml");
-            List<Feature> features = LeerFeatures();
-        }        
+
+            //Persona en específico a cargar.
+            HashSet<string> personasACargar = new HashSet<string>();
+            personasACargar.Add("79");
+
+            //Eliminación de datos cargados.
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person");
+
+            //Lista de recursos a cargar.
+            List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
+
+            //Personas.
+            Dictionary<string, string> personasCargar = CargarPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos);
+
+            //Carga de personas.
+            foreach (ComplexOntologyResource recursoCargar in listaRecursosCargar)
+            {
+                mResourceApi.ChangeOntoly("person");
+                mResourceApi.LoadComplexSemanticResource(recursoCargar);
+            }
+        }
+
+        /// <summary>
+        /// Proceso de carga de los datos de las Personas.
+        /// </summary>
+        /// <param name="pPersonasACargar">IDs de las personas que se quieran cargar. Si viene vacío, se cargan todas.</param>
+        /// <param name="pListaRecursosCargar">Lista de recursos a cargar.</param>
+        /// <param name="pPersonas">Datos de las personas.</param>
+        /// <param name="pAutoresArticulos">Datos de los artículos.</param>
+        /// <returns></returns>
+        private static Dictionary<string, string> CargarPersonas(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pPersonas, List<AutorArticulo> pAutoresArticulos)
+        {
+            Dictionary<string, string> dicIDs = new Dictionary<string, string>();
+            HashSet<string> listaPersonasCargarDefinitiva = new HashSet<string>();
+
+            if (pPersonasACargar == null || pPersonasACargar.Count == 0)
+            {
+                //Si viene vacía la lista de personas, cargamos todas.
+                listaPersonasCargarDefinitiva = new HashSet<string>(pPersonas.Select(x => x.IDPERSONA));
+            }
+            else
+            {
+                //Cargamos las personas de la lista.
+                listaPersonasCargarDefinitiva.UnionWith(pPersonasACargar);
+
+                //Cargamos las personas coautoras de las de la lista.
+                HashSet<string> idsArticulos = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsArticulos.UnionWith(pAutoresArticulos.Where(x => x.IDPERSONA == personaID).Select(x => x.ARTI_CODIGO));
+                }
+                listaPersonasCargarDefinitiva.UnionWith(pAutoresArticulos.Where(x => idsArticulos.Contains(x.ARTI_CODIGO)).Select(x => x.IDPERSONA));
+            }
+
+            foreach (string idPersona in listaPersonasCargarDefinitiva)
+            {
+                Persona persona = pPersonas.FirstOrDefault(x => x.IDPERSONA == idPersona);
+                if (persona != null)
+                {
+                    //Agregamos las propiedades con los datos pertinentes.
+                    PersonOntology.Person personaCarga = new PersonOntology.Person();
+                    personaCarga.Foaf_familyName = persona.NOMBRE;
+
+                    //Creamos el recurso.
+                    ComplexOntologyResource resource = personaCarga.ToGnossApiResource(mResourceApi, new List<string>());
+                    pListaRecursosCargar.Add(resource);
+
+                    //Guardamos los IDs en el diccionario.
+                    dicIDs.Add(persona.IDPERSONA, resource.GnossId);
+                }
+            }
+
+            return dicIDs;
+        }
+
+        /// <summary>
+        /// Elimina los datos del grafo.
+        /// </summary>
+        /// <param name="pRdfType">RdfType del recurso a borrar.</param>
+        /// <param name="pOntology">Ontología a consultar.</param>
+        private static void EliminarDatosCargados(string pRdfType, string pOntology)
+        {
+            //Consulta.
+            string select = string.Empty, where = string.Empty;
+            select += $@"SELECT ?s ";
+            where += $@"WHERE {{ ";
+            where += $@"?s a <{pRdfType}>";
+            where += $@"}} ";
+
+            //Obtiene las URLs de los recursos a borrar.
+            List<string> listaUrl = new List<string>();
+            SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, pOntology);
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    listaUrl.Add(GetValorFilaSparqlObject(fila, "s"));
+                }
+            }
+
+            //Borra los recursos.
+            foreach (string idLargo in listaUrl)
+            {
+                mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(idLargo));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene el valor de de las filas de la consulta.
+        /// </summary>
+        /// <param name="pFila">Fila con el resultado.</param>
+        /// <param name="pParametro">Parametro a obtener.</param>
+        /// <returns>Dato guardado.</returns>
+        public static string GetValorFilaSparqlObject(Dictionary<string, SparqlObject.Data> pFila, string pParametro)
+        {
+            if (pFila.ContainsKey(pParametro) && !string.IsNullOrEmpty(pFila[pParametro].value))
+            {
+                return pFila[pParametro].value;
+            }
+            return null;
+        }
 
         #region Lectura de XMLs
         private static List<AreasUnescoProyectos> LeerAreasUnescoProyectos(string pFile)
@@ -1227,5 +1353,5 @@ namespace Hercules.MA.Load
             return listaPropiedades.Select(x => x.Name).ToList();
         }
         #endregion
-    }    
+    }
 }

@@ -27,7 +27,7 @@ namespace Hercules.MA.Load
         //Ruta con el XML de datos a leer.
         private static string RUTA_XML = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Dataset\CVN\ReferenceTables.xml";
 
-        // Resource API
+        // Resource API.
         private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config");
 
         //Identificadores de las tablas.
@@ -407,7 +407,7 @@ namespace Hercules.MA.Load
             string select = string.Empty, where = string.Empty;
             select += $@"SELECT ?s ";
             where += $@"WHERE {{ ";
-            where += $@"?s a <{pRdfType}>";
+            where += $@"?s a <{pRdfType}> ";
             where += $@"}} ";
 
             //Obtiene las URLs de los recursos a borrar.
