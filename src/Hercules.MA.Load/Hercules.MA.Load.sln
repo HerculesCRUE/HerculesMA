@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hercules.MA.Load", "Hercules.MA.Load\Hercules.MA.Load.csproj", "{4C42748D-31A8-447C-9668-7C03C2CFAB08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hercules", "ClasesGeneradas\hercules.csproj", "{1B064F3D-DF82-452C-BD0B-89A2B09AEF9F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C42748D-31A8-447C-9668-7C03C2CFAB08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C42748D-31A8-447C-9668-7C03C2CFAB08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C42748D-31A8-447C-9668-7C03C2CFAB08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C42748D-31A8-447C-9668-7C03C2CFAB08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B064F3D-DF82-452C-BD0B-89A2B09AEF9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B064F3D-DF82-452C-BD0B-89A2B09AEF9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B064F3D-DF82-452C-BD0B-89A2B09AEF9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B064F3D-DF82-452C-BD0B-89A2B09AEF9F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ABE8E9F3-B958-4C80-9FE4-6699F51EE562}
+	EndGlobalSection
+EndGlobal
