@@ -62,32 +62,40 @@ namespace Hercules.MA.Load
             HashSet<string> personasACargar = new HashSet<string>();
             personasACargar.Add("79");
 
-            //Eliminación de datos cargados.
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person");
-
             //Lista de recursos a cargar.
             List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
 
-            //Personas.
-            Dictionary<string, string> personasCargar = CargarPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos);
+            //Cargar personas.
+            mResourceApi.ChangeOntoly("person");
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person");
+            Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes);
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
 
-            //Carga de personas.
-            foreach (ComplexOntologyResource recursoCargar in listaRecursosCargar)
-            {
-                mResourceApi.ChangeOntoly("person");
-                mResourceApi.LoadComplexSemanticResource(recursoCargar);
-            }
+            //Cargar organizaciones.
+            mResourceApi.ChangeOntoly("organization");
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization");
+            Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas);
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
+
+            //Cargar proyectos.
+            mResourceApi.ChangeOntoly("project");
+            EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project");
+            Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos);
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
         }
 
         /// <summary>
-        /// Proceso de carga de los datos de las Personas.
+        /// Proceso de obtención de datos de las Personas.
         /// </summary>
         /// <param name="pPersonasACargar">IDs de las personas que se quieran cargar. Si viene vacío, se cargan todas.</param>
         /// <param name="pListaRecursosCargar">Lista de recursos a cargar.</param>
         /// <param name="pPersonas">Datos de las personas.</param>
         /// <param name="pAutoresArticulos">Datos de los artículos.</param>
-        /// <returns></returns>
-        private static Dictionary<string, string> CargarPersonas(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pPersonas, List<AutorArticulo> pAutoresArticulos)
+        /// <returns>Diccionario con el ID persona / ID recurso.</returns>
+        private static Dictionary<string, string> ObtenerPersonas(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pPersonas, List<AutorArticulo> pAutoresArticulos, List<AutorCongreso> pAutoresCongreso, List<AutorExposicion> pAutoresExposicion, List<DirectoresTesis> pDirectoresTesis, List<EquipoProyecto> pEquiposProyectos, List<InventoresPatentes> pInventoresPatentes)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> listaPersonasCargarDefinitiva = new HashSet<string>();
@@ -102,13 +110,59 @@ namespace Hercules.MA.Load
                 //Cargamos las personas de la lista.
                 listaPersonasCargarDefinitiva.UnionWith(pPersonasACargar);
 
-                //Cargamos las personas coautoras de las de la lista.
+                #region --- Personas que han participado en los mismos artículos.
                 HashSet<string> idsArticulos = new HashSet<string>();
                 foreach (string personaID in pPersonasACargar)
                 {
                     idsArticulos.UnionWith(pAutoresArticulos.Where(x => x.IDPERSONA == personaID).Select(x => x.ARTI_CODIGO));
                 }
                 listaPersonasCargarDefinitiva.UnionWith(pAutoresArticulos.Where(x => idsArticulos.Contains(x.ARTI_CODIGO)).Select(x => x.IDPERSONA));
+                #endregion
+
+                #region --- Personas que han participado en los mismos congresos.
+                HashSet<string> idsCongreso = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsCongreso.UnionWith(pAutoresCongreso.Where(x => x.IDPERSONA == personaID).Select(x => x.CONG_NUMERO));
+                }
+                listaPersonasCargarDefinitiva.UnionWith(pAutoresCongreso.Where(x => idsCongreso.Contains(x.CONG_NUMERO)).Select(x => x.IDPERSONA));
+                #endregion
+
+                #region --- Personas que han participado en las mismas exposiciones.
+                HashSet<string> idsExposiciones = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsExposiciones.UnionWith(pAutoresExposicion.Where(x => x.IDPERSONA == personaID).Select(x => x.EXPO_CODIGO));
+                }
+                listaPersonasCargarDefinitiva.UnionWith(pAutoresExposicion.Where(x => idsExposiciones.Contains(x.EXPO_CODIGO)).Select(x => x.IDPERSONA));
+                #endregion
+
+                #region --- Personas que han participado en las mismas tesis.
+                HashSet<string> idsDirectoresTesis = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsDirectoresTesis.UnionWith(pDirectoresTesis.Where(x => x.IDPERSONADIRECTOR == personaID).Select(x => x.CODIGO_TESIS));
+                }
+                listaPersonasCargarDefinitiva.UnionWith(pDirectoresTesis.Where(x => idsDirectoresTesis.Contains(x.CODIGO_TESIS)).Select(x => x.IDPERSONADIRECTOR));
+                #endregion
+
+                #region --- Personas que han participado en los mismos proyectos.
+                HashSet<string> idsProyectos = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsProyectos.UnionWith(pEquiposProyectos.Where(x => x.IDPERSONA == personaID).Select(x => x.IDPROYECTO));
+                }
+                listaPersonasCargarDefinitiva.UnionWith(pEquiposProyectos.Where(x => idsProyectos.Contains(x.IDPROYECTO)).Select(x => x.IDPERSONA));
+                #endregion
+
+                #region --- Personas que han participado en los mismas patentes.
+                HashSet<string> idsPatentes = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsPatentes.UnionWith(pInventoresPatentes.Where(x => x.IDPERSONAINVENTOR == personaID).Select(x => x.IDPATENTE));
+                }
+                listaPersonasCargarDefinitiva.UnionWith(pInventoresPatentes.Where(x => idsPatentes.Contains(x.IDPATENTE)).Select(x => x.IDPERSONAINVENTOR));
+                #endregion
             }
 
             foreach (string idPersona in listaPersonasCargarDefinitiva)
@@ -119,6 +173,9 @@ namespace Hercules.MA.Load
                     //Agregamos las propiedades con los datos pertinentes.
                     PersonOntology.Person personaCarga = new PersonOntology.Person();
                     personaCarga.Foaf_familyName = persona.NOMBRE;
+                    personaCarga.Foaf_name = persona.NOMBRE;
+                    personaCarga.Foaf_firstName = persona.NOMBRE;
+                    personaCarga.Foaf_lastName = persona.NOMBRE;
 
                     //Creamos el recurso.
                     ComplexOntologyResource resource = personaCarga.ToGnossApiResource(mResourceApi, new List<string>());
@@ -133,6 +190,188 @@ namespace Hercules.MA.Load
         }
 
         /// <summary>
+        /// Proceso de obtención de datos de las Organizaciones.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pEquiposProyectos"></param>
+        /// <param name="pOrganizaciones"></param>
+        /// <returns>Diccionario con el ID organización / ID recurso.</returns>
+        private static Dictionary<string, string> ObtenerOrganizaciones(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<OrganizacionesExternas> pOrganizaciones)
+        {
+            Dictionary<string, string> dicIDs = new Dictionary<string, string>();
+            HashSet<string> idsProyectosCargar = new HashSet<string>();
+
+            if (pPersonasACargar == null || pPersonasACargar.Count == 0)
+            {
+                //Si viene vacía la lista de personas, cargamos todas.
+                idsProyectosCargar = new HashSet<string>(pEquiposProyectos.Select(x => x.IDPROYECTO));
+            }
+            else
+            {
+                //Obtengo los IDs de los proyectos.
+                HashSet<string> idsProyectos = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsProyectosCargar.UnionWith(pEquiposProyectos.Where(x => x.IDPERSONA == personaID).Select(x => x.IDPROYECTO));
+                }
+            }
+
+            //Obtengo las organizaciones de dichos proyectos.
+            foreach (string proyectoID in idsProyectosCargar)
+            {
+                OrganizacionesExternas organizacion = pOrganizaciones.FirstOrDefault(x => x.IDPROYECTO == proyectoID);
+                if (organizacion != null)
+                {
+                    //Agregamos las propiedades con los datos pertinentes.
+                    OrganizationOntology.Organization organizacionCargar = new OrganizationOntology.Organization();
+                    organizacionCargar.Roh_title = organizacion.ENTIDAD;                                       
+
+                    //Guardamos los IDs en la lista.
+                    if (!dicIDs.ContainsKey(organizacion.ENTIDAD))
+                    {
+                        //Creamos el recurso.
+                        ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                        pListaRecursosCargar.Add(resource);
+
+                        dicIDs.Add(organizacion.ENTIDAD, resource.GnossId);                        
+                    }
+                }
+            }
+
+            return dicIDs;
+        }
+
+        /// <summary>
+        /// Proceso de obtención de datos de los Proyectos.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pDicPersonasCargadas"></param>
+        /// <param name="pDicOrganizacionesCargadas"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pEquiposProyectos"></param>
+        /// <param name="pProyectos"></param>
+        /// <param name="pOrganizacionesExternas"></param>
+        /// <param name="pFechaProyectos"></param>
+        /// <returns>Diccionario con el ID proyecto / ID recurso.</returns>
+        private static Dictionary<string, string> ObtenerProyectos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicOrganizacionesCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<Proyecto> pProyectos, List<OrganizacionesExternas> pOrganizacionesExternas, List<FechaProyecto> pFechaProyectos)
+        {
+            Dictionary<string, string> dicIDs = new Dictionary<string, string>();
+            HashSet<string> idsProyectosCargar = new HashSet<string>();
+
+            if (pPersonasACargar == null || pPersonasACargar.Count == 0)
+            {
+                //Si viene vacía la lista de personas, cargamos todas.
+                idsProyectosCargar = new HashSet<string>(pEquiposProyectos.Select(x => x.IDPROYECTO));
+            }
+            else
+            {
+                //Obtengo los IDs de los proyectos.
+                HashSet<string> idsProyectos = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsProyectosCargar.UnionWith(pEquiposProyectos.Where(x => x.IDPERSONA == personaID).Select(x => x.IDPROYECTO));
+                }
+            }
+
+            //Obtengo las organizaciones de dichos proyectos.
+            foreach (string proyectoID in idsProyectosCargar)
+            {
+                Proyecto proyecto = pProyectos.FirstOrDefault(x => x.IDPROYECTO == proyectoID);
+                if (proyecto != null)
+                {
+                    //Agregamos las propiedades con los datos pertinentes.
+                    ProjectOntology.Project proyectoCargar = new ProjectOntology.Project();
+                    proyectoCargar.Roh_title = proyecto.NOMBRE;
+                    proyectoCargar.Roh_researchersNumber = pEquiposProyectos.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO).Count();
+                    proyectoCargar.Vivo_relates = new List<ProjectOntology.BFO_0000023>();
+                    
+                    //Fechas.
+                    foreach(FechaProyecto fechaProyecto in pFechaProyectos.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
+                    {
+                        DateTime fechaInicio = new DateTime();
+                        DateTime fechaFin = new DateTime();
+
+                        if (!string.IsNullOrEmpty(fechaProyecto.FECHAINICIOPROYECTO))
+                        {                            
+                            int anio = Int32.Parse(fechaProyecto.FECHAINICIOPROYECTO.Substring(0, 4));
+                            int mes = Int32.Parse(fechaProyecto.FECHAINICIOPROYECTO.Substring(5, 2));
+                            int dia = Int32.Parse(fechaProyecto.FECHAINICIOPROYECTO.Substring(8, 2));
+                            int horas = Int32.Parse(fechaProyecto.FECHAINICIOPROYECTO.Substring(11, 2));
+                            int minutos = Int32.Parse(fechaProyecto.FECHAINICIOPROYECTO.Substring(14, 2));
+                            int segundos = Int32.Parse(fechaProyecto.FECHAINICIOPROYECTO.Substring(17, 2));
+                            fechaInicio = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                            proyectoCargar.Vivo_start = fechaInicio;
+                        }
+
+                        if (!string.IsNullOrEmpty(fechaProyecto.FECHAFINPROYECTO))
+                        {
+                            int anio = Int32.Parse(fechaProyecto.FECHAFINPROYECTO.Substring(0, 4));
+                            int mes = Int32.Parse(fechaProyecto.FECHAFINPROYECTO.Substring(5, 2));
+                            int dia = Int32.Parse(fechaProyecto.FECHAFINPROYECTO.Substring(8, 2));
+                            int horas = Int32.Parse(fechaProyecto.FECHAFINPROYECTO.Substring(11, 2));
+                            int minutos = Int32.Parse(fechaProyecto.FECHAFINPROYECTO.Substring(14, 2));
+                            int segundos = Int32.Parse(fechaProyecto.FECHAFINPROYECTO.Substring(17, 2));
+                            fechaFin = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                            proyectoCargar.Vivo_end = fechaFin;
+                        }
+
+                        if(fechaInicio != DateTime.MinValue && fechaFin != DateTime.MinValue)
+                        {
+                            DateTime zeroTime = new DateTime(1, 1, 1);
+                            TimeSpan diferencia = fechaFin - fechaInicio;
+                            proyectoCargar.Roh_durationYears = ((zeroTime + diferencia).Year - 1).ToString();
+                            proyectoCargar.Roh_durationMonths = ((zeroTime + diferencia).Month - 1).ToString();
+                            proyectoCargar.Roh_durationDays = ((zeroTime + diferencia).Day - 1).ToString();
+                        }
+                    }
+
+                    //Auxiliar BFO_0000023.
+                    foreach (EquipoProyecto equipo in pEquiposProyectos.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
+                    {
+                        ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
+                        persona.IdRoh_roleOf = pDicPersonasCargadas[equipo.IDPERSONA];
+                        persona.Roh_order = equipo.NUMEROCOLABORADOR;
+                        proyectoCargar.Vivo_relates.Add(persona);
+                    }
+
+                    //Principal Organization.
+                    proyectoCargar.IdsRoh_participates = new List<string>();
+                    foreach (OrganizacionesExternas organizacion in pOrganizacionesExternas.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
+                    {
+                        if (pDicOrganizacionesCargadas.ContainsKey(organizacion.ENTIDAD))
+                        {
+                            proyectoCargar.IdsRoh_participates.Add(pDicOrganizacionesCargadas[organizacion.ENTIDAD]);
+                        }
+                    }                    
+
+                    //Creamos el recurso.
+                    ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    pListaRecursosCargar.Add(resource);
+
+                    //Guardamos los IDs en la lista.
+                    dicIDs.Add(proyecto.IDPROYECTO, resource.GnossId);
+                }
+            }
+
+            return dicIDs;
+        }
+
+        /// <summary>
+        /// Permite cargar los recursos.
+        /// </summary>
+        /// <param name="pListaRecursosCargar">Lista de recursos a cargar.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarDatos(List<ComplexOntologyResource> pListaRecursosCargar)
+        {
+            //Carga.
+            foreach (ComplexOntologyResource recursoCargar in pListaRecursosCargar)
+            {
+                mResourceApi.LoadComplexSemanticResource(recursoCargar);
+            }
+        }
+
+        /// <summary>
         /// Elimina los datos del grafo.
         /// </summary>
         /// <param name="pRdfType">RdfType del recurso a borrar.</param>
@@ -143,7 +382,7 @@ namespace Hercules.MA.Load
             string select = string.Empty, where = string.Empty;
             select += $@"SELECT ?s ";
             where += $@"WHERE {{ ";
-            where += $@"?s a <{pRdfType}>";
+            where += $@"?s a <{pRdfType}> ";
             where += $@"}} ";
 
             //Obtiene las URLs de los recursos a borrar.

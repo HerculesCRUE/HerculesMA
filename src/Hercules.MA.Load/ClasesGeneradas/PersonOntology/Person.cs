@@ -12,6 +12,8 @@ using GnossBase;
 using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Collections;
+using Gnoss.ApiWrapper.Exceptions;
 
 namespace PersonOntology
 {
@@ -59,6 +61,8 @@ namespace PersonOntology
 			this.Foaf_lastName = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/lastName"));
 		}
 
+		public virtual string RdfType { get { return "http://xmlns.com/foaf/0.1/Person"; } }
+		public virtual string RdfsLabel { get { return "http://xmlns.com/foaf/0.1/Person"; } }
 		[LABEL(LanguageEnum.es,"Segundo apellido")]
 		[RDFProperty("http://xmlns.com/foaf/0.1/familyName")]
 		public  string Foaf_familyName { get; set;}
@@ -98,7 +102,6 @@ namespace PersonOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
-			entList = new List<OntologyEntity>();
 		} 
 		public virtual ComplexOntologyResource ToGnossApiResource(ResourceApi resourceAPI, List<string> listaDeCategorias)
 		{
@@ -112,10 +115,10 @@ namespace PersonOntology
 			GetProperties();
 			if(idrecurso.Equals(Guid.Empty) && idarticulo.Equals(Guid.Empty))
 			{
-				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, "http://xmlns.com/foaf/0.1/Person", "http://xmlns.com/foaf/0.1/Person", prefList, propList, entList);
+				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, RdfType, RdfsLabel, prefList, propList, entList);
 			}
 			else{
-				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, "http://xmlns.com/foaf/0.1/Person", "http://xmlns.com/foaf/0.1/Person", prefList, propList, entList,idrecurso,idarticulo);
+				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, RdfType, RdfsLabel, prefList, propList, entList,idrecurso,idarticulo);
 			}
 			resource.Id = GNOSSID;
 			resource.Ontology = ontology;
@@ -130,35 +133,35 @@ namespace PersonOntology
 		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			list.Add($"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> . ");
-			list.Add($"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> <http://www.w3.org/2000/01/rdf-schema#label> \"http://xmlns.com/foaf/0.1/Person\" . ");
-			list.Add($"<{resourceAPI.GraphsUrl}{ResourceID}> <http://gnoss/hasEntidad> <{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://xmlns.com/foaf/0.1/Person>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://xmlns.com/foaf/0.1/Person\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}>", list, " . ");
 				if(this.Foaf_familyName != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> <http://xmlns.com/foaf/0.1/familyName> \"{this.Foaf_familyName.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}",  "http://xmlns.com/foaf/0.1/familyName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_familyName)}\"", list, " . ");
 				}
 				if(this.Roh_ORCID != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> <http://w3id.org/roh/ORCID> \"{this.Roh_ORCID.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/ORCID", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_ORCID)}\"", list, " . ");
 				}
 				if(this.Foaf_nick != null)
 				{
 					foreach(var item2 in this.Foaf_nick)
 					{
-						list.Add($"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> <http://xmlns.com/foaf/0.1/nick> \"{item2.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+						AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}", "http://xmlns.com/foaf/0.1/nick", $"\"{GenerarTextoSinSaltoDeLinea(item2)}\"", list, " . ");
 					}
 				}
 				if(this.Foaf_firstName != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> <http://xmlns.com/foaf/0.1/firstName> \"{this.Foaf_firstName.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}",  "http://xmlns.com/foaf/0.1/firstName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_firstName)}\"", list, " . ");
 				}
 				if(this.Foaf_name != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> <http://xmlns.com/foaf/0.1/name> \"{this.Foaf_name.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}",  "http://xmlns.com/foaf/0.1/name", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_name)}\"", list, " . ");
 				}
 				if(this.Foaf_lastName != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}> <http://xmlns.com/foaf/0.1/lastName> \"{this.Foaf_lastName.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}",  "http://xmlns.com/foaf/0.1/lastName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_lastName)}\"", list, " . ");
 				}
 			return list;
 		}
@@ -166,52 +169,56 @@ namespace PersonOntology
 		public override List<string> ToSearchGraphTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> \"person\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/type> \"http://xmlns.com/foaf/0.1/Person\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasfechapublicacion> {DateTime.Now.ToString("yyyyMMddHHmmss")} . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hastipodoc> \"5\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasfechamodificacion> {DateTime.Now.ToString("yyyyMMddHHmmss")} . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasnumeroVisitas>  0 . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasprivacidadCom> \"publico\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://xmlns.com/foaf/0.1/firstName> \"{this.Foaf_name.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasnombrecompleto> \"{this.Foaf_name.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+			List<string> listaSearch = new List<string>();
+			AgregarTags(list);
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"\"person\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/type", $"\"http://xmlns.com/foaf/0.1/Person\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasfechapublicacion", $"{DateTime.Now.ToString("yyyyMMddHHmmss")}", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hastipodoc", "\"5\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasfechamodificacion", $"{DateTime.Now.ToString("yyyyMMddHHmmss")}", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasnumeroVisitas", "0", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasprivacidadCom", "\"publico\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://xmlns.com/foaf/0.1/firstName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_name)}\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasnombrecompleto", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_name)}\"", list, " . ");
 			string search = string.Empty;
-			search = $"{this.Foaf_name.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}";
-			if(!string.IsNullOrEmpty(this.Foaf_name))
-			{
-				search += $"{this.Foaf_name.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}";
-			}
-			if(!string.IsNullOrEmpty(search))
-			{
-				list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/search> \"{search.ToLower()}\" . ");
-			}
 				if(this.Foaf_familyName != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://xmlns.com/foaf/0.1/familyName> \"{this.Foaf_familyName.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://xmlns.com/foaf/0.1/familyName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_familyName).ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_ORCID != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://w3id.org/roh/ORCID> \"{this.Roh_ORCID.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/ORCID", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_ORCID).ToLower()}\"", list, " . ");
 				}
 				if(this.Foaf_nick != null)
 				{
 					foreach(var item2 in this.Foaf_nick)
 					{
-						list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://xmlns.com/foaf/0.1/nick> \"{item2.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+						AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://xmlns.com/foaf/0.1/nick", $"\"{GenerarTextoSinSaltoDeLinea(item2).ToLower()}\"", list, " . ");
 					}
 				}
 				if(this.Foaf_firstName != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://xmlns.com/foaf/0.1/firstName> \"{this.Foaf_firstName.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://xmlns.com/foaf/0.1/firstName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_firstName).ToLower()}\"", list, " . ");
 				}
 				if(this.Foaf_name != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://xmlns.com/foaf/0.1/name> \"{this.Foaf_name.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://xmlns.com/foaf/0.1/name", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_name).ToLower()}\"", list, " . ");
 				}
 				if(this.Foaf_lastName != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://xmlns.com/foaf/0.1/lastName> \"{this.Foaf_lastName.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://xmlns.com/foaf/0.1/lastName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_lastName).ToLower()}\"", list, " . ");
 				}
+			if (listaSearch != null && listaSearch.Count > 0)
+			{
+				foreach(string valorSearch in listaSearch)
+				{
+					search += $"{valorSearch} ";
+				}
+			}
+			if(!string.IsNullOrEmpty(search))
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/search", $"\"{search.ToLower()}\"", list, " . ");
+			}
 			return list;
 		}
 
@@ -219,15 +226,72 @@ namespace PersonOntology
 		{
 
 			//Insert en la tabla Documento
-			string tablaDoc = $"'{this.Foaf_name.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}', '{this.Foaf_name.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}', '{resourceAPI.GraphsUrl}'";
+			string titulo = $"{this.Foaf_name.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}";
+			string descripcion = $"{this.Foaf_name.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}";
+			string tablaDoc = $"'{titulo}', '{descripcion}', '{resourceAPI.GraphsUrl}'";
 			KeyValuePair<Guid, string> valor = new KeyValuePair<Guid, string>(ResourceID, tablaDoc);
 
 			return valor;
 		}
 
+		protected List<object> ObtenerObjetosDePropiedad(object propiedad)
+		{
+			List<object> lista = new List<object>();
+			if(propiedad is IList)
+			{
+				foreach (object item in (IList)propiedad)
+				{
+					lista.Add(item);
+				}
+			}
+			else
+			{
+				lista.Add(propiedad);
+			}
+			return lista;
+		}
+		protected List<string> ObtenerStringDePropiedad(object propiedad)
+		{
+			List<string> lista = new List<string>();
+			if (propiedad is IList)
+			{
+				foreach (string item in (IList)propiedad)
+				{
+					lista.Add(item);
+				}
+			}
+			else if (propiedad is IDictionary)
+			{
+				foreach (object key in ((IDictionary)propiedad).Keys)
+				{
+					if (((IDictionary)propiedad)[key] is IList)
+					{
+						List<string> listaValores = (List<string>)((IDictionary)propiedad)[key];
+						foreach(string valor in listaValores)
+						{
+							lista.Add(valor);
+						}
+					}
+					else
+					{
+					lista.Add((string)((IDictionary)propiedad)[key]);
+					}
+				}
+			}
+			else if (propiedad is string)
+			{
+				lista.Add((string)propiedad);
+			}
+			return lista;
+		}
 		public override string GetURI(ResourceApi resourceAPI)
 		{
 			return $"{resourceAPI.GraphsUrl}items/PersonOntology_{ResourceID}_{ArticleID}";
+		}
+
+		private string GenerarTextoSinSaltoDeLinea(string pTexto)
+		{
+			return pTexto.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"");
 		}
 
 		internal void AddResourceTitle(ComplexOntologyResource resource)
@@ -238,6 +302,22 @@ namespace PersonOntology
 		internal void AddResourceDescription(ComplexOntologyResource resource)
 		{
 			resource.Description = this.Foaf_name;
+		}
+
+		private void AgregarTripleALista(string pSujeto, string pPredicado, string pObjeto, List<string> pLista, string pDatosExtra)
+		{
+			if(!string.IsNullOrEmpty(pObjeto) && !pObjeto.Equals("\"\"") && !pObjeto.Equals("<>"))
+			{
+				pLista.Add($"<{pSujeto}> <{pPredicado}> {pObjeto}{pDatosExtra}");
+			} 
+		} 
+
+		private void AgregarTags(List<string> pListaTriples)
+		{
+			foreach(string tag in tagList)
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://rdfs.org/sioc/types#Tag", tag.ToLower(), pListaTriples, " . ");
+			}
 		}
 
 

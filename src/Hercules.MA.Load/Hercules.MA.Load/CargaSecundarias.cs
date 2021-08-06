@@ -1,4 +1,4 @@
-﻿using ContributiongradeOntology;
+﻿using ContributiongradeprojectOntology;
 using FeatureOntology;
 using DedicationregimeOntology;
 using Gnoss.ApiWrapper;
@@ -16,6 +16,14 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using static GnossBase.GnossOCBase;
+using MotivationOntology;
+using ContributiongradedocumentOntology;
+using ReferencesourceOntology;
+using ImpactindexcategoryOntology;
+using LanguageOntology;
+using PublicationtypeOntology;
+using EventtypeOntology;
+using GeographicregionOntology;
 
 namespace Hercules.MA.Load
 {
@@ -35,9 +43,17 @@ namespace Hercules.MA.Load
         private static readonly string idRegiones = "CVN_REGION";
         private static readonly string idProvincias = "CVN_PROVINCE";
         private static readonly string idParticipationType = "CVN_PARTICIPATION_A";
-        private static readonly string idContributionGrade = "CVN_PARTICIPATION_B";
+        private static readonly string idContributionGradeProject = "CVN_PARTICIPATION_B";
+        private static readonly string idContributionGradeDocument = "CVN_PARTICIPATION_G";
         private static readonly string idModalidad = "CVN_PROJECT_C";
         private static readonly string idDedicationRegime = "CVN_DEDICATION_A";
+        private static readonly string idMotivation = "CVN_SUPERVISION_A";
+        private static readonly string idReferenceSource = "CVN_AGENCY_B";
+        private static readonly string idImpactIndexCategory = "CVN_CATEGORY_A";
+        private static readonly string idLanguage = "ISO_639"; 
+        private static readonly string idPublicationType = "CVN_PUBLICATION_A";
+        private static readonly string idEventType = "CVN_EVENT_B";
+        private static readonly string idGeographicRegion = "CVN_SCOPE_A";
 
         /// <summary>
         /// Método para cargar las entidades secundarias.
@@ -53,9 +69,17 @@ namespace Hercules.MA.Load
             //Carga de entidades secundarias.
             CargarFeatures(tablas, "feature");
             CargarModality(tablas, "modality");
-            CargarContributionGrade(tablas, "contributiongrade");
+            CargarContributionGradeProject(tablas, "contributiongradeproject");
             CargarParticipationType(tablas, "participationtype");
             CargarDedicationRegime(tablas, "dedicationregime");
+            CargarMotivation(tablas, "motivation");
+            CargarContributionGradeDocument(tablas, "contributiongradedocument");
+            CargarReferenceSource(tablas, "referencesource");
+            CargarImpactIndexCategory(tablas, "impactindexcategory");
+            CargarLanguage(tablas, "language");
+            CargarPublicationType(tablas, "publicationtype");
+            CargarEventType(tablas, "eventtype");
+            CargarGeographicRegion(tablas, "geographicregion");
         }
 
         /// <summary>
@@ -211,37 +235,37 @@ namespace Hercules.MA.Load
         }
 
         /// <summary>
-        /// Carga la entidad secundaria ContributionGrade.
+        /// Carga la entidad secundaria ContributionGradeProject.
         /// </summary>
         /// <param name="pTablas">Tablas con los datos a obtener.</param>
         /// <param name="pOntology">Ontología.</param>
-        private static void CargarContributionGrade(ReferenceTables pTablas, string pOntology)
+        private static void CargarContributionGradeProject(ReferenceTables pTablas, string pOntology)
         {
             //Cambio de ontología.
             mResourceApi.ChangeOntoly(pOntology);
 
             //Elimina los datos cargados antes de volverlos a cargar.
-            EliminarDatosCargados("http://w3id.org/roh/ContributionGrade", pOntology);
+            EliminarDatosCargados("http://w3id.org/roh/ContributionGradeProject", pOntology);
 
             //Obtención de los objetos a cargar.
-            List<ContributionGrade> contributions = new List<ContributionGrade>();
-            contributions = ObtenerDatosContributionGrade(pTablas, idContributionGrade, contributions);
+            List<ContributionGradeProject> contributions = new List<ContributionGradeProject>();
+            contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
 
             //Carga.
-            foreach (ContributionGrade contribution in contributions)
+            foreach (ContributionGradeProject contribution in contributions)
             {
                 mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, contribution.Dc_identifier));
             }
         }
 
         /// <summary>
-        /// Obtiene los objetos ContributionGrade a cargar.
+        /// Obtiene los objetos ContributionGradeProject a cargar.
         /// </summary>
         /// <param name="pTablas">Objetos con los datos a obtener.</param>
         /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
         /// <param name="pListaContributionGrade">Lista dónde guardar los objetos.</param>
         /// <returns>Lista con los objetos creados.</returns>
-        private static List<ContributionGrade> ObtenerDatosContributionGrade(ReferenceTables pTablas, string pCodigoTabla, List<ContributionGrade> pListaContributionGrade)
+        private static List<ContributionGradeProject> ObtenerDatosContributionGradeProject(ReferenceTables pTablas, string pCodigoTabla, List<ContributionGradeProject> pListaContributionGrade)
         {
             //Mapea los idiomas.
             Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
@@ -250,7 +274,7 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    ContributionGrade contribution = new ContributionGrade();
+                    ContributionGradeProject contribution = new ContributionGradeProject();
                     Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
                     string identificador = item.Code;
                     foreach (TableItemNameDetail contribucion in item.Name)
@@ -396,6 +420,502 @@ namespace Hercules.MA.Load
             return pListaDedicationRegime;
         }
 
+        /// <summary>
+        /// Carga la entidad secundaria Motivation.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarMotivation(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/Motivation", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<Motivation> motivations = new List<Motivation>();
+            motivations = ObtenerDatosMotivation(pTablas, idMotivation, motivations);
+
+            //Carga.
+            foreach (Motivation motivation in motivations)
+            {
+                mResourceApi.LoadSecondaryResource(motivation.ToGnossApiResource(mResourceApi, motivation.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos Motivation a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaMotivation">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<Motivation> ObtenerDatosMotivation(ReferenceTables pTablas, string pCodigoTabla, List<Motivation> pListaMotivation)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    Motivation motivation = new Motivation();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail motivacion in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[motivacion.lang];
+                        string nombre = motivacion.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    motivation.Dc_identifier = identificador;
+                    motivation.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaMotivation.Add(motivation);
+                }
+            }
+
+            return pListaMotivation;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria ContributionGradeDocument.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarContributionGradeDocument(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ContributionGradeDocument", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ContributionGradeDocument> contributions = new List<ContributionGradeDocument>();
+            contributions = ObtenerDatosContributionGradeDocument(pTablas, idContributionGradeDocument, contributions);
+
+            //Carga.
+            foreach (ContributionGradeDocument contribution in contributions)
+            {
+                mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, contribution.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos ContributionGradeDocument a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaContributionGrade">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ContributionGradeDocument> ObtenerDatosContributionGradeDocument(ReferenceTables pTablas, string pCodigoTabla, List<ContributionGradeDocument> pListaContributionGrade)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    ContributionGradeDocument contribution = new ContributionGradeDocument();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail contribucion in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[contribucion.lang];
+                        string nombre = contribucion.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    contribution.Dc_identifier = identificador;
+                    contribution.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaContributionGrade.Add(contribution);
+                }
+            }
+
+            return pListaContributionGrade;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria ReferenceSource.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarReferenceSource(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://purl.org/ontology/bibo/ReferenceSource", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ReferenceSource> references = new List<ReferenceSource>();
+            references = ObtenerDatosReferenceSource(pTablas, idReferenceSource, references);
+
+            //Carga.
+            foreach (ReferenceSource reference in references)
+            {
+                mResourceApi.LoadSecondaryResource(reference.ToGnossApiResource(mResourceApi, reference.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos ReferenceSource a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaReferenceSource">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ReferenceSource> ObtenerDatosReferenceSource(ReferenceTables pTablas, string pCodigoTabla, List<ReferenceSource> pListaReferenceSource)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    ReferenceSource reference = new ReferenceSource();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail referencia in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[referencia.lang];
+                        string nombre = referencia.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    reference.Dc_identifier = identificador;
+                    reference.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaReferenceSource.Add(reference);
+                }
+            }
+
+            return pListaReferenceSource;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria ImpactIndexCategory.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarImpactIndexCategory(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ImpactIndexCategory", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ImpactIndexCategory> categorias = new List<ImpactIndexCategory>();
+            categorias = ObtenerDatosImpactIndexCategory(pTablas, idImpactIndexCategory, categorias);
+
+            //Carga.
+            foreach (ImpactIndexCategory category in categorias)
+            {
+                mResourceApi.LoadSecondaryResource(category.ToGnossApiResource(mResourceApi, category.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos ImpactIndexCategory a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaImpactIndexCategory">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ImpactIndexCategory> ObtenerDatosImpactIndexCategory(ReferenceTables pTablas, string pCodigoTabla, List<ImpactIndexCategory> pListaImpactIndexCategory)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    ImpactIndexCategory categories = new ImpactIndexCategory();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail categoria in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[categoria.lang];
+                        string nombre = categoria.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    categories.Dc_identifier = identificador;
+                    categories.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaImpactIndexCategory.Add(categories);
+                }
+            }
+
+            return pListaImpactIndexCategory;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria Language.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarLanguage(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/Language", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<Language> lenguajes = new List<Language>();
+            lenguajes = ObtenerDatosLanguage(pTablas, idLanguage, lenguajes);
+
+            //Carga.
+            foreach (Language language in lenguajes)
+            {
+                mResourceApi.LoadSecondaryResource(language.ToGnossApiResource(mResourceApi, language.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos Language a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaLanguage">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<Language> ObtenerDatosLanguage(ReferenceTables pTablas, string pCodigoTabla, List<Language> pListaLanguage)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    Language language = new Language();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail lenguaje in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[lenguaje.lang];
+                        string nombre = lenguaje.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    language.Dc_identifier = identificador;
+                    language.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaLanguage.Add(language);
+                }
+            }
+
+            return pListaLanguage;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria PublicationType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarPublicationType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/PublicationType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<PublicationType> publicaciones = new List<PublicationType>();
+            publicaciones = ObtenerDatosPublicationType(pTablas, idPublicationType, publicaciones);
+
+            //Carga.
+            foreach (PublicationType publication in publicaciones)
+            {
+                mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, publication.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos Language a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaPublicationType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<PublicationType> ObtenerDatosPublicationType(ReferenceTables pTablas, string pCodigoTabla, List<PublicationType> pListaPublicationType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    PublicationType publication = new PublicationType();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail publicacion in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[publicacion.lang];
+                        string nombre = publicacion.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    publication.Dc_identifier = identificador;
+                    publication.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaPublicationType.Add(publication);
+                }
+            }
+
+            return pListaPublicationType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria EventType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarEventType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/EventType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<EventType> eventos = new List<EventType>();
+            eventos = ObtenerDatosEventType(pTablas, idEventType, eventos);
+
+            //Carga.
+            foreach (EventType eventType in eventos)
+            {
+                mResourceApi.LoadSecondaryResource(eventType.ToGnossApiResource(mResourceApi, eventType.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos EventType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaEventType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<EventType> ObtenerDatosEventType(ReferenceTables pTablas, string pCodigoTabla, List<EventType> pListaEventType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    EventType eventType = new EventType();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail evento in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[evento.lang];
+                        string nombre = evento.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    eventType.Dc_identifier = identificador;
+                    eventType.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaEventType.Add(eventType);
+                }
+            }
+
+            return pListaEventType;
+        }
+        
+        /// <summary>
+        /// Carga la entidad secundaria GeographicRegion.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarGeographicRegion(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/GeographicRegion", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<GeographicRegion> regiones = new List<GeographicRegion>();
+            regiones = ObtenerDatosGeographicRegion(pTablas, idGeographicRegion, regiones);
+
+            //Carga.
+            foreach (GeographicRegion region in regiones)
+            {
+                mResourceApi.LoadSecondaryResource(region.ToGnossApiResource(mResourceApi, region.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos GeographicRegion a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaGeographicRegion">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<GeographicRegion> ObtenerDatosGeographicRegion(ReferenceTables pTablas, string pCodigoTabla, List<GeographicRegion> pListaGeographicRegion)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    GeographicRegion geographicRegion = new GeographicRegion();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail region in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[region.lang];
+                        string nombre = region.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    geographicRegion.Dc_identifier = identificador;
+                    geographicRegion.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaGeographicRegion.Add(geographicRegion);
+                }
+            }
+
+            return pListaGeographicRegion;
+        }
+        
         /// <summary>
         /// Elimina los datos del grafo.
         /// </summary>

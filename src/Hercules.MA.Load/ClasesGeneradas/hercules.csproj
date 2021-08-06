@@ -105,19 +105,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContributiongradeOntology\ContributionGrade.cs" />
+    <Compile Include="ContributiongradedocumentOntology\ContributionGradeDocument.cs" />
+    <Compile Include="ContributiongradeprojectOntology\ContributionGradeProject.cs" />
     <Compile Include="CurriculumvitaeOntology\Address.cs" />
     <Compile Include="CurriculumvitaeOntology\CV.cs" />
     <Compile Include="CurriculumvitaeOntology\Document.cs" />
     <Compile Include="CurriculumvitaeOntology\PersonalData.cs" />
+    <Compile Include="CurriculumvitaeOntology\RelatedDocuments.cs" />
     <Compile Include="CurriculumvitaeOntology\RelatedProjects.cs" />
+    <Compile Include="CurriculumvitaeOntology\ScientificActivity.cs" />
     <Compile Include="CurriculumvitaeOntology\ScientificExperience.cs" />
     <Compile Include="CurriculumvitaeOntology\TelephoneType.cs" />
     <Compile Include="DedicationregimeOntology\DedicationRegime.cs" />
+    <Compile Include="EventtypeOntology\EventType.cs" />
     <Compile Include="FeatureOntology\Feature.cs" />
     <Compile Include="GeographicregionOntology\GeographicRegion.cs" />
     <Compile Include="GnossBase\GnossOCBase.cs" />
+    <Compile Include="ImpactindexcategoryOntology\ImpactIndexCategory.cs" />
+    <Compile Include="LanguageOntology\Language.cs" />
     <Compile Include="ModalityOntology\Modality.cs" />
+    <Compile Include="MotivationOntology\Motivation.cs" />
     <Compile Include="OrganizationOntology\Address.cs" />
     <Compile Include="OrganizationOntology\Organization.cs" />
     <Compile Include="OrganizationtypeOntology\OrganizationType.cs" />
@@ -127,6 +134,8 @@
     <Compile Include="ProjectOntology\Funding.cs" />
     <Compile Include="ProjectOntology\Project.cs" />
     <Compile Include="ProjectOntology\ProjectClassification.cs" />
+    <Compile Include="PublicationtypeOntology\PublicationType.cs" />
+    <Compile Include="ReferencesourceOntology\ReferenceSource.cs" />
     <Compile Include="TaxonomyOntology\Collection.cs" />
     <Compile Include="TaxonomyOntology\Concept.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

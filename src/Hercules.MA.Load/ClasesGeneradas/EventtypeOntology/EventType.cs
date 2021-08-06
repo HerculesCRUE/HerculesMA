@@ -15,27 +15,32 @@ using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
 
-namespace OrganizationtypeOntology
+namespace EventtypeOntology
 {
-	public class OrganizationType : GnossOCBase
+	public class EventType : GnossOCBase
 	{
 
-		public OrganizationType() : base() { } 
+		public EventType() : base() { } 
 
-		public OrganizationType(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
+		public EventType(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
 			this.Dc_title = new Dictionary<LanguageEnum,string>();
 			this.Dc_title.Add(idiomaUsuario , GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/title")));
 			
+			this.Dc_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/identifier"));
 		}
 
-		public virtual string RdfType { get { return "http://w3id.org/roh/OrganizationType"; } }
-		public virtual string RdfsLabel { get { return "http://w3id.org/roh/OrganizationType"; } }
-		[LABEL(LanguageEnum.es,"Tipo de entidad")]
+		public virtual string RdfType { get { return "http://w3id.org/roh/EventType"; } }
+		public virtual string RdfsLabel { get { return "http://w3id.org/roh/EventType"; } }
+		[LABEL(LanguageEnum.es,"Tipo de evento")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/title")]
 		public  Dictionary<LanguageEnum,string> Dc_title { get; set;}
+
+		[LABEL(LanguageEnum.es,"Identificador del tipo de evento")]
+		[RDFProperty("http://purl.org/dc/elements/1.1/identifier")]
+		public  string Dc_identifier { get; set;}
 
 
 		internal override void GetProperties()
@@ -52,6 +57,7 @@ namespace OrganizationtypeOntology
 			{
 				throw new GnossAPIException($"La propiedad dc:title debe tener al menos un valor en el recurso: {resourceID}");
 			}
+			propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
 		}
 
 		internal override void GetEntities()
@@ -63,7 +69,7 @@ namespace OrganizationtypeOntology
 			SecondaryResource resource = new SecondaryResource();
 			List<SecondaryEntity> listSecondaryEntity = null;
 			GetProperties();
-			SecondaryOntology ontology = new SecondaryOntology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, "http://w3id.org/roh/OrganizationType", "http://w3id.org/roh/OrganizationType", prefList, propList,identificador,listSecondaryEntity, null);
+			SecondaryOntology ontology = new SecondaryOntology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, "http://w3id.org/roh/EventType", "http://w3id.org/roh/EventType", prefList, propList,identificador,listSecondaryEntity, null);
 			resource.SecondaryOntology = ontology;
 			AddImages(resource);
 			AddFiles(resource);
@@ -73,15 +79,19 @@ namespace OrganizationtypeOntology
 		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/OrganizationType_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/OrganizationType>", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/OrganizationType_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/OrganizationType\"", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/OrganizationType_{ResourceID}_{ArticleID}>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/EventType_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/EventType>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/EventType_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/EventType\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/EventType_{ResourceID}_{ArticleID}>", list, " . ");
 				if(this.Dc_title != null)
 				{
 							foreach (LanguageEnum idioma in this.Dc_title.Keys)
 							{
-								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/OrganizationType_{ResourceID}_{ArticleID}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma])}\"", list,  $"{idioma} . ");
+								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/EventType_{ResourceID}_{ArticleID}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma])}\"", list,  $"{idioma} . ");
 							}
+				}
+				if(this.Dc_identifier != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/EventType_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
 				}
 			return list;
 		}
@@ -97,6 +107,10 @@ namespace OrganizationtypeOntology
 							{
 								AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma]).ToLower()}\"", list,  $"{idioma} . ");
 							}
+				}
+				if(this.Dc_identifier != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier).ToLower()}\"", list, " . ");
 				}
 			if (listaSearch != null && listaSearch.Count > 0)
 			{
@@ -171,7 +185,7 @@ namespace OrganizationtypeOntology
 		}
 		public override string GetURI(ResourceApi resourceAPI)
 		{
-			return $"{resourceAPI.GraphsUrl}items/OrganizationtypeOntology_{ResourceID}_{ArticleID}";
+			return $"{resourceAPI.GraphsUrl}items/EventtypeOntology_{ResourceID}_{ArticleID}";
 		}
 
 		private string GenerarTextoSinSaltoDeLinea(string pTexto)

@@ -12,6 +12,8 @@ using GnossBase;
 using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Collections;
+using Gnoss.ApiWrapper.Exceptions;
 using OrganizationType = OrganizationtypeOntology.OrganizationType;
 
 namespace OrganizationOntology
@@ -58,6 +60,8 @@ namespace OrganizationOntology
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 		}
 
+		public virtual string RdfType { get { return "http://xmlns.com/foaf/0.1/Organization"; } }
+		public virtual string RdfsLabel { get { return "http://xmlns.com/foaf/0.1/Organization"; } }
 		[LABEL(LanguageEnum.es,"Dirección")]
 		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasAddress")]
 		public  Address Vcard_hasAddress { get; set;}
@@ -92,7 +96,6 @@ namespace OrganizationOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
-			entList = new List<OntologyEntity>();
 			if(Vcard_hasAddress!=null){
 				Vcard_hasAddress.GetProperties();
 				Vcard_hasAddress.GetEntities();
@@ -113,10 +116,10 @@ namespace OrganizationOntology
 			GetProperties();
 			if(idrecurso.Equals(Guid.Empty) && idarticulo.Equals(Guid.Empty))
 			{
-				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, "http://xmlns.com/foaf/0.1/Organization", "http://xmlns.com/foaf/0.1/Organization", prefList, propList, entList);
+				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, RdfType, RdfsLabel, prefList, propList, entList);
 			}
 			else{
-				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, "http://xmlns.com/foaf/0.1/Organization", "http://xmlns.com/foaf/0.1/Organization", prefList, propList, entList,idrecurso,idarticulo);
+				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, RdfType, RdfsLabel, prefList, propList, entList,idrecurso,idarticulo);
 			}
 			resource.Id = GNOSSID;
 			resource.Ontology = ontology;
@@ -131,43 +134,43 @@ namespace OrganizationOntology
 		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			list.Add($"<{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Organization> . ");
-			list.Add($"<{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}> <http://www.w3.org/2000/01/rdf-schema#label> \"http://xmlns.com/foaf/0.1/Organization\" . ");
-			list.Add($"<{resourceAPI.GraphsUrl}{ResourceID}> <http://gnoss/hasEntidad> <{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}> . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://xmlns.com/foaf/0.1/Organization>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://xmlns.com/foaf/0.1/Organization\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}>", list, " . ");
 			if(this.Vcard_hasAddress != null)
 			{
-				list.Add($"<{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2006/vcard/ns#Address> . ");
-				list.Add($"<{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> <http://www.w3.org/2000/01/rdf-schema#label> \"https://www.w3.org/2006/vcard/ns#Address\" . ");
-				list.Add($"<{resourceAPI.GraphsUrl}{ResourceID}> <http://gnoss/hasEntidad> <{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> . ");
-				list.Add($"<{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}> <https://www.w3.org/2006/vcard/ns#hasAddress> <{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> . ");
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<https://www.w3.org/2006/vcard/ns#Address>", list, " . ");
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"https://www.w3.org/2006/vcard/ns#Address\"", list, " . ");
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}>", list, " . ");
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}", "https://www.w3.org/2006/vcard/ns#hasAddress", $"<{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}>", list, " . ");
 				if(this.Vcard_hasAddress.IdVcard_hasRegion != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> <https://www.w3.org/2006/vcard/ns#hasRegion> <{this.Vcard_hasAddress.IdVcard_hasRegion}> . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}",  "https://www.w3.org/2006/vcard/ns#hasRegion", $"<{this.Vcard_hasAddress.IdVcard_hasRegion}>", list, " . ");
 				}
 				if(this.Vcard_hasAddress.IdVcard_hasCountryName != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> <https://www.w3.org/2006/vcard/ns#hasCountryName> <{this.Vcard_hasAddress.IdVcard_hasCountryName}> . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}",  "https://www.w3.org/2006/vcard/ns#hasCountryName", $"<{this.Vcard_hasAddress.IdVcard_hasCountryName}>", list, " . ");
 				}
 				if(this.Vcard_hasAddress.Vcard_locality != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> <https://www.w3.org/2006/vcard/ns#locality> \"{this.Vcard_hasAddress.Vcard_locality.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}",  "https://www.w3.org/2006/vcard/ns#locality", $"\"{GenerarTextoSinSaltoDeLinea(this.Vcard_hasAddress.Vcard_locality)}\"", list, " . ");
 				}
 			}
 				if(this.IdDc_type != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}> <http://purl.org/dc/elements/1.1/type> <{this.IdDc_type}> . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/type", $"<{this.IdDc_type}>", list, " . ");
 				}
 				if(this.Vivo_identifier != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}> <http://vivoweb.org/ontology/core#identifier> \"{this.Vivo_identifier.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}",  "http://vivoweb.org/ontology/core#identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Vivo_identifier)}\"", list, " . ");
 				}
 				if(this.Roh_otherTypeMoreInfo != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}> <http://w3id.org/roh/otherTypeMoreInfo> \"{this.Roh_otherTypeMoreInfo.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/otherTypeMoreInfo", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_otherTypeMoreInfo)}\"", list, " . ");
 				}
 				if(this.Roh_title != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}> <http://w3id.org/roh/title> \"{this.Roh_title.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/title", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_title)}\"", list, " . ");
 				}
 			return list;
 		}
@@ -175,28 +178,21 @@ namespace OrganizationOntology
 		public override List<string> ToSearchGraphTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> \"organization\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/type> \"http://xmlns.com/foaf/0.1/Organization\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasfechapublicacion> {DateTime.Now.ToString("yyyyMMddHHmmss")} . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hastipodoc> \"5\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasfechamodificacion> {DateTime.Now.ToString("yyyyMMddHHmmss")} . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasnumeroVisitas>  0 . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasprivacidadCom> \"publico\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://xmlns.com/foaf/0.1/firstName> \"{this.Roh_title.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
-			list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/hasnombrecompleto> \"{this.Roh_title.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+			List<string> listaSearch = new List<string>();
+			AgregarTags(list);
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"\"organization\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/type", $"\"http://xmlns.com/foaf/0.1/Organization\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasfechapublicacion", $"{DateTime.Now.ToString("yyyyMMddHHmmss")}", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hastipodoc", "\"5\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasfechamodificacion", $"{DateTime.Now.ToString("yyyyMMddHHmmss")}", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasnumeroVisitas", "0", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasprivacidadCom", "\"publico\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://xmlns.com/foaf/0.1/firstName", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_title)}\"", list, " . ");
+			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasnombrecompleto", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_title)}\"", list, " . ");
 			string search = string.Empty;
-			search = $"{this.Roh_title.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}";
-			if(!string.IsNullOrEmpty(this.Roh_title))
-			{
-				search += $"{this.Roh_title.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}";
-			}
-			if(!string.IsNullOrEmpty(search))
-			{
-				list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://gnoss/search> \"{search.ToLower()}\" . ");
-			}
 			if(this.Vcard_hasAddress != null)
 			{
-				list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <https://www.w3.org/2006/vcard/ns#hasAddress> <{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> . ");
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "https://www.w3.org/2006/vcard/ns#hasAddress", $"<{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}>", list, " . ");
 				if(this.Vcard_hasAddress.IdVcard_hasRegion != null)
 				{
 					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
@@ -209,7 +205,7 @@ namespace OrganizationOntology
 					{
 						itemRegex = itemRegex.ToLower();
 					}
-					list.Add($"<{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> <https://www.w3.org/2006/vcard/ns#hasRegion> <{itemRegex}> . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}",  "https://www.w3.org/2006/vcard/ns#hasRegion", $"<{itemRegex}>", list, " . ");
 				}
 				if(this.Vcard_hasAddress.IdVcard_hasCountryName != null)
 				{
@@ -223,11 +219,11 @@ namespace OrganizationOntology
 					{
 						itemRegex = itemRegex.ToLower();
 					}
-					list.Add($"<{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> <https://www.w3.org/2006/vcard/ns#hasCountryName> <{itemRegex}> . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}",  "https://www.w3.org/2006/vcard/ns#hasCountryName", $"<{itemRegex}>", list, " . ");
 				}
 				if(this.Vcard_hasAddress.Vcard_locality != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}> <https://www.w3.org/2006/vcard/ns#locality> \"{this.Vcard_hasAddress.Vcard_locality.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Vcard_hasAddress.ArticleID}",  "https://www.w3.org/2006/vcard/ns#locality", $"\"{GenerarTextoSinSaltoDeLinea(this.Vcard_hasAddress.Vcard_locality).ToLower()}\"", list, " . ");
 				}
 			}
 				if(this.IdDc_type != null)
@@ -242,20 +238,31 @@ namespace OrganizationOntology
 					{
 						itemRegex = itemRegex.ToLower();
 					}
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://purl.org/dc/elements/1.1/type> <{itemRegex}> . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://purl.org/dc/elements/1.1/type", $"<{itemRegex}>", list, " . ");
 				}
 				if(this.Vivo_identifier != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://vivoweb.org/ontology/core#identifier> \"{this.Vivo_identifier.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://vivoweb.org/ontology/core#identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Vivo_identifier).ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_otherTypeMoreInfo != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://w3id.org/roh/otherTypeMoreInfo> \"{this.Roh_otherTypeMoreInfo.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/otherTypeMoreInfo", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_otherTypeMoreInfo).ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_title != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://w3id.org/roh/title> \"{this.Roh_title.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/title", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_title).ToLower()}\"", list, " . ");
 				}
+			if (listaSearch != null && listaSearch.Count > 0)
+			{
+				foreach(string valorSearch in listaSearch)
+				{
+					search += $"{valorSearch} ";
+				}
+			}
+			if(!string.IsNullOrEmpty(search))
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/search", $"\"{search.ToLower()}\"", list, " . ");
+			}
 			return list;
 		}
 
@@ -263,15 +270,72 @@ namespace OrganizationOntology
 		{
 
 			//Insert en la tabla Documento
-			string tablaDoc = $"'{this.Roh_title.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}', '{this.Roh_title.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}', '{resourceAPI.GraphsUrl}'";
+			string titulo = $"{this.Roh_title.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}";
+			string descripcion = $"{this.Roh_title.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}";
+			string tablaDoc = $"'{titulo}', '{descripcion}', '{resourceAPI.GraphsUrl}'";
 			KeyValuePair<Guid, string> valor = new KeyValuePair<Guid, string>(ResourceID, tablaDoc);
 
 			return valor;
 		}
 
+		protected List<object> ObtenerObjetosDePropiedad(object propiedad)
+		{
+			List<object> lista = new List<object>();
+			if(propiedad is IList)
+			{
+				foreach (object item in (IList)propiedad)
+				{
+					lista.Add(item);
+				}
+			}
+			else
+			{
+				lista.Add(propiedad);
+			}
+			return lista;
+		}
+		protected List<string> ObtenerStringDePropiedad(object propiedad)
+		{
+			List<string> lista = new List<string>();
+			if (propiedad is IList)
+			{
+				foreach (string item in (IList)propiedad)
+				{
+					lista.Add(item);
+				}
+			}
+			else if (propiedad is IDictionary)
+			{
+				foreach (object key in ((IDictionary)propiedad).Keys)
+				{
+					if (((IDictionary)propiedad)[key] is IList)
+					{
+						List<string> listaValores = (List<string>)((IDictionary)propiedad)[key];
+						foreach(string valor in listaValores)
+						{
+							lista.Add(valor);
+						}
+					}
+					else
+					{
+					lista.Add((string)((IDictionary)propiedad)[key]);
+					}
+				}
+			}
+			else if (propiedad is string)
+			{
+				lista.Add((string)propiedad);
+			}
+			return lista;
+		}
 		public override string GetURI(ResourceApi resourceAPI)
 		{
 			return $"{resourceAPI.GraphsUrl}items/OrganizationOntology_{ResourceID}_{ArticleID}";
+		}
+
+		private string GenerarTextoSinSaltoDeLinea(string pTexto)
+		{
+			return pTexto.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"");
 		}
 
 		internal void AddResourceTitle(ComplexOntologyResource resource)
@@ -282,6 +346,22 @@ namespace OrganizationOntology
 		internal void AddResourceDescription(ComplexOntologyResource resource)
 		{
 			resource.Description = this.Roh_title;
+		}
+
+		private void AgregarTripleALista(string pSujeto, string pPredicado, string pObjeto, List<string> pLista, string pDatosExtra)
+		{
+			if(!string.IsNullOrEmpty(pObjeto) && !pObjeto.Equals("\"\"") && !pObjeto.Equals("<>"))
+			{
+				pLista.Add($"<{pSujeto}> <{pPredicado}> {pObjeto}{pDatosExtra}");
+			} 
+		} 
+
+		private void AgregarTags(List<string> pListaTriples)
+		{
+			foreach(string tag in tagList)
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://rdfs.org/sioc/types#Tag", tag.ToLower(), pListaTriples, " . ");
+			}
 		}
 
 

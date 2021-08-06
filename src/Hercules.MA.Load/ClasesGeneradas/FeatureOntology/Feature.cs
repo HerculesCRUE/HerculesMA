@@ -12,6 +12,8 @@ using GnossBase;
 using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Collections;
+using Gnoss.ApiWrapper.Exceptions;
 using Feature = FeatureOntology.Feature;
 
 namespace FeatureOntology
@@ -37,6 +39,8 @@ namespace FeatureOntology
 			this.Gn_featureCode = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://www.geonames.org/ontology#featureCode"));
 		}
 
+		public virtual string RdfType { get { return "http://www.geonames.org/ontology#Feature"; } }
+		public virtual string RdfsLabel { get { return "http://www.geonames.org/ontology#Feature"; } }
 		[LABEL(LanguageEnum.es,"Rasgo padre")]
 		[RDFProperty("http://www.geonames.org/ontology#parentFeature")]
 		public  Feature Gn_parentFeature  { get; set;} 
@@ -60,12 +64,16 @@ namespace FeatureOntology
 			base.GetProperties();
 			propList.Add(new StringOntologyProperty("gn:parentFeature", this.IdGn_parentFeature));
 			propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
-			foreach (LanguageEnum LanguageEnum in Enum.GetValues(typeof(LanguageEnum)))
+			if(this.Gn_name != null)
 			{
-				if (Gn_name.ContainsKey(LanguageEnum))
+				foreach (LanguageEnum idioma in this.Gn_name.Keys)
 				{
-					propList.Add(new StringOntologyProperty("gn:name", this.Gn_name[LanguageEnum], LanguageEnum.ToString()));
+					propList.Add(new StringOntologyProperty("gn:name", this.Gn_name[idioma], idioma.ToString()));
 				}
+			}
+			else
+			{
+				throw new GnossAPIException($"La propiedad gn:name debe tener al menos un valor en el recurso: {resourceID}");
 			}
 			propList.Add(new StringOntologyProperty("gn:featureCode", this.Gn_featureCode));
 		}
@@ -73,7 +81,6 @@ namespace FeatureOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
-			entList = new List<OntologyEntity>();
 		} 
 		public virtual SecondaryResource ToGnossApiResource(ResourceApi resourceAPI,string identificador)
 		{
@@ -90,27 +97,27 @@ namespace FeatureOntology
 		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			list.Add($"<{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.geonames.org/ontology#Feature> . ");
-			list.Add($"<{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}> <http://www.w3.org/2000/01/rdf-schema#label> \"http://www.geonames.org/ontology#Feature\" . ");
-			list.Add($"<{resourceAPI.GraphsUrl}{ResourceID}> <http://gnoss/hasEntidad> <{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}> . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://www.geonames.org/ontology#Feature>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://www.geonames.org/ontology#Feature\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}>", list, " . ");
 				if(this.IdGn_parentFeature != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}> <http://www.geonames.org/ontology#parentFeature> <{this.IdGn_parentFeature}> . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}",  "http://www.geonames.org/ontology#parentFeature", $"<{this.IdGn_parentFeature}>", list, " . ");
 				}
 				if(this.Dc_identifier != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}> <http://purl.org/dc/elements/1.1/identifier> \"{this.Dc_identifier.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
 				}
 				if(this.Gn_name != null)
 				{
-					foreach (LanguageEnum LanguageEnum in Enum.GetValues(typeof(LanguageEnum)))
-					{
-						//list.Add($"<{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}> <http://www.geonames.org/ontology#name> \"{this.Gn_name.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" @[LanguageEnum]" .);
-					}
+							foreach (LanguageEnum idioma in this.Gn_name.Keys)
+							{
+								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}", "http://www.geonames.org/ontology#name",  $"\"{GenerarTextoSinSaltoDeLinea(this.Gn_name[idioma])}\"", list,  $"{idioma} . ");
+							}
 				}
 				if(this.Gn_featureCode != null)
 				{
-					list.Add($"<{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}> <http://www.geonames.org/ontology#featureCode> \"{this.Gn_featureCode.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"")}\" . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Feature_{ResourceID}_{ArticleID}",  "http://www.geonames.org/ontology#featureCode", $"\"{GenerarTextoSinSaltoDeLinea(this.Gn_featureCode)}\"", list, " . ");
 				}
 			return list;
 		}
@@ -118,6 +125,8 @@ namespace FeatureOntology
 		public override List<string> ToSearchGraphTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
+			List<string> listaSearch = new List<string>();
+			string search = string.Empty;
 				if(this.IdGn_parentFeature != null)
 				{
 					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
@@ -130,23 +139,34 @@ namespace FeatureOntology
 					{
 						itemRegex = itemRegex.ToLower();
 					}
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://www.geonames.org/ontology#parentFeature> <{itemRegex}> . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://www.geonames.org/ontology#parentFeature", $"<{itemRegex}>", list, " . ");
 				}
 				if(this.Dc_identifier != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://purl.org/dc/elements/1.1/identifier> \"{this.Dc_identifier.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier).ToLower()}\"", list, " . ");
 				}
 				if(this.Gn_name != null)
 				{
-					foreach (LanguageEnum LanguageEnum in Enum.GetValues(typeof(LanguageEnum)))
-					{
-						//list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://www.geonames.org/ontology#name> \"{this.Gn_name.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" @[LanguageEnum]" .);
-					}
+							foreach (LanguageEnum idioma in this.Gn_name.Keys)
+							{
+								AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://www.geonames.org/ontology#name",  $"\"{GenerarTextoSinSaltoDeLinea(this.Gn_name[idioma]).ToLower()}\"", list,  $"{idioma} . ");
+							}
 				}
 				if(this.Gn_featureCode != null)
 				{
-					list.Add($"<http://gnoss/{ResourceID.ToString().ToUpper()}> <http://www.geonames.org/ontology#featureCode> \"{this.Gn_featureCode.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"").ToLower()}\" . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://www.geonames.org/ontology#featureCode", $"\"{GenerarTextoSinSaltoDeLinea(this.Gn_featureCode).ToLower()}\"", list, " . ");
 				}
+			if (listaSearch != null && listaSearch.Count > 0)
+			{
+				foreach(string valorSearch in listaSearch)
+				{
+					search += $"{valorSearch} ";
+				}
+			}
+			if(!string.IsNullOrEmpty(search))
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/search", $"\"{search.ToLower()}\"", list, " . ");
+			}
 			return list;
 		}
 
@@ -157,15 +177,86 @@ namespace FeatureOntology
 			return valor;
 		}
 
+		protected List<object> ObtenerObjetosDePropiedad(object propiedad)
+		{
+			List<object> lista = new List<object>();
+			if(propiedad is IList)
+			{
+				foreach (object item in (IList)propiedad)
+				{
+					lista.Add(item);
+				}
+			}
+			else
+			{
+				lista.Add(propiedad);
+			}
+			return lista;
+		}
+		protected List<string> ObtenerStringDePropiedad(object propiedad)
+		{
+			List<string> lista = new List<string>();
+			if (propiedad is IList)
+			{
+				foreach (string item in (IList)propiedad)
+				{
+					lista.Add(item);
+				}
+			}
+			else if (propiedad is IDictionary)
+			{
+				foreach (object key in ((IDictionary)propiedad).Keys)
+				{
+					if (((IDictionary)propiedad)[key] is IList)
+					{
+						List<string> listaValores = (List<string>)((IDictionary)propiedad)[key];
+						foreach(string valor in listaValores)
+						{
+							lista.Add(valor);
+						}
+					}
+					else
+					{
+					lista.Add((string)((IDictionary)propiedad)[key]);
+					}
+				}
+			}
+			else if (propiedad is string)
+			{
+				lista.Add((string)propiedad);
+			}
+			return lista;
+		}
 		public override string GetURI(ResourceApi resourceAPI)
 		{
 			return $"{resourceAPI.GraphsUrl}items/FeatureOntology_{ResourceID}_{ArticleID}";
+		}
+
+		private string GenerarTextoSinSaltoDeLinea(string pTexto)
+		{
+			return pTexto.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"");
 		}
 
 		internal void AddResourceTitle(ComplexOntologyResource resource)
 		{
 		}
 
+
+		private void AgregarTripleALista(string pSujeto, string pPredicado, string pObjeto, List<string> pLista, string pDatosExtra)
+		{
+			if(!string.IsNullOrEmpty(pObjeto) && !pObjeto.Equals("\"\"") && !pObjeto.Equals("<>"))
+			{
+				pLista.Add($"<{pSujeto}> <{pPredicado}> {pObjeto}{pDatosExtra}");
+			} 
+		} 
+
+		private void AgregarTags(List<string> pListaTriples)
+		{
+			foreach(string tag in tagList)
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://rdfs.org/sioc/types#Tag", tag.ToLower(), pListaTriples, " . ");
+			}
+		}
 
 
 	}

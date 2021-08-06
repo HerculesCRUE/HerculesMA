@@ -12,8 +12,9 @@ using GnossBase;
 using Es.Riam.Gnoss.Web.MVC.Models;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Collections;
+using Gnoss.ApiWrapper.Exceptions;
 using ParticipationType = ParticipationtypeOntology.ParticipationType;
-using ContributionGrade = ContributiongradeOntology.ContributionGrade;
 using DedicationRegime = DedicationregimeOntology.DedicationRegime;
 using Person = PersonOntology.Person;
 
@@ -33,11 +34,6 @@ namespace ProjectOntology
 			{
 				this.Roh_participationType = new ParticipationType(propRoh_participationType.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
-			SemanticPropertyModel propRoh_contributionGrade = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/contributionGrade");
-			if(propRoh_contributionGrade != null && propRoh_contributionGrade.PropertyValues.Count > 0)
-			{
-				this.Roh_contributionGrade = new ContributionGrade(propRoh_contributionGrade.PropertyValues[0].RelatedEntity,idiomaUsuario);
-			}
 			this.Roh_dedicationRegime = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/dedicationRegime"));
 			this.Roh_participationTypeOther = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/participationTypeOther"));
 			this.Roh_applicantContribution = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/applicantContribution"));
@@ -50,6 +46,8 @@ namespace ProjectOntology
 			this.Roh_order = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/order"));
 		}
 
+		public virtual string RdfType { get { return "http://purl.obolibrary.org/obo/BFO_0000023"; } }
+		public virtual string RdfsLabel { get { return "http://purl.obolibrary.org/obo/BFO_0000023"; } }
 		public OntologyEntity Entity { get; set; }
 
 		[LABEL(LanguageEnum.es,"Tipo de participación")]
@@ -59,7 +57,7 @@ namespace ProjectOntology
 
 		[LABEL(LanguageEnum.es,"Grado de contribución")]
 		[RDFProperty("http://w3id.org/roh/contributionGrade")]
-		public  ContributionGrade Roh_contributionGrade  { get; set;} 
+		public  object Roh_contributionGrade  { get; set;} 
 		public string IdRoh_contributionGrade  { get; set;} 
 
 		[LABEL(LanguageEnum.es,"Régimen de dedicación")]
@@ -93,7 +91,7 @@ namespace ProjectOntology
 		{
 			base.GetProperties();
 			propList.Add(new StringOntologyProperty("roh:participationType", this.IdRoh_participationType));
-			propList.Add(new StringOntologyProperty("roh:contributionGrade", this.IdRoh_contributionGrade));
+			//propList.Add(new StringOntologyProperty("roh:contributionGrade", this.Roh_contributionGrade));
 			propList.Add(new StringOntologyProperty("roh:dedicationRegime", this.Roh_dedicationRegime));
 			propList.Add(new StringOntologyProperty("roh:participationTypeOther", this.Roh_participationTypeOther));
 			propList.Add(new StringOntologyProperty("roh:applicantContribution", this.Roh_applicantContribution));
@@ -105,14 +103,84 @@ namespace ProjectOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
-			entList = new List<OntologyEntity>();
 		} 
 
 
 
 
+		protected List<object> ObtenerObjetosDePropiedad(object propiedad)
+		{
+			List<object> lista = new List<object>();
+			if(propiedad is IList)
+			{
+				foreach (object item in (IList)propiedad)
+				{
+					lista.Add(item);
+				}
+			}
+			else
+			{
+				lista.Add(propiedad);
+			}
+			return lista;
+		}
+		protected List<string> ObtenerStringDePropiedad(object propiedad)
+		{
+			List<string> lista = new List<string>();
+			if (propiedad is IList)
+			{
+				foreach (string item in (IList)propiedad)
+				{
+					lista.Add(item);
+				}
+			}
+			else if (propiedad is IDictionary)
+			{
+				foreach (object key in ((IDictionary)propiedad).Keys)
+				{
+					if (((IDictionary)propiedad)[key] is IList)
+					{
+						List<string> listaValores = (List<string>)((IDictionary)propiedad)[key];
+						foreach(string valor in listaValores)
+						{
+							lista.Add(valor);
+						}
+					}
+					else
+					{
+					lista.Add((string)((IDictionary)propiedad)[key]);
+					}
+				}
+			}
+			else if (propiedad is string)
+			{
+				lista.Add((string)propiedad);
+			}
+			return lista;
+		}
+
+		private string GenerarTextoSinSaltoDeLinea(string pTexto)
+		{
+			return pTexto.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\"", "\\\"");
+		}
 
 
+
+		private void AgregarTripleALista(string pSujeto, string pPredicado, string pObjeto, List<string> pLista, string pDatosExtra)
+		{
+			if(!string.IsNullOrEmpty(pObjeto) && !pObjeto.Equals("\"\"") && !pObjeto.Equals("<>"))
+			{
+				pLista.Add($"<{pSujeto}> <{pPredicado}> {pObjeto}{pDatosExtra}");
+			} 
+		} 
+
+		private void AgregarTags(List<string> pListaTriples)
+		{
+			foreach(string tag in tagList)
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://rdfs.org/sioc/types#Tag", tag.ToLower(), pListaTriples, " . ");
+			}
+		}
 
 
 	}

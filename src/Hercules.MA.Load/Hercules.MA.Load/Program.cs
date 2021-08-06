@@ -11,7 +11,7 @@ namespace Hercules.MA.Load
         static void Main(string[] args)
         {
             CargaSecundarias.CargarEntidadesSecundarias();
-            //CargaPrincipales.CargarEntidadesPrincipales();
+            CargaPrincipales.CargarEntidadesPrincipales();
         }
     }
 }
