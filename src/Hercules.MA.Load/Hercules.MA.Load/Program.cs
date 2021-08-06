@@ -10,7 +10,7 @@ namespace Hercules.MA.Load
     {
         static void Main(string[] args)
         {
-            CargaSecundarias.CargarEntidadesSecundarias();
+            //CargaSecundarias.CargarEntidadesSecundarias();
             CargaPrincipales.CargarEntidadesPrincipales();
         }
     }

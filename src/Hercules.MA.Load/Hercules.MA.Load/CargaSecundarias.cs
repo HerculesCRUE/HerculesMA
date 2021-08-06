@@ -24,6 +24,7 @@ using LanguageOntology;
 using PublicationtypeOntology;
 using EventtypeOntology;
 using GeographicregionOntology;
+using OrganizationtypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -54,6 +55,7 @@ namespace Hercules.MA.Load
         private static readonly string idPublicationType = "CVN_PUBLICATION_A";
         private static readonly string idEventType = "CVN_EVENT_B";
         private static readonly string idGeographicRegion = "CVN_SCOPE_A";
+        private static readonly string idOrganizationType = "CVN_ENTITY_TYPE";
 
         /// <summary>
         /// Método para cargar las entidades secundarias.
@@ -80,6 +82,7 @@ namespace Hercules.MA.Load
             CargarPublicationType(tablas, "publicationtype");
             CargarEventType(tablas, "eventtype");
             CargarGeographicRegion(tablas, "geographicregion");
+            CargarOrganizationType(tablas, "organizationtype");
         }
 
         /// <summary>
@@ -915,7 +918,69 @@ namespace Hercules.MA.Load
 
             return pListaGeographicRegion;
         }
-        
+
+        /// <summary>
+        /// Carga la entidad secundaria OrganizationType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarOrganizationType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/OrganizationType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<OrganizationType> organizaciones = new List<OrganizationType>();
+            organizaciones = ObtenerDatosOrganizationType(pTablas, idOrganizationType, organizaciones);
+
+            //Carga.
+            foreach (OrganizationType organization in organizaciones)
+            {
+                mResourceApi.LoadSecondaryResource(organization.ToGnossApiResource(mResourceApi, organization.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos OrganizationType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaOrganizationType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<OrganizationType> ObtenerDatosOrganizationType(ReferenceTables pTablas, string pCodigoTabla, List<OrganizationType> pListaOrganizationType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    OrganizationType organization = new OrganizationType();
+                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                    string identificador = item.Code;
+                    foreach (TableItemNameDetail organizacion in item.Name)
+                    {
+                        LanguageEnum idioma = dicIdiomasMapeados[organizacion.lang];
+                        string nombre = organizacion.Name;
+                        dicIdioma.Add(idioma, nombre);
+                    }
+
+                    //Se agrega las propiedades.
+                    organization.Dc_identifier = identificador;
+                    organization.Dc_title = dicIdioma;
+
+                    //Se guarda el objeto a la lista.
+                    pListaOrganizationType.Add(organization);
+                }
+            }
+
+            return pListaOrganizationType;
+        }
+
         /// <summary>
         /// Elimina los datos del grafo.
         /// </summary>

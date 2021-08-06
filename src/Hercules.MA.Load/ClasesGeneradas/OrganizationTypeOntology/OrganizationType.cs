@@ -26,6 +26,7 @@ namespace OrganizationtypeOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
+			this.Dc_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/identifier"));
 			this.Dc_title = new Dictionary<LanguageEnum,string>();
 			this.Dc_title.Add(idiomaUsuario , GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/title")));
 			
@@ -33,6 +34,10 @@ namespace OrganizationtypeOntology
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/OrganizationType"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/OrganizationType"; } }
+		[LABEL(LanguageEnum.es,"Identificador del tipo de entidad")]
+		[RDFProperty("http://purl.org/dc/elements/1.1/identifier")]
+		public  string Dc_identifier { get; set;}
+
 		[LABEL(LanguageEnum.es,"Tipo de entidad")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/title")]
 		public  Dictionary<LanguageEnum,string> Dc_title { get; set;}
@@ -41,6 +46,7 @@ namespace OrganizationtypeOntology
 		internal override void GetProperties()
 		{
 			base.GetProperties();
+			propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
 			if(this.Dc_title != null)
 			{
 				foreach (LanguageEnum idioma in this.Dc_title.Keys)
@@ -76,6 +82,10 @@ namespace OrganizationtypeOntology
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/OrganizationType_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/OrganizationType>", list, " . ");
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/OrganizationType_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/OrganizationType\"", list, " . ");
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/OrganizationType_{ResourceID}_{ArticleID}>", list, " . ");
+				if(this.Dc_identifier != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/OrganizationType_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
+				}
 				if(this.Dc_title != null)
 				{
 							foreach (LanguageEnum idioma in this.Dc_title.Keys)
@@ -91,6 +101,10 @@ namespace OrganizationtypeOntology
 			List<string> list = new List<string>();
 			List<string> listaSearch = new List<string>();
 			string search = string.Empty;
+				if(this.Dc_identifier != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier).ToLower()}\"", list, " . ");
+				}
 				if(this.Dc_title != null)
 				{
 							foreach (LanguageEnum idioma in this.Dc_title.Keys)

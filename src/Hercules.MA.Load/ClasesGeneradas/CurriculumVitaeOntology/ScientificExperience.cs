@@ -26,6 +26,18 @@ namespace CurriculumvitaeOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
+			this.Roh_nonCompetitiveProjects = new List<RelatedProjects>();
+			SemanticPropertyModel propRoh_nonCompetitiveProjects = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/nonCompetitiveProjects");
+			if(propRoh_nonCompetitiveProjects != null && propRoh_nonCompetitiveProjects.PropertyValues.Count > 0)
+			{
+				foreach (SemanticPropertyModel.PropertyValue propValue in propRoh_nonCompetitiveProjects.PropertyValues)
+				{
+					if(propValue.RelatedEntity!=null){
+						RelatedProjects roh_nonCompetitiveProjects = new RelatedProjects(propValue.RelatedEntity,idiomaUsuario);
+						this.Roh_nonCompetitiveProjects.Add(roh_nonCompetitiveProjects);
+					}
+				}
+			}
 			this.Roh_competitiveProjects = new List<RelatedProjects>();
 			SemanticPropertyModel propRoh_competitiveProjects = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/competitiveProjects");
 			if(propRoh_competitiveProjects != null && propRoh_competitiveProjects.PropertyValues.Count > 0)
@@ -38,24 +50,19 @@ namespace CurriculumvitaeOntology
 					}
 				}
 			}
-			SemanticPropertyModel propRoh_nonCompetitiveProjects = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/nonCompetitiveProjects");
-			if(propRoh_nonCompetitiveProjects != null && propRoh_nonCompetitiveProjects.PropertyValues.Count > 0)
-			{
-				this.Roh_nonCompetitiveProjects = new RelatedProjects(propRoh_nonCompetitiveProjects.PropertyValues[0].RelatedEntity,idiomaUsuario);
-			}
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/ScientificExperience"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/ScientificExperience"; } }
 		public OntologyEntity Entity { get; set; }
 
+		[LABEL(LanguageEnum.es,"Proyectos no Competitivos")]
+		[RDFProperty("http://w3id.org/roh/nonCompetitiveProjects")]
+		public  List<RelatedProjects> Roh_nonCompetitiveProjects { get; set;}
+
 		[LABEL(LanguageEnum.es,"Proyectos competitivos")]
 		[RDFProperty("http://w3id.org/roh/competitiveProjects")]
 		public  List<RelatedProjects> Roh_competitiveProjects { get; set;}
-
-		[LABEL(LanguageEnum.es,"Proyectos no Competitivos")]
-		[RDFProperty("http://w3id.org/roh/nonCompetitiveProjects")]
-		public  RelatedProjects Roh_nonCompetitiveProjects { get; set;}
 
 
 		internal override void GetProperties()
@@ -66,6 +73,15 @@ namespace CurriculumvitaeOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
+			if(Roh_nonCompetitiveProjects!=null){
+				foreach(RelatedProjects prop in Roh_nonCompetitiveProjects){
+					prop.GetProperties();
+					prop.GetEntities();
+					OntologyEntity entityRelatedProjects = new OntologyEntity("http://w3id.org/roh/RelatedProjects", "http://w3id.org/roh/RelatedProjects", "roh:nonCompetitiveProjects", prop.propList, prop.entList);
+				entList.Add(entityRelatedProjects);
+				prop.Entity= entityRelatedProjects;
+				}
+			}
 			if(Roh_competitiveProjects!=null){
 				foreach(RelatedProjects prop in Roh_competitiveProjects){
 					prop.GetProperties();
@@ -75,10 +91,6 @@ namespace CurriculumvitaeOntology
 				prop.Entity= entityRelatedProjects;
 				}
 			}
-			Roh_nonCompetitiveProjects.GetProperties();
-			Roh_nonCompetitiveProjects.GetEntities();
-			OntologyEntity entityRoh_nonCompetitiveProjects = new OntologyEntity("http://w3id.org/roh/RelatedProjects", "http://w3id.org/roh/RelatedProjects", "roh:nonCompetitiveProjects", Roh_nonCompetitiveProjects.propList, Roh_nonCompetitiveProjects.entList);
-			entList.Add(entityRoh_nonCompetitiveProjects);
 		} 
 
 
