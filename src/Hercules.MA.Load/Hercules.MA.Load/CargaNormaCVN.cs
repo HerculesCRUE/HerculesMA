@@ -31,7 +31,7 @@ namespace Hercules.MA.Load
     /// <summary>
     /// Clase encargada de cargar los datos de las entidades secundarias de Hércules-MA.
     /// </summary>
-    public class CargaSecundarias
+    public class CargaNormaCVN
     {
         //Ruta con el XML de datos a leer.
         private static string RUTA_XML = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Dataset\CVN\ReferenceTables.xml";
@@ -100,14 +100,14 @@ namespace Hercules.MA.Load
 
             //Obtención de los objetos a cargar.
             List<Feature> features = new List<Feature>();
-            features = ObtenerDatosFeature(pTablas, idPaises, "PCLD", features);
-            features = ObtenerDatosFeature(pTablas, idRegiones, "ADM1", features);
-            features = ObtenerDatosFeature(pTablas, idProvincias, "ADM2", features);
+            features = ObtenerDatosFeature(pTablas, idPaises, "PCLD", features, pOntology);
+            features = ObtenerDatosFeature(pTablas, idRegiones, "ADM1", features, pOntology);
+            features = ObtenerDatosFeature(pTablas, idProvincias, "ADM2", features, pOntology);
 
             //Carga.
             foreach (Feature feature in features)
             {
-                mResourceApi.LoadSecondaryResource(feature.ToGnossApiResource(mResourceApi, feature.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(feature.ToGnossApiResource(mResourceApi,pOntology+"_"+ feature.Dc_identifier));
             }
         }
 
@@ -119,7 +119,7 @@ namespace Hercules.MA.Load
         /// <param name="pId">Número que se le agregará al ID creado.</param>
         /// <param name="pListaFeatures">Lista dónde guardar los objetos.</param>
         /// <returns>Lista con los objetos creados.</returns>
-        private static List<Feature> ObtenerDatosFeature(ReferenceTables pTablas, string pCodigoTabla, string pId, List<Feature> pListaFeatures)
+        private static List<Feature> ObtenerDatosFeature(ReferenceTables pTablas, string pCodigoTabla, string pId, List<Feature> pListaFeatures,string pOntology)
         {
             //Mapea los idiomas.
             Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
@@ -168,11 +168,11 @@ namespace Hercules.MA.Load
                                 codigoPadre = "0" + codigoPadre;
                             }
 
-                            feature.IdGn_parentFeature = $@"PCLD_{codigoPadre}";
+                            feature.IdGn_parentFeature = $@"{pOntology}_PCLD_{codigoPadre}";
                             feature.Gn_parentFeature = pListaFeatures.First(x => x.Dc_identifier == $@"PCLD_{codigoPadre}");
                             break;
                         case "ADM2":
-                            feature.IdGn_parentFeature = $@"ADM1_{codigoPadre}";
+                            feature.IdGn_parentFeature = $@"{pOntology}_ADM1_{codigoPadre}";
                             feature.Gn_parentFeature = pListaFeatures.First(x => x.Dc_identifier == $@"ADM1_{codigoPadre}");
                             break;
                     }
@@ -212,7 +212,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (Modality modality in modalities)
             {
-                mResourceApi.LoadSecondaryResource(modality.ToGnossApiResource(mResourceApi, modality.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(modality.ToGnossApiResource(mResourceApi, pOntology+"_"+ modality.Dc_identifier));
             }
         }
 

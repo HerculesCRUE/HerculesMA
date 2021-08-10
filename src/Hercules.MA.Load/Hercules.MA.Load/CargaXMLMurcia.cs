@@ -17,7 +17,7 @@ namespace Hercules.MA.Load
     /// <summary>
     /// Clase encargada de cargar los datos de las entidades principales de Hércules-MA.
     /// </summary>
-    public class CargaPrincipales
+    public class CargaXMLMurcia
     {
         //Directorio de lectura.
         private static string inputFolder = "Dataset/UMU";
@@ -73,46 +73,50 @@ namespace Hercules.MA.Load
             List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
 
             //Cargar personas.
-            mResourceApi.ChangeOntoly("person");
+            CambiarOntologia("person");
             EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar organizaciones.
-            //mResourceApi.ChangeOntoly("organization");
+            //CambiarOntologia("organization");
             //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
             //Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas);
             //CargarDatos(listaRecursosCargar);
             //listaRecursosCargar.Clear();
 
             //Cargar proyectos.
-            //mResourceApi.ChangeOntoly("project");
+            //CambiarOntologia("project");
             //EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
             //Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos);
             //CargarDatos(listaRecursosCargar);
             //listaRecursosCargar.Clear();
 
             //Cargar documentos.
-            mResourceApi.ChangeOntoly("document");
+            CambiarOntologia("document");
             EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
             Dictionary<string, string> documentosCargar = ObtenerDocumentos(personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
-
             //Secundarios
             List<SecondaryResource> listaRecursosSecundariosCargar = new List<SecondaryResource>();
             //Categorización UM
-            while (mResourceApi.OntologyNameWithoutExtension != "taxonomy")
-            {
-                mResourceApi.ChangeOntoly("taxonomy");
-            }
-            CargaSecundarias.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "um");
-            CargaSecundarias.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "um");            
+            CambiarOntologia("taxonomy");
+            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "um");
+            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "um");            
             ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar,"um");
             CargarDatosSecundarios(listaRecursosSecundariosCargar);
             listaRecursosSecundariosCargar.Clear();
+        }
+
+        private static void CambiarOntologia(string pOntologia)
+        {
+            while (mResourceApi.OntologyNameWithoutExtension != pOntologia)
+            {
+                mResourceApi.ChangeOntoly(pOntologia);
+            }
         }
 
         private static void ObtenerTesauroUMDocumentos(List<Articulo> articulos,ref List<SecondaryResource> pListaRecursosCargar,string pSource)
@@ -147,22 +151,6 @@ namespace Hercules.MA.Load
             {
                 pListaRecursosCargar.Add(concept.ToGnossApiResource(mResourceApi,concept.Dc_identifier));
             }
-
-
-            /*//Elimina los datos cargados antes de volverlos a cargar.
-            EliminarDatosCargados("http://www.geonames.org/ontology#Feature", pOntology);
-
-            //Obtención de los objetos a cargar.
-            List<Feature> features = new List<Feature>();
-            features = ObtenerDatosFeature(pTablas, idPaises, "PCLD", features);
-            features = ObtenerDatosFeature(pTablas, idRegiones, "ADM1", features);
-            features = ObtenerDatosFeature(pTablas, idProvincias, "ADM2", features);
-
-            //Carga.
-            foreach (Feature feature in features)
-            {
-                mResourceApi.LoadSecondaryResource(feature.ToGnossApiResource(mResourceApi, feature.Dc_identifier));
-            }*/
         }
 
 
@@ -471,7 +459,7 @@ namespace Hercules.MA.Load
                 if (articulo != null)
                 {
                     DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
-                    documentoACargar.IdDc_type = "http://gnoss.com/items/020";
+                    documentoACargar.IdDc_type = "http://gnoss.com/items/020"; //TODO
                     documentoACargar.Roh_title = articulo.TITULO;
                     if (!string.IsNullOrEmpty(articulo.ANO))
                     {

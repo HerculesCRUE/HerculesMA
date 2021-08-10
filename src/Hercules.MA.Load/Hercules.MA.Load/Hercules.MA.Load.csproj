@@ -95,8 +95,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CargaPrincipales.cs" />
-    <Compile Include="CargaSecundarias.cs" />
+    <Compile Include="CargaXMLMurcia.cs" />
+    <Compile Include="CargaNormaCVN.cs" />
     <Compile Include="Models\CVN\ReferenceTablesXML.cs" />
     <Compile Include="Models\TaxonomyOntology\CollectionEDMA.cs" />
     <Compile Include="Models\TaxonomyOntology\ConceptEDMA.cs" />
