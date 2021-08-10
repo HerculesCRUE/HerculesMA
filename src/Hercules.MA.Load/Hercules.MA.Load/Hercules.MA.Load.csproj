@@ -8,12 +8,13 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Hercules.MA.Load</RootNamespace>
     <AssemblyName>Hercules.MA.Load</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -97,6 +98,8 @@
     <Compile Include="CargaPrincipales.cs" />
     <Compile Include="CargaSecundarias.cs" />
     <Compile Include="Models\CVN\ReferenceTablesXML.cs" />
+    <Compile Include="Models\TaxonomyOntology\CollectionEDMA.cs" />
+    <Compile Include="Models\TaxonomyOntology\ConceptEDMA.cs" />
     <Compile Include="Models\UMU\AreasUnescoProyectos.cs" />
     <Compile Include="Models\UMU\Articulo.cs" />
     <Compile Include="Models\UMU\AutorArticulo.cs" />
