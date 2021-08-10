@@ -14,47 +14,53 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
-using Document = DocumentOntology.Document;
+using ReferenceSource = ReferencesourceOntology.ReferenceSource;
 
-namespace CurriculumvitaeOntology
+namespace DocumentOntology
 {
-	public class RelatedDocuments : GnossOCBase
+	public class PublicationMetric : GnossOCBase
 	{
 
-		public RelatedDocuments() : base() { } 
+		public PublicationMetric() : base() { } 
 
-		public RelatedDocuments(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
+		public PublicationMetric(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
-			SemanticPropertyModel propRoh_relatedDocument = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/relatedDocument");
-			if(propRoh_relatedDocument != null && propRoh_relatedDocument.PropertyValues.Count > 0)
+			this.Roh_metricNameOther = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/metricNameOther"));
+			SemanticPropertyModel propRoh_metricName = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/metricName");
+			if(propRoh_metricName != null && propRoh_metricName.PropertyValues.Count > 0)
 			{
-				this.Roh_relatedDocument = new Document(propRoh_relatedDocument.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				this.Roh_metricName = new ReferenceSource(propRoh_metricName.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
-			this.Roh_isPublic= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/isPublic"));
+			this.Roh_citationCount = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/citationCount")).Value;
 		}
 
-		public virtual string RdfType { get { return "http://w3id.org/roh/RelatedDocuments"; } }
-		public virtual string RdfsLabel { get { return "http://w3id.org/roh/RelatedDocuments"; } }
+		public virtual string RdfType { get { return "http://w3id.org/roh/PublicationMetric"; } }
+		public virtual string RdfsLabel { get { return "http://w3id.org/roh/PublicationMetric"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"Publicaciones relacionadas")]
-		[RDFProperty("http://w3id.org/roh/relatedDocument")]
-		[Required]
-		public  Document Roh_relatedDocument  { get; set;} 
-		public string IdRoh_relatedDocument  { get; set;} 
+		[LABEL(LanguageEnum.es,"Nombre de la métrica, otros")]
+		[RDFProperty("http://w3id.org/roh/metricNameOther")]
+		public  string Roh_metricNameOther { get; set;}
 
-		[LABEL(LanguageEnum.es,"Público")]
-		[RDFProperty("http://w3id.org/roh/isPublic")]
-		public  bool Roh_isPublic { get; set;}
+		[LABEL(LanguageEnum.es,"Nombre de la métrica")]
+		[RDFProperty("http://w3id.org/roh/metricName")]
+		[Required]
+		public  ReferenceSource Roh_metricName  { get; set;} 
+		public string IdRoh_metricName  { get; set;} 
+
+		[LABEL(LanguageEnum.es,"Número de citas")]
+		[RDFProperty("http://w3id.org/roh/citationCount")]
+		public  int Roh_citationCount { get; set;}
 
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
-			propList.Add(new StringOntologyProperty("roh:relatedDocument", this.IdRoh_relatedDocument));
-			propList.Add(new BoolOntologyProperty("roh:isPublic", this.Roh_isPublic));
+			propList.Add(new StringOntologyProperty("roh:metricNameOther", this.Roh_metricNameOther));
+			propList.Add(new StringOntologyProperty("roh:metricName", this.IdRoh_metricName));
+			propList.Add(new StringOntologyProperty("roh:citationCount", this.Roh_citationCount.ToString()));
 		}
 
 		internal override void GetEntities()

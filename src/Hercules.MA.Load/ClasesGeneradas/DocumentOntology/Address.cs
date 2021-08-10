@@ -14,47 +14,57 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
-using Document = DocumentOntology.Document;
+using Feature = FeatureOntology.Feature;
 
-namespace CurriculumvitaeOntology
+namespace DocumentOntology
 {
-	public class RelatedDocuments : GnossOCBase
+	public class Address : GnossOCBase
 	{
 
-		public RelatedDocuments() : base() { } 
+		public Address() : base() { } 
 
-		public RelatedDocuments(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
+		public Address(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
-			SemanticPropertyModel propRoh_relatedDocument = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/relatedDocument");
-			if(propRoh_relatedDocument != null && propRoh_relatedDocument.PropertyValues.Count > 0)
+			SemanticPropertyModel propVcard_hasCountryName = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasCountryName");
+			if(propVcard_hasCountryName != null && propVcard_hasCountryName.PropertyValues.Count > 0)
 			{
-				this.Roh_relatedDocument = new Document(propRoh_relatedDocument.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				this.Vcard_hasCountryName = new Feature(propVcard_hasCountryName.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
-			this.Roh_isPublic= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/isPublic"));
+			SemanticPropertyModel propVcard_hasRegion = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasRegion");
+			if(propVcard_hasRegion != null && propVcard_hasRegion.PropertyValues.Count > 0)
+			{
+				this.Vcard_hasRegion = new Feature(propVcard_hasRegion.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
+			this.Vcard_locality = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#locality"));
 		}
 
-		public virtual string RdfType { get { return "http://w3id.org/roh/RelatedDocuments"; } }
-		public virtual string RdfsLabel { get { return "http://w3id.org/roh/RelatedDocuments"; } }
+		public virtual string RdfType { get { return "https://www.w3.org/2006/vcard/ns#Address"; } }
+		public virtual string RdfsLabel { get { return "https://www.w3.org/2006/vcard/ns#Address"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"Publicaciones relacionadas")]
-		[RDFProperty("http://w3id.org/roh/relatedDocument")]
-		[Required]
-		public  Document Roh_relatedDocument  { get; set;} 
-		public string IdRoh_relatedDocument  { get; set;} 
+		[LABEL(LanguageEnum.es,"País")]
+		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasCountryName")]
+		public  Feature Vcard_hasCountryName  { get; set;} 
+		public string IdVcard_hasCountryName  { get; set;} 
 
-		[LABEL(LanguageEnum.es,"Público")]
-		[RDFProperty("http://w3id.org/roh/isPublic")]
-		public  bool Roh_isPublic { get; set;}
+		[LABEL(LanguageEnum.es,"C. Autón./Reg.")]
+		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasRegion")]
+		public  Feature Vcard_hasRegion  { get; set;} 
+		public string IdVcard_hasRegion  { get; set;} 
+
+		[LABEL(LanguageEnum.es,"Ciudad")]
+		[RDFProperty("https://www.w3.org/2006/vcard/ns#locality")]
+		public  string Vcard_locality { get; set;}
 
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
-			propList.Add(new StringOntologyProperty("roh:relatedDocument", this.IdRoh_relatedDocument));
-			propList.Add(new BoolOntologyProperty("roh:isPublic", this.Roh_isPublic));
+			propList.Add(new StringOntologyProperty("vcard:hasCountryName", this.IdVcard_hasCountryName));
+			propList.Add(new StringOntologyProperty("vcard:hasRegion", this.IdVcard_hasRegion));
+			propList.Add(new StringOntologyProperty("vcard:locality", this.Vcard_locality));
 		}
 
 		internal override void GetEntities()

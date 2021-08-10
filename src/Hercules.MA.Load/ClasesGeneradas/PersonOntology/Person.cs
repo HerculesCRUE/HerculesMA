@@ -25,7 +25,6 @@ namespace PersonOntology
 		public Person(SemanticResourceModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.RootEntities[0].Entity.Uri;
-			this.Foaf_familyName = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/familyName"));
 			this.Roh_ORCID = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/ORCID"));
 			SemanticPropertyModel propFoaf_nick = pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/nick");
 			this.Foaf_nick = new List<string>();
@@ -45,7 +44,6 @@ namespace PersonOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
-			this.Foaf_familyName = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/familyName"));
 			this.Roh_ORCID = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/ORCID"));
 			SemanticPropertyModel propFoaf_nick = pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/nick");
 			this.Foaf_nick = new List<string>();
@@ -63,10 +61,6 @@ namespace PersonOntology
 
 		public virtual string RdfType { get { return "http://xmlns.com/foaf/0.1/Person"; } }
 		public virtual string RdfsLabel { get { return "http://xmlns.com/foaf/0.1/Person"; } }
-		[LABEL(LanguageEnum.es,"Segundo apellido")]
-		[RDFProperty("http://xmlns.com/foaf/0.1/familyName")]
-		public  string Foaf_familyName { get; set;}
-
 		[LABEL(LanguageEnum.es,"ORCID")]
 		[RDFProperty("http://w3id.org/roh/ORCID")]
 		public  string Roh_ORCID { get; set;}
@@ -83,7 +77,7 @@ namespace PersonOntology
 		[RDFProperty("http://xmlns.com/foaf/0.1/name")]
 		public  string Foaf_name { get; set;}
 
-		[LABEL(LanguageEnum.es,"Primer apellido")]
+		[LABEL(LanguageEnum.es,"Apellidos")]
 		[RDFProperty("http://xmlns.com/foaf/0.1/lastName")]
 		public  string Foaf_lastName { get; set;}
 
@@ -91,7 +85,6 @@ namespace PersonOntology
 		internal override void GetProperties()
 		{
 			base.GetProperties();
-			propList.Add(new StringOntologyProperty("foaf:familyName", this.Foaf_familyName));
 			propList.Add(new StringOntologyProperty("roh:ORCID", this.Roh_ORCID));
 			propList.Add(new ListStringOntologyProperty("foaf:nick", this.Foaf_nick));
 			propList.Add(new StringOntologyProperty("foaf:firstName", this.Foaf_firstName));
@@ -136,10 +129,6 @@ namespace PersonOntology
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://xmlns.com/foaf/0.1/Person>", list, " . ");
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://xmlns.com/foaf/0.1/Person\"", list, " . ");
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}>", list, " . ");
-				if(this.Foaf_familyName != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}",  "http://xmlns.com/foaf/0.1/familyName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_familyName)}\"", list, " . ");
-				}
 				if(this.Roh_ORCID != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Person_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/ORCID", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_ORCID)}\"", list, " . ");
@@ -181,10 +170,6 @@ namespace PersonOntology
 			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://xmlns.com/foaf/0.1/firstName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_name)}\"", list, " . ");
 			AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/hasnombrecompleto", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_name)}\"", list, " . ");
 			string search = string.Empty;
-				if(this.Foaf_familyName != null)
-				{
-					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://xmlns.com/foaf/0.1/familyName", $"\"{GenerarTextoSinSaltoDeLinea(this.Foaf_familyName).ToLower()}\"", list, " . ");
-				}
 				if(this.Roh_ORCID != null)
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/ORCID", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_ORCID).ToLower()}\"", list, " . ");

@@ -36,7 +36,7 @@ namespace Hercules.MA.Load
         //Ruta con el XML de datos a leer.
         private static string RUTA_XML = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Dataset\CVN\ReferenceTables.xml";
 
-        // Resource API.
+        //Resource API.
         private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config");
 
         //Identificadores de las tablas.
