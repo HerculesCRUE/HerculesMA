@@ -27,7 +27,7 @@ namespace TaxonomyOntology
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
 			this.Skos_member = new List<Concept>();
-			SemanticPropertyModel propSkos_member = pSemCmsModel.GetPropertyByPath("http://www.w3.org/2004/02/skos/core#member");
+			SemanticPropertyModel propSkos_member = pSemCmsModel.GetPropertyByPath("http://www.w3.org/2008/05/skos#member");
 			if(propSkos_member != null && propSkos_member.PropertyValues.Count > 0)
 			{
 				foreach (SemanticPropertyModel.PropertyValue propValue in propSkos_member.PropertyValues)
@@ -38,18 +38,18 @@ namespace TaxonomyOntology
 					}
 				}
 			}
-			this.Skos_scopeNote = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://www.w3.org/2004/02/skos/core#scopeNote"));
+			this.Skos_scopeNote = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://www.w3.org/2008/05/skos#scopeNote"));
 			this.Dc_source = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/source"));
 		}
 
-		public virtual string RdfType { get { return "http://www.w3.org/2004/02/skos/core#Collection"; } }
-		public virtual string RdfsLabel { get { return "http://www.w3.org/2004/02/skos/core#Collection"; } }
+		public virtual string RdfType { get { return "http://www.w3.org/2008/05/skos#Collection"; } }
+		public virtual string RdfsLabel { get { return "http://www.w3.org/2008/05/skos#Collection"; } }
 		[LABEL(LanguageEnum.es,"Miembro")]
-		[RDFProperty("http://www.w3.org/2004/02/skos/core#member")]
+		[RDFProperty("http://www.w3.org/2008/05/skos#member")]
 		public  List<Concept> Skos_member { get; set;}
 
 		[LABEL(LanguageEnum.es,"Nota alcance")]
-		[RDFProperty("http://www.w3.org/2004/02/skos/core#scopeNote")]
+		[RDFProperty("http://www.w3.org/2008/05/skos#scopeNote")]
 		public  string Skos_scopeNote { get; set;}
 
 		[LABEL(LanguageEnum.es,"Fuente")]
@@ -71,7 +71,7 @@ namespace TaxonomyOntology
 				foreach(Concept prop in Skos_member){
 					prop.GetProperties();
 					prop.GetEntities();
-					OntologyEntity entityConcept = new OntologyEntity("http://www.w3.org/2004/02/skos/core#Concept", "http://www.w3.org/2004/02/skos/core#Concept", "skos:member", prop.propList, prop.entList);
+					OntologyEntity entityConcept = new OntologyEntity("http://www.w3.org/2008/05/skos#Concept", "http://www.w3.org/2008/05/skos#Concept", "skos:member", prop.propList, prop.entList);
 				entList.Add(entityConcept);
 				prop.Entity= entityConcept;
 				}
@@ -83,7 +83,7 @@ namespace TaxonomyOntology
 			List<SecondaryEntity> listSecondaryEntity = null;
 			GetEntities();
 			GetProperties();
-			SecondaryOntology ontology = new SecondaryOntology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, "http://www.w3.org/2004/02/skos/core#Collection", "http://www.w3.org/2004/02/skos/core#Collection", prefList, propList,identificador,listSecondaryEntity, entList);
+			SecondaryOntology ontology = new SecondaryOntology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, "http://www.w3.org/2008/05/skos#Collection", "http://www.w3.org/2008/05/skos#Collection", prefList, propList,identificador,listSecondaryEntity, entList);
 			resource.SecondaryOntology = ontology;
 			AddImages(resource);
 			AddFiles(resource);
@@ -93,24 +93,24 @@ namespace TaxonomyOntology
 		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://www.w3.org/2004/02/skos/core#Collection>", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://www.w3.org/2004/02/skos/core#Collection\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://www.w3.org/2008/05/skos#Collection>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://www.w3.org/2008/05/skos#Collection\"", list, " . ");
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}>", list, " . ");
 			if(this.Skos_member != null)
 			{
 			foreach(var item0 in this.Skos_member)
 			{
-				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://www.w3.org/2004/02/skos/core#Concept>", list, " . ");
-				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://www.w3.org/2004/02/skos/core#Concept\"", list, " . ");
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://www.w3.org/2008/05/skos#Concept>", list, " . ");
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://www.w3.org/2008/05/skos#Concept\"", list, " . ");
 				AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}>", list, " . ");
-				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}", "http://www.w3.org/2004/02/skos/core#member", $"<{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}>", list, " . ");
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}", "http://www.w3.org/2008/05/skos#member", $"<{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}>", list, " . ");
 				if(item0.Skos_prefLabel != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}",  "http://www.w3.org/2004/02/skos/core#prefLabel", $"\"{GenerarTextoSinSaltoDeLinea(item0.Skos_prefLabel)}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}",  "http://www.w3.org/2008/05/skos#prefLabel", $"\"{GenerarTextoSinSaltoDeLinea(item0.Skos_prefLabel)}\"", list, " . ");
 				}
 				if(item0.Skos_symbol != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}",  "http://www.w3.org/2004/02/skos/core#symbol", $"\"{GenerarTextoSinSaltoDeLinea(item0.Skos_symbol)}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Concept_{ResourceID}_{item0.ArticleID}",  "http://www.w3.org/2008/05/skos#symbol", $"\"{GenerarTextoSinSaltoDeLinea(item0.Skos_symbol)}\"", list, " . ");
 				}
 				if(item0.Dc_identifier != null)
 				{
@@ -124,7 +124,7 @@ namespace TaxonomyOntology
 			}
 				if(this.Skos_scopeNote != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}",  "http://www.w3.org/2004/02/skos/core#scopeNote", $"\"{GenerarTextoSinSaltoDeLinea(this.Skos_scopeNote)}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Collection_{ResourceID}_{ArticleID}",  "http://www.w3.org/2008/05/skos#scopeNote", $"\"{GenerarTextoSinSaltoDeLinea(this.Skos_scopeNote)}\"", list, " . ");
 				}
 				if(this.Dc_source != null)
 				{
@@ -142,14 +142,14 @@ namespace TaxonomyOntology
 			{
 			foreach(var item0 in this.Skos_member)
 			{
-				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://www.w3.org/2004/02/skos/core#member", $"<{resourceAPI.GraphsUrl}items/concept_{ResourceID}_{item0.ArticleID}>", list, " . ");
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://www.w3.org/2008/05/skos#member", $"<{resourceAPI.GraphsUrl}items/concept_{ResourceID}_{item0.ArticleID}>", list, " . ");
 				if(item0.Skos_prefLabel != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/concept_{ResourceID}_{item0.ArticleID}",  "http://www.w3.org/2004/02/skos/core#prefLabel", $"\"{GenerarTextoSinSaltoDeLinea(item0.Skos_prefLabel).ToLower()}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/concept_{ResourceID}_{item0.ArticleID}",  "http://www.w3.org/2008/05/skos#prefLabel", $"\"{GenerarTextoSinSaltoDeLinea(item0.Skos_prefLabel).ToLower()}\"", list, " . ");
 				}
 				if(item0.Skos_symbol != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/concept_{ResourceID}_{item0.ArticleID}",  "http://www.w3.org/2004/02/skos/core#symbol", $"\"{GenerarTextoSinSaltoDeLinea(item0.Skos_symbol).ToLower()}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/concept_{ResourceID}_{item0.ArticleID}",  "http://www.w3.org/2008/05/skos#symbol", $"\"{GenerarTextoSinSaltoDeLinea(item0.Skos_symbol).ToLower()}\"", list, " . ");
 				}
 				if(item0.Dc_identifier != null)
 				{
@@ -163,7 +163,7 @@ namespace TaxonomyOntology
 			}
 				if(this.Skos_scopeNote != null)
 				{
-					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://www.w3.org/2004/02/skos/core#scopeNote", $"\"{GenerarTextoSinSaltoDeLinea(this.Skos_scopeNote).ToLower()}\"", list, " . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://www.w3.org/2008/05/skos#scopeNote", $"\"{GenerarTextoSinSaltoDeLinea(this.Skos_scopeNote).ToLower()}\"", list, " . ");
 				}
 				if(this.Dc_source != null)
 				{

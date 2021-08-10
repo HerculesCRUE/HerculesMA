@@ -1042,13 +1042,18 @@ namespace Hercules.MA.Load
         /// </summary>
         /// <param name="pRdfType">RdfType del recurso a borrar.</param>
         /// <param name="pOntology">Ontología a consultar.</param>
-        private static void EliminarDatosCargados(string pRdfType, string pOntology)
+        /// <param name="pSource">Source para los tesauros semánticos</param>
+        public static void EliminarDatosCargados(string pRdfType, string pOntology,string pSource="")
         {
             //Consulta.
             string select = string.Empty, where = string.Empty;
             select += $@"SELECT ?s ";
             where += $@"WHERE {{ ";
-            where += $@"?s a <{pRdfType}> ";
+            where += $@"?s a <{pRdfType}>. ";
+            if(!string.IsNullOrEmpty(pSource))
+            {
+                where += "?s <http://purl.org/dc/elements/1.1/source> '"+pSource+"'";
+            }
             where += $@"}} ";
 
             //Obtiene las URLs de los recursos a borrar.

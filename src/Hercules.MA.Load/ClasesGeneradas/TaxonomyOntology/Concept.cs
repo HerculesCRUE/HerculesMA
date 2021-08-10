@@ -27,7 +27,7 @@ namespace TaxonomyOntology
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
 			this.Skos_narrower = new List<Concept>();
-			SemanticPropertyModel propSkos_narrower = pSemCmsModel.GetPropertyByPath("http://www.w3.org/2004/02/skos/core#narrower");
+			SemanticPropertyModel propSkos_narrower = pSemCmsModel.GetPropertyByPath("http://www.w3.org/2008/05/skos#narrower");
 			if(propSkos_narrower != null && propSkos_narrower.PropertyValues.Count > 0)
 			{
 				foreach (SemanticPropertyModel.PropertyValue propValue in propSkos_narrower.PropertyValues)
@@ -39,7 +39,7 @@ namespace TaxonomyOntology
 				}
 			}
 			this.Skos_broader = new List<Concept>();
-			SemanticPropertyModel propSkos_broader = pSemCmsModel.GetPropertyByPath("http://www.w3.org/2004/02/skos/core#broader");
+			SemanticPropertyModel propSkos_broader = pSemCmsModel.GetPropertyByPath("http://www.w3.org/2008/05/skos#broader");
 			if(propSkos_broader != null && propSkos_broader.PropertyValues.Count > 0)
 			{
 				foreach (SemanticPropertyModel.PropertyValue propValue in propSkos_broader.PropertyValues)
@@ -50,30 +50,30 @@ namespace TaxonomyOntology
 					}
 				}
 			}
-			this.Skos_prefLabel = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://www.w3.org/2004/02/skos/core#prefLabel"));
-			this.Skos_symbol = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://www.w3.org/2004/02/skos/core#symbol"));
+			this.Skos_prefLabel = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://www.w3.org/2008/05/skos#prefLabel"));
+			this.Skos_symbol = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://www.w3.org/2008/05/skos#symbol"));
 			this.Dc_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/identifier"));
 			this.Dc_source = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/source"));
 		}
 
-		public virtual string RdfType { get { return "http://www.w3.org/2004/02/skos/core#Concept"; } }
-		public virtual string RdfsLabel { get { return "http://www.w3.org/2004/02/skos/core#Concept"; } }
+		public virtual string RdfType { get { return "http://www.w3.org/2008/05/skos#Concept"; } }
+		public virtual string RdfsLabel { get { return "http://www.w3.org/2008/05/skos#Concept"; } }
 		public OntologyEntity Entity { get; set; }
 
 		[LABEL(LanguageEnum.es,"Específico")]
-		[RDFProperty("http://www.w3.org/2004/02/skos/core#narrower")]
+		[RDFProperty("http://www.w3.org/2008/05/skos#narrower")]
 		public  List<Concept> Skos_narrower { get; set;}
 
 		[LABEL(LanguageEnum.es,"Genérico")]
-		[RDFProperty("http://www.w3.org/2004/02/skos/core#broader")]
+		[RDFProperty("http://www.w3.org/2008/05/skos#broader")]
 		public  List<Concept> Skos_broader { get; set;}
 
 		[LABEL(LanguageEnum.es,"Etiqueta preferente")]
-		[RDFProperty("http://www.w3.org/2004/02/skos/core#prefLabel")]
+		[RDFProperty("http://www.w3.org/2008/05/skos#prefLabel")]
 		public  string Skos_prefLabel { get; set;}
 
 		[LABEL(LanguageEnum.es,"Símbolo")]
-		[RDFProperty("http://www.w3.org/2004/02/skos/core#symbol")]
+		[RDFProperty("http://www.w3.org/2008/05/skos#symbol")]
 		public  string Skos_symbol { get; set;}
 
 		[LABEL(LanguageEnum.es,"Identificador")]
@@ -101,7 +101,7 @@ namespace TaxonomyOntology
 				foreach(Concept prop in Skos_narrower){
 					prop.GetProperties();
 					prop.GetEntities();
-					OntologyEntity entityConcept = new OntologyEntity("http://www.w3.org/2004/02/skos/core#Concept", "http://www.w3.org/2004/02/skos/core#Concept", "skos:narrower", prop.propList, prop.entList);
+					OntologyEntity entityConcept = new OntologyEntity("http://www.w3.org/2008/05/skos#Concept", "http://www.w3.org/2008/05/skos#Concept", "skos:narrower", prop.propList, prop.entList);
 				entList.Add(entityConcept);
 				prop.Entity= entityConcept;
 				}
@@ -110,7 +110,7 @@ namespace TaxonomyOntology
 				foreach(Concept prop in Skos_broader){
 					prop.GetProperties();
 					prop.GetEntities();
-					OntologyEntity entityConcept = new OntologyEntity("http://www.w3.org/2004/02/skos/core#Concept", "http://www.w3.org/2004/02/skos/core#Concept", "skos:broader", prop.propList, prop.entList);
+					OntologyEntity entityConcept = new OntologyEntity("http://www.w3.org/2008/05/skos#Concept", "http://www.w3.org/2008/05/skos#Concept", "skos:broader", prop.propList, prop.entList);
 				entList.Add(entityConcept);
 				prop.Entity= entityConcept;
 				}

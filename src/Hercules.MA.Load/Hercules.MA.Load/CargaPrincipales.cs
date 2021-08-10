@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,7 +8,9 @@ using System.Xml;
 using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
+using Hercules.MA.Load.Models.TaxonomyOntology;
 using Hercules.MA.Load.Models.UMU;
+using TaxonomyOntology;
 
 namespace Hercules.MA.Load
 {
@@ -96,7 +99,72 @@ namespace Hercules.MA.Load
             Dictionary<string, string> documentosCargar = ObtenerDocumentos(personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
+
+
+            //Secundarios
+            List<SecondaryResource> listaRecursosSecundariosCargar = new List<SecondaryResource>();
+            //Categorización UM
+            while (mResourceApi.OntologyNameWithoutExtension != "taxonomy")
+            {
+                mResourceApi.ChangeOntoly("taxonomy");
+            }
+            CargaSecundarias.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "um");
+            CargaSecundarias.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "um");            
+            ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar,"um");
+            CargarDatosSecundarios(listaRecursosSecundariosCargar);
+            listaRecursosSecundariosCargar.Clear();
         }
+
+        private static void ObtenerTesauroUMDocumentos(List<Articulo> articulos,ref List<SecondaryResource> pListaRecursosCargar,string pSource)
+        {
+            Dictionary<string, string> listaCategorias = new Dictionary<string, string>();
+            foreach(Articulo articulo in articulos)
+            {
+                if(!listaCategorias.ContainsKey(articulo.AREA))
+                {
+                    listaCategorias.Add(articulo.AREA, articulo.DESCRI_AREA);
+                }
+            }
+
+            List<Concept> listConcepts = new List<Concept>();
+            foreach(string id in listaCategorias.Keys)
+            {
+                ConceptEDMA concept = new ConceptEDMA();
+                concept.Dc_identifier = id;
+                concept.Dc_source = pSource;
+                concept.Skos_prefLabel = listaCategorias[id];
+                concept.Skos_symbol = "1";
+                listConcepts.Add(concept);                
+            }
+
+            CollectionEDMA collection = new CollectionEDMA();
+            collection.Dc_source = pSource;
+            collection.Skos_member = listConcepts;
+            collection.Skos_scopeNote = "Tesauro UM";
+            pListaRecursosCargar.Add(collection.ToGnossApiResource(mResourceApi, "0"));
+
+            foreach(ConceptEDMA concept in listConcepts)
+            {
+                pListaRecursosCargar.Add(concept.ToGnossApiResource(mResourceApi,concept.Dc_identifier));
+            }
+
+
+            /*//Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://www.geonames.org/ontology#Feature", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<Feature> features = new List<Feature>();
+            features = ObtenerDatosFeature(pTablas, idPaises, "PCLD", features);
+            features = ObtenerDatosFeature(pTablas, idRegiones, "ADM1", features);
+            features = ObtenerDatosFeature(pTablas, idProvincias, "ADM2", features);
+
+            //Carga.
+            foreach (Feature feature in features)
+            {
+                mResourceApi.LoadSecondaryResource(feature.ToGnossApiResource(mResourceApi, feature.Dc_identifier));
+            }*/
+        }
+
 
         /// <summary>
         /// Proceso de obtención de datos de las Personas.
@@ -487,6 +555,19 @@ namespace Hercules.MA.Load
             foreach (ComplexOntologyResource recursoCargar in pListaRecursosCargar)
             {
                 mResourceApi.LoadComplexSemanticResource(recursoCargar);
+            }
+        }
+
+        /// <summary>
+        /// Permite cargar los recursos secundarios.
+        /// </summary>
+        /// <param name="pListaRecursosSecundariosCargar">Lista de recursos secundarios a cargar.</param>
+        private static void CargarDatosSecundarios(List<SecondaryResource> pListaRecursosCargar)
+        {
+            //Carga.
+            foreach (SecondaryResource recursoCargar in pListaRecursosCargar)
+            {
+                mResourceApi.LoadSecondaryResource(recursoCargar);
             }
         }
 
