@@ -107,7 +107,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (Feature feature in features)
             {
-                mResourceApi.LoadSecondaryResource(feature.ToGnossApiResource(mResourceApi,pOntology+"_"+ feature.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(feature.ToGnossApiResource(mResourceApi, pOntology + "_" + feature.Dc_identifier));
             }
         }
 
@@ -119,7 +119,7 @@ namespace Hercules.MA.Load
         /// <param name="pId">Número que se le agregará al ID creado.</param>
         /// <param name="pListaFeatures">Lista dónde guardar los objetos.</param>
         /// <returns>Lista con los objetos creados.</returns>
-        private static List<Feature> ObtenerDatosFeature(ReferenceTables pTablas, string pCodigoTabla, string pId, List<Feature> pListaFeatures,string pOntology)
+        private static List<Feature> ObtenerDatosFeature(ReferenceTables pTablas, string pCodigoTabla, string pId, List<Feature> pListaFeatures, string pOntology)
         {
             //Mapea los idiomas.
             Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
@@ -212,7 +212,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (Modality modality in modalities)
             {
-                mResourceApi.LoadSecondaryResource(modality.ToGnossApiResource(mResourceApi, pOntology+"_"+ modality.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(modality.ToGnossApiResource(mResourceApi, pOntology + "_" + modality.Dc_identifier));
             }
         }
 
@@ -277,7 +277,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (ContributionGradeProject contribution in contributions)
             {
-                mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, contribution.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, pOntology + "_" + contribution.Dc_identifier));
             }
         }
 
@@ -342,7 +342,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (ParticipationType participation in participations)
             {
-                mResourceApi.LoadSecondaryResource(participation.ToGnossApiResource(mResourceApi, participation.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(participation.ToGnossApiResource(mResourceApi, pOntology + "_" + participation.Dc_identifier));
             }
         }
 
@@ -407,7 +407,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (DedicationRegime dedication in dedications)
             {
-                mResourceApi.LoadSecondaryResource(dedication.ToGnossApiResource(mResourceApi, dedication.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(dedication.ToGnossApiResource(mResourceApi, pOntology + "_" + dedication.Dc_identifier));
             }
         }
 
@@ -472,7 +472,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (Motivation motivation in motivations)
             {
-                mResourceApi.LoadSecondaryResource(motivation.ToGnossApiResource(mResourceApi, motivation.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(motivation.ToGnossApiResource(mResourceApi, pOntology + "_" + motivation.Dc_identifier));
             }
         }
 
@@ -537,7 +537,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (ContributionGradeDocument contribution in contributions)
             {
-                mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, contribution.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, pOntology + "_" + contribution.Dc_identifier));
             }
         }
 
@@ -602,7 +602,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (ReferenceSource reference in references)
             {
-                mResourceApi.LoadSecondaryResource(reference.ToGnossApiResource(mResourceApi, reference.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(reference.ToGnossApiResource(mResourceApi, pOntology + "_" + reference.Dc_identifier));
             }
         }
 
@@ -667,7 +667,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (ImpactIndexCategory category in categorias)
             {
-                mResourceApi.LoadSecondaryResource(category.ToGnossApiResource(mResourceApi, category.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(category.ToGnossApiResource(mResourceApi, pOntology + "_" + category.Dc_identifier));
             }
         }
 
@@ -732,7 +732,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (Language language in lenguajes)
             {
-                mResourceApi.LoadSecondaryResource(language.ToGnossApiResource(mResourceApi, language.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(language.ToGnossApiResource(mResourceApi, pOntology + "_" + language.Dc_identifier));
             }
         }
 
@@ -797,7 +797,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (PublicationType publication in publicaciones)
             {
-                mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, publication.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, pOntology + "_" + publication.Dc_identifier));
             }
         }
 
@@ -862,7 +862,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (EventType eventType in eventos)
             {
-                mResourceApi.LoadSecondaryResource(eventType.ToGnossApiResource(mResourceApi, eventType.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(eventType.ToGnossApiResource(mResourceApi, pOntology + "_" + eventType.Dc_identifier));
             }
         }
 
@@ -927,7 +927,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (GeographicRegion region in regiones)
             {
-                mResourceApi.LoadSecondaryResource(region.ToGnossApiResource(mResourceApi, region.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(region.ToGnossApiResource(mResourceApi, pOntology + "_" + region.Dc_identifier));
             }
         }
 
@@ -992,7 +992,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (OrganizationType organization in organizaciones)
             {
-                mResourceApi.LoadSecondaryResource(organization.ToGnossApiResource(mResourceApi, organization.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(organization.ToGnossApiResource(mResourceApi, pOntology + "_" + organization.Dc_identifier));
             }
         }
 
@@ -1043,16 +1043,16 @@ namespace Hercules.MA.Load
         /// <param name="pRdfType">RdfType del recurso a borrar.</param>
         /// <param name="pOntology">Ontología a consultar.</param>
         /// <param name="pSource">Source para los tesauros semánticos</param>
-        public static void EliminarDatosCargados(string pRdfType, string pOntology,string pSource="")
+        public static void EliminarDatosCargados(string pRdfType, string pOntology, string pSource = "")
         {
             //Consulta.
             string select = string.Empty, where = string.Empty;
             select += $@"SELECT ?s ";
             where += $@"WHERE {{ ";
             where += $@"?s a <{pRdfType}>. ";
-            if(!string.IsNullOrEmpty(pSource))
+            if (!string.IsNullOrEmpty(pSource))
             {
-                where += "?s <http://purl.org/dc/elements/1.1/source> '"+pSource+"'";
+                where += "?s <http://purl.org/dc/elements/1.1/source> '" + pSource + "'";
             }
             where += $@"}} ";
 

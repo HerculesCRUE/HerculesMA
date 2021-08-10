@@ -105,12 +105,16 @@ namespace Hercules.MA.Load
             //Categorización UM
             CambiarOntologia("taxonomy");
             CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "um");
-            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "um");            
-            ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar,"um");
+            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "um");
+            ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar, "um");
             CargarDatosSecundarios(listaRecursosSecundariosCargar);
             listaRecursosSecundariosCargar.Clear();
         }
 
+        /// <summary>
+        /// Permite cambiar de ontología sin que de error.
+        /// </summary>
+        /// <param name="pOntologia">Ontología a cambiar.</param>
         private static void CambiarOntologia(string pOntologia)
         {
             while (mResourceApi.OntologyNameWithoutExtension != pOntologia)
@@ -119,26 +123,32 @@ namespace Hercules.MA.Load
             }
         }
 
-        private static void ObtenerTesauroUMDocumentos(List<Articulo> articulos,ref List<SecondaryResource> pListaRecursosCargar,string pSource)
+        /// <summary>
+        /// Tesauro.
+        /// </summary>
+        /// <param name="articulos"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pSource"></param>
+        private static void ObtenerTesauroUMDocumentos(List<Articulo> articulos, ref List<SecondaryResource> pListaRecursosCargar, string pSource)
         {
             Dictionary<string, string> listaCategorias = new Dictionary<string, string>();
-            foreach(Articulo articulo in articulos)
+            foreach (Articulo articulo in articulos)
             {
-                if(!listaCategorias.ContainsKey(articulo.AREA))
+                if (!listaCategorias.ContainsKey(articulo.AREA))
                 {
                     listaCategorias.Add(articulo.AREA, articulo.DESCRI_AREA);
                 }
             }
 
             List<Concept> listConcepts = new List<Concept>();
-            foreach(string id in listaCategorias.Keys)
+            foreach (string id in listaCategorias.Keys)
             {
                 ConceptEDMA concept = new ConceptEDMA();
                 concept.Dc_identifier = id;
                 concept.Dc_source = pSource;
                 concept.Skos_prefLabel = listaCategorias[id];
                 concept.Skos_symbol = "1";
-                listConcepts.Add(concept);                
+                listConcepts.Add(concept);
             }
 
             CollectionEDMA collection = new CollectionEDMA();
@@ -147,9 +157,9 @@ namespace Hercules.MA.Load
             collection.Skos_scopeNote = "Tesauro UM";
             pListaRecursosCargar.Add(collection.ToGnossApiResource(mResourceApi, "0"));
 
-            foreach(ConceptEDMA concept in listConcepts)
+            foreach (ConceptEDMA concept in listConcepts)
             {
-                pListaRecursosCargar.Add(concept.ToGnossApiResource(mResourceApi,concept.Dc_identifier));
+                pListaRecursosCargar.Add(concept.ToGnossApiResource(mResourceApi, concept.Dc_identifier));
             }
         }
 
@@ -459,7 +469,7 @@ namespace Hercules.MA.Load
                 if (articulo != null)
                 {
                     DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
-                    documentoACargar.IdDc_type = "http://gnoss.com/items/020"; //TODO
+                    documentoACargar.IdDc_type = "http://gnoss.com/items/publicationtype_020";
                     documentoACargar.Roh_title = articulo.TITULO;
                     if (!string.IsNullOrEmpty(articulo.ANO))
                     {
@@ -499,13 +509,13 @@ namespace Hercules.MA.Load
 
                     //Address
                     DocumentOntology.Address direccion = new DocumentOntology.Address();
-                    direccion.Vcard_locality = "Murcia"; 
-                    direccion.IdVcard_hasRegion = "http://gnoss.com/items/ADM1_ES62";
-                    direccion.IdVcard_hasCountryName = "http://gnoss.com/items/PCLD_724";
+                    direccion.Vcard_locality = "Murcia";
+                    direccion.IdVcard_hasRegion = "http://gnoss.com/items/feature_ADM1_ES62";
+                    direccion.IdVcard_hasCountryName = "http://gnoss.com/items/feature_PCLD_724";
 
                     //ImpactIndex
                     DocumentOntology.ImpactIndex impacto = new DocumentOntology.ImpactIndex();
-                    impacto.IdRoh_impactSource = "http://gnoss.com/items/OTHERS";
+                    impacto.IdRoh_impactSource = "http://gnoss.com/items/impactindexcategory_OTHERS";
                     impacto.Roh_impactSourceOther = "Universidad de Murcia";
                     impacto.Roh_impactIndexInYear = articulo.IMPACTO_REVISTA;
                     if (articulo.CUARTIL_REVISTA == "1")
