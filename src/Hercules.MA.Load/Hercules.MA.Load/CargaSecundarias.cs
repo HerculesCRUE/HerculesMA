@@ -51,7 +51,7 @@ namespace Hercules.MA.Load
         private static readonly string idMotivation = "CVN_SUPERVISION_A";
         private static readonly string idReferenceSource = "CVN_AGENCY_B";
         private static readonly string idImpactIndexCategory = "CVN_CATEGORY_A";
-        private static readonly string idLanguage = "ISO_639"; 
+        private static readonly string idLanguage = "ISO_639";
         private static readonly string idPublicationType = "CVN_PUBLICATION_A";
         private static readonly string idEventType = "CVN_EVENT_B";
         private static readonly string idGeographicRegion = "CVN_SCOPE_A";
@@ -128,6 +128,7 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
+
                     Feature feature = new Feature();
                     Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
                     string identificador = $@"{pId}_{item.Code}";
@@ -154,10 +155,19 @@ namespace Hercules.MA.Load
                         }
                     }
 
-                    //Se asigna el identificador del padre al hijo (País --> Región y Región --> Provincia).
                     switch (pId)
                     {
                         case "ADM1":
+                            //Contruyo el ID del padre, debido al error que hay en los datos.
+                            if (!string.IsNullOrEmpty(codigoPadre) && Int32.Parse(codigoPadre) < 10)
+                            {
+                                codigoPadre = "00" + codigoPadre;
+                            }
+                            else if (!string.IsNullOrEmpty(codigoPadre) && Int32.Parse(codigoPadre) < 100)
+                            {
+                                codigoPadre = "0" + codigoPadre;
+                            }
+
                             feature.IdGn_parentFeature = $@"PCLD_{codigoPadre}";
                             feature.Gn_parentFeature = pListaFeatures.First(x => x.Dc_identifier == $@"PCLD_{codigoPadre}");
                             break;
@@ -168,7 +178,14 @@ namespace Hercules.MA.Load
                     }
 
                     //Se guarda el objeto a la lista.
-                    pListaFeatures.Add(feature);
+                    if (pCodigoTabla == idPaises && feature.Dc_identifier.Split('_')[1].Length == 3)
+                    {
+                        pListaFeatures.Add(feature);
+                    }
+                    else if (string.IsNullOrEmpty(item.Delegate) && (pCodigoTabla == idRegiones || pCodigoTabla == idProvincias))
+                    {
+                        pListaFeatures.Add(feature);
+                    }
                 }
             }
 
@@ -215,22 +232,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    Modality modality = new Modality();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail modalidad in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
-                        string nombre = modalidad.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        Modality modality = new Modality();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        modality.Dc_identifier = identificador;
+                        modality.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaModality.Add(modality);
                     }
-
-                    //Se agrega las propiedades.
-                    modality.Dc_identifier = identificador;
-                    modality.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaModality.Add(modality);
                 }
             }
 
@@ -277,22 +297,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    ContributionGradeProject contribution = new ContributionGradeProject();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail contribucion in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[contribucion.lang];
-                        string nombre = contribucion.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        ContributionGradeProject contribution = new ContributionGradeProject();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail contribucion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[contribucion.lang];
+                            string nombre = contribucion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        contribution.Dc_identifier = identificador;
+                        contribution.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaContributionGrade.Add(contribution);
                     }
-
-                    //Se agrega las propiedades.
-                    contribution.Dc_identifier = identificador;
-                    contribution.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaContributionGrade.Add(contribution);
                 }
             }
 
@@ -339,22 +362,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    ParticipationType participation = new ParticipationType();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail participacion in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[participacion.lang];
-                        string nombre = participacion.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        ParticipationType participation = new ParticipationType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail participacion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[participacion.lang];
+                            string nombre = participacion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        participation.Dc_identifier = identificador;
+                        participation.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaParticipationType.Add(participation);
                     }
-
-                    //Se agrega las propiedades.
-                    participation.Dc_identifier = identificador;
-                    participation.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaParticipationType.Add(participation);
                 }
             }
 
@@ -401,22 +427,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    DedicationRegime dedication = new DedicationRegime();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail dedicacion in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[dedicacion.lang];
-                        string nombre = dedicacion.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        DedicationRegime dedication = new DedicationRegime();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail dedicacion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[dedicacion.lang];
+                            string nombre = dedicacion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        dedication.Dc_identifier = identificador;
+                        dedication.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDedicationRegime.Add(dedication);
                     }
-
-                    //Se agrega las propiedades.
-                    dedication.Dc_identifier = identificador;
-                    dedication.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaDedicationRegime.Add(dedication);
                 }
             }
 
@@ -463,22 +492,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    Motivation motivation = new Motivation();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail motivacion in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[motivacion.lang];
-                        string nombre = motivacion.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        Motivation motivation = new Motivation();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail motivacion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[motivacion.lang];
+                            string nombre = motivacion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        motivation.Dc_identifier = identificador;
+                        motivation.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaMotivation.Add(motivation);
                     }
-
-                    //Se agrega las propiedades.
-                    motivation.Dc_identifier = identificador;
-                    motivation.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaMotivation.Add(motivation);
                 }
             }
 
@@ -525,22 +557,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    ContributionGradeDocument contribution = new ContributionGradeDocument();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail contribucion in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[contribucion.lang];
-                        string nombre = contribucion.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        ContributionGradeDocument contribution = new ContributionGradeDocument();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail contribucion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[contribucion.lang];
+                            string nombre = contribucion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        contribution.Dc_identifier = identificador;
+                        contribution.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaContributionGrade.Add(contribution);
                     }
-
-                    //Se agrega las propiedades.
-                    contribution.Dc_identifier = identificador;
-                    contribution.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaContributionGrade.Add(contribution);
                 }
             }
 
@@ -587,22 +622,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    ReferenceSource reference = new ReferenceSource();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail referencia in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[referencia.lang];
-                        string nombre = referencia.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        ReferenceSource reference = new ReferenceSource();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail referencia in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[referencia.lang];
+                            string nombre = referencia.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        reference.Dc_identifier = identificador;
+                        reference.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaReferenceSource.Add(reference);
                     }
-
-                    //Se agrega las propiedades.
-                    reference.Dc_identifier = identificador;
-                    reference.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaReferenceSource.Add(reference);
                 }
             }
 
@@ -649,22 +687,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    ImpactIndexCategory categories = new ImpactIndexCategory();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail categoria in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[categoria.lang];
-                        string nombre = categoria.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        ImpactIndexCategory categories = new ImpactIndexCategory();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail categoria in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[categoria.lang];
+                            string nombre = categoria.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        categories.Dc_identifier = identificador;
+                        categories.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaImpactIndexCategory.Add(categories);
                     }
-
-                    //Se agrega las propiedades.
-                    categories.Dc_identifier = identificador;
-                    categories.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaImpactIndexCategory.Add(categories);
                 }
             }
 
@@ -711,22 +752,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    Language language = new Language();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail lenguaje in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[lenguaje.lang];
-                        string nombre = lenguaje.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        Language language = new Language();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail lenguaje in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[lenguaje.lang];
+                            string nombre = lenguaje.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        language.Dc_identifier = identificador;
+                        language.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaLanguage.Add(language);
                     }
-
-                    //Se agrega las propiedades.
-                    language.Dc_identifier = identificador;
-                    language.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaLanguage.Add(language);
                 }
             }
 
@@ -773,22 +817,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    PublicationType publication = new PublicationType();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail publicacion in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[publicacion.lang];
-                        string nombre = publicacion.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        PublicationType publication = new PublicationType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail publicacion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[publicacion.lang];
+                            string nombre = publicacion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        publication.Dc_identifier = identificador;
+                        publication.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaPublicationType.Add(publication);
                     }
-
-                    //Se agrega las propiedades.
-                    publication.Dc_identifier = identificador;
-                    publication.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaPublicationType.Add(publication);
                 }
             }
 
@@ -835,28 +882,31 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    EventType eventType = new EventType();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail evento in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[evento.lang];
-                        string nombre = evento.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        EventType eventType = new EventType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail evento in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[evento.lang];
+                            string nombre = evento.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        eventType.Dc_identifier = identificador;
+                        eventType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaEventType.Add(eventType);
                     }
-
-                    //Se agrega las propiedades.
-                    eventType.Dc_identifier = identificador;
-                    eventType.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaEventType.Add(eventType);
                 }
             }
 
             return pListaEventType;
         }
-        
+
         /// <summary>
         /// Carga la entidad secundaria GeographicRegion.
         /// </summary>
@@ -897,22 +947,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    GeographicRegion geographicRegion = new GeographicRegion();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail region in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[region.lang];
-                        string nombre = region.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        GeographicRegion geographicRegion = new GeographicRegion();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail region in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[region.lang];
+                            string nombre = region.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        geographicRegion.Dc_identifier = identificador;
+                        geographicRegion.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaGeographicRegion.Add(geographicRegion);
                     }
-
-                    //Se agrega las propiedades.
-                    geographicRegion.Dc_identifier = identificador;
-                    geographicRegion.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaGeographicRegion.Add(geographicRegion);
                 }
             }
 
@@ -959,22 +1012,25 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    OrganizationType organization = new OrganizationType();
-                    Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                    string identificador = item.Code;
-                    foreach (TableItemNameDetail organizacion in item.Name)
+                    if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageEnum idioma = dicIdiomasMapeados[organizacion.lang];
-                        string nombre = organizacion.Name;
-                        dicIdioma.Add(idioma, nombre);
+                        OrganizationType organization = new OrganizationType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail organizacion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[organizacion.lang];
+                            string nombre = organizacion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        organization.Dc_identifier = identificador;
+                        organization.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaOrganizationType.Add(organization);
                     }
-
-                    //Se agrega las propiedades.
-                    organization.Dc_identifier = identificador;
-                    organization.Dc_title = dicIdioma;
-
-                    //Se guarda el objeto a la lista.
-                    pListaOrganizationType.Add(organization);
                 }
             }
 

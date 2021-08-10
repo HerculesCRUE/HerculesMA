@@ -443,7 +443,7 @@ namespace Hercules.MA.Load
 
                     //Address
                     DocumentOntology.Address direccion = new DocumentOntology.Address();
-                    direccion.Vcard_locality = "Murcia"; //TODO:
+                    direccion.Vcard_locality = "Murcia"; 
                     direccion.IdVcard_hasRegion = "http://gnoss.com/items/ADM1_ES62";
                     direccion.IdVcard_hasCountryName = "http://gnoss.com/items/PCLD_724";
 

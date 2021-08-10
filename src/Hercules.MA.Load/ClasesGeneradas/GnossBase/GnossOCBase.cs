@@ -83,6 +83,7 @@ namespace GnossBase
 			prefList.Add("xmlns:obo=\"http://purl.obolibrary.org/obo/\"");
 			prefList.Add("xmlns:vcard=\"https://www.w3.org/2006/vcard/ns#\"");
 			prefList.Add("xmlns:dc=\"http://purl.org/dc/elements/1.1/\"");
+			prefList.Add("xmlns:gn=\"http://www.geonames.org/ontology#\"");
 
 			this.resourceID = Guid.NewGuid();
 			this.articleID = Guid.NewGuid();
