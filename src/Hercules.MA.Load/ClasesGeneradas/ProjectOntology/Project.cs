@@ -119,6 +119,7 @@ namespace ProjectOntology
 			this.Vivo_end= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#end"));
 			this.Roh_monetaryAmount = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/monetaryAmount"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
+			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
 		}
 
 		public Project(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
@@ -216,10 +217,16 @@ namespace ProjectOntology
 			this.Vivo_end= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#end"));
 			this.Roh_monetaryAmount = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/monetaryAmount"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
+			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
 		}
 
 		public virtual string RdfType { get { return "http://vivoweb.org/ontology/core#Project"; } }
 		public virtual string RdfsLabel { get { return "http://vivoweb.org/ontology/core#Project"; } }
+
+		[LABEL(LanguageEnum.es, "Identificador")]
+		[RDFProperty("http://w3id.org/roh/crisIdentifier")]
+		public string Roh_crisIdentifier { get; set; }
+
 		[LABEL(LanguageEnum.es,"Financiación")]
 		[RDFProperty("http://w3id.org/roh/isSupportedBy")]
 		public  Funding Roh_isSupportedBy { get; set;}
@@ -329,6 +336,7 @@ namespace ProjectOntology
 				}
 			propList.Add(new StringOntologyProperty("roh:monetaryAmount", this.Roh_monetaryAmount.ToString()));
 			propList.Add(new StringOntologyProperty("roh:title", this.Roh_title));
+			propList.Add(new StringOntologyProperty("roh:crisIdentifier", this.Roh_crisIdentifier));
 		}
 
 		internal override void GetEntities()
@@ -579,6 +587,10 @@ namespace ProjectOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/title", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_title)}\"", list, " . ");
 				}
+			if (this.Roh_crisIdentifier != null)
+			{
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}", "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier)}\"", list, " . ");
+			}
 			return list;
 		}
 
@@ -872,6 +884,10 @@ namespace ProjectOntology
 			if(!string.IsNullOrEmpty(search))
 			{
 				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/search", $"\"{search.ToLower()}\"", list, " . ");
+			}
+			if (this.Roh_crisIdentifier != null)
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier).ToLower()}\"", list, " . ");
 			}
 			return list;
 		}

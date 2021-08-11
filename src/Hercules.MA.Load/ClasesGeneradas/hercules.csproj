@@ -103,6 +103,7 @@
     <Compile Include="DedicationregimeOntology\DedicationRegime.cs" />
     <Compile Include="DocumentOntology\Address.cs" />
     <Compile Include="DocumentOntology\BFO_0000023.cs" />
+    <Compile Include="DocumentOntology\CategoryPath.cs" />
     <Compile Include="DocumentOntology\DataAuthor.cs" />
     <Compile Include="DocumentOntology\Document.cs" />
     <Compile Include="DocumentOntology\Event.cs" />

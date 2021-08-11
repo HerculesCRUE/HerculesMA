@@ -36,7 +36,7 @@ namespace OrganizationOntology
 			{
 				this.Dc_type = new OrganizationType(propDc_type.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
-			this.Vivo_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#identifier"));
+			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
 			this.Roh_otherTypeMoreInfo = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/otherTypeMoreInfo"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 		}
@@ -55,7 +55,7 @@ namespace OrganizationOntology
 			{
 				this.Dc_type = new OrganizationType(propDc_type.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
-			this.Vivo_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#identifier"));
+			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
 			this.Roh_otherTypeMoreInfo = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/otherTypeMoreInfo"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 		}
@@ -72,8 +72,8 @@ namespace OrganizationOntology
 		public string IdDc_type  { get; set;} 
 
 		[LABEL(LanguageEnum.es,"Identificador")]
-		[RDFProperty("http://vivoweb.org/ontology/core#identifier")]
-		public  string Vivo_identifier { get; set;}
+		[RDFProperty("http://w3id.org/roh/crisIdentifier")]
+		public  string Roh_crisIdentifier { get; set;}
 
 		[LABEL(LanguageEnum.es,"Tipo de entidad, otros")]
 		[RDFProperty("http://w3id.org/roh/otherTypeMoreInfo")]
@@ -88,7 +88,7 @@ namespace OrganizationOntology
 		{
 			base.GetProperties();
 			propList.Add(new StringOntologyProperty("dc:type", this.IdDc_type));
-			propList.Add(new StringOntologyProperty("vivo:identifier", this.Vivo_identifier));
+			propList.Add(new StringOntologyProperty("roh:crisIdentifier", this.Roh_crisIdentifier));
 			propList.Add(new StringOntologyProperty("roh:otherTypeMoreInfo", this.Roh_otherTypeMoreInfo));
 			propList.Add(new StringOntologyProperty("roh:title", this.Roh_title));
 		}
@@ -159,11 +159,7 @@ namespace OrganizationOntology
 				if(this.IdDc_type != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/type", $"<{this.IdDc_type}>", list, " . ");
-				}
-				if(this.Vivo_identifier != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}",  "http://vivoweb.org/ontology/core#identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Vivo_identifier)}\"", list, " . ");
-				}
+				}				
 				if(this.Roh_otherTypeMoreInfo != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/otherTypeMoreInfo", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_otherTypeMoreInfo)}\"", list, " . ");
@@ -172,6 +168,10 @@ namespace OrganizationOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/title", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_title)}\"", list, " . ");
 				}
+			if (this.Roh_crisIdentifier != null)
+			{
+				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}", "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier)}\"", list, " . ");
+			}
 			return list;
 		}
 
@@ -240,9 +240,9 @@ namespace OrganizationOntology
 					}
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://purl.org/dc/elements/1.1/type", $"<{itemRegex}>", list, " . ");
 				}
-				if(this.Vivo_identifier != null)
+				if(this.Roh_crisIdentifier != null)
 				{
-					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://vivoweb.org/ontology/core#identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Vivo_identifier).ToLower()}\"", list, " . ");
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier).ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_otherTypeMoreInfo != null)
 				{

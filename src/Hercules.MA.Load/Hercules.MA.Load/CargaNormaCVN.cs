@@ -37,7 +37,7 @@ namespace Hercules.MA.Load
         private static string RUTA_XML = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Dataset\CVN\ReferenceTables.xml";
 
         //Resource API.
-        private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config");
+        public static ResourceApi mResourceApi { get; set; }
 
         //Identificadores de las tablas.
         private static readonly string idPaises = "ISO_3166";
