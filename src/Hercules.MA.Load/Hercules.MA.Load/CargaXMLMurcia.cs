@@ -86,9 +86,7 @@ namespace Hercules.MA.Load
             EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar);
             CargarDatos(listaRecursosCargar);
-            listaRecursosCargar.Clear();
-
-            
+            listaRecursosCargar.Clear();            
 
             //Cargar proyectos.
             //CambiarOntologia("project");
@@ -494,6 +492,20 @@ namespace Hercules.MA.Load
                 {
                     DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
                     documentoACargar.IdDc_type = "http://gnoss.com/items/publicationtype_020";
+                    if (!string.IsNullOrEmpty(articulo.NOMBRE_REVISTA))
+                    {
+                        documentoACargar.IdRoh_supportType = "http://gnoss.com/items/supporttype_057";
+                        documentoACargar.Vivo_hasPublicationVenue = articulo.NOMBRE_REVISTA;
+                    }
+                    if (!string.IsNullOrEmpty(articulo.VOLUMEN))
+                    {
+                        documentoACargar.Bibo_volume = articulo.VOLUMEN;
+                    }
+                    if (!string.IsNullOrEmpty(articulo.NUMERO))
+                    {
+                        documentoACargar.Bibo_issue = articulo.NUMERO;
+                    }
+
                     documentoACargar.Roh_title = articulo.TITULO;
                     documentoACargar.Roh_crisIdentifier = articulo.CODIGO;
                     if (!string.IsNullOrEmpty(articulo.ANO))
@@ -551,6 +563,8 @@ namespace Hercules.MA.Load
                     {
                         impacto.Roh_journalTop25 = false;
                     }
+                    documentoACargar.Roh_impactIndex = new List<DocumentOntology.ImpactIndex>();
+                    documentoACargar.Roh_impactIndex.Add(impacto);
 
                     if (!string.IsNullOrEmpty(articulo.AREA))
                     {

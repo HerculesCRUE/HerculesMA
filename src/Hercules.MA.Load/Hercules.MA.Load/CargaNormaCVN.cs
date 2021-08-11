@@ -25,6 +25,7 @@ using PublicationtypeOntology;
 using EventtypeOntology;
 using GeographicregionOntology;
 using OrganizationtypeOntology;
+using SupporttypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -56,6 +57,7 @@ namespace Hercules.MA.Load
         private static readonly string idEventType = "CVN_EVENT_B";
         private static readonly string idGeographicRegion = "CVN_SCOPE_A";
         private static readonly string idOrganizationType = "CVN_ENTITY_TYPE";
+        private static readonly string idSupportType = "CVN_SUPPORT_B";
 
         /// <summary>
         /// Método para cargar las entidades secundarias.
@@ -83,6 +85,7 @@ namespace Hercules.MA.Load
             CargarEventType(tablas, "eventtype");
             CargarGeographicRegion(tablas, "geographicregion");
             CargarOrganizationType(tablas, "organizationtype");
+            CargarSupportType(tablas, "supporttype");
         }
 
         /// <summary>
@@ -996,6 +999,7 @@ namespace Hercules.MA.Load
             }
         }
 
+
         /// <summary>
         /// Obtiene los objetos OrganizationType a cargar.
         /// </summary>
@@ -1036,6 +1040,72 @@ namespace Hercules.MA.Load
 
             return pListaOrganizationType;
         }
+
+        /// <summary>
+        /// Carga la entidad secundaria SupportType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarSupportType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/SupportType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<SupportType> publicaciones = new List<SupportType>();
+            publicaciones = ObtenerDatosSupportType(pTablas, idSupportType, publicaciones);
+
+            //Carga.
+            foreach (SupportType publication in publicaciones)
+            {
+                mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, pOntology + "_" + publication.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos Language a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaSupportType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<SupportType> ObtenerDatosSupportType(ReferenceTables pTablas, string pCodigoTabla, List<SupportType> pListaSupportType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        SupportType publication = new SupportType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail publicacion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[publicacion.lang];
+                            string nombre = publicacion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        publication.Dc_identifier = identificador;
+                        publication.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaSupportType.Add(publication);
+                    }
+                }
+            }
+
+            return pListaSupportType;
+        }
+
 
         /// <summary>
         /// Elimina los datos del grafo.

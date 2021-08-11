@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
+using Concept = TaxonomyOntology.Concept;
 
 namespace DocumentOntology
 {
@@ -26,14 +27,27 @@ namespace DocumentOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
+			this.Roh_categoryNode = new List<Concept>();
+			SemanticPropertyModel propRoh_categoryNode = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/categoryNode");
+			if(propRoh_categoryNode != null && propRoh_categoryNode.PropertyValues.Count > 0)
+			{
+				foreach (SemanticPropertyModel.PropertyValue propValue in propRoh_categoryNode.PropertyValues)
+				{
+					if(propValue.RelatedEntity!=null){
+						Concept roh_categoryNode = new Concept(propValue.RelatedEntity,idiomaUsuario);
+						this.Roh_categoryNode.Add(roh_categoryNode);
+					}
+				}
+			}
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/CategoryPath"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/CategoryPath"; } }
 		public OntologyEntity Entity { get; set; }
 
-		//[RDFProperty("http://w3id.org/roh/CategoryNode")]
-		//public  List<object> Roh_CategoryNode { get; set;}
+		[LABEL(LanguageEnum.es,"")]
+		[RDFProperty("http://w3id.org/roh/categoryNode")]
+		public  List<Concept> Roh_categoryNode { get; set;}
 		public List<string> IdsRoh_categoryNode { get; set;}
 
 

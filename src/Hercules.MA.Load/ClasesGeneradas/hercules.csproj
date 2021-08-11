@@ -128,6 +128,7 @@
     <Compile Include="ProjectOntology\ProjectClassification.cs" />
     <Compile Include="PublicationtypeOntology\PublicationType.cs" />
     <Compile Include="ReferencesourceOntology\ReferenceSource.cs" />
+    <Compile Include="SupporttypeOntology\SupportType.cs" />
     <Compile Include="TaxonomyOntology\Collection.cs" />
     <Compile Include="TaxonomyOntology\Concept.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
