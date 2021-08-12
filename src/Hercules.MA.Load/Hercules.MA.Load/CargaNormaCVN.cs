@@ -26,6 +26,7 @@ using EventtypeOntology;
 using GeographicregionOntology;
 using OrganizationtypeOntology;
 using SupporttypeOntology;
+using GenderOntology;
 
 namespace Hercules.MA.Load
 {
@@ -58,6 +59,7 @@ namespace Hercules.MA.Load
         private static readonly string idGeographicRegion = "CVN_SCOPE_A";
         private static readonly string idOrganizationType = "CVN_ENTITY_TYPE";
         private static readonly string idSupportType = "CVN_SUPPORT_B";
+        private static readonly string idGender = "CVN_SEX_A";
 
         /// <summary>
         /// Método para cargar las entidades secundarias.
@@ -86,6 +88,7 @@ namespace Hercules.MA.Load
             CargarGeographicRegion(tablas, "geographicregion");
             CargarOrganizationType(tablas, "organizationtype");
             CargarSupportType(tablas, "supporttype");
+            CargarGender(tablas, "gender");
         }
 
         /// <summary>
@@ -1104,6 +1107,71 @@ namespace Hercules.MA.Load
             }
 
             return pListaSupportType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria Gender.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarGender(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/Gender", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<Gender> publicaciones = new List<Gender>();
+            publicaciones = ObtenerDatosGender(pTablas, idGender, publicaciones);
+
+            //Carga.
+            foreach (Gender publication in publicaciones)
+            {
+                mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, pOntology + "_" + publication.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos Gender a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaGender">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<Gender> ObtenerDatosGender(ReferenceTables pTablas, string pCodigoTabla, List<Gender> pListaGender)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        Gender publication = new Gender();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail publicacion in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[publicacion.lang];
+                            string nombre = publicacion.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        publication.Dc_identifier = identificador;
+                        publication.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaGender.Add(publication);
+                    }
+                }
+            }
+
+            return pListaGender;
         }
 
 

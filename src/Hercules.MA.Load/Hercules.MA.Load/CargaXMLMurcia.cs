@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using CurriculumvitaeOntology;
 using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
@@ -99,6 +100,13 @@ namespace Hercules.MA.Load
             CambiarOntologia("document");
             EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
             Dictionary<string, string> documentosCargar = ObtenerDocumentos(personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave);
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
+
+            //Cargar curriculums
+            CambiarOntologia("curriculumvitae");
+            EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
+            Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar,documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
@@ -584,6 +592,70 @@ namespace Hercules.MA.Load
 
                     //Guardamos los IDs en la lista.
                     dicIDs.Add(articulo.CODIGO, resource.GnossId);
+                }
+            }
+
+            return dicIDs;
+        }
+
+        private static Dictionary<string, string> ObtenerCVs(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicDocumentosCargados, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas)
+        {
+            Dictionary<string, string> dicIDs = new Dictionary<string, string>();
+            HashSet<string> idsCVsACargar = new HashSet<string>();
+
+            if (pPersonasACargar == null || pPersonasACargar.Count == 0)
+            {
+                //Si viene vacía la lista de personas, cargamos todas las de Murcia.
+                idsCVsACargar = new HashSet<string>(pListaPersonas.Where(x=>x.PERSONAL_UMU=="S").Select(x => x.IDPERSONA));
+            }
+            else
+            {
+                //Obtengo los IDs de loas personas de murcia a Cargar
+                idsCVsACargar = new HashSet<string>(pListaPersonas.Where(x => x.PERSONAL_UMU == "S").Select(x => x.IDPERSONA).Intersect(pDicPersonasCargadas.Keys));
+            }
+
+            //Obtengo los datos de los documentos.
+            foreach (string id in idsCVsACargar)
+            {
+                Persona persona = pListaPersonas.FirstOrDefault(x => x.IDPERSONA == id);
+
+                if (persona != null && persona.PERSONAL_UMU=="S")
+                {
+                    CV cvACargar = new CV();
+                    cvACargar.Foaf_name = persona.NOMBRE;
+                    cvACargar.IdRoh_cvOf = pDicPersonasCargadas[id];
+                    cvACargar.Roh_personalData = new PersonalData();
+                    cvACargar.Roh_scientificExperience = new ScientificExperience();
+                    cvACargar.Roh_scientificActivity = new ScientificActivity();
+
+                    //PersonalData
+                    if (persona.SEXO == "M")
+                    {
+                        cvACargar.Roh_personalData.IdFoaf_gender = "http://gnoss.com/items/gender_000";
+                    }
+                    else if (persona.SEXO == "F")
+                    {
+                        cvACargar.Roh_personalData.IdFoaf_gender = "http://gnoss.com/items/gender_010";
+                    }
+                    cvACargar.Roh_personalData.Vcard_email = persona.EMAIL;
+
+                    //ScientificActivity
+                    cvACargar.Roh_scientificActivity.Roh_scientificPublications = new List<RelatedDocuments>();
+
+                    foreach (string idArticulo in pListaAutoresArticulos.Where(x => x.IDPERSONA == id && pDicDocumentosCargados.ContainsKey(x.ARTI_CODIGO)).Select(x => x.ARTI_CODIGO))
+                    {
+                        RelatedDocuments relatedDocuments = new RelatedDocuments();
+                        relatedDocuments.IdRoh_relatedDocument= pDicDocumentosCargados[idArticulo];
+                        relatedDocuments.Roh_isPublic = false;
+                        cvACargar.Roh_scientificActivity.Roh_scientificPublications.Add(relatedDocuments);
+                    }
+
+                    //Creamos el recurso.
+                    ComplexOntologyResource resource = cvACargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    pListaRecursosCargar.Add(resource);
+
+                    //Guardamos los IDs en la lista.
+                    dicIDs.Add(id, resource.GnossId);
                 }
             }
 

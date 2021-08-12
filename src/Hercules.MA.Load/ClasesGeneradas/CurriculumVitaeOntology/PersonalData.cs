@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
+using Gender = GenderOntology.Gender;
 using Feature = FeatureOntology.Feature;
 
 namespace CurriculumvitaeOntology
@@ -49,6 +50,11 @@ namespace CurriculumvitaeOntology
 			{
 				this.Roh_birthplace = new Address(propRoh_birthplace.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
+			SemanticPropertyModel propFoaf_gender = pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/gender");
+			if(propFoaf_gender != null && propFoaf_gender.PropertyValues.Count > 0)
+			{
+				this.Foaf_gender = new Gender(propFoaf_gender.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
 			SemanticPropertyModel propSchema_nationality = pSemCmsModel.GetPropertyByPath("http://www.schema.org/nationality");
 			if(propSchema_nationality != null && propSchema_nationality.PropertyValues.Count > 0)
 			{
@@ -83,7 +89,6 @@ namespace CurriculumvitaeOntology
 			}
 			this.Foaf_homepage = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/homepage"));
 			this.Vcard_birth_date= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#birth-date"));
-			this.Foaf_gender = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/gender"));
 			this.Foaf_img = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/img"));
 			this.Vcard_email = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#email"));
 		}
@@ -103,6 +108,11 @@ namespace CurriculumvitaeOntology
 		[LABEL(LanguageEnum.es,"Lugar de nacimiento")]
 		[RDFProperty("http://w3id.org/roh/birthplace")]
 		public  Address Roh_birthplace { get; set;}
+
+		[LABEL(LanguageEnum.es,"Sexo")]
+		[RDFProperty("http://xmlns.com/foaf/0.1/gender")]
+		public  Gender Foaf_gender  { get; set;} 
+		public string IdFoaf_gender  { get; set;} 
 
 		[LABEL(LanguageEnum.es,"Nacionalidad")]
 		[RDFProperty("http://www.schema.org/nationality")]
@@ -133,10 +143,6 @@ namespace CurriculumvitaeOntology
 		[RDFProperty("https://www.w3.org/2006/vcard/ns#birth-date")]
 		public  DateTime? Vcard_birth_date { get; set;}
 
-		[LABEL(LanguageEnum.es,"Sexo")]
-		[RDFProperty("http://xmlns.com/foaf/0.1/gender")]
-		public  string Foaf_gender { get; set;}
-
 		[LABEL(LanguageEnum.es,"Imagen")]
 		[RDFProperty("http://xmlns.com/foaf/0.1/img")]
 		public  string Foaf_img { get; set;}
@@ -149,12 +155,12 @@ namespace CurriculumvitaeOntology
 		internal override void GetProperties()
 		{
 			base.GetProperties();
+			propList.Add(new StringOntologyProperty("foaf:gender", this.IdFoaf_gender));
 			propList.Add(new StringOntologyProperty("schema:nationality", this.IdSchema_nationality));
 			propList.Add(new StringOntologyProperty("foaf:homepage", this.Foaf_homepage));
 			if (this.Vcard_birth_date.HasValue){
 				propList.Add(new DateOntologyProperty("vcard:birth-date", this.Vcard_birth_date.Value));
 				}
-			propList.Add(new StringOntologyProperty("foaf:gender", this.Foaf_gender));
 			propList.Add(new StringOntologyProperty("foaf:img", this.Foaf_img));
 			propList.Add(new StringOntologyProperty("vcard:email", this.Vcard_email));
 		}

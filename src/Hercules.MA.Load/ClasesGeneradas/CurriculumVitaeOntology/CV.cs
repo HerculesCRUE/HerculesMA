@@ -340,6 +340,10 @@ namespace CurriculumvitaeOntology
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Address_{ResourceID}_{this.Roh_personalData.Vcard_address.ArticleID}",  "https://www.w3.org/2006/vcard/ns#locality", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_personalData.Vcard_address.Vcard_locality)}\"", list, " . ");
 				}
 			}
+				if(this.Roh_personalData.IdFoaf_gender != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/PersonalData_{ResourceID}_{this.Roh_personalData.ArticleID}",  "http://xmlns.com/foaf/0.1/gender", $"<{this.Roh_personalData.IdFoaf_gender}>", list, " . ");
+				}
 				if(this.Roh_personalData.IdSchema_nationality != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/PersonalData_{ResourceID}_{this.Roh_personalData.ArticleID}",  "http://www.schema.org/nationality", $"<{this.Roh_personalData.IdSchema_nationality}>", list, " . ");
@@ -351,10 +355,6 @@ namespace CurriculumvitaeOntology
 				if(this.Roh_personalData.Vcard_birth_date != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/PersonalData_{ResourceID}_{this.Roh_personalData.ArticleID}",  "https://www.w3.org/2006/vcard/ns#birth-date", $"\"{this.Roh_personalData.Vcard_birth_date.Value.ToString("yyyyMMddHHmmss")}\"", list, " . ");
-				}
-				if(this.Roh_personalData.Foaf_gender != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/PersonalData_{ResourceID}_{this.Roh_personalData.ArticleID}",  "http://xmlns.com/foaf/0.1/gender", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_personalData.Foaf_gender)}\"", list, " . ");
 				}
 				if(this.Roh_personalData.Foaf_img != null)
 				{
@@ -730,6 +730,20 @@ namespace CurriculumvitaeOntology
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/address_{ResourceID}_{this.Roh_personalData.Vcard_address.ArticleID}",  "https://www.w3.org/2006/vcard/ns#locality", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_personalData.Vcard_address.Vcard_locality).ToLower()}\"", list, " . ");
 				}
 			}
+				if(this.Roh_personalData.IdFoaf_gender != null)
+				{
+					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
+					string itemRegex = this.Roh_personalData.IdFoaf_gender;
+					if (regex.IsMatch(itemRegex))
+					{
+						itemRegex = $"http://gnoss/{resourceAPI.GetShortGuid(itemRegex).ToString().ToUpper()}";
+					}
+					else
+					{
+						itemRegex = itemRegex.ToLower();
+					}
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/personaldata_{ResourceID}_{this.Roh_personalData.ArticleID}",  "http://xmlns.com/foaf/0.1/gender", $"<{itemRegex}>", list, " . ");
+				}
 				if(this.Roh_personalData.IdSchema_nationality != null)
 				{
 					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
@@ -751,10 +765,6 @@ namespace CurriculumvitaeOntology
 				if(this.Roh_personalData.Vcard_birth_date != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/personaldata_{ResourceID}_{this.Roh_personalData.ArticleID}",  "https://www.w3.org/2006/vcard/ns#birth-date", $"{this.Roh_personalData.Vcard_birth_date.Value.ToString("yyyyMMddHHmmss")}", list, " . ");
-				}
-				if(this.Roh_personalData.Foaf_gender != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/personaldata_{ResourceID}_{this.Roh_personalData.ArticleID}",  "http://xmlns.com/foaf/0.1/gender", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_personalData.Foaf_gender).ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_personalData.Foaf_img != null)
 				{
