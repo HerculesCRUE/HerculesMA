@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -87,7 +88,7 @@ namespace Hercules.MA.Load
             EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar);
             CargarDatos(listaRecursosCargar);
-            listaRecursosCargar.Clear();            
+            listaRecursosCargar.Clear();
 
             //Cargar proyectos.
             //CambiarOntologia("project");
@@ -106,7 +107,7 @@ namespace Hercules.MA.Load
             //Cargar curriculums
             CambiarOntologia("curriculumvitae");
             EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
-            Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar,documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
+            Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar, documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
@@ -270,11 +271,11 @@ namespace Hercules.MA.Load
                         apellidos += palabra + " ";
                     }
 
-                    personaCarga.Foaf_name = persona.NOMBRE;
-                    personaCarga.Foaf_firstName = partesNombre[0];
-                    personaCarga.Foaf_lastName = apellidos.Trim();
+                    personaCarga.Foaf_name = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(persona.NOMBRE);
+                    personaCarga.Foaf_firstName = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(partesNombre[0]);
+                    personaCarga.Foaf_lastName = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(apellidos.Trim());
                     personaCarga.Roh_crisIdentifier = persona.IDPERSONA;
-                    if(persona.PERSONAL_UMU=="S")
+                    if (persona.PERSONAL_UMU == "S")
                     {
                         personaCarga.IdRoh_hasRole = pOrganizacionesCargar["UMU"];
                     }
@@ -540,6 +541,7 @@ namespace Hercules.MA.Load
                             DocumentOntology.BFO_0000023 persona = new DocumentOntology.BFO_0000023();
                             persona.IdRdf_member = pDicPersonasCargadas[autor.IDPERSONA];
                             persona.Rdf_comment = Int32.Parse(autor.ORDEN);
+                            persona.Foaf_nick  = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos( pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA).NOMBRE);
                             documentoACargar.Bibo_authorList.Add(persona);
 
                             //DataAuthor
@@ -606,7 +608,7 @@ namespace Hercules.MA.Load
             if (pPersonasACargar == null || pPersonasACargar.Count == 0)
             {
                 //Si viene vacía la lista de personas, cargamos todas las de Murcia.
-                idsCVsACargar = new HashSet<string>(pListaPersonas.Where(x=>x.PERSONAL_UMU=="S").Select(x => x.IDPERSONA));
+                idsCVsACargar = new HashSet<string>(pListaPersonas.Where(x => x.PERSONAL_UMU == "S").Select(x => x.IDPERSONA));
             }
             else
             {
@@ -619,14 +621,16 @@ namespace Hercules.MA.Load
             {
                 Persona persona = pListaPersonas.FirstOrDefault(x => x.IDPERSONA == id);
 
-                if (persona != null && persona.PERSONAL_UMU=="S")
+                if (persona != null && persona.PERSONAL_UMU == "S")
                 {
                     CV cvACargar = new CV();
                     cvACargar.Foaf_name = persona.NOMBRE;
                     cvACargar.IdRoh_cvOf = pDicPersonasCargadas[id];
                     cvACargar.Roh_personalData = new PersonalData();
                     cvACargar.Roh_scientificExperience = new ScientificExperience();
+                    cvACargar.Roh_scientificExperience.Foaf_name = "Experiencia científica";
                     cvACargar.Roh_scientificActivity = new ScientificActivity();
+                    cvACargar.Roh_scientificActivity.Foaf_name = "Actividad científica";
 
                     //PersonalData
                     if (persona.SEXO == "M")
@@ -645,7 +649,7 @@ namespace Hercules.MA.Load
                     foreach (string idArticulo in pListaAutoresArticulos.Where(x => x.IDPERSONA == id && pDicDocumentosCargados.ContainsKey(x.ARTI_CODIGO)).Select(x => x.ARTI_CODIGO))
                     {
                         RelatedDocuments relatedDocuments = new RelatedDocuments();
-                        relatedDocuments.IdRoh_relatedDocument= pDicDocumentosCargados[idArticulo];
+                        relatedDocuments.IdRoh_relatedDocument = pDicDocumentosCargados[idArticulo];
                         relatedDocuments.Roh_isPublic = false;
                         cvACargar.Roh_scientificActivity.Roh_scientificPublications.Add(relatedDocuments);
                     }
@@ -725,7 +729,7 @@ namespace Hercules.MA.Load
                 {
                     if (listaUrl.Last() == idLargo)
                     {
-                        mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(idLargo),true,true);
+                        mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(idLargo), true, true);
                     }
                     else
                     {
@@ -1926,5 +1930,92 @@ namespace Hercules.MA.Load
             return listaPropiedades.Select(x => x.Name).ToList();
         }
         #endregion
+
+        /// <summary>
+        /// Convierte la 1º letra de cada palabra a mayúsculas.
+        /// </summary>
+        /// <param name="pTexto">Texto a convertir</param>
+        /// <returns>Texto con la 1º letra de cada palabra a mayúsculas</returns>
+        public static string ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(string pTexto)
+        {
+            pTexto = pTexto.ToLower();
+            string[] SEPARADORES = { ","/*, "."*/, "...", ":", ";", "(", ")", "<", ">", "/", "|", " y ", " o ", " u ", " e ", "·", " .", ". ", " -", "- ", "[", "]", "{", "}" };
+            Regex RegExSiglos = new Regex(@"\bx{0,3}(i{1,3}|i[vx]|vi{0,3})\b", RegexOptions.IgnoreCase);
+
+            string[] separadores = new string[SEPARADORES.Length + 3];
+            SEPARADORES.CopyTo(separadores, 0);
+            separadores[SEPARADORES.Length] = " ";
+            separadores[SEPARADORES.Length + 1] = ".";
+            separadores[SEPARADORES.Length + 2] = "-";
+
+            string[] palabras = pTexto.Split(separadores, StringSplitOptions.RemoveEmptyEntries);
+
+            string textoFinal = "";
+
+            string palabra2;
+
+            int contador = 0;
+
+            foreach (string palabra in palabras)
+            {
+                palabra2 = palabra;
+                if (palabra.Contains("+") && palabra.Length >= palabra.IndexOf("+") + 2)
+                {
+                    palabra2 = palabra.Substring(0, palabra.IndexOf("+") + 1) + palabra.Substring(palabra.IndexOf("+") + 1, 1).ToUpper() + palabra.Substring(palabra.IndexOf("+") + 2) + " ";
+                }
+
+                //Pongo los símbolos intermedios que hay entre palabra y palabra (espacios, comas...)
+                while (contador < pTexto.Length && !pTexto[contador].Equals(palabra[0]))
+                {
+                    textoFinal += pTexto[contador];
+                    contador++;
+                }
+
+                if (RegExSiglos.IsMatch(palabra2))
+                {
+                    textoFinal += palabra2.ToUpper();
+                }
+                else if (!EsArticuloOConjuncionOPreposicionesComunes(palabra2))
+                {
+                    if (palabra2.Length > 1)
+                    {
+                        textoFinal += palabra2.Substring(0, 1).ToUpper() + palabra2.Substring(1);
+                    }
+                    else if (palabra2.Length == 1)
+                    {
+                        textoFinal += palabra2.ToUpper();
+                    }
+                }
+                else
+                {
+                    textoFinal += palabra2;
+                }
+
+                contador += palabra.Length;
+            }
+
+            //Pongo los símbolos del final de la frase (puntos, cierre de paréntesis...)
+            while (contador < pTexto.Length)
+            {
+                textoFinal += pTexto[contador];
+                contador++;
+            }
+
+            return textoFinal;
+        }
+
+        /// <summary>
+        /// Comprueba si la palabra es un artículo o una conjunción.
+        /// </summary>
+        /// <param name="pPalabra">Palabra a comprobar</param>
+        /// <returns>TRUE si la palabra es un artículo o conjunción, FALSE en caso contrario</returns>
+        public static bool EsArticuloOConjuncionOPreposicionesComunes(string pPalabra)
+        {
+            string[] ARTICULOS = { "el", "la", "los", "las", "un", "una", "lo", "unos", "unas" };
+            string[] CONJUNCIONES = { "y", "o", "u", "e", "ni" };
+            string[] PREPOSICIONESMUYCOMUNES = { "a", "ante", "bajo", "con", "contra", "de", "del", "desde", "en", "entre", "hacia", "hasta", "para", "por", "segun", "sin", "so", "sobre", "tras", "durante", "mediante", "al", "excepto", "salvo" };
+            return (ARTICULOS.Contains(pPalabra) || CONJUNCIONES.Contains(pPalabra) || PREPOSICIONESMUYCOMUNES.Contains(pPalabra));
+        }
+
     }
 }

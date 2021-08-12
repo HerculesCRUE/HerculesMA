@@ -74,6 +74,7 @@ namespace CurriculumvitaeOntology
 					}
 				}
 			}
+			this.Foaf_name = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/name"));
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/ScientificActivity"; } }
@@ -96,10 +97,15 @@ namespace CurriculumvitaeOntology
 		[RDFProperty("http://w3id.org/roh/worksSubmittedSeminars")]
 		public  List<RelatedDocuments> Roh_worksSubmittedSeminars { get; set;}
 
+		[LABEL(LanguageEnum.es,"Nombre")]
+		[RDFProperty("http://xmlns.com/foaf/0.1/name")]
+		public  string Foaf_name { get; set;}
+
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
+			propList.Add(new StringOntologyProperty("foaf:name", this.Foaf_name));
 		}
 
 		internal override void GetEntities()
