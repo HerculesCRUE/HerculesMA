@@ -111,6 +111,7 @@
     <Compile Include="DocumentOntology\PublicationMetric.cs" />
     <Compile Include="EventtypeOntology\EventType.cs" />
     <Compile Include="FeatureOntology\Feature.cs" />
+    <Compile Include="GenderOntology\Gender.cs" />
     <Compile Include="GeographicregionOntology\GeographicRegion.cs" />
     <Compile Include="GnossBase\GnossOCBase.cs" />
     <Compile Include="ImpactindexcategoryOntology\ImpactIndexCategory.cs" />
