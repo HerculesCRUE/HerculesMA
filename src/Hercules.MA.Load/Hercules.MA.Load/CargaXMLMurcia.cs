@@ -93,7 +93,7 @@ namespace Hercules.MA.Load
             //Cargar proyectos.
             CambiarOntologia("project");
             EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
-            Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos);
+            Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, areasUnescoProyectos, codigosUnesco);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
@@ -120,6 +120,15 @@ namespace Hercules.MA.Load
             ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar, "um");
             CargarDatosSecundarios(listaRecursosSecundariosCargar);
             listaRecursosSecundariosCargar.Clear();
+
+            //TODO
+            //Categorización UNESCO
+            //CambiarOntologia("taxonomy");
+            //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "unesco");
+            //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "unesco");
+            //ObtenerTesauroUMUnesco(articulos, ref listaRecursosSecundariosCargar, "unesco");
+            //CargarDatosSecundarios(listaRecursosSecundariosCargar);
+            //listaRecursosSecundariosCargar.Clear();
         }
 
         /// <summary>
@@ -151,6 +160,56 @@ namespace Hercules.MA.Load
                 if (!listaCategorias.ContainsKey(articulo.AREA))
                 {
                     listaCategorias.Add(articulo.AREA, articulo.DESCRI_AREA);
+                }
+            }
+
+            List<Concept> listConcepts = new List<Concept>();
+            foreach (string id in listaCategorias.Keys)
+            {
+                ConceptEDMA concept = new ConceptEDMA();
+                concept.Dc_identifier = id;
+                concept.Dc_source = pSource;
+                concept.Skos_prefLabel = listaCategorias[id];
+                concept.Skos_symbol = "1";
+                listConcepts.Add(concept);
+            }
+
+            CollectionEDMA collection = new CollectionEDMA();
+            collection.Dc_source = pSource;
+            collection.Skos_member = listConcepts;
+            collection.Skos_scopeNote = "Tesauro UM";
+            pListaRecursosCargar.Add(collection.ToGnossApiResource(mResourceApi, "0"));
+
+            foreach (ConceptEDMA concept in listConcepts)
+            {
+                pListaRecursosCargar.Add(concept.ToGnossApiResource(mResourceApi, concept.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// TODO: Tesauro UNESCO.
+        /// </summary>
+        /// <param name="articulos"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pSource"></param>
+        private static void ObtenerTesauroUMUnesco(List<CodigosUnesco> codigosUnesco, ref List<SecondaryResource> pListaRecursosCargar, string pSource)
+        {
+            Dictionary<string, string> listaCategorias = new Dictionary<string, string>();
+            foreach (CodigosUnesco codigo in codigosUnesco)
+            {
+                string codigoUnesco = codigo.UNES_UNAR_CODIGO;
+                if(!string.IsNullOrEmpty(codigo.UNES_UNCA_CODIGO) && codigo.UNES_UNCA_CODIGO != "00")
+                {
+                    codigoUnesco += $@"_{codigo.UNES_UNCA_CODIGO}";
+                }
+                if (!string.IsNullOrEmpty(codigo.UNES_CODIGO) && codigo.UNES_CODIGO != "00")
+                {
+                    codigoUnesco += $@"_{codigo.UNES_CODIGO}";
+                }
+
+                if (!listaCategorias.ContainsKey(codigo.UNES_NOMBRE))
+                {
+                    listaCategorias.Add(codigo.UNES_NOMBRE, codigoUnesco);
                 }
             }
 
@@ -368,7 +427,7 @@ namespace Hercules.MA.Load
         /// <param name="pOrganizacionesExternas"></param>
         /// <param name="pFechaProyectos"></param>
         /// <returns>Diccionario con el ID proyecto / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerProyectos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicOrganizacionesCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<Proyecto> pProyectos, List<OrganizacionesExternas> pOrganizacionesExternas, List<FechaProyecto> pFechaProyectos)
+        private static Dictionary<string, string> ObtenerProyectos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicOrganizacionesCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<Proyecto> pProyectos, List<OrganizacionesExternas> pOrganizacionesExternas, List<FechaProyecto> pFechaProyectos, List<AreasUnescoProyectos> pAreasUnesco, List<CodigosUnesco> pCodigosUnesco)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsProyectosCargar = new HashSet<string>();
@@ -460,6 +519,21 @@ namespace Hercules.MA.Load
                         }
                     }
 
+                    //Temas de Investigación
+                    //foreach (AreasUnescoProyectos areas in pAreasUnesco.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
+                    //{
+                    //    foreach (CodigosUnesco codigos in pCodigosUnesco.Where(x => x.UNES_UNAR_CODIGO == areas.UNAR_CODIGO && x.UNES_UNCA_CODIGO == areas.UNCA_CODIGO && x.UNES_CODIGO == x.UNES_CODIGO))
+                    //    {
+                    //        if (!string.IsNullOrEmpty(codigos.UNES_NOMBRE))
+                    //        {
+                    //            proyectoCargar.Roh_hasProjectClassification = new List<ProjectOntology.ProjectClassification>();
+                    //            ProjectOntology.ProjectClassification categoryClassification = new ProjectOntology.ProjectClassification();
+                    //            categoryClassification.IdsRoh_projectClassificationNode = new List<string>() { "http://gnoss.com/items/um_" + codigos.UNES_NOMBRE };
+                    //            proyectoCargar.Roh_hasProjectClassification.Add(categoryClassification);
+                    //        }
+                    //    }
+                    //}
+
                     //Creamos el recurso.
                     ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, new List<string>());
                     pListaRecursosCargar.Add(resource);
@@ -541,7 +615,7 @@ namespace Hercules.MA.Load
                             DocumentOntology.BFO_0000023 persona = new DocumentOntology.BFO_0000023();
                             persona.IdRdf_member = pDicPersonasCargadas[autor.IDPERSONA];
                             persona.Rdf_comment = Int32.Parse(autor.ORDEN);
-                            persona.Foaf_nick  = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos( pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA).NOMBRE);
+                            persona.Foaf_nick = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA).NOMBRE);
                             documentoACargar.Bibo_authorList.Add(persona);
 
                             //DataAuthor
