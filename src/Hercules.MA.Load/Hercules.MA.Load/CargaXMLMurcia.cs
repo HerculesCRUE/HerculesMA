@@ -91,11 +91,11 @@ namespace Hercules.MA.Load
             listaRecursosCargar.Clear();
 
             //Cargar proyectos.
-            //CambiarOntologia("project");
-            //EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
-            //Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos);
-            //CargarDatos(listaRecursosCargar);
-            //listaRecursosCargar.Clear();
+            CambiarOntologia("project");
+            EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
+            Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos);
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
 
             //Cargar documentos.
             CambiarOntologia("document");
