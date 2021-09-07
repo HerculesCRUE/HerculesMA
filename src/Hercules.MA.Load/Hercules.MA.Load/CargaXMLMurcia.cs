@@ -93,7 +93,7 @@ namespace Hercules.MA.Load
             //Cargar proyectos.
             CambiarOntologia("project");
             EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
-            Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, areasUnescoProyectos, codigosUnesco);
+            Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, fechasEquiposProyectos, areasUnescoProyectos, codigosUnesco);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
@@ -113,6 +113,7 @@ namespace Hercules.MA.Load
 
             //Secundarios
             List<SecondaryResource> listaRecursosSecundariosCargar = new List<SecondaryResource>();
+
             //Categorización UM
             CambiarOntologia("taxonomy");
             CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "um");
@@ -427,7 +428,7 @@ namespace Hercules.MA.Load
         /// <param name="pOrganizacionesExternas"></param>
         /// <param name="pFechaProyectos"></param>
         /// <returns>Diccionario con el ID proyecto / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerProyectos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicOrganizacionesCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<Proyecto> pProyectos, List<OrganizacionesExternas> pOrganizacionesExternas, List<FechaProyecto> pFechaProyectos, List<AreasUnescoProyectos> pAreasUnesco, List<CodigosUnesco> pCodigosUnesco)
+        private static Dictionary<string, string> ObtenerProyectos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicOrganizacionesCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<Proyecto> pProyectos, List<OrganizacionesExternas> pOrganizacionesExternas, List<FechaProyecto> pFechaProyectos, List<FechaEquipoProyecto> pFechaEquipoProyectos, List<AreasUnescoProyectos> pAreasUnesco, List<CodigosUnesco> pCodigosUnesco)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsProyectosCargar = new HashSet<string>();
@@ -506,6 +507,27 @@ namespace Hercules.MA.Load
                         ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
                         persona.IdRoh_roleOf = pDicPersonasCargadas[equipo.IDPERSONA];
                         persona.Roh_order = equipo.NUMEROCOLABORADOR;
+
+                        //Tipo de participación.
+                        string tipoParticipacion = pFechaEquipoProyectos.FirstOrDefault(x => x.IDPROYECTO == proyectoID && x.NUMEROCOLABORADOR == equipo.NUMEROCOLABORADOR).CODTIPOPARTICIPACION;
+                        switch(tipoParticipacion)
+                        {
+                            case "IP":
+                                persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_050";
+                                break;
+                            case "IPRE":
+                                persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_OTHERS";
+                                persona.Roh_participationTypeOther = "Investigador principal responsable económico";
+                                break;
+                            case "INV":
+                                persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_060";
+                                break;
+                            case "RE":
+                                persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_OTHERS";
+                                persona.Roh_participationTypeOther = "Responsable económico";
+                                break;
+                        }
+
                         proyectoCargar.Vivo_relates.Add(persona);
                     }
 
@@ -546,6 +568,17 @@ namespace Hercules.MA.Load
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de los datos de documentos.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pDicPersonasCargadas"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaArticulos"></param>
+        /// <param name="pListaAutoresArticulos"></param>
+        /// <param name="pListaPersonas"></param>
+        /// <param name="pListaPalabrasClave"></param>
+        /// <returns>Diccionario con el ID documento / ID recurso.</returns>
         private static Dictionary<string, string> ObtenerDocumentos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
