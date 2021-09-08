@@ -17,6 +17,7 @@ using Gnoss.ApiWrapper.Exceptions;
 using SupportType = SupporttypeOntology.SupportType;
 using Language = LanguageOntology.Language;
 using PublicationType = PublicationtypeOntology.PublicationType;
+using Project = ProjectOntology.Project;
 
 namespace DocumentOntology
 {
@@ -152,6 +153,18 @@ namespace DocumentOntology
 				this.Dc_type = new PublicationType(propDc_type.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
+			SemanticPropertyModel propRoh_project = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/project");
+			if (propRoh_project != null && propRoh_project.PropertyValues.Count > 0)
+			{
+				foreach (SemanticPropertyModel.PropertyValue propValue in propRoh_project.PropertyValues)
+				{
+					if (propValue.RelatedEntity != null)
+					{
+						Project roh_project = new Project(propValue.RelatedEntity, idiomaUsuario);
+						this.Roh_project.Add(roh_project);
+					}
+				}
+			}
 		}
 
 		public Document(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
@@ -282,6 +295,19 @@ namespace DocumentOntology
 				this.Dc_type = new PublicationType(propDc_type.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
+			this.Roh_project = new List<Project>();
+			SemanticPropertyModel propRoh_project = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/project");
+			if (propRoh_project != null && propRoh_project.PropertyValues.Count > 0)
+			{
+				foreach (SemanticPropertyModel.PropertyValue propValue in propRoh_project.PropertyValues)
+				{
+					if (propValue.RelatedEntity != null)
+					{
+						Project roh_project = new Project(propValue.RelatedEntity, idiomaUsuario);
+						this.Roh_project.Add(roh_project);
+					}
+				}
+			}
 		}
 
 		public virtual string RdfType { get { return "http://purl.org/ontology/bibo/Document"; } }
@@ -407,10 +433,15 @@ namespace DocumentOntology
 		[RDFProperty("http://w3id.org/roh/title")]
 		public  string Roh_title { get; set;}
 
+		[LABEL(LanguageEnum.es, "Proyectos participantes")]
+		[RDFProperty("http://w3id.org/roh/project")]
+		public List<Project> Roh_project { get; set; }
+		public List<string> IdsRoh_project { get; set; }
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
+			propList.Add(new ListStringOntologyProperty("roh:project", this.IdsRoh_project));
 			propList.Add(new StringOntologyProperty("roh:supportType", this.IdRoh_supportType));
 			propList.Add(new ListStringOntologyProperty("vcard:hasLanguage", this.IdsVcard_hasLanguage));
 			propList.Add(new StringOntologyProperty("roh:legalDeposit", this.Roh_legalDeposit));
@@ -576,7 +607,14 @@ namespace DocumentOntology
 				}
 			}
 			}
-			if(this.Bibo_identifier != null)
+			if (this.IdsRoh_project != null)
+			{
+				foreach (var item2 in this.IdsRoh_project)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}", "http://w3id.org/roh/project", $"<{item2}>", list, " . ");
+				}
+			}
+			if (this.Bibo_identifier != null)
 			{
 				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{this.Bibo_identifier.ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://xmlns.com/foaf/0.1/Document>", list, " . ");
 				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{this.Bibo_identifier.ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://xmlns.com/foaf/0.1/Document\"", list, " . ");
@@ -916,7 +954,24 @@ namespace DocumentOntology
 					}
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/dataauthor_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/contributionGrade", $"<{itemRegex}>", list, " . ");
 				}
-				if(item0.Roh_relevantResults != null)
+					if (this.IdsRoh_project != null)
+					{
+						foreach (var item2 in this.IdsRoh_project)
+						{
+							Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
+							string itemRegex = item2;
+							if (regex.IsMatch(itemRegex))
+							{
+								itemRegex = $"http://gnoss/{resourceAPI.GetShortGuid(itemRegex).ToString().ToUpper()}";
+							}
+							else
+							{
+								itemRegex = itemRegex.ToLower();
+							}
+							AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://w3id.org/roh/project", $"<{itemRegex}>", list, " . ");
+						}
+					}
+					if (item0.Roh_relevantResults != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/dataauthor_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/relevantResults", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_relevantResults).ToLower()}\"", list, " . ");
 				}
