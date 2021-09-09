@@ -65,13 +65,28 @@ namespace Hercules.MA.Load
             List<TiposEventos> tiposEventos = LeerTiposEventos(inputFolder + "/Tipos eventos.xml");
 
             //Persona en específico a cargar.
-            HashSet<string> personasACargar = new HashSet<string>() { "79" };
+            //HashSet<string> personasACargar = new HashSet<string>() { "79" };
+            HashSet<string> personasACargar = new HashSet<string>();
 
             //Recursos para NO borrarlos.
             HashSet<string> listaNoBorrar = new HashSet<string>();
             listaNoBorrar.Add("http://gnoss.com/items/Person_21c0c51d-7a1e-1222-c23e-e8370eb10488_b51f0913-39cd-439d-980e-6cdb108d70e2");
             listaNoBorrar.Add("http://gnoss.com/items/CV_1fca886e-da0b-770e-1171-963e7ca03db8_2eb3851b-5489-47b2-b541-f99b37d83922");
             listaNoBorrar.Add("http://gnoss.com/items/Document_4656ba9a-af48-4bdd-83a4-832ccff0356f_df774a2a-5a9a-44b4-955d-8d631eed399b");
+            listaNoBorrar.Add("http://gnoss.com/items/Document_0e80c969-015e-4fcb-a049-4c225e340490_0cfb6939-5067-4504-afdd-789307a48112");
+            listaNoBorrar.Add("http://gnoss.com/items/Project_87ca995e-8ed0-4878-be62-6c0c16baa3f3_27c97476-1194-4107-85b4-a09e8c9304af");
+            listaNoBorrar.Add("http://gnoss.com/items/Project_26be071f-5640-477e-b596-d0f429e2ac21_c1545417-1173-4d7e-a350-f8c645963ab2");
+            listaNoBorrar.Add("http://gnoss.com/items/Project_ef0fc429-4dd9-4402-b55c-19c7562fbbfd_2697e5f6-465e-42ce-86fd-bdf61abb3375");
+            listaNoBorrar.Add("http://gnoss.com/items/Project_dc1323a3-1c8f-4b87-8fdf-ec703bae3ffd_997cb1d7-8b90-4ee1-ad06-97d9a5231d9d");
+            listaNoBorrar.Add("http://gnoss.com/items/Project_2e9e1645-d3e0-4303-a034-653e18137fdc_4aa03cfa-790e-4404-808e-c909f39e57f4");
+            listaNoBorrar.Add("http://gnoss.com/items/Person_e55eaec7-e020-4839-aaa4-042a07dfd823_f92b6662-8514-422a-ab31-040b8c1908af");
+            listaNoBorrar.Add("http://gnoss.com/items/Person_516e29e5-6ba5-4b2e-9ecb-53a900121386_00f01033-b255-4073-95cf-8d5c331b10f9");
+            listaNoBorrar.Add("http://gnoss.com/items/Person_21f63d02-c1f9-4202-9839-4b1c069aadcf_5ee49ae7-1dc8-42b5-b62b-4c1280366a62");
+            listaNoBorrar.Add("http://gnoss.com/items/Person_7964a83b-4aab-4614-a219-f3200a0d3477_6669764e-f17b-4c96-a643-8a775865ee72");
+            listaNoBorrar.Add("http://gnoss.com/items/Person_8c5317f2-f967-49bf-b270-2faf97adaf7c_daa5f283-e693-48a3-8b6c-098864b9137e");
+            listaNoBorrar.Add("http://gnoss.com/items/Person_e55eaec7-e020-4839-aaa4-042a07dfd823_f92b6662-8514-422a-ab31-040b8c1908af");
+            listaNoBorrar.Add("http://gnoss.com/items/Person_32616992-5ae9-4c6a-b047-10bf9717332f_ef14e2e4-018a-4cf9-b15d-500e890bb1d6");
+            listaNoBorrar.Add("http://gnoss.com/items/Person_516e29e5-6ba5-4b2e-9ecb-53a900121386_00f01033-b255-4073-95cf-8d5c331b10f9");
 
             //Lista de recursos a cargar.
             List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
@@ -100,7 +115,7 @@ namespace Hercules.MA.Load
             //Cargar documentos.
             CambiarOntologia("document");
             EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
-            Dictionary<string, string> documentosCargar = ObtenerDocumentos(personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave);
+            Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
@@ -579,7 +594,7 @@ namespace Hercules.MA.Load
         /// <param name="pListaPersonas"></param>
         /// <param name="pListaPalabrasClave"></param>
         /// <returns>Diccionario con el ID documento / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerDocumentos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave)
+        private static Dictionary<string, string> ObtenerDocumentos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave, List<Proyecto> pListaProyectos, List<EquipoProyecto> pEquipoProyectos)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsArticulosACargar = new HashSet<string>();
@@ -657,9 +672,33 @@ namespace Hercules.MA.Load
                             documentoACargar.Roh_dataAuthor.Add(dataAuthor);
 
                             numAutores++;
+
+                            //Proyectos
+                            documentoACargar.IdsRoh_project = new List<string>();
+                            List<EquipoProyecto> listaEquipos = pEquipoProyectos.Where(x => x.IDPERSONA == autor.IDPERSONA).ToList();
+                            foreach (EquipoProyecto equipo in listaEquipos)
+                            {
+                                int anyIncio = 0;
+                                int anyFin = DateTime.Now.Year;
+                                if (!string.IsNullOrEmpty(equipo.FECHAINICIO))
+                                {
+                                    anyIncio = Int32.Parse(equipo.FECHAINICIO.Split('/')[0]);
+                                }
+                                if (!string.IsNullOrEmpty(equipo.FECHAFIN))
+                                {
+                                    anyFin = Int32.Parse(equipo.FECHAFIN.Split('/')[0]);
+                                }
+                                if (!string.IsNullOrEmpty(articulo.ANO) && Int32.Parse(articulo.ANO) >= anyIncio && Int32.Parse(articulo.ANO) <= anyFin)
+                                {                                    
+                                    if (pDicProyectosACargar.ContainsKey(equipo.IDPROYECTO))
+                                    {
+                                        documentoACargar.IdsRoh_project.Add(pDicProyectosACargar[equipo.IDPROYECTO]);
+                                    }
+                                }
+                            }
                         }
                     }
-                    documentoACargar.Roh_authorsNumber = numAutores;
+                    documentoACargar.Roh_authorsNumber = numAutores;                    
 
                     //Address
                     DocumentOntology.Address direccion = new DocumentOntology.Address();
@@ -719,7 +758,7 @@ namespace Hercules.MA.Load
             }
             else
             {
-                //Obtengo los IDs de loas personas de murcia a Cargar
+                //Obtengo los IDs de loas personas de Murcia a Cargar
                 idsCVsACargar = new HashSet<string>(pListaPersonas.Where(x => x.PERSONAL_UMU == "S").Select(x => x.IDPERSONA).Intersect(pDicPersonasCargadas.Keys));
             }
 
