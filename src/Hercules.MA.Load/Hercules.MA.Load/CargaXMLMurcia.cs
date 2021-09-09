@@ -520,7 +520,10 @@ namespace Hercules.MA.Load
                     foreach (EquipoProyecto equipo in pEquiposProyectos.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
                     {
                         ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
-                        persona.IdRoh_roleOf = pDicPersonasCargadas[equipo.IDPERSONA];
+                        if (pDicPersonasCargadas.ContainsKey(equipo.IDPERSONA))
+                        {
+                            persona.IdRoh_roleOf = pDicPersonasCargadas[equipo.IDPERSONA];
+                        }
                         persona.Roh_order = equipo.NUMEROCOLABORADOR;
 
                         //Tipo de participación.
@@ -767,7 +770,7 @@ namespace Hercules.MA.Load
             {
                 Persona persona = pListaPersonas.FirstOrDefault(x => x.IDPERSONA == id);
 
-                if (persona != null && persona.PERSONAL_UMU == "S")
+                if (persona != null && persona.PERSONAL_UMU == "S" && pDicPersonasCargadas.ContainsKey(id))
                 {
                     CV cvACargar = new CV();
                     cvACargar.Foaf_name = persona.NOMBRE;

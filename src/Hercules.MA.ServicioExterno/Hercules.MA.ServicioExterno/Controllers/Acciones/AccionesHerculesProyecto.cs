@@ -2,6 +2,7 @@
 using Gnoss.ApiWrapper.ApiModel;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
 using Hercules.MA.ServicioExterno.ModelsDataGraficaColaboradores;
+using Hercules.MA.ServicioExterno.ModelsDataGraficaPublicaciones;
 using Hercules.MA.ServicioExterno.ModelsDataQueryRelaciones;
 using Newtonsoft.Json;
 using System;
@@ -19,6 +20,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         #region --- Constantes     
         private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config";
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models\JSON\prefijos.json";
+        private static string COLOR_GRAFICAS = "#6cafe3";
         #endregion
 
         private readonly ResourceApi mResourceApi;
@@ -35,6 +37,44 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             mCommunityApi = new CommunityApi(RUTA_OAUTH);
             mIdComunidad = mCommunityApi.GetCommunityId(XDocument.Load(RUTA_OAUTH).Element("config").Element("communityShortName").Value); // Pruebas: 423ee734-43e5-4183-9254-16d4d6d659c3
             mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
+        }
+
+        /// <summary>
+        /// Obtienes los datos de las pestañas de cada sección de la ficha.
+        /// </summary>
+        /// <param name="pProyecto">ID del recurso del proyecto.</param>
+        /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
+        public Dictionary<string, int> GetDatosCabeceraProyecto(string pProyecto)
+        {
+            string idGrafoBusqueda = ObtenerIdBusqueda(pProyecto);
+            Dictionary<string, int> dicResultados = new Dictionary<string, int>();
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append(mPrefijos);
+            select.Append("SELECT COUNT(?persona) AS ?NumParticipantes COUNT(?documento) AS ?NumPublicaciones ");
+            where.Append("WHERE {{ "); // Total de Participantes.
+            where.Append($@"<{idGrafoBusqueda}> vivo:relates ?relacion. ");
+            where.Append("?relacion roh:roleOf ?persona. ");
+            where.Append("} UNION { "); // Total Publicaciones.
+            where.Append($@"?documento roh:project <{idGrafoBusqueda}>. ");
+            where.Append("}} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    int numParticipantes = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumParticipantes"));
+                    int numPublicaciones = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumPublicaciones"));
+                    dicResultados.Add("Participantes", numParticipantes);
+                    dicResultados.Add("Publicaciones", numPublicaciones);
+                }
+            }
+
+            return dicResultados;
         }
 
         /// <summary>
@@ -104,7 +144,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
             #endregion
 
-            #region --- Creación de las relaciones
+            #region --- Creación de las relaciones.
             KeyValuePair<string, string> proyecto = dicNodos.First();
             foreach (KeyValuePair<string, string> item in dicNodos)
             {
@@ -150,6 +190,66 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             return colaboradores;
 
+        }
+
+        /// <summary>
+        /// Obtiene los datos para crear la gráfica de las publicaciones.
+        /// </summary>
+        /// <param name="pIdProyecto">ID del recurso del proyecto.</param>
+        /// <param name="pParametros">Filtros aplicados en las facetas.</param>
+        /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
+        public DataGraficaPublicaciones GetDatosGraficaPublicaciones(string pIdProyecto, string pParametros)
+        {
+            string idGrafoBusqueda = ObtenerIdBusqueda(pIdProyecto);
+            Dictionary<string, int> dicResultados = new Dictionary<string, int>(); // Dictionary<año, numDocumentos>
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append(mPrefijos);
+            select.Append("SELECT ?fecha COUNT(DISTINCT(?documento)) AS ?NumPublicaciones ");
+            where.Append("WHERE { ");
+            where.Append($@"?documento roh:project <{idGrafoBusqueda}>. ");
+            where.Append("?documento dct:issued ?fecha. ");
+            if (!string.IsNullOrEmpty(pParametros))
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                string filtros = CrearFiltros(dicParametros, "?s", ref aux);
+                where.Append(filtros);
+            }
+            where.Append("} ");
+            where.Append("ORDER BY ?fecha ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string fechaPublicacion = UtilidadesAPI.GetValorFilaSparqlObject(fila, "fecha");
+                    int numPublicaciones = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumPublicaciones"));
+                    dicResultados.Add(fechaPublicacion, numPublicaciones);
+                }
+            }
+
+            // Rellenar, agrupar y ordenar los años.
+            if (dicResultados != null && dicResultados.Count > 0)
+            {
+                RellenarAnys(dicResultados, dicResultados.First().Key, dicResultados.Last().Key);
+                dicResultados = AgruparAnys(dicResultados);
+                dicResultados = dicResultados.OrderBy(item => item.Key).ToDictionary((keyItem) => keyItem.Key, (valueItem) => valueItem.Value);
+            }
+
+            // Contruir el objeto de la gráfica.
+            List<string> listaColores = CrearListaColores(dicResultados.Count, COLOR_GRAFICAS);
+            Datasets datasets = new Datasets("Publicaciones", GetValuesList(dicResultados), listaColores, listaColores, 1);
+            ModelsDataGraficaPublicaciones.Data data = new ModelsDataGraficaPublicaciones.Data(GetKeysList(dicResultados), new List<Datasets> { datasets });
+            Options options = new Options(new Scales(new Y(true)), new Plugins(new Legend(new Labels(true), "top", "start")));
+            DataGraficaPublicaciones dataGrafica = new DataGraficaPublicaciones("bar", data, options);
+
+            return dataGrafica;
         }
 
         #region --- Utilidades

@@ -205,6 +205,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\DataGraficaColaboradores.cs" />
+    <Compile Include="Models\DataGraficaPublicaciones.cs" />
     <Compile Include="Models\DataQueryRelaciones.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
