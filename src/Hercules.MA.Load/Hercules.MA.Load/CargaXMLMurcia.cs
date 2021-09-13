@@ -556,25 +556,49 @@ namespace Hercules.MA.Load
                         if (pDicOrganizacionesCargadas.ContainsKey(organizacion.ENTIDAD))
                         {
                             proyectoCargar.IdsRoh_participates.Add(pDicOrganizacionesCargadas[organizacion.ENTIDAD]);
+                        }                        
+                    }
+                    
+                    //Organización financiadora.
+                    proyectoCargar.IdRoh_conductedBy = pDicOrganizacionesCargadas["UMU"];
+                    
+                    //Temas de Investigación
+                    proyectoCargar.tagList = new List<string>();
+                    foreach (AreasUnescoProyectos areas in pAreasUnesco.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
+                    {
+                        foreach (CodigosUnesco codigos in pCodigosUnesco.Where(x => x.UNES_UNAR_CODIGO == areas.UNAR_CODIGO && x.UNES_UNCA_CODIGO == areas.UNCA_CODIGO && x.UNES_CODIGO == x.UNES_CODIGO))
+                        {
+                            if (!string.IsNullOrEmpty(codigos.UNES_NOMBRE))
+                            {
+                                proyectoCargar.tagList.Add(codigos.UNES_NOMBRE);
+                            }
                         }
                     }
 
-                    //Temas de Investigación
-                    //foreach (AreasUnescoProyectos areas in pAreasUnesco.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
-                    //{
-                    //    foreach (CodigosUnesco codigos in pCodigosUnesco.Where(x => x.UNES_UNAR_CODIGO == areas.UNAR_CODIGO && x.UNES_UNCA_CODIGO == areas.UNCA_CODIGO && x.UNES_CODIGO == x.UNES_CODIGO))
-                    //    {
-                    //        if (!string.IsNullOrEmpty(codigos.UNES_NOMBRE))
-                    //        {
-                    //            proyectoCargar.Roh_hasProjectClassification = new List<ProjectOntology.ProjectClassification>();
-                    //            ProjectOntology.ProjectClassification categoryClassification = new ProjectOntology.ProjectClassification();
-                    //            categoryClassification.IdsRoh_projectClassificationNode = new List<string>() { "http://gnoss.com/items/um_" + codigos.UNES_NOMBRE };
-                    //            proyectoCargar.Roh_hasProjectClassification.Add(categoryClassification);
-                    //        }
-                    //    }
-                    //}
+                    //Ámbito geográfico
+                    if(!string.IsNullOrEmpty(proyecto.AMBITO_GEOGRAFICO))
+                    {
+                        switch (proyecto.AMBITO_GEOGRAFICO)
+                        {
+                            case "REGIONAL":
+                                proyectoCargar.IdVivo_geographicFocus = "http://gnoss.com/items/geographicregion_000";
+                                break;
+                            case "NACIONAL":
+                                proyectoCargar.IdVivo_geographicFocus = "http://gnoss.com/items/geographicregion_010";
+                                break;
+                            case "EUROPEO":
+                                proyectoCargar.IdVivo_geographicFocus = "http://gnoss.com/items/geographicregion_020";
+                                break;
+                            case "INTERNACIONAL":
+                                proyectoCargar.IdVivo_geographicFocus = "http://gnoss.com/items/geographicregion_030";
+                                break;
+                            case "PROPIO":
+                                proyectoCargar.IdVivo_geographicFocus = "http://gnoss.com/items/geographicregion_OTHERS";
+                                proyectoCargar.Roh_geographicFocusOther = "Propio";
+                                break;
+                        }
+                    }                    
 
-                    //Creamos el recurso.
                     ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, new List<string>());
                     pListaRecursosCargar.Add(resource);
 
@@ -849,44 +873,51 @@ namespace Hercules.MA.Load
         /// <param name="pOntology">Ontología a consultar.</param>
         private static void EliminarDatosCargados(string pRdfType, string pOntology, HashSet<string> pListaRecursosNoBorrar)
         {
-            //Consulta.
-            string select = string.Empty, where = string.Empty;
-            select += $@"SELECT ?s ";
-            where += $@"WHERE {{ ";
-            where += $@"?s a <{pRdfType}> ";
-            where += $@"}} ";
+            int max = 10000;
 
-            //Obtiene las URLs de los recursos a borrar.
-            List<string> listaUrl = new List<string>();
-            SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, pOntology);
-            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            while (max == 10000)
             {
-                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                max = 10000;
+                //Consulta.
+                string select = string.Empty, where = string.Empty;
+                select += $@"SELECT ?s ";
+                where += $@"WHERE {{ ";
+                where += $@"?s a <{pRdfType}> ";
+                where += $@"}}limit 10000 ";
+
+                //Obtiene las URLs de los recursos a borrar.
+                List<string> listaUrl = new List<string>();
+                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, pOntology);
+                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                 {
-                    string recurso = GetValorFilaSparqlObject(fila, "s");
-                    if (!pListaRecursosNoBorrar.Contains(recurso))
+                    max = resultadoQuery.results.bindings.Count;
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                     {
-                        listaUrl.Add(recurso);
+                        string recurso = GetValorFilaSparqlObject(fila, "s");
+                        if (!pListaRecursosNoBorrar.Contains(recurso))
+                        {
+                            listaUrl.Add(recurso);
+                        }
                     }
                 }
-            }
 
-            //Borra los recursos.
-            foreach (string idLargo in listaUrl)
-            {
-                try
+                //Borra los recursos.
+                foreach (string idLargo in listaUrl)
                 {
-                    if (listaUrl.Last() == idLargo)
+                    try
                     {
-                        mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(idLargo), true, true);
-                    }
-                    else
-                    {
-                        mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(idLargo));
-                    }
+                        if (listaUrl.Last() == idLargo)
+                        {
+                            mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(idLargo), true, true);
+                        }
+                        else
+                        {
+                            mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(idLargo));
+                        }
 
+                    }
+                    catch (Exception) { }
                 }
-                catch (Exception) { }
             }
         }
 

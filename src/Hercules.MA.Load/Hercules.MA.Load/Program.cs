@@ -14,7 +14,7 @@ namespace Hercules.MA.Load
         {
             CargaNormaCVN.mResourceApi = mResourceApi;
             CargaXMLMurcia.mResourceApi = mResourceApi;
-            //CargaNormaCVN.CargarEntidadesSecundarias();
+            CargaNormaCVN.CargarEntidadesSecundarias();
             CargaXMLMurcia.CargarEntidadesPrincipales();
         }
     }

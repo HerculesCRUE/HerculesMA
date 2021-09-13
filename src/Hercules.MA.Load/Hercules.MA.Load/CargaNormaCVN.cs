@@ -924,7 +924,7 @@ namespace Hercules.MA.Load
             mResourceApi.ChangeOntoly(pOntology);
 
             //Elimina los datos cargados antes de volverlos a cargar.
-            EliminarDatosCargados("http://w3id.org/roh/GeographicRegion", pOntology);
+            EliminarDatosCargados("http://vivoweb.org/ontology/core#GeographicRegion", pOntology);
 
             //Obtención de los objetos a cargar.
             List<GeographicRegion> regiones = new List<GeographicRegion>();
