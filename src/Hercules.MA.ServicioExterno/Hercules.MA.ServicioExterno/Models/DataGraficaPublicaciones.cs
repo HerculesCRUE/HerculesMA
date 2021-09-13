@@ -71,10 +71,22 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicaciones
     }
     public class Plugins
     {
+        public Title title { get; set; }
         public Legend legend { get; set; }
-        public Plugins(Legend pLegend)
+        public Plugins(Title pTitle, Legend pLegend)
         {
+            this.title = pTitle;
             this.legend = pLegend;
+        }
+    }
+    public class Title
+    {
+        public bool display { get; set; }
+        public string text { get; set; }
+        public Title(bool pDisplay, string pText)
+        {
+            this.display = pDisplay;
+            this.text = pText;
         }
     }
     public class Legend

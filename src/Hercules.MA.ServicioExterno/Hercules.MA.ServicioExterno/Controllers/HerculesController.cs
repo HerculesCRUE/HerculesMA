@@ -1,6 +1,7 @@
 ﻿using Hercules.MA.ServicioExterno.Controllers.Acciones;
 using Hercules.MA.ServicioExterno.ModelsDataGraficaColaboradores;
 using Hercules.MA.ServicioExterno.ModelsDataGraficaPublicaciones;
+using Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,6 +74,30 @@ namespace Hercules.MA.ServicioExterno.Controllers
             {
                 AccionesHerculesProyecto accionProyecto = new AccionesHerculesProyecto();
                 datosPublicaciones = accionProyecto.GetDatosGraficaPublicaciones(pIdProyecto, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Json(datosPublicaciones, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Controlador para obtener los datos de la gráfica de publicaciones (horizontal).
+        /// </summary>
+        /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet]
+        public ActionResult DatosGraficaPublicacionesHorizontal(string pIdProyecto, string pParametros)
+        {
+            DataGraficaPublicacionesHorizontal datosPublicaciones = null;
+
+            try
+            {
+                AccionesHerculesProyecto accionProyecto = new AccionesHerculesProyecto();
+                datosPublicaciones = accionProyecto.GetDatosGraficaPublicacionesHorizontal(pIdProyecto, pParametros);
             }
             catch (Exception)
             {

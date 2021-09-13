@@ -197,6 +197,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\Acciones\AccionesHerculesDocumento.cs" />
     <Compile Include="Controllers\Acciones\AccionesHerculesProyecto.cs" />
     <Compile Include="Controllers\HerculesController.cs" />
     <Compile Include="Controllers\Utilidades\Enumeraciones.cs" />
@@ -206,6 +207,7 @@
     </Compile>
     <Compile Include="Models\DataGraficaColaboradores.cs" />
     <Compile Include="Models\DataGraficaPublicaciones.cs" />
+    <Compile Include="Models\DataGraficaPublicacionesHorizontal.cs" />
     <Compile Include="Models\DataQueryRelaciones.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

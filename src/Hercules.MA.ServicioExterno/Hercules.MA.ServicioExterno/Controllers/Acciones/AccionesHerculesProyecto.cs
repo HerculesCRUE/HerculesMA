@@ -3,6 +3,7 @@ using Gnoss.ApiWrapper.ApiModel;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
 using Hercules.MA.ServicioExterno.ModelsDataGraficaColaboradores;
 using Hercules.MA.ServicioExterno.ModelsDataGraficaPublicaciones;
+using Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal;
 using Hercules.MA.ServicioExterno.ModelsDataQueryRelaciones;
 using Newtonsoft.Json;
 using System;
@@ -21,6 +22,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config";
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models\JSON\prefijos.json";
         private static string COLOR_GRAFICAS = "#6cafe3";
+        private static string COLOR_GRAFICAS_HORIZONTAL = "#1177ff";
         #endregion
 
         private readonly ResourceApi mResourceApi;
@@ -53,12 +55,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT COUNT(?persona) AS ?NumParticipantes COUNT(?documento) AS ?NumPublicaciones ");
+            select.Append("SELECT COUNT(DISTINCT ?persona) AS ?NumParticipantes COUNT(DISTINCT ?documento) AS ?NumPublicaciones  COUNT(DISTINCT ?nombreCategoria) AS ?NumCategorias ");
             where.Append("WHERE {{ "); // Total de Participantes.
             where.Append($@"<{idGrafoBusqueda}> vivo:relates ?relacion. ");
             where.Append("?relacion roh:roleOf ?persona. ");
             where.Append("} UNION { "); // Total Publicaciones.
             where.Append($@"?documento roh:project <{idGrafoBusqueda}>. ");
+            where.Append("} UNION { "); // Total Categorías.
+            where.Append($@"?documento roh:project <{idGrafoBusqueda}>. ");
+            where.Append("?documento roh:hasKnowledgeArea ?area. ");
+            where.Append("?area roh:categoryNode ?categoria. ");
+            where.Append($@"?categoria <http://www.w3.org/2008/05/skos#prefLabel> ?nombreCategoria. ");
             where.Append("}} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
@@ -69,8 +76,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     int numParticipantes = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumParticipantes"));
                     int numPublicaciones = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumPublicaciones"));
+                    int numCategorias = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumCategorias"));
                     dicResultados.Add("Participantes", numParticipantes);
                     dicResultados.Add("Publicaciones", numPublicaciones);
+                    dicResultados.Add("Categorias", numCategorias);
                 }
             }
 
@@ -211,12 +220,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("WHERE { ");
             where.Append($@"?documento roh:project <{idGrafoBusqueda}>. ");
             where.Append("?documento dct:issued ?fecha. ");
-            if (!string.IsNullOrEmpty(pParametros))
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
             {
                 // Creación de los filtros obtenidos por parámetros.
                 int aux = 0;
                 Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                string filtros = CrearFiltros(dicParametros, "?s", ref aux);
+                string filtros = CrearFiltros(dicParametros, "?documento", ref aux);
                 where.Append(filtros);
             }
             where.Append("} ");
@@ -244,10 +253,82 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Contruir el objeto de la gráfica.
             List<string> listaColores = CrearListaColores(dicResultados.Count, COLOR_GRAFICAS);
-            Datasets datasets = new Datasets("Publicaciones", GetValuesList(dicResultados), listaColores, listaColores, 1);
-            ModelsDataGraficaPublicaciones.Data data = new ModelsDataGraficaPublicaciones.Data(GetKeysList(dicResultados), new List<Datasets> { datasets });
-            Options options = new Options(new Scales(new Y(true)), new Plugins(new Legend(new Labels(true), "top", "start")));
+            ModelsDataGraficaPublicaciones.Datasets datasets = new ModelsDataGraficaPublicaciones.Datasets("Publicaciones", GetValuesList(dicResultados), listaColores, listaColores, 1);
+            ModelsDataGraficaPublicaciones.Data data = new ModelsDataGraficaPublicaciones.Data(GetKeysList(dicResultados), new List<ModelsDataGraficaPublicaciones.Datasets> { datasets });
+            ModelsDataGraficaPublicaciones.Options options = new ModelsDataGraficaPublicaciones.Options(new ModelsDataGraficaPublicaciones.Scales(new Y(true)), new ModelsDataGraficaPublicaciones.Plugins(new ModelsDataGraficaPublicaciones.Title(true, "Evolución temporal publicaciones"), new ModelsDataGraficaPublicaciones.Legend(new Labels(true), "top", "end")));
             DataGraficaPublicaciones dataGrafica = new DataGraficaPublicaciones("bar", data, options);
+
+            return dataGrafica;
+        }
+
+        /// <summary>
+        /// Obtiene los datos para crear la gráfica de las publicaciones (horizontal).
+        /// </summary>
+        /// <param name="pIdProyecto">ID del recurso del proyecto.</param>
+        /// <param name="pParametros">Filtros aplicados en las facetas.</param>
+        /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
+        public DataGraficaPublicacionesHorizontal GetDatosGraficaPublicacionesHorizontal(string pIdProyecto, string pParametros)
+        {
+            string idGrafoBusqueda = ObtenerIdBusqueda(pIdProyecto);
+            Dictionary<string, int> dicResultados = new Dictionary<string, int>(); 
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append(mPrefijos);
+            select.Append("SELECT ?nombreCategoria COUNT(?nombreCategoria) AS ?numCategorias ");
+            where.Append("WHERE { ");
+            where.Append($@"?documento roh:project <{idGrafoBusqueda}>. ");
+            where.Append("?documento dct:issued ?fecha. ");
+            where.Append("?documento roh:hasKnowledgeArea ?area. ");
+            where.Append("?area roh:categoryNode ?categoria. ");
+            where.Append("?categoria <http://www.w3.org/2008/05/skos#prefLabel> ?nombreCategoria. ");
+            if (!string.IsNullOrEmpty(pParametros))
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                string filtros = CrearFiltros(dicParametros, "?documento", ref aux);
+                where.Append(filtros);
+            }
+            where.Append("} ");
+            where.Append("GROUP BY (?nombreCategoria) ORDER BY DESC (?numCategorias) ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string nombreCategoria = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombreCategoria");
+                    int numCategoria = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numCategorias"));
+                    dicResultados.Add(nombreCategoria, numCategoria);
+                }
+            }
+
+            //Calculo del porcentaje
+            int numTotalCategorias = 0;
+            foreach(KeyValuePair<string, int> item in dicResultados)
+            {
+                numTotalCategorias += item.Value;
+            }
+            Dictionary<string, double> dicResultadosPorcentaje = new Dictionary<string, double>();
+            foreach (KeyValuePair<string, int> item in dicResultados)
+            {
+                double porcentaje = Math.Round((double)(100 * item.Value) / numTotalCategorias, 2);
+                dicResultadosPorcentaje.Add(item.Key, porcentaje);
+            }
+
+            // Contruir el objeto de la gráfica.
+            List<string> listaColores = CrearListaColores(dicResultados.Count, COLOR_GRAFICAS_HORIZONTAL);
+            ModelsDataGraficaPublicacionesHorizontal.Datasets datasets = new ModelsDataGraficaPublicacionesHorizontal.Datasets(dicResultadosPorcentaje.Values.ToList(), listaColores);
+            ModelsDataGraficaPublicacionesHorizontal.Data data = new ModelsDataGraficaPublicacionesHorizontal.Data(dicResultadosPorcentaje.Keys.ToList(), new List<ModelsDataGraficaPublicacionesHorizontal.Datasets> { datasets });
+            
+            //Máximo
+            x xAxes = new x(new Ticks(0, 100), new ScaleLabel(true, "Percentage"));
+            
+            ModelsDataGraficaPublicacionesHorizontal.Options options = new ModelsDataGraficaPublicacionesHorizontal.Options("y", new ModelsDataGraficaPublicacionesHorizontal.Plugins(new ModelsDataGraficaPublicacionesHorizontal.Title(true, "Resultados de la investigación por fuente de datos"), new ModelsDataGraficaPublicacionesHorizontal.Legend(false)), new ModelsDataGraficaPublicacionesHorizontal.Scales(xAxes));
+            DataGraficaPublicacionesHorizontal dataGrafica = new DataGraficaPublicacionesHorizontal("bar", data, options);
 
             return dataGrafica;
         }
@@ -304,6 +385,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>String con los filtros creados.</returns>
         private string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux)
         {
+            string varInicial = pVarAnterior;
+
             if (pDicFiltros != null && pDicFiltros.Count > 0)
             {
                 StringBuilder filtro = new StringBuilder();
@@ -311,7 +394,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
                 {
                     // Filtro de fechas.
-                    if (item.Key == "vivo:dateTime")
+                    if (item.Key == "dct:issued")
                     {
                         foreach (string fecha in item.Value)
                         {
@@ -353,6 +436,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
 
                         filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                        pVarAnterior = varInicial;
                     }
                 }
                 return filtro.ToString();
