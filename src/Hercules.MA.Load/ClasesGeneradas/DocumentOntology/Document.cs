@@ -49,7 +49,7 @@ namespace DocumentOntology
 			SemanticPropertyModel propBibo_identifier = pSemCmsModel.GetPropertyByPath("http://purl.org/ontology/bibo/identifier");
 			if(propBibo_identifier != null && propBibo_identifier.PropertyValues.Count > 0)
 			{
-				this.Bibo_identifier = new Document(propBibo_identifier.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				this.Bibo_identifier = new fDocument(propBibo_identifier.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			this.Vcard_hasLanguage = new List<Language>();
 			SemanticPropertyModel propVcard_hasLanguage = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasLanguage");
@@ -191,7 +191,7 @@ namespace DocumentOntology
 			SemanticPropertyModel propBibo_identifier = pSemCmsModel.GetPropertyByPath("http://purl.org/ontology/bibo/identifier");
 			if(propBibo_identifier != null && propBibo_identifier.PropertyValues.Count > 0)
 			{
-				this.Bibo_identifier = new Document(propBibo_identifier.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				this.Bibo_identifier = new fDocument(propBibo_identifier.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			this.Vcard_hasLanguage = new List<Language>();
 			SemanticPropertyModel propVcard_hasLanguage = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasLanguage");
@@ -322,7 +322,7 @@ namespace DocumentOntology
 
 		[LABEL(LanguageEnum.es,"Identificador de la publicación")]
 		[RDFProperty("http://purl.org/ontology/bibo/identifier")]
-		public  Document Bibo_identifier { get; set;}
+		public  fDocument Bibo_identifier { get; set;}
 
 		[LABEL(LanguageEnum.es,"Traducciones")]
 		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasLanguage")]
