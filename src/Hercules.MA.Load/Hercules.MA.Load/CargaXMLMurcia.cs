@@ -50,6 +50,7 @@ namespace Hercules.MA.Load
             List<Feature> features = LeerFeatures();
             List<FechaEquipoProyecto> fechasEquiposProyectos = LeerFechasEquiposProyectos(inputFolder + "/Fechas equipos proyectos.xml");
             List<FechaProyecto> fechasProyectos = LeerFechasProyectos(inputFolder + "/Fechas proyectos.xml");
+            List<FuentesFinanciacionProyectos> fuentesFinanciacionProyectos = LeerFuentesFinanciacionProyectos(inputFolder + "/Fuentes financiacion proyectos.xml");
             List<GrupoInvestigacion> gruposInvestigacion = LeerGruposInvestigacion(inputFolder + "/Grupos de investigacion.xml");
             List<InventoresPatentes> inventoresPatentes = LeerInventoresPatentes(inputFolder + "/Inventores patentes.xml");
             List<LineasDeInvestigacion> lineasDeInvestigacion = LeerLineasDeInvestigacion(inputFolder + "/Lineas de investigacion.xml");
@@ -93,37 +94,37 @@ namespace Hercules.MA.Load
 
             //Cargar organizaciones.
             CambiarOntologia("organization");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
-            Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas);
-            CargarDatos(listaRecursosCargar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
+            Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas, fuentesFinanciacionProyectos);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar personas.
             CambiarOntologia("person");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar proyectos.
             CambiarOntologia("project");
-            EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
-            Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, fechasEquiposProyectos, areasUnescoProyectos, codigosUnesco);
-            CargarDatos(listaRecursosCargar);
+            //EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
+            Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, fechasEquiposProyectos, areasUnescoProyectos, codigosUnesco, fuentesFinanciacionProyectos);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos.
             CambiarOntologia("document");
-            EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
+            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
             Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar curriculums
             CambiarOntologia("curriculumvitae");
-            EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
+            //EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
             Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar, documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Secundarios
@@ -214,7 +215,7 @@ namespace Hercules.MA.Load
             foreach (CodigosUnesco codigo in codigosUnesco)
             {
                 string codigoUnesco = codigo.UNES_UNAR_CODIGO;
-                if(!string.IsNullOrEmpty(codigo.UNES_UNCA_CODIGO) && codigo.UNES_UNCA_CODIGO != "00")
+                if (!string.IsNullOrEmpty(codigo.UNES_UNCA_CODIGO) && codigo.UNES_UNCA_CODIGO != "00")
                 {
                     codigoUnesco += $@"_{codigo.UNES_UNCA_CODIGO}";
                 }
@@ -374,8 +375,9 @@ namespace Hercules.MA.Load
         /// <param name="pListaRecursosCargar"></param>
         /// <param name="pEquiposProyectos"></param>
         /// <param name="pOrganizaciones"></param>
+        /// <param name="pFuentesFinanciacionProy"></param>
         /// <returns>Diccionario con el ID organización / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerOrganizaciones(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<OrganizacionesExternas> pOrganizaciones)
+        private static Dictionary<string, string> ObtenerOrganizaciones(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<OrganizacionesExternas> pOrganizaciones, List<FuentesFinanciacionProyectos> pFuentesFinanciacionProy)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsProyectosCargar = new HashSet<string>();
@@ -428,6 +430,30 @@ namespace Hercules.MA.Load
                 dicIDs.Add("UMU", resource.GnossId);
             }
 
+            //Agregamos las Organizaciones de las Fuentes de Financiación
+            Dictionary<string, string> dicOrganizacionFuente = new Dictionary<string, string>();
+            foreach (FuentesFinanciacionProyectos fuente in pFuentesFinanciacionProy)
+            {
+                if (!dicOrganizacionFuente.ContainsKey(fuente.AYFI_FUEN_CODIGO))
+                {
+                    dicOrganizacionFuente.Add(fuente.AYFI_FUEN_CODIGO, fuente.FUEN_NOMBRE);
+                }
+            }
+
+            foreach (KeyValuePair<string, string> organizacion in dicOrganizacionFuente)
+            {
+                //Guardamos los IDs en la lista.
+                if (!dicIDs.ContainsKey(organizacion.Value))
+                {
+                    OrganizationOntology.Organization organizacionCargar = new OrganizationOntology.Organization();
+                    organizacionCargar.Roh_title = organizacion.Value;
+                    organizacionCargar.Roh_crisIdentifier = organizacion.Key;
+                    ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    pListaRecursosCargar.Add(resource);
+                    dicIDs.Add(organizacion.Value, resource.GnossId);
+                }
+            }
+
             return dicIDs;
         }
 
@@ -443,7 +469,7 @@ namespace Hercules.MA.Load
         /// <param name="pOrganizacionesExternas"></param>
         /// <param name="pFechaProyectos"></param>
         /// <returns>Diccionario con el ID proyecto / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerProyectos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicOrganizacionesCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<Proyecto> pProyectos, List<OrganizacionesExternas> pOrganizacionesExternas, List<FechaProyecto> pFechaProyectos, List<FechaEquipoProyecto> pFechaEquipoProyectos, List<AreasUnescoProyectos> pAreasUnesco, List<CodigosUnesco> pCodigosUnesco)
+        private static Dictionary<string, string> ObtenerProyectos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicOrganizacionesCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<EquipoProyecto> pEquiposProyectos, List<Proyecto> pProyectos, List<OrganizacionesExternas> pOrganizacionesExternas, List<FechaProyecto> pFechaProyectos, List<FechaEquipoProyecto> pFechaEquipoProyectos, List<AreasUnescoProyectos> pAreasUnesco, List<CodigosUnesco> pCodigosUnesco, List<FuentesFinanciacionProyectos> pFuentesFinanciacionProy)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsProyectosCargar = new HashSet<string>();
@@ -528,7 +554,7 @@ namespace Hercules.MA.Load
 
                         //Tipo de participación.
                         string tipoParticipacion = pFechaEquipoProyectos.FirstOrDefault(x => x.IDPROYECTO == proyectoID && x.NUMEROCOLABORADOR == equipo.NUMEROCOLABORADOR).CODTIPOPARTICIPACION;
-                        switch(tipoParticipacion)
+                        switch (tipoParticipacion)
                         {
                             case "IP":
                                 persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_050";
@@ -556,12 +582,12 @@ namespace Hercules.MA.Load
                         if (pDicOrganizacionesCargadas.ContainsKey(organizacion.ENTIDAD))
                         {
                             proyectoCargar.IdsRoh_participates.Add(pDicOrganizacionesCargadas[organizacion.ENTIDAD]);
-                        }                        
+                        }
                     }
-                    
+
                     //Organización financiadora.
                     proyectoCargar.IdRoh_conductedBy = pDicOrganizacionesCargadas["UMU"];
-                    
+
                     //Temas de Investigación
                     proyectoCargar.tagList = new List<string>();
                     foreach (AreasUnescoProyectos areas in pAreasUnesco.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
@@ -576,7 +602,7 @@ namespace Hercules.MA.Load
                     }
 
                     //Ámbito geográfico
-                    if(!string.IsNullOrEmpty(proyecto.AMBITO_GEOGRAFICO))
+                    if (!string.IsNullOrEmpty(proyecto.AMBITO_GEOGRAFICO))
                     {
                         switch (proyecto.AMBITO_GEOGRAFICO)
                         {
@@ -597,7 +623,19 @@ namespace Hercules.MA.Load
                                 proyectoCargar.Roh_geographicFocusOther = "Propio";
                                 break;
                         }
-                    }                    
+                    }
+
+                    //Organización financiadora
+                    proyectoCargar.IdsRoh_grantedBy = new List<string>();
+                    HashSet<string> fuentesFinanciacion = new HashSet<string>();
+                    foreach (FuentesFinanciacionProyectos fuente in pFuentesFinanciacionProy.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
+                    {
+                        fuentesFinanciacion.Add(fuente.FUEN_NOMBRE);
+                    }
+                    foreach(string nomFuente in fuentesFinanciacion)
+                    {
+                        proyectoCargar.IdsRoh_grantedBy.Add(pDicOrganizacionesCargadas[nomFuente]);
+                    }
 
                     ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, new List<string>());
                     pListaRecursosCargar.Add(resource);
@@ -716,7 +754,7 @@ namespace Hercules.MA.Load
                                     anyFin = Int32.Parse(equipo.FECHAFIN.Split('/')[0]);
                                 }
                                 if (!string.IsNullOrEmpty(articulo.ANO) && Int32.Parse(articulo.ANO) >= anyIncio && Int32.Parse(articulo.ANO) <= anyFin)
-                                {                                    
+                                {
                                     if (pDicProyectosACargar.ContainsKey(equipo.IDPROYECTO))
                                     {
                                         documentoACargar.IdsRoh_project.Add(pDicProyectosACargar[equipo.IDPROYECTO]);
@@ -725,7 +763,7 @@ namespace Hercules.MA.Load
                             }
                         }
                     }
-                    documentoACargar.Roh_authorsNumber = numAutores;                    
+                    documentoACargar.Roh_authorsNumber = numAutores;
 
                     //Address
                     DocumentOntology.Address direccion = new DocumentOntology.Address();
@@ -760,6 +798,14 @@ namespace Hercules.MA.Load
 
                     //FreeTextKeyword
                     documentoACargar.Vivo_freeTextKeyword = pListaPalabrasClave.Where(x => x.PC_ARTI_CODIGO == articulo.CODIGO).Select(x => x.PC_PALABRA).ToList();
+
+                    //DOI
+                    if (!string.IsNullOrEmpty(articulo.ARTI_DOI))
+                    {
+                        documentoACargar.Bibo_identifier = new DocumentOntology.fDocument();
+                        documentoACargar.Bibo_identifier.Dc_title = LimpiarDoi(articulo.ARTI_DOI);
+                        documentoACargar.Bibo_identifier.Foaf_primaryTopic = "DOI";
+                    }
 
                     //Creamos el recurso.
                     ComplexOntologyResource resource = documentoACargar.ToGnossApiResource(mResourceApi, new List<string>());
@@ -1606,6 +1652,40 @@ namespace Hercules.MA.Load
             return elementos;
         }
 
+        private static List<FuentesFinanciacionProyectos> LeerFuentesFinanciacionProyectos(string pFile)
+        {
+            Console.Write($"Leyendo {pFile}...");
+            List<FuentesFinanciacionProyectos> elementos = new List<FuentesFinanciacionProyectos>();
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(System.IO.File.ReadAllText(pFile));
+
+            foreach (XmlNode node in doc.SelectNodes("main/DATA_RECORD"))
+            {
+                FuentesFinanciacionProyectos elemento = new FuentesFinanciacionProyectos();
+                foreach (string propiedad in Propiedades(elemento))
+                {
+                    switch (propiedad)
+                    {
+                        case "IDPROYECTO":
+                            elemento.IDPROYECTO = node.SelectSingleNode("IDPROYECTO").InnerText;
+                            break;
+                        case "AYFI_FUEN_CODIGO":
+                            elemento.AYFI_FUEN_CODIGO = node.SelectSingleNode("AYFI_FUEN_CODIGO").InnerText;
+                            break;
+                        case "FUEN_NOMBRE":
+                            elemento.FUEN_NOMBRE = node.SelectSingleNode("FUEN_NOMBRE").InnerText;
+                            break;
+                        default:
+                            throw new Exception("Propiedad no controlada");
+                    }
+                }
+                elementos.Add(elemento);
+            }
+            Console.WriteLine($"\rLeídos {elementos.Count} elementos de {pFile}");
+            return elementos;
+        }
+
         private static List<GrupoInvestigacion> LeerGruposInvestigacion(string pFile)
         {
             Console.Write($"Leyendo {pFile}...");
@@ -2197,5 +2277,22 @@ namespace Hercules.MA.Load
             return (ARTICULOS.Contains(pPalabra) || CONJUNCIONES.Contains(pPalabra) || PREPOSICIONESMUYCOMUNES.Contains(pPalabra));
         }
 
+        /// <summary>
+        /// Permite normalziar el código DOI de los datos.
+        /// </summary>
+        /// <param name="pDoi">DOI a normalizar.</param>
+        /// <returns>DOI normalizado.</returns>
+        public static string LimpiarDoi(string pDoi)
+        {
+            try
+            {
+                Uri uri = new Uri(pDoi);
+                return uri.AbsolutePath.Substring(1);
+            }
+            catch (Exception) 
+            { 
+                return pDoi; 
+            }
+        }
     }
 }

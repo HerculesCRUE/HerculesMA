@@ -116,6 +116,7 @@
     <Compile Include="Models\UMU\Feature.cs" />
     <Compile Include="Models\UMU\FechaEquipoProyecto.cs" />
     <Compile Include="Models\UMU\FechaProyecto.cs" />
+    <Compile Include="Models\UMU\FuentesFinanciacionProyectos.cs" />
     <Compile Include="Models\UMU\GrupoInvestigacion.cs" />
     <Compile Include="Models\UMU\InventoresPatentes.cs" />
     <Compile Include="Models\UMU\LineasDeInvestigacion.cs" />
@@ -195,6 +196,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Dataset\UMU\Fechas proyectos.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dataset\UMU\Fuentes financiacion proyectos.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Dataset\UMU\Grupos de investigacion.xml">
