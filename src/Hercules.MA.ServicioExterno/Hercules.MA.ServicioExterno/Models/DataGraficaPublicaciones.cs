@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Threading.Tasks;
 
-namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicaciones
+namespace Hercules.MA.ServicioExterno.Models.DataGraficaPublicaciones
 {
     public class DataGraficaPublicaciones
     {
@@ -101,7 +101,6 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicaciones
             this.align = pAlign;
         }
     }
-
     public class Labels
     {
         public bool usePointStyle { get; set; }

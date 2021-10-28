@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Threading.Tasks;
 
-namespace Hercules.MA.ServicioExterno.ModelsDataGraficaColaboradores
+namespace Hercules.MA.ServicioExterno.Models.DataGraficaColaboradores
 {
     public class DataGraficaColaboradores
     {
@@ -21,13 +21,13 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaColaboradores
     public class Data
     {
         public string id { get; set; }
-        public string name { get; set; }      
+        public string name { get; set; }
         public string source { get; set; }
         public string target { get; set; }
         public double? weight { get; set; }
-        public string group { get; set; }  
-        
-        public Data (string pId, string pName, string pSource, string pTarget, double? pWeight, string pGroup)
+        public string group { get; set; }
+
+        public Data(string pId, string pName, string pSource, string pTarget, double? pWeight, string pGroup)
         {
             this.id = pId;
             this.name = pName;

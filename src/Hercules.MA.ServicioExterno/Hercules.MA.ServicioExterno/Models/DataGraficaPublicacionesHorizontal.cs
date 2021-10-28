@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Threading.Tasks;
 
-namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
+namespace Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal
 {
     public class DataGraficaPublicacionesHorizontal
     {
@@ -17,7 +17,6 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
             this.options = pOptions;
         }
     }
-
     public class Data
     {
         public List<string> labels { get; set; }
@@ -28,7 +27,6 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
             this.datasets = pDatasets;
         }
     }
-
     public class Datasets
     {
         public List<double> data { get; set; }
@@ -39,11 +37,10 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
             this.backgroundColor = pBackgroundColor;
         }
     }
-
     public class Options
     {
         public string indexAxis { get; set; }
-        public Plugins plugins { get; set; }  
+        public Plugins plugins { get; set; }
         public Scales scales { get; set; }
         public Options(string pIndexAxis, Plugins pPlugins, Scales pScales)
         {
@@ -62,18 +59,16 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
             this.legend = pLegend;
         }
     }
-
     public class Title
     {
         public bool display { get; set; }
         public string text { get; set; }
-        public Title (bool pDisplay, string pText)
+        public Title(bool pDisplay, string pText)
         {
             this.display = pDisplay;
             this.text = pText;
         }
     }
-
     public class Legend
     {
         public bool display { get; set; }
@@ -82,7 +77,6 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
             this.display = pDisplay;
         }
     }
-
     public class Scales
     {
         public x x { get; set; }
@@ -91,7 +85,6 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
             this.x = pY;
         }
     }
-
     public class x
     {
         public Ticks ticks { get; set; }
@@ -102,7 +95,6 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
             this.scaleLabel = pScaleLabel;
         }
     }
-
     public class Ticks
     {
         public int min { get; set; }
@@ -113,7 +105,6 @@ namespace Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal
             this.max = max;
         }
     }
-
     public class ScaleLabel
     {
         public bool display { get; set; }

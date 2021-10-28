@@ -1,15 +1,20 @@
 ﻿using Hercules.MA.ServicioExterno.Controllers.Acciones;
-using Hercules.MA.ServicioExterno.ModelsDataGraficaColaboradores;
-using Hercules.MA.ServicioExterno.ModelsDataGraficaPublicaciones;
-using Hercules.MA.ServicioExterno.ModelsDataGraficaPublicacionesHorizontal;
+using Hercules.MA.ServicioExterno.Models;
+using Hercules.MA.ServicioExterno.Models.DataGraficaColaboradores;
+using Hercules.MA.ServicioExterno.Models.DataGraficaPublicaciones;
+using Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using System.Threading.Tasks;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class HerculesController : Controller
     {
         /// <summary>
@@ -17,14 +22,15 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet]
+        [HttpPost]
+        [Route("DatosFichaProyecto")]
         public ActionResult DatosFichaProyecto(string pIdProyecto)
         {
             Dictionary<string, int> datosCabeceraFichas = null;
 
             try
             {
-                AccionesHerculesProyecto accionProyecto = new AccionesHerculesProyecto();
+                AccionesProyecto accionProyecto = new AccionesProyecto();
                 datosCabeceraFichas = accionProyecto.GetDatosCabeceraProyecto(pIdProyecto);
             }
             catch (Exception)
@@ -32,7 +38,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
 
-            return Json(datosCabeceraFichas, JsonRequestBehavior.AllowGet);
+            return Json(datosCabeceraFichas);
         }
 
         /// <summary>
@@ -41,14 +47,15 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet]
+        [HttpPost]
+        [Route("DatosGraficaRedColaboradores")]
         public ActionResult DatosGraficaRedColaboradores(string pIdProyecto, string pParametros)
         {
             List<DataGraficaColaboradores> datosRedColaboradores = null;
 
             try
             {
-                AccionesHerculesProyecto accionProyecto = new AccionesHerculesProyecto();
+                AccionesProyecto accionProyecto = new AccionesProyecto();
                 datosRedColaboradores = accionProyecto.GetDatosGraficaRedColaboradores(pIdProyecto, pParametros);
             }
             catch (Exception)
@@ -56,7 +63,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
 
-            return Json(datosRedColaboradores, JsonRequestBehavior.AllowGet);
+            return Json(datosRedColaboradores);
         }
 
         /// <summary>
@@ -65,14 +72,15 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet]
+        [HttpPost]
+        [Route("DatosGraficaPublicaciones")]
         public ActionResult DatosGraficaPublicaciones(string pIdProyecto, string pParametros)
         {
             DataGraficaPublicaciones datosPublicaciones = null;
 
             try
             {
-                AccionesHerculesProyecto accionProyecto = new AccionesHerculesProyecto();
+                AccionesProyecto accionProyecto = new AccionesProyecto();
                 datosPublicaciones = accionProyecto.GetDatosGraficaPublicaciones(pIdProyecto, pParametros);
             }
             catch (Exception)
@@ -80,7 +88,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
 
-            return Json(datosPublicaciones, JsonRequestBehavior.AllowGet);
+            return Json(datosPublicaciones);
         }
 
         /// <summary>
@@ -89,14 +97,15 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet]
+        [HttpPost]
+        [Route("DatosGraficaPublicacionesHorizontal")]
         public ActionResult DatosGraficaPublicacionesHorizontal(string pIdProyecto, string pParametros)
         {
             DataGraficaPublicacionesHorizontal datosPublicaciones = null;
 
             try
             {
-                AccionesHerculesProyecto accionProyecto = new AccionesHerculesProyecto();
+                AccionesProyecto accionProyecto = new AccionesProyecto();
                 datosPublicaciones = accionProyecto.GetDatosGraficaPublicacionesHorizontal(pIdProyecto, pParametros);
             }
             catch (Exception)
@@ -104,7 +113,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
 
-            return Json(datosPublicaciones, JsonRequestBehavior.AllowGet);
+            return Json(datosPublicaciones);
         }
     }
 }
