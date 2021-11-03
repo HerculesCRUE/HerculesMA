@@ -205,5 +205,28 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(datosPublicacionesPersona);
         }
+
+        /// <summary>
+        /// Controlador para obtener los datos de la gráfica en horizontal de personas.
+        /// </summary>
+        /// <param name="pIdPersona">ID de la persona en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaHorizontalPersonas")]
+        public IActionResult DatosGraficaHorizontalPersonas(string pIdPersona, string pParametros)
+        {
+            DataGraficaPublicacionesHorizontal datosPublicacionesPersona = null;
+
+            try
+            {
+                AccionesPersona accionPersona = new AccionesPersona();
+                datosPublicacionesPersona = accionPersona.GetDatosGraficaProyectosPersonaHorizontal(pIdPersona, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosPublicacionesPersona);
+        }
     }
 }

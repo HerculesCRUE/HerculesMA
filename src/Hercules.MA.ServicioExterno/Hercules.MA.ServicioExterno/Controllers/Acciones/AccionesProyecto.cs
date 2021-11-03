@@ -21,26 +21,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
     {
         #region --- Constantes     
         private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
+        private static ResourceApi mResourceApi = new ResourceApi(RUTA_OAUTH);
+        private static CommunityApi mCommunityApi = new CommunityApi(RUTA_OAUTH);
+        private static Guid mIdComunidad = mCommunityApi.GetCommunityId();
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
+        private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string COLOR_GRAFICAS = "#6cafe3";
         private static string COLOR_GRAFICAS_HORIZONTAL = "#1177ff";
         #endregion
-
-        private readonly ResourceApi mResourceApi;
-        private readonly CommunityApi mCommunityApi;
-        private readonly Guid mIdComunidad;
-        private readonly string mPrefijos;
-
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public AccionesProyecto()
-        {
-            mResourceApi = new ResourceApi(RUTA_OAUTH);
-            mCommunityApi = new CommunityApi(RUTA_OAUTH);
-            mIdComunidad = mCommunityApi.GetCommunityId();
-            mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
-        }
 
         /// <summary>
         /// Obtienes los datos de las pestañas de cada sección de la ficha.
