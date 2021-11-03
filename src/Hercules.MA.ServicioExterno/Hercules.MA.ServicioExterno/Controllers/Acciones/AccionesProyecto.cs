@@ -38,7 +38,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             mResourceApi = new ResourceApi(RUTA_OAUTH);
             mCommunityApi = new CommunityApi(RUTA_OAUTH);
-            throw new Exception(File.ReadAllText(RUTA_OAUTH));
             mIdComunidad = mCommunityApi.GetCommunityId();
             mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         }
