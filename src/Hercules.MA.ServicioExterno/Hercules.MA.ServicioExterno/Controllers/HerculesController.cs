@@ -3,6 +3,7 @@ using Hercules.MA.ServicioExterno.Models;
 using Hercules.MA.ServicioExterno.Models.DataGraficaColaboradores;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicaciones;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,16 +16,16 @@ namespace Hercules.MA.ServicioExterno.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class HerculesController : Controller
+    [EnableCors("_myAllowSpecificOrigins")]
+    public class HerculesController : ControllerBase
     {
         /// <summary>
         /// Controlador para obtener los datos del proyecto en la cabecera de la ficha.
         /// </summary>
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpPost]
-        [Route("DatosFichaProyecto")]
-        public ActionResult DatosFichaProyecto(string pIdProyecto)
+        [HttpPost("DatosFichaProyecto")]
+        public IActionResult DatosFichaProyecto(string pIdProyecto)
         {
             Dictionary<string, int> datosCabeceraFichas = null;
 
@@ -38,7 +39,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
 
-            return Json(datosCabeceraFichas);
+            return Ok(datosCabeceraFichas);
         }
 
         /// <summary>
@@ -47,9 +48,8 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpPost]
-        [Route("DatosGraficaRedColaboradores")]
-        public ActionResult DatosGraficaRedColaboradores(string pIdProyecto, string pParametros)
+        [HttpPost("DatosGraficaRedColaboradores")]
+        public IActionResult DatosGraficaRedColaboradores(string pIdProyecto, string pParametros)
         {
             List<DataGraficaColaboradores> datosRedColaboradores = null;
 
@@ -63,7 +63,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
 
-            return Json(datosRedColaboradores);
+            return Ok(datosRedColaboradores);
         }
 
         /// <summary>
@@ -72,9 +72,8 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpPost]
-        [Route("DatosGraficaPublicaciones")]
-        public ActionResult DatosGraficaPublicaciones(string pIdProyecto, string pParametros)
+        [HttpPost("DatosGraficaPublicaciones")]
+        public IActionResult DatosGraficaPublicaciones(string pIdProyecto, string pParametros)
         {
             DataGraficaPublicaciones datosPublicaciones = null;
 
@@ -88,7 +87,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
 
-            return Json(datosPublicaciones);
+            return Ok(datosPublicaciones);
         }
 
         /// <summary>
@@ -97,9 +96,8 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpPost]
-        [Route("DatosGraficaPublicacionesHorizontal")]
-        public ActionResult DatosGraficaPublicacionesHorizontal(string pIdProyecto, string pParametros)
+        [HttpPost("DatosGraficaPublicacionesHorizontal")]
+        public IActionResult DatosGraficaPublicacionesHorizontal(string pIdProyecto, string pParametros)
         {
             DataGraficaPublicacionesHorizontal datosPublicaciones = null;
 
@@ -113,7 +111,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
 
-            return Json(datosPublicaciones);
+            return Ok(datosPublicaciones);
         }
     }
 }
