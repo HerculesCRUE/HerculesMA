@@ -24,7 +24,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpPost("DatosFichaProyecto")]
+        [HttpGet("DatosFichaProyecto")]
         public IActionResult DatosFichaProyecto(string pIdProyecto)
         {
             Dictionary<string, int> datosCabeceraFichas = null;
@@ -48,7 +48,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpPost("DatosGraficaRedColaboradores")]
+        [HttpGet("DatosGraficaRedColaboradores")]
         public IActionResult DatosGraficaRedColaboradores(string pIdProyecto, string pParametros)
         {
             List<DataGraficaColaboradores> datosRedColaboradores = null;
@@ -72,7 +72,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpPost("DatosGraficaPublicaciones")]
+        [HttpGet("DatosGraficaPublicaciones")]
         public IActionResult DatosGraficaPublicaciones(string pIdProyecto, string pParametros)
         {
             DataGraficaPublicaciones datosPublicaciones = null;
@@ -96,7 +96,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpPost("DatosGraficaPublicacionesHorizontal")]
+        [HttpGet("DatosGraficaPublicacionesHorizontal")]
         public IActionResult DatosGraficaPublicacionesHorizontal(string pIdProyecto, string pParametros)
         {
             DataGraficaPublicacionesHorizontal datosPublicaciones = null;
@@ -112,6 +112,52 @@ namespace Hercules.MA.ServicioExterno.Controllers
             }
 
             return Ok(datosPublicaciones);
+        }
+
+        /// <summary>
+        /// Controlador para obtener los datos de la persona en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdPersona">ID de la persona en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosFichaPersona")]
+        public IActionResult DatosFichaPersona(string pIdPersona)
+        {
+            Dictionary<string, int> datosCabeceraFichas = null;
+
+            try
+            {
+                AccionesPersona accionPersona = new AccionesPersona();
+                datosCabeceraFichas = accionPersona.GetDatosCabeceraPersona(pIdPersona);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosCabeceraFichas);
+        }
+
+        /// <summary>
+        /// Controlador para obtener los datos de la gráfica de publicaciones en persona.
+        /// </summary>
+        /// <param name="pIdPersona">ID de la persona en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaPublicacionesPersona")]
+        public IActionResult DatosGraficaPublicacionesPersona(string pIdPersona, string pParametros)
+        {
+            DataGraficaPublicaciones datosPublicacionesPersona = null;
+
+            try
+            {
+                AccionesPersona accionPersona = new AccionesPersona();
+                datosPublicacionesPersona = accionPersona.GetDatosGraficaPublicaciones(pIdPersona, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosPublicacionesPersona);
         }
     }
 }
