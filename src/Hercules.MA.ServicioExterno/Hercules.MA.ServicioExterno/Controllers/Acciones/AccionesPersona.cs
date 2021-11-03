@@ -142,6 +142,73 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return dataGrafica;
         }
 
+        public List<string> GetGrupoInvestigacion(string pIdPersona)
+        {
+            string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
+            List<string> grupos = new List<string>();
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append(mPrefijos);
+            select.Append("SELECT DISTINCT(?tituloGrupo) ");
+            where.Append("WHERE { ");
+            where.Append("?s ?p ?grupo. ");
+            where.Append("?s foaf:member ?miembros. ");
+            where.Append("?s roh:mainResearcher ?investigadorPrincipal. ");
+            where.Append("?s roh:title ?tituloGrupo. ");
+            where.Append("?miembros roh:roleOf ?persona1. ");
+            where.Append("?investigadorPrincipal  roh:roleOf ?persona2. ");
+            where.Append("FILTER(?grupo = 'group') ");
+            where.Append($@"FILTER(?persona1 LIKE <{idGrafoBusqueda}> || ?persona2 LIKE <{idGrafoBusqueda}>) ");
+            where.Append("} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    grupos.Add(UtilidadesAPI.GetValorFilaSparqlObject(fila, "tituloGrupo"));
+                }
+            }
+
+            return grupos;
+        }
+
+        public List<string> GetTopicsPersona(string pIdPersona)
+        {
+            string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
+            List<string> categorias = new List<string>();
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append(mPrefijos);
+            select.Append("SELECT DISTINCT(?nombreCategoria) ");
+            where.Append("WHERE { ");
+            where.Append("?s ?p ?documento. ");
+            where.Append("?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores. ");
+            where.Append("?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona. ");
+            where.Append("?documento <http://w3id.org/roh/hasKnowledgeArea> ?area. ");
+            where.Append("?area <http://w3id.org/roh/categoryNode> ?categoria. ");
+            where.Append("?categoria <http://www.w3.org/2008/05/skos#prefLabel> ?nombreCategoria. ");
+            where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>)");
+            where.Append("} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    categorias.Add(UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombreCategoria"));
+                }
+            }
+
+            return categorias;
+        }
+
         /// <summary>
         /// Obtiene los filtros por los parámetros de la URL.
         /// </summary>

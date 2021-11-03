@@ -159,5 +159,51 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(datosPublicacionesPersona);
         }
+
+        /// <summary>
+        /// Controlador para obtener los datos de los grupos.
+        /// </summary>
+        /// <param name="pIdPersona">ID de la persona en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGruposPersona")]
+        public IActionResult DatosGruposPersona(string pIdPersona)
+        {
+            List<string> datosPublicacionesPersona = null;
+
+            try
+            {
+                AccionesPersona accionPersona = new AccionesPersona();
+                datosPublicacionesPersona = accionPersona.GetGrupoInvestigacion(pIdPersona);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosPublicacionesPersona);
+        }
+
+        /// <summary>
+        /// Controlador para obtener los datos de las categorias.
+        /// </summary>
+        /// <param name="pIdPersona">ID de la persona en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosCategoriasPersona")]
+        public IActionResult DatosCategoriasPersona(string pIdPersona)
+        {
+            List<string> datosPublicacionesPersona = null;
+
+            try
+            {
+                AccionesPersona accionPersona = new AccionesPersona();
+                datosPublicacionesPersona = accionPersona.GetTopicsPersona(pIdPersona);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosPublicacionesPersona);
+        }
     }
 }
