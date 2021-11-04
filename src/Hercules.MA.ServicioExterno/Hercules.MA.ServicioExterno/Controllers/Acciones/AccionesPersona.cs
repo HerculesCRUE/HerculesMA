@@ -1,8 +1,10 @@
 ﻿using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
+using Hercules.MA.ServicioExterno.Models.DataGraficaColaboradores;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicaciones;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal;
+using Hercules.MA.ServicioExterno.Models.DataQueryRelaciones;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -20,7 +22,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
         private static ResourceApi mResourceApi = new ResourceApi(RUTA_OAUTH);
         private static CommunityApi mCommunityApi = new CommunityApi(RUTA_OAUTH);
-        private static Guid mIdComunidad=mCommunityApi.GetCommunityId();
+        private static Guid mIdComunidad = mCommunityApi.GetCommunityId();
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string COLOR_GRAFICAS = "#6cafe3";
@@ -54,7 +56,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("?listaAutoresC rdf:member ?persona. ");
             where.Append("?documentoC roh:hasKnowledgeArea ?area. ");
             where.Append("?area roh:categoryNode ?categoria. ");
-            where.Append("} UNION { "); // Total Categorías.
+            where.Append("} UNION { "); // Total Colaboradores.
             where.Append("?proyecto <http://vivoweb.org/ontology/core#relates> ?relacion. ");
             where.Append("?relacion <http://w3id.org/roh/roleOf> ?persona. ");
             where.Append("?proyecto <http://vivoweb.org/ontology/core#relates> ?relacion2. ");
@@ -211,6 +213,94 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return categorias;
         }
 
+        public List<DataGraficaColaboradores> GetDatosGraficaRedColaboradoresPersonas(string pIdPersona, string pParametros)
+        {
+            string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
+            Dictionary<string, string> dicNodos = new Dictionary<string, string>();
+            Dictionary<string, DataQueryRelaciones> dicRelaciones = new Dictionary<string, DataQueryRelaciones>();
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = null, where = null;
+            string personas = $@"<{idGrafoBusqueda}>";
+
+            if (!string.IsNullOrEmpty(pParametros))
+            {
+                dicNodos.Add(idGrafoBusqueda, pParametros.ToLower().Trim());
+            }
+
+            // Consulta sparql.
+            select = new StringBuilder(mPrefijos);
+            select.Append("SELECT ?nombre ?persona2 AS ?id count(*) as ?numRelaciones");
+            where = new StringBuilder("WHERE { ");
+            where.Append("?proyecto  <http://vivoweb.org/ontology/core#relates>?relacion.  ");
+            where.Append("?relacion <http://w3id.org/roh/roleOf> ?persona. ");
+            where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
+            where.Append("?proyecto <http://vivoweb.org/ontology/core#relates>?relacion2. ");
+            where.Append("?relacion2 <http://w3id.org/roh/roleOf> ?persona2. ");
+            where.Append("?persona2 <http://xmlns.com/foaf/0.1/name> ?nombre. ");
+            where.Append($@"FILTER(?persona2 != <{idGrafoBusqueda}>) ");
+            where.Append("} Group by ?nombre ?persona2 order by DESC (?numRelaciones) LIMIT 10");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "id");
+                    string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
+                    if (!dicNodos.ContainsKey(id))
+                    {
+                        dicNodos.Add(id, nombreColaborador.ToLower().Trim());
+                        personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "id") + ">";
+                    }
+                }
+            }
+
+            KeyValuePair<string, string> proyecto = dicNodos.First();
+            foreach (KeyValuePair<string, string> item in dicNodos)
+            {
+                if (item.Key != proyecto.Key)
+                {
+                    dicRelaciones.Add(item.Key, new DataQueryRelaciones(new List<Datos> { new Datos(proyecto.Key, 1) }));
+                }
+            }
+
+            // Construcción del objeto de la gráfica.            
+            List<DataGraficaColaboradores> colaboradores = new List<DataGraficaColaboradores>();
+            int maximasRelaciones = 1;
+
+            // Nodos. 
+            if (dicNodos != null && dicNodos.Count > 0)
+            {
+                foreach (KeyValuePair<string, string> nodo in dicNodos)
+                {
+                    string clave = nodo.Key;
+                    string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
+                    Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(clave, valor, null, null, null, "nodes");
+                    DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, true, true);
+                    colaboradores.Add(dataColabo);
+                }
+            }
+
+            // Relaciones.
+            if (dicRelaciones != null && dicRelaciones.Count > 0)
+            {
+                foreach (KeyValuePair<string, DataQueryRelaciones> sujeto in dicRelaciones)
+                {
+                    foreach (Datos relaciones in sujeto.Value.idRelacionados)
+                    {
+                        relaciones.numVeces = 1;
+                        string id = $@"{sujeto.Key}~{relaciones.idRelacionado}~{relaciones.numVeces}";
+                        Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(id, null, sujeto.Key, relaciones.idRelacionado, CalcularGrosor(maximasRelaciones, relaciones.numVeces), "edges");
+                        DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, null, null);
+                        colaboradores.Add(dataColabo);
+                    }
+                }
+            }
+
+            return colaboradores;
+        }
+
         public DataGraficaPublicacionesHorizontal GetDatosGraficaProyectosPersonaHorizontal(string pIdPersona, string pParametros)
         {
 
@@ -294,6 +384,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             DataGraficaPublicacionesHorizontal dataGrafica = new DataGraficaPublicacionesHorizontal("bar", data, options);
 
             return dataGrafica;
+        }
+
+        /// <summary>
+        /// Permite calcular el valor del ancho de la línea según el número de colaboraciones que tenga el nodo.
+        /// </summary>
+        /// <param name="pMax">Valor máximo.</param>
+        /// <param name="pColabo">Número de colaboraciones.</param>
+        /// <returns>Ancho de la línea en formate double.</returns>
+        private double CalcularGrosor(int pMax, int pColabo)
+        {
+            return Math.Round(((double)pColabo / (double)pMax) * 10, 2);
         }
 
         /// <summary>
