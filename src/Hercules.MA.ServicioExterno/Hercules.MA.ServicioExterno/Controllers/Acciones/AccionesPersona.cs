@@ -43,26 +43,23 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT COUNT(DISTINCT ?proyecto) AS ?NumProyectos COUNT(DISTINCT ?documento) AS ?NumPublicaciones COUNT(DISTINCT ?categoria) AS ?NumCategorias COUNT(DISTINCT ?persona2) AS ?NumColaboradores");
+            select.Append("SELECT COUNT(DISTINCT ?proyecto) AS ?NumProyectos COUNT(DISTINCT ?documento) AS ?NumPublicaciones COUNT(DISTINCT ?categoria) AS ?NumCategorias ");
             where.Append("WHERE {{ "); // Total Proyectos.
             where.Append("?proyecto vivo:relates ?relacion. ");
             where.Append("?relacion roh:roleOf ?persona. ");
-            where.Append("  } UNION { "); // Total Documentos.
+            where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
+            where.Append("} UNION { "); // Total Documentos.
             where.Append("?documento bibo:authorList ?listaAutores. ");
             where.Append("?listaAutores rdf:member ?persona. ");
+            where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
             where.Append("} UNION { "); // Total Categorías.
             where.Append("?s ?p ?documentoC. ");
             where.Append("?documentoC bibo:authorList ?listaAutoresC. ");
             where.Append("?listaAutoresC rdf:member ?persona. ");
             where.Append("?documentoC roh:hasKnowledgeArea ?area. ");
             where.Append("?area roh:categoryNode ?categoria. ");
-            where.Append("} UNION { "); // Total Colaboradores.
-            where.Append("?proyecto <http://vivoweb.org/ontology/core#relates> ?relacion. ");
-            where.Append("?relacion <http://w3id.org/roh/roleOf> ?persona. ");
-            where.Append("?proyecto <http://vivoweb.org/ontology/core#relates> ?relacion2. ");
-            where.Append("?relacion2 <http://w3id.org/roh/roleOf> ?persona2. ");
-            where.Append($@"FILTER(?persona2 != <{idGrafoBusqueda}>) ");
-            where.Append($@"}}FILTER(?persona = <{idGrafoBusqueda}>)}} ");
+            where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
+            where.Append("}} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
 
@@ -73,10 +70,42 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     int numProyectos = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumProyectos"));
                     int numDocumentos = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumPublicaciones"));
                     int numCategorias = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumCategorias"));
-                    int numColaboradores = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumColaboradores"));
                     dicResultados.Add("Proyectos", numProyectos);
                     dicResultados.Add("Publicaciones", numDocumentos);
                     dicResultados.Add("Categorias", numCategorias);
+                }
+            }
+
+            // Consulta sparql.
+            select = new StringBuilder();
+            where = new StringBuilder();
+            select.Append(mPrefijos);
+            select.Append("SELECT  COUNT(DISTINCT ?id) AS ?NumColaboradores ");
+            where.Append("WHERE {{ "); 
+            where.Append("SELECT * WHERE { ");
+            where.Append("?proyecto vivo:relates ?relacion. ");
+            where.Append("?relacion roh:roleOf ?persona. ");
+            where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
+            where.Append("?proyecto vivo:relates ?relacion2. ");
+            where.Append("?relacion2 roh:roleOf ?id. ");
+            where.Append($@"FILTER(?id != <{idGrafoBusqueda}>)}} ");
+            where.Append("} UNION { ");
+            where.Append("SELECT * WHERE { ");
+            where.Append("?documento bibo:authorList ?listaAutores. ");
+            where.Append("?listaAutores rdf:member ?persona2. ");
+            where.Append($@"FILTER(?persona2 = <{idGrafoBusqueda}>) ");
+            where.Append("?documento bibo:authorList ?listaAutores2. ");
+            where.Append("?listaAutores2 rdf:member ?id. ");
+            where.Append($@"FILTER(?id != <{idGrafoBusqueda}>) ");
+            where.Append("}}} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    int numColaboradores = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumColaboradores"));
                     dicResultados.Add("Colaboradores", numColaboradores);
                 }
             }
@@ -146,6 +175,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return dataGrafica;
         }
 
+        /// <summary>
+        /// Obtiene el dato del grupo de investigación el cual pertenece la persona.
+        /// </summary>
+        /// <param name="pIdPersona">ID del recurso de la persona.</param>
+        /// <returns>Lista con los grupos de investigación pertenecientes.</returns>
         public List<string> GetGrupoInvestigacion(string pIdPersona)
         {
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
@@ -180,6 +214,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return grupos;
         }
 
+        /// <summary>
+        /// Obtiene los topics de las publicaciones de la persona.
+        /// </summary>
+        /// <param name="pIdPersona">ID del recurso de la persona.</param>
+        /// <returns>Listado de topics de dicha persona.</returns>
         public List<string> GetTopicsPersona(string pIdPersona)
         {
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
@@ -213,13 +252,22 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return categorias;
         }
 
+        /// <summary>
+        /// Obtiene un listado con los objetos de la gráfica.
+        /// </summary>
+        /// <param name="pIdPersona">ID del recurso de la persona.</param>
+        /// <param name="pParametros">En este caso, el nombre completo de la persona.</param>
+        /// <returns>Listado de objetos de la gráfica.</returns>
         public List<DataGraficaColaboradores> GetDatosGraficaRedColaboradoresPersonas(string pIdPersona, string pParametros)
         {
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
             Dictionary<string, string> dicNodos = new Dictionary<string, string>();
             Dictionary<string, DataQueryRelaciones> dicRelaciones = new Dictionary<string, DataQueryRelaciones>();
+
+            Dictionary<string, Dictionary<string, int>> dicPersonasColabo = new();
+
+
             SparqlObject resultadoQuery = null;
-            StringBuilder select = null, where = null;
             string personas = $@"<{idGrafoBusqueda}>";
 
             if (!string.IsNullOrEmpty(pParametros))
@@ -227,34 +275,76 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 dicNodos.Add(idGrafoBusqueda, pParametros.ToLower().Trim());
             }
 
-            // Consulta sparql.
-            select = new StringBuilder(mPrefijos);
-            select.Append("SELECT ?nombre ?persona2 AS ?id count(*) as ?numRelaciones");
-            where = new StringBuilder("WHERE { ");
-            where.Append("?proyecto  <http://vivoweb.org/ontology/core#relates>?relacion.  ");
-            where.Append("?relacion <http://w3id.org/roh/roleOf> ?persona. ");
-            where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
-            where.Append("?proyecto <http://vivoweb.org/ontology/core#relates>?relacion2. ");
-            where.Append("?relacion2 <http://w3id.org/roh/roleOf> ?persona2. ");
-            where.Append("?persona2 <http://xmlns.com/foaf/0.1/name> ?nombre. ");
-            where.Append($@"FILTER(?persona2 != <{idGrafoBusqueda}>) ");
-            where.Append("} Group by ?nombre ?persona2 order by DESC (?numRelaciones) LIMIT 10");
+            // Consulta sparql (Obtener personas que han trabajado en los mismos proyectos).
+            string select = mPrefijos;
+            select += "SELECT ?persona2 COUNT(*) AS ?numRelaciones ?nombre";
+            string where = $@"
+                WHERE {{
+                    ?proyecto vivo:relates ?relacion. 
+                    ?relacion roh:roleOf ?persona.
+                    FILTER(?persona = <{idGrafoBusqueda}>)
+                    ?proyecto vivo:relates ?relacion2. 
+                    ?relacion2 roh:roleOf ?persona2.
+                    ?persona2 foaf:name ?nombre
+                    FILTER(?persona2 != <{idGrafoBusqueda}>)
+                    }} ORDER BY DESC(COUNT(*))
+                "; 
 
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+            resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
-                    string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "id");
+                    string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "persona2");
+                    int proyectosComun = Int32.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelaciones"));
                     string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
-                    if (!dicNodos.ContainsKey(id))
+
+                    Dictionary<string, int> dicPersonaNum = new();
+                    dicPersonaNum.Add(nombreColaborador, proyectosComun);
+                    dicPersonasColabo.Add(id, dicPersonaNum);
+                }
+            }
+
+
+            // Consulta sparql (Obtener personas que han trabajado en los mismos documentos).
+            where = $@"
+                WHERE {{
+                    ?documento bibo:authorList ?listaAutores.
+                    ?listaAutores rdf:member ?personaDoc.
+                    FILTER(?personaDoc= <{idGrafoBusqueda}>)
+                    ?documento bibo:authorList ?listaAutores2.
+                    ?listaAutores2 rdf:member ?persona2.
+                    ?persona2 foaf:name ?nombre
+                    FILTER(?persona2 != <{idGrafoBusqueda}>)
+                    }} ORDER BY DESC(COUNT(*))
+                ";
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "persona2");
+                    int proyectosComun = Int32.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelaciones"));
+                    string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
+
+                    if (dicPersonasColabo.ContainsKey(id))
                     {
-                        dicNodos.Add(id, nombreColaborador.ToLower().Trim());
-                        personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "id") + ">";
+                        dicPersonasColabo[id][nombreColaborador] += proyectosComun;
+                    }
+                    else
+                    {
+                        Dictionary<string, int> dicPersonaNum = new();
+                        dicPersonaNum.Add(nombreColaborador, proyectosComun);
+                        dicPersonasColabo.Add(id, dicPersonaNum);
                     }
                 }
             }
+
+            dicPersonasColabo.OrderByDescending(x => x.Value.Values.First());
+            dicPersonasColabo.Take(10).ToList().ForEach(x => dicNodos.Add(x.Key, x.Value.Keys.First().ToLower().Trim()));
 
             KeyValuePair<string, string> proyecto = dicNodos.First();
             foreach (KeyValuePair<string, string> item in dicNodos)
@@ -301,9 +391,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return colaboradores;
         }
 
+        /// <summary>
+        /// Obtiene el objeto de la gráfica horizontal de topics.
+        /// </summary>
+        /// <param name="pIdPersona">ID del recurso de la persona.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>Objeto que se trata en JS para contruir la gráfica.</returns>
         public DataGraficaPublicacionesHorizontal GetDatosGraficaProyectosPersonaHorizontal(string pIdPersona, string pParametros)
         {
-
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
             Dictionary<string, int> dicResultados = new Dictionary<string, int>();
             SparqlObject resultadoQuery = null;
@@ -311,10 +406,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            //select.Append("Select DISTINCT(?titulo) ");
-
             select.Append("Select ?nombreCategoria count(*) as ?numCategorias ");
-
             where.Append("where");
             where.Append("{ ");
             where.Append("?s ?p ?documento. ");
@@ -327,12 +419,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("} ");
             where.Append("Group by(?nombreCategoria)");
 
-
-
-
-
-
-
             if (!string.IsNullOrEmpty(pParametros))
             {
                 // Creación de los filtros obtenidos por parámetros.
@@ -341,8 +427,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 string filtros = CrearFiltros(dicParametros, "?documento", ref aux);
                 where.Append(filtros);
             }
-            //where.Append("} ");
-            //where.Append("GROUP BY (?nombreCategoria) ORDER BY DESC (?numCategorias) ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
 
@@ -355,10 +439,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     dicResultados.Add(nombreCategoria, numCategoria);
                 }
             }
+
             //Ordenar diccionario
-
-
             var dicionarioOrdenado = dicResultados.OrderByDescending(x => x.Value);
+
             // Calculo del porcentaje.
             int numTotalCategorias = 0;
             foreach (KeyValuePair<string, int> item in dicionarioOrdenado)
