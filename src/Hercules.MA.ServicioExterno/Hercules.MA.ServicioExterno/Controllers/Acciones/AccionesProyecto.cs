@@ -91,15 +91,23 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?proyecto a 'project'.
 	                    ?proyecto <http://vivoweb.org/ontology/core#relates> ?members.
 	                    ?members <http://w3id.org/roh/roleOf> ?people. 
-	                    OPTIONAL{{ ?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}}
-	                    OPTIONAL{{ ?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}} 
+	                    OPTIONAL{{ 
+                            ?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.
+                        }}
+	                    OPTIONAL{{ 
+                            ?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.
+                        }} 
                         BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)
                         BIND(IF(bound(?fechaProjInit), ?fechaProjInit, 10000000000000) as ?fechaProjInitAux)
 			            <{idGrafoBusqueda}> ?p2 ?members2.
 			            FILTER (?p2 IN (<http://xmlns.com/foaf/0.1/member>, <http://w3id.org/roh/mainResearcher> ) )
 			            ?members2 <http://w3id.org/roh/roleOf> ?people. 
-			            OPTIONAL{{ ?members2 <http://vivoweb.org/ontology/core#start> ?fechaGroupInit.}}
-			            OPTIONAL{{ ?members2 <http://vivoweb.org/ontology/core#end> ?fechaGroupEnd.}}
+			            OPTIONAL{{ 
+                            ?members2 <http://vivoweb.org/ontology/core#start> ?fechaGroupInit.
+                        }}
+			            OPTIONAL{{ 
+                            ?members2 <http://vivoweb.org/ontology/core#end> ?fechaGroupEnd.
+                        }}
 			            BIND(IF(bound(?fechaGroupEnd), ?fechaGroupEnd, 30000000000000) as ?fechaGroupEndAux)
                         BIND(IF(bound(?fechaGroupInit), ?fechaGroupInit, 10000000000000) as ?fechaGroupInitAux)
                         FILTER(?fechaGroupEndAux > ?fechaProjInitAux AND ?fechaGroupInitAux < ?fechaProjEndAux)                                          
@@ -125,8 +133,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?members <http://w3id.org/roh/roleOf> ?person.
                         FILTER(?propmembers  in (<http://xmlns.com/foaf/0.1/member>, <http://w3id.org/roh/mainResearcher>))
 	                    ?person a 'person'.
-                        OPTIONAL{{ ?members2 <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.}}
-	                    OPTIONAL{{ ?members2 <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.}}
+                        OPTIONAL{{ 
+                            ?members2 <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.
+                        }}
+	                    OPTIONAL{{ 
+                            ?members2 <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.
+                        }}
 	                    BIND(IF(bound(?fechaPersonaEnd), ?fechaPersonaEnd, 30000000000000) as ?fechaPersonaEndAux)
                         BIND(IF(bound(?fechaPersonaInit), ?fechaPersonaInit, 10000000000000) as ?fechaPersonaInitAux)
                         ?publicacion a 'document'.
