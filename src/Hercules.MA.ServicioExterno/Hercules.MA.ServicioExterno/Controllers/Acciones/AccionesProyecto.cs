@@ -549,7 +549,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>ID del grafo de búsqueda.</returns>
         private string ObtenerIdBusqueda(string pIdOntologia)
         {
-            Guid idCorto = mResourceApi.GetShortGuid(pIdOntologia);
+            Guid idCorto = mResourceApi.GetShortGuid(pIdOntologia) ;
             return $@"http://gnoss/{idCorto.ToString().ToUpper()}";
         }
 
