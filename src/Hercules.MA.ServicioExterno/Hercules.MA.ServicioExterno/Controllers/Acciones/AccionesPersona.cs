@@ -470,12 +470,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("where");
             where.Append("{ ");
             where.Append("?s ?p ?documento. ");
-            where.Append("?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.");
-            where.Append("?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona.");
-            where.Append("?documento <http://w3id.org/roh/hasKnowledgeArea> ?area. ");
-            where.Append("?area <http://w3id.org/roh/categoryNode> ?categoria. ");
-            where.Append("?categoria <http://www.w3.org/2008/05/skos#prefLabel> ?nombreCategoria. ");
-            where.Append("FILTER( ?persona = <http://gnoss/7C1768AE-BA7C-4CBF-9087-63606E74B085>)");
+            where.Append("?documento bibo:authorList ?listaAutores.");
+            where.Append("?listaAutores rdf:member ?persona.");
+            where.Append("?documento roh:hasKnowledgeArea ?area. ");
+            where.Append("?area roh:categoryNode ?categoria. ");
+            where.Append("?categoria skos:prefLabel ?nombreCategoria. ");
+            where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>)");
             where.Append("} ");
             where.Append("Group by(?nombreCategoria)");
 
