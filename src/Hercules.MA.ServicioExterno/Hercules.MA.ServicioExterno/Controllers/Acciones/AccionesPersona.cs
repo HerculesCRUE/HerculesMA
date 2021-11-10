@@ -198,7 +198,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select1.Append("SELECT COUNT(DISTINCT(?proyecto)) AS ?numPublicaciones ?anyoInicio ");
             where1.Append("WHERE { ");
             where1.Append("?proyecto vivo:relates ?relacion. ");
-            where2.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
+            where1.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
             where1.Append("?proyecto vivo:start ?fecha. ");
             where1.Append("?proyecto vivo:end ?fechaFin. ");
             where1.Append("?relacion roh:roleOf ?persona. ");
