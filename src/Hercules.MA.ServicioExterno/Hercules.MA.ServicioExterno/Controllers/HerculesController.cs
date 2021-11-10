@@ -89,6 +89,31 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok(datosCabeceraFichas);
         }
 
+
+        /// <summary>
+        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaProyectosGrupo")]
+        public IActionResult DatosGraficaProyectosGrupo(string pIdGrupo, string pParametros)
+        {
+            DataGraficaPublicaciones datosCabeceraFichas = null;
+
+            try
+            {
+                AccionesGroup accionProyecto = new AccionesGroup();
+                datosCabeceraFichas = accionProyecto.GetDatosGraficaProyectos(pIdGrupo, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosCabeceraFichas);
+        }
+
         /// <summary>
         /// Controlador para obtener los datos de la gráfica de red de colaboradores.
         /// </summary>
