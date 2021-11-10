@@ -1,6 +1,8 @@
 ﻿using Hercules.MA.ServicioExterno.Controllers.Acciones;
 using Hercules.MA.ServicioExterno.Models;
+using Hercules.MA.ServicioExterno.Models.DataFechas;
 using Hercules.MA.ServicioExterno.Models.DataGraficaColaboradores;
+using Hercules.MA.ServicioExterno.Models.DataGraficaProyectosGroupBars;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicaciones;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal;
 using Microsoft.AspNetCore.Cors;
@@ -307,14 +309,37 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdPersona">ID de la persona en cuestión.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
         [HttpGet("DatosGraficaColaboradoresPersonas")]
-        public IActionResult DatosGraficaColaboradoresPersonas(string pIdPersona, string pParametros)
+        public IActionResult DatosGraficaColaboradoresPersonas(string pIdPersona, string pParametros, string pNombrePersona)
         {
             List<DataGraficaColaboradores> datosPublicacionesPersona = null;
 
             try
             {
                 AccionesPersona accionPersona = new AccionesPersona();
-                datosPublicacionesPersona = accionPersona.GetDatosGraficaRedColaboradoresPersonas(pIdPersona, pParametros);
+                datosPublicacionesPersona = accionPersona.GetDatosGraficaRedColaboradoresPersonas(pIdPersona, pParametros, pNombrePersona);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosPublicacionesPersona);
+        }
+
+        /// <summary>
+        /// Controlador para obtener los datos de los proyectos por año.
+        /// </summary>
+        /// <param name="pIdPersona">ID de la persona en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaProyectosPersona")]
+        public IActionResult DatosGraficaProyectosPersona(string pIdPersona, string pParametros)
+        {
+            ObjGrafica datosPublicacionesPersona = null;
+
+            try
+            {
+                AccionesPersona accionPersona = new AccionesPersona();
+                datosPublicacionesPersona = accionPersona.GetDatosGraficaProyectos(pIdPersona, pParametros);
             }
             catch (Exception)
             {

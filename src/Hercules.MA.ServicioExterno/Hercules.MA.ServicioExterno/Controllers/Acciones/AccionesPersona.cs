@@ -1,7 +1,9 @@
 ﻿using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
+using Hercules.MA.ServicioExterno.Models.DataFechas;
 using Hercules.MA.ServicioExterno.Models.DataGraficaColaboradores;
+using Hercules.MA.ServicioExterno.Models.DataGraficaProyectosGroupBars;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicaciones;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal;
 using Hercules.MA.ServicioExterno.Models.DataQueryRelaciones;
@@ -176,6 +178,146 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
         /// <summary>
+        /// Obtiene los datos para crear la gráfico de los proyectos por año.
+        /// </summary>
+        /// <param name="pIdPersona">ID del recurso de la persona.</param>
+        /// <param name="pParametros">Filtros aplicados en las facetas.</param>
+        public ObjGrafica GetDatosGraficaProyectos(string pIdPersona, string pParametros)
+        {
+            string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
+            Dictionary<string, DataFechas> dicResultados = new ();
+            SparqlObject resultadoQuery = null;
+            StringBuilder select1 = new(), where1 = new();
+            StringBuilder select2 = new(), where2 = new();
+
+            // Consultas sparql.
+
+            #region --- Obtención de datos del año de inicio de los proyectos
+            select1.Append(mPrefijos);
+            select1.Append("SELECT COUNT(DISTINCT(?proyecto)) AS ?numPublicaciones ?anyoInicio ");
+            where1.Append("WHERE { ");
+            where1.Append("?proyecto vivo:relates ?relacion. ");
+            where1.Append("?proyecto vivo:start ?fecha. ");
+            where1.Append("?proyecto vivo:end ?fechaFin. ");
+            where1.Append("?relacion roh:roleOf ?persona. ");
+            where1.Append("BIND( SUBSTR( STR(?fecha), 0, 4) AS ?anyoInicio) ");
+            where1.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                string filtros = CrearFiltros(dicParametros, "?proyecto", ref aux, pVarFechaInicio:"fecha", pVarFechaFin:"fechaFin");
+                where1.Append(filtros);
+            }
+            where1.Append("} ");
+            where1.Append("ORDER BY ?anyoInicio ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select1.ToString(), where1.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string anyo = UtilidadesAPI.GetValorFilaSparqlObject(fila, "anyoInicio");
+                    int numProyectos = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numPublicaciones"));
+
+                    if (!dicResultados.ContainsKey(anyo))
+                    {
+                        // Si no contiene el año, creo el objeto.
+                        DataFechas data = new();
+                        data.numProyectosInicio = numProyectos;
+                        data.numProyectosFin = 0;
+                        dicResultados.Add(anyo, data);
+                    }
+                    else
+                    {
+                        // Si lo contiene, se lo agrego.
+                        dicResultados[anyo].numProyectosInicio += numProyectos;
+                    }
+                }
+            }
+            #endregion
+
+            #region --- Obtención de datos del año de fin de los proyectos
+            select2.Append(mPrefijos);
+            select2.Append("SELECT COUNT(DISTINCT(?proyecto)) AS ?numPublicaciones ?anyoFin ");
+            where2.Append("WHERE { ");
+            where2.Append("?proyecto vivo:relates ?relacion. ");
+            where2.Append("?proyecto vivo:start ?fecha. ");
+            where2.Append("?proyecto vivo:end ?fechaFin. ");
+            where2.Append("?relacion roh:roleOf ?persona. ");
+            where2.Append("BIND( SUBSTR( STR(?fechaFin), 0, 4) AS ?anyoFin) ");
+            where2.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                string filtros = CrearFiltros(dicParametros, "?proyecto", ref aux, pVarFechaInicio: "fecha", pVarFechaFin: "fechaFin");
+                where2.Append(filtros);
+            }
+            where2.Append("} ");
+            where2.Append("ORDER BY ?anyoFin ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select2.ToString(), where2.ToString(), mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string anyo = UtilidadesAPI.GetValorFilaSparqlObject(fila, "anyoFin");
+                    int numProyectos = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numPublicaciones"));
+
+                    if (!dicResultados.ContainsKey(anyo))
+                    {
+                        // Si no contiene el año, creo el objeto.
+                        DataFechas data = new();
+                        data.numProyectosInicio = 0;
+                        data.numProyectosFin = numProyectos;
+                        dicResultados.Add(anyo, data);
+                    }
+                    else
+                    {
+                        // Si lo contiene, se lo agrego.
+                        dicResultados[anyo].numProyectosFin += numProyectos;
+                    }
+                }
+            }
+            #endregion
+
+            // Rellenar años intermedios y ordenarlos.
+            string max = "2100";
+            string min = "1900";
+            if(dicResultados != null && dicResultados.Count > 0)
+            {
+                max = dicResultados.Keys.First();
+                min = dicResultados.Keys.Last();
+            }
+            RellenarAnys(dicResultados, max, min);
+            dicResultados = dicResultados.OrderBy(item => item.Key).ToDictionary((keyItem) => keyItem.Key, (valueItem) => valueItem.Value);
+
+            // Se coge los datos del número de proyectos.
+            List<int> listaInicios = new();
+            List<int> listaFines = new();
+            foreach (KeyValuePair<string, DataFechas> item in dicResultados)
+            {
+                listaInicios.Add(item.Value.numProyectosInicio);
+                listaFines.Add(item.Value.numProyectosFin);
+            }
+
+            // Se construye el objeto con los datos.
+            List<DatosAnyo> listaDatos = new List<DatosAnyo>();
+            listaDatos.Add(new DatosAnyo("Inicio", "green", listaInicios));
+            listaDatos.Add(new DatosAnyo("Fin", "red", listaFines));
+
+            // Se crea el objeto de la gráfica.
+            DataGraficaProyectosGroupBars dataObj = new DataGraficaProyectosGroupBars(dicResultados.Keys.ToList(), listaDatos);
+
+            return new ObjGrafica("bar", dataObj, new Models.DataGraficaProyectosGroupBars.Options(20, new Models.DataGraficaProyectosGroupBars.Scales(new List<YAxes>() { new YAxes(new Models.DataGraficaProyectosGroupBars.Ticks(0)) })));
+        }
+
+        /// <summary>
         /// Obtiene el dato del grupo de investigación el cual pertenece la persona.
         /// </summary>
         /// <param name="pIdPersona">ID del recurso de la persona.</param>
@@ -231,11 +373,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select.Append("SELECT DISTINCT(?nombreCategoria) ");
             where.Append("WHERE { ");
             where.Append("?s ?p ?documento. ");
-            where.Append("?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores. ");
-            where.Append("?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona. ");
-            where.Append("?documento <http://w3id.org/roh/hasKnowledgeArea> ?area. ");
-            where.Append("?area <http://w3id.org/roh/categoryNode> ?categoria. ");
-            where.Append("?categoria <http://www.w3.org/2008/05/skos#prefLabel> ?nombreCategoria. ");
+            where.Append("?documento bibo:authorList ?listaAutores. ");
+            where.Append("?listaAutores rdf:member ?persona. ");
+            where.Append("?documento roh:hasKnowledgeArea ?area. ");
+            where.Append("?area roh:categoryNode ?categoria. ");
+            where.Append("?categoria skos:prefLabel ?nombreCategoria. ");
             where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>)");
             where.Append("} ");
 
@@ -256,9 +398,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// Obtiene un listado con los objetos de la gráfica.
         /// </summary>
         /// <param name="pIdPersona">ID del recurso de la persona.</param>
-        /// <param name="pParametros">En este caso, el nombre completo de la persona.</param>
+        /// <param name="pNombrePersona">En este caso, el nombre completo de la persona.</param>
         /// <returns>Listado de objetos de la gráfica.</returns>
-        public List<DataGraficaColaboradores> GetDatosGraficaRedColaboradoresPersonas(string pIdPersona, string pParametros)
+        public List<DataGraficaColaboradores> GetDatosGraficaRedColaboradoresPersonas(string pIdPersona, string pParametros, string pNombrePersona)
         {
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
             Dictionary<string, string> dicNodos = new Dictionary<string, string>();
@@ -268,9 +410,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             string personas = $@"<{idGrafoBusqueda}>";
 
-            if (!string.IsNullOrEmpty(pParametros))
+            if (!string.IsNullOrEmpty(pNombrePersona))
             {
-                dicNodos.Add(idGrafoBusqueda, pParametros.ToLower().Trim());
+                dicNodos.Add(idGrafoBusqueda, pNombrePersona.ToLower().Trim());
             }
 
             // Consulta sparql.
@@ -282,24 +424,55 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         WHERE {{
                         ?documento bibo:authorList ?listaAutores.
                         ?listaAutores rdf:member ?personaDoc.
-                        FILTER(?personaDoc = <{idGrafoBusqueda}>)
-                        ?documento bibo:authorList ?listaAutores2.
+                        FILTER(?personaDoc = <{idGrafoBusqueda}>)";
+                        if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+                        {
+                            // Creación de los filtros obtenidos por parámetros.
+                            int aux = 0;
+                            Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                            string filtros = CrearFiltros(dicParametros, "?personaDoc", ref aux);
+                            where += filtros;
+                        }
+            where += $@"?documento bibo:authorList ?listaAutores2.
                         ?listaAutores2 rdf:member ?id.
                         ?id foaf:name ?nombre.
-                        FILTER(?id != <{idGrafoBusqueda}>)
-                    }}
+                        FILTER(?id != <{idGrafoBusqueda}>)";
+                        if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+                        {
+                            // Creación de los filtros obtenidos por parámetros.
+                            int aux = 0;
+                            Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                            string filtros = CrearFiltros(dicParametros, "?id", ref aux);
+                            where += filtros;
+                        }
+            where += $@"}}
                     }} UNION {{
                         SELECT *
                         WHERE {{
                         ?proyecto vivo:relates ?relacion.
                         ?relacion roh:roleOf ?persona.
-                        FILTER(?persona = <{idGrafoBusqueda}>)
-                        ?proyecto vivo:relates ?relacion2.
+                        FILTER(?persona = <{idGrafoBusqueda}>)";
+                        if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+                        {
+                            // Creación de los filtros obtenidos por parámetros.
+                            int aux = 0;
+                            Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                            string filtros = CrearFiltros(dicParametros, "?persona", ref aux);
+                            where += filtros;
+                        }
+            where += $@"?proyecto vivo:relates ?relacion2.
                         ?relacion2 roh:roleOf ?id.
                         ?id foaf:name ?nombre.
-                        FILTER(?id != <{idGrafoBusqueda}>)
-                    }} }} }} ORDER BY DESC (COUNT(*)) LIMIT 10
-                ";
+                        FILTER(?id != <{idGrafoBusqueda}>)";
+                        if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+                        {
+                            // Creación de los filtros obtenidos por parámetros.
+                            int aux = 0;
+                            Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                            string filtros = CrearFiltros(dicParametros, "?id", ref aux);
+                            where += filtros;
+                        }
+            where += $@"}} }} }} ORDER BY DESC (COUNT(*)) LIMIT 10";
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
@@ -522,13 +695,277 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Models.DataGraficaPublicacionesHorizontal.Data data = new Models.DataGraficaPublicacionesHorizontal.Data(dicResultadosPorcentaje.Keys.ToList(), new List<Models.DataGraficaPublicacionesHorizontal.Datasets> { datasets });
 
             // Máximo.
-            x xAxes = new x(new Ticks(0, 100), new ScaleLabel(true, "Percentage"));
+            x xAxes = new x(new Models.DataGraficaPublicacionesHorizontal.Ticks(0, 100), new ScaleLabel(true, "Percentage"));
 
             Models.DataGraficaPublicacionesHorizontal.Options options = new Models.DataGraficaPublicacionesHorizontal.Options("y", new Models.DataGraficaPublicacionesHorizontal.Plugins(new Models.DataGraficaPublicacionesHorizontal.Title(true, "Resultados de la investigación por fuente de datos"), new Models.DataGraficaPublicacionesHorizontal.Legend(false)), new Models.DataGraficaPublicacionesHorizontal.Scales(xAxes));
             DataGraficaPublicacionesHorizontal dataGrafica = new DataGraficaPublicacionesHorizontal("bar", data, options);
 
             return dataGrafica;
         }
+
+        /// <summary>
+        /// Permite calcular el valor del ancho de la línea según el número de colaboraciones que tenga el nodo.
+        /// </summary>
+        /// <param name="pMax">Valor máximo.</param>
+        /// <param name="pColabo">Número de colaboraciones.</param>
+        /// <returns>Ancho de la línea en formate double.</returns>
+        private double CalcularGrosor(int pMax, int pColabo)
+        {
+            return Math.Round(((double)pColabo / (double)pMax) * 10, 2);
+        }
+
+        /// <summary>
+        /// Obtiene los filtros por los parámetros de la URL.
+        /// </summary>
+        /// <param name="pParametros">String de filtros.</param>
+        /// <returns>Diccionario de filtros.</returns>
+        private Dictionary<string, List<string>> ObtenerParametros(string pParametros)
+        {
+            if (!string.IsNullOrEmpty(pParametros))
+            {
+                Dictionary<string, List<string>> dicFiltros = new Dictionary<string, List<string>>();
+
+                // Agregamos al diccionario los filtros.
+                foreach (string filtro in pParametros.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string keyFiltro = filtro.Split('=')[0];
+                    string valorFiltro = filtro.Split('=')[1];
+                    if (dicFiltros.ContainsKey(keyFiltro))
+                    {
+                        dicFiltros[keyFiltro].Add(valorFiltro);
+                    }
+                    else
+                    {
+                        dicFiltros.Add(keyFiltro, new List<string> { valorFiltro });
+                    }
+                }
+
+                return dicFiltros;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Crea los filtros en formato sparql.
+        /// </summary>
+        /// <param name="pDicFiltros">Diccionario con los filtros.</param>
+        /// <param name="pVarAnterior">Variable anterior para no repetir nombre.</param>
+        /// <param name="pAux">Variable auxiliar para que no se repitan los nombres.</param>
+        /// <returns>String con los filtros creados.</returns>
+        private string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux, string pVarFechaInicio = "", string pVarFechaFin = "")
+        {
+            string varInicial = pVarAnterior;
+
+            if (pDicFiltros != null && pDicFiltros.Count > 0)
+            {
+                StringBuilder filtro = new StringBuilder();
+
+                foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
+                {
+                    // Filtro de fechas.
+                    if (item.Key == "dct:issued")
+                    {
+                        foreach (string fecha in item.Value)
+                        {
+                            filtro.Append($@"FILTER(?fecha >= {fecha.Split('-')[0]}000000) ");
+                            filtro.Append($@"FILTER(?fecha <= {fecha.Split('-')[1]}000000) ");
+                        }
+                    }
+                    else if (item.Key == "vivo:start")
+                    {
+                        foreach (string fecha in item.Value)
+                        {
+                            filtro.Append($@"FILTER(?{pVarFechaInicio} >= {fecha.Split('-')[0]}000000 AND ?{pVarFechaInicio} < {fecha.Split('-')[1]}000000)");
+                        }
+                    }
+                    else if (item.Key == "vivo:end")
+                    {
+                        foreach (string fecha in item.Value)
+                        {
+                            filtro.Append($@"FILTER(?{pVarFechaFin} >= {fecha.Split('-')[0]}000000 AND ?{pVarFechaFin} < {fecha.Split('-')[1]}000000)");
+                        }
+                    }
+                    else
+                    {
+                        // Filtros normales.
+                        foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
+                            filtro.Append($@"{pVarAnterior} ");
+                            filtro.Append($@"{parteFiltro} ");
+                            filtro.Append($@"{varActual}. ");
+                            pVarAnterior = varActual;
+                            pAux++;
+                        }
+
+                        string valorFiltro = string.Empty;
+                        foreach (string valor in item.Value)
+                        {
+                            Uri uriAux = null;
+                            bool esUri = Uri.TryCreate(valor, UriKind.Absolute, out uriAux);
+                            if (esUri)
+                            {
+                                valorFiltro += $@",<{valor}>";
+                            }
+                            else
+                            {
+                                valorFiltro += $@",'{valor}'";
+                            }
+                        }
+
+                        if (valorFiltro.Length > 0)
+                        {
+                            valorFiltro = valorFiltro.Substring(1);
+                        }
+
+                        filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                        pVarAnterior = varInicial;
+                    }
+                }
+                return filtro.ToString();
+            }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Rellenar los años faltantes del diccionario.
+        /// </summary>
+        /// <param name="pDicResultados">Diccionario a rellenar.</param>
+        /// <param name="pFechaInicial">Primer año.</param>
+        /// <param name="pFechaFinal">Último año.</param>
+        private void RellenarAnys(Dictionary<string, int> pDicResultados, string pFechaInicial, string pFechaFinal)
+        {
+            // Fecha inicial.
+            int dia1 = int.Parse(pFechaInicial.Substring(6, 2));
+            int mes1 = int.Parse(pFechaInicial.Substring(4, 2));
+            int anio1 = int.Parse(pFechaInicial.Substring(0, 4));
+            DateTime fecha1 = new DateTime(anio1, mes1, dia1);
+
+            // Fecha final.
+            int dia2 = int.Parse(pFechaFinal.Substring(6, 2));
+            int mes2 = int.Parse(pFechaFinal.Substring(4, 2));
+            int anio2 = int.Parse(pFechaFinal.Substring(0, 4));
+            DateTime fecha2 = new DateTime(anio2, mes2, dia2);
+
+            while (fecha1 <= fecha2)
+            {
+                // Hay que rellenar con los años intermedios.
+                string fechaString = $@"{fecha1.ToString("yyyyMMdd")}010000";
+                if (!pDicResultados.ContainsKey(fechaString))
+                {
+                    pDicResultados.Add(fechaString, 0);
+                }
+                fecha1 = fecha1.AddYears(1);
+            }
+        }
+
+        /// <summary>
+        /// Rellenar los años faltantes del diccionario.
+        /// </summary>
+        /// <param name="pDicResultados">Diccionario a rellenar.</param>
+        /// <param name="pFechaInicial">Primer año.</param>
+        /// <param name="pFechaFinal">Último año.</param>
+        private void RellenarAnys(Dictionary<string, DataFechas> pDicResultados, string pFechaInicial, string pFechaFinal)
+        {
+            // Fecha inicial.
+            int dia1 = 01;
+            int mes1 = 01;
+            int anio1 = int.Parse(pFechaInicial);
+            DateTime fecha1 = new DateTime(anio1, mes1, dia1);
+
+            // Fecha final.
+            int dia2 = 01;
+            int mes2 = 01;
+            int anio2 = int.Parse(pFechaFinal);
+            DateTime fecha2 = new DateTime(anio2, mes2, dia2);
+
+            while (fecha1 <= fecha2)
+            {
+                // Hay que rellenar con los años intermedios.
+                string fechaString = $@"{fecha1.ToString("yyyy")}";
+                if (!pDicResultados.ContainsKey(fechaString))
+                {
+                    DataFechas data = new();
+                    data.numProyectosInicio = 0;
+                    data.numProyectosFin = 0;
+                    pDicResultados.Add(fechaString, data);
+                }
+                fecha1 = fecha1.AddYears(1);
+            }
+        }
+
+        /// <summary>
+        /// Agrupa el número de publicaciones por año.
+        /// </summary>
+        /// <param name="pDicResultados">Diccionario a agrupar.</param>
+        /// <returns>Diccionario con los datos agrupados por año.</returns>
+        private Dictionary<string, int> AgruparAnys(Dictionary<string, int> pDicResultados)
+        {
+            Dictionary<string, int> pDicAgrupado = new Dictionary<string, int>();
+            foreach (KeyValuePair<string, int> item in pDicResultados)
+            {
+                string anio = ExtraerAny(item.Key);
+                int numPublicaciones = item.Value;
+
+                if (!pDicAgrupado.ContainsKey(anio))
+                {
+                    pDicAgrupado.Add(anio, numPublicaciones);
+                }
+                else
+                {
+                    pDicAgrupado[anio] += numPublicaciones;
+                }
+            }
+            return pDicAgrupado;
+        }
+
+        /// <summary>
+        /// Obtiene el año de un string.
+        /// </summary>
+        /// <param name="pFecha">String del año.</param>
+        /// <returns>Año en string.</returns>
+        private string ExtraerAny(string pFecha)
+        {
+            return pFecha.Substring(0, 4);
+        }
+
+        /// <summary>
+        /// Obtiene las llaves de un diccionario.
+        /// </summary>
+        /// <param name="pDic"></param>
+        /// <returns>Lista de llaves.</returns>
+        private List<string> GetKeysList(Dictionary<string, int> pDic)
+        {
+            return pDic.Keys.ToList();
+        }
+
+        /// <summary>
+        /// Obtiene los valores de un diccionario.
+        /// </summary>
+        /// <param name="pDic"></param>
+        /// <returns>Lista de valores.</returns>
+        private List<int> GetValuesList(Dictionary<string, int> pDic)
+        {
+            return pDic.Values.ToList();
+        }
+
+        /// <summary>
+        /// Permite crear la lista con los colores.
+        /// </summary>
+        /// <param name="pSize">Tamaño de la lista.</param>
+        /// <param name="pColorHex">Colores asignados.</param>
+        /// <returns>Lista con los colores.</returns>
+        private List<string> CrearListaColores(int pSize, string pColorHex)
+        {
+            List<string> listaColores = new List<string>();
+            for (int i = 0; i < pSize; i++)
+            {
+                listaColores.Add(pColorHex);
+            }
+            return listaColores;
+        }
+
         /// <summary>
         /// Mediante el ID del grafo de la ontología, obtiene el ID del grafo de búsqueda.
         /// </summary>
