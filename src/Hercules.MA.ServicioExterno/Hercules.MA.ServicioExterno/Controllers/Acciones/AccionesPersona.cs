@@ -48,6 +48,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select.Append("SELECT COUNT(DISTINCT ?proyecto) AS ?NumProyectos COUNT(DISTINCT ?documento) AS ?NumPublicaciones COUNT(DISTINCT ?categoria) AS ?NumCategorias ");
             where.Append("WHERE {{ "); // Total Proyectos.
             where.Append("?proyecto vivo:relates ?relacion. ");
+            where.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
             where.Append("?relacion roh:roleOf ?persona. ");
             where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
             where.Append("} UNION { "); // Total Documentos.
@@ -197,6 +198,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select1.Append("SELECT COUNT(DISTINCT(?proyecto)) AS ?numPublicaciones ?anyoInicio ");
             where1.Append("WHERE { ");
             where1.Append("?proyecto vivo:relates ?relacion. ");
+            where2.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
             where1.Append("?proyecto vivo:start ?fecha. ");
             where1.Append("?proyecto vivo:end ?fechaFin. ");
             where1.Append("?relacion roh:roleOf ?persona. ");
@@ -244,6 +246,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select2.Append("SELECT COUNT(DISTINCT(?proyecto)) AS ?numPublicaciones ?anyoFin ");
             where2.Append("WHERE { ");
             where2.Append("?proyecto vivo:relates ?relacion. ");
+            where2.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
             where2.Append("?proyecto vivo:start ?fecha. ");
             where2.Append("?proyecto vivo:end ?fechaFin. ");
             where2.Append("?relacion roh:roleOf ?persona. ");
