@@ -71,7 +71,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         /// <param name="pVarFechaInicio">Variable auxiliar para la fecha inicio.</param>
         /// <param name="pVarFechaFin">Variable auxiliar para la fecha fin.</param>
         /// <returns>String con los filtros creados.</returns>
-        public static string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux, string pVarFechaInicio = "", string pVarFechaFin = "")
+        public static string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux)
         {
             // Filtros de fechas.
             List<string> filtrosFecha = new List<string>();
@@ -93,26 +93,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                 foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
                 {
                     // Filtro de fechas.
-                    if (item.Key == "dct:issued")
+                    if (!filtrosReciprocos.ContainsKey(item.Key))
                     {
-                        foreach (string fecha in item.Value)
+                        foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
                         {
-                            filtro.Append($@"FILTER(?fecha >= {fecha.Split('-')[0]}000000) ");
-                            filtro.Append($@"FILTER(?fecha <= {fecha.Split('-')[1]}000000) ");
-                        }
-                    }
-                    else if (item.Key == "vivo:start")
-                    {
-                        foreach (string fecha in item.Value)
-                        {
-                            filtro.Append($@"FILTER(?{pVarFechaInicio} >= {fecha.Split('-')[0]}000000 AND ?{pVarFechaInicio} < {fecha.Split('-')[1]}000000)");
-                        }
-                    }
-                    else if (item.Key == "vivo:end")
-                    {
-                        foreach (string fecha in item.Value)
-                        {
-                            filtro.Append($@"FILTER(?{pVarFechaFin} >= {fecha.Split('-')[0]}000000 AND ?{pVarFechaFin} < {fecha.Split('-')[1]}000000)");
+                            string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
+                            filtro.Append($@"{pVarAnterior} ");
+                            filtro.Append($@"{parteFiltro} ");
+                            filtro.Append($@"{varActual}. ");
+                            pVarAnterior = varActual;
+                            pAux++;
                         }
                     }
                     else

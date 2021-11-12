@@ -467,7 +467,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Creación de los filtros obtenidos por parámetros.
                 int aux = 0;
                 Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
-                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?proyecto", ref aux, "fechaProjInit", "fechaProjEnd");
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?proyecto", ref aux);
                 where += filtros;
             }
 
