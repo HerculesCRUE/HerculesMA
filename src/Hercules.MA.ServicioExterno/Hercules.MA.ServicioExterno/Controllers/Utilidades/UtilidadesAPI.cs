@@ -71,7 +71,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         /// <returns>String con los filtros creados.</returns>
         public static string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux)
         {
+            // Filtros de fechas.
+            List<string> filtrosFecha = new List<string>();
+            filtrosFecha.Add("dct:issued");
+            filtrosFecha.Add("vivo:start");
+            filtrosFecha.Add("vivo:end");
+
+            // Filtros de inversas.
+            Dictionary<string, int> filtrosReciprocos = new Dictionary<string, int>();
+            filtrosReciprocos.Add("foaf:member@@@roh:roleOf@@@roh:title", 2);
+
             string varInicial = pVarAnterior;
+            string pVarAnteriorAux = string.Empty;
 
             if (pDicFiltros != null && pDicFiltros.Count > 0)
             {
@@ -79,18 +90,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                 foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
                 {
-                    // Filtro de fechas.
-                    if (item.Key == "dct:issued")
+                    if (!filtrosReciprocos.ContainsKey(item.Key))
                     {
-                        foreach (string fecha in item.Value)
-                        {
-                            filtro.Append($@"FILTER(?fecha >= {fecha.Split('-')[0]}000000) ");
-                            filtro.Append($@"FILTER(?fecha <= {fecha.Split('-')[1]}000000) ");
-                        }
-                    }
-                    else
-                    {
-                        // Filtros normales.
                         foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
                         {
                             string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
@@ -100,7 +101,51 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             pVarAnterior = varActual;
                             pAux++;
                         }
+                    }
+                    else
+                    {
+                        int index = filtrosReciprocos[item.Key];
+                        pVarAnterior = "?varAuxiliar";
+                        pVarAnteriorAux = pVarAnterior;
+                        foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            if ((pAux + 1) < index)
+                            {
+                                string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
+                                filtro.Append($@"{pVarAnterior} ");
+                                filtro.Append($@"{parteFiltro} ");
+                                filtro.Append($@"{varActual}. ");
+                                pVarAnterior = varActual;
+                                pAux++;
+                            }
+                            else if ((pAux + 1) == index)
+                            {
+                                string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
+                                filtro.Append($@"{pVarAnterior} ");
+                                filtro.Append($@"{parteFiltro} ");
+                                filtro.Append($@"{varInicial}. ");
+                                pAux++;
+                            }
+                            else
+                            {
+                                filtro.Append($@"{pVarAnteriorAux} ");
+                                filtro.Append($@"{parteFiltro} ");
+                                filtro.Append($@"'{HttpUtility.UrlDecode(item.Value[0])}'. ");
+                            }
+                        }
+                    }
 
+                    // Filtro de fechas.
+                    if (filtrosFecha.Contains(item.Key))
+                    {
+                        foreach (string fecha in item.Value)
+                        {
+                            filtro.Append($@"FILTER({pVarAnterior} >= {fecha.Split('-')[0]}000000) ");
+                            filtro.Append($@"FILTER({pVarAnterior} <= {fecha.Split('-')[1]}000000) ");
+                        }
+                    }
+                    else
+                    {
                         string valorFiltro = string.Empty;
                         foreach (string valor in item.Value)
                         {
@@ -121,9 +166,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             valorFiltro = valorFiltro.Substring(1);
                         }
 
-                        filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
-                        pVarAnterior = varInicial;
+                        if (!filtrosReciprocos.ContainsKey(item.Key))
+                        {
+                            filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                        }                      
                     }
+                    pVarAnterior = varInicial;
                 }
                 return filtro.ToString();
             }

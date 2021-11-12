@@ -215,7 +215,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Creación de los filtros obtenidos por parámetros.
                 int aux = 0;
                 Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                string filtros = CrearFiltros(dicParametros, "?documento", ref aux);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?documento", ref aux);
                 where.Append(filtros);
             }
             where.Append("} ");
@@ -278,7 +278,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Creación de los filtros obtenidos por parámetros.
                 int aux = 0;
                 Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                string filtros = CrearFiltros(dicParametros, "?documento", ref aux);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?documento", ref aux);
                 where.Append(filtros);
             }
             where.Append("} ");
@@ -367,73 +367,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return null;
         }
 
-        /// <summary>
-        /// Crea los filtros en formato sparql.
-        /// </summary>
-        /// <param name="pDicFiltros">Diccionario con los filtros.</param>
-        /// <param name="pVarAnterior">Variable anterior para no repetir nombre.</param>
-        /// <param name="pAux">Variable auxiliar para que no se repitan los nombres.</param>
-        /// <returns>String con los filtros creados.</returns>
-        private string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux)
-        {
-            string varInicial = pVarAnterior;
-
-            if (pDicFiltros != null && pDicFiltros.Count > 0)
-            {
-                StringBuilder filtro = new StringBuilder();
-
-                foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
-                {
-                    // Filtro de fechas.
-                    if (item.Key == "dct:issued")
-                    {
-                        foreach (string fecha in item.Value)
-                        {
-                            filtro.Append($@"FILTER(?fecha >= {fecha.Split('-')[0]}000000) ");
-                            filtro.Append($@"FILTER(?fecha <= {fecha.Split('-')[1]}000000) ");
-                        }
-                    }
-                    else
-                    {
-                        // Filtros normales.
-                        foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                            filtro.Append($@"{pVarAnterior} ");
-                            filtro.Append($@"{parteFiltro} ");
-                            filtro.Append($@"{varActual}. ");
-                            pVarAnterior = varActual;
-                            pAux++;
-                        }
-
-                        string valorFiltro = string.Empty;
-                        foreach (string valor in item.Value)
-                        {
-                            Uri uriAux = null;
-                            bool esUri = Uri.TryCreate(valor, UriKind.Absolute, out uriAux);
-                            if (esUri)
-                            {
-                                valorFiltro += $@",<{valor}>";
-                            }
-                            else
-                            {
-                                valorFiltro += $@",'{valor}'";
-                            }
-                        }
-
-                        if (valorFiltro.Length > 0)
-                        {
-                            valorFiltro = valorFiltro.Substring(1);
-                        }
-
-                        filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
-                        pVarAnterior = varInicial;
-                    }
-                }
-                return filtro.ToString();
-            }
-            return string.Empty;
-        }
 
         /// <summary>
         /// Mediante el ID del grafo de la ontología, obtiene el ID del grafo de búsqueda.
