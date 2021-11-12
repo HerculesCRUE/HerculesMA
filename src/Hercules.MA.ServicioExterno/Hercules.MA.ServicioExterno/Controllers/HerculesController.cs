@@ -21,6 +21,182 @@ namespace Hercules.MA.ServicioExterno.Controllers
     [EnableCors("_myAllowSpecificOrigins")]
     public class HerculesController : ControllerBase
     {
+
+
+        #region --- Grupo
+        /// <summary>
+        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosFichaGrupo")]
+        public IActionResult DatosFichaGrupo(string pIdGrupo)
+        {
+            Dictionary<string, int> datosGrupo = null;
+
+            try
+            {
+                AccionesGroup accionGrupo = new AccionesGroup();
+                datosGrupo = accionGrupo.GetDatosCabeceraGrupo(pIdGrupo);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosGrupo);
+        }
+
+        /// <summary>
+        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaPublicacionesGrupo")]
+        public IActionResult DatosGraficaPublicacionesGrupo(string pIdGrupo, string pParametros)
+        {
+            DataGraficaPublicaciones datosGrupo = null;
+
+            try
+            {
+                AccionesGroup accionGrupo = new AccionesGroup();
+                datosGrupo = accionGrupo.GetDatosGraficaPublicaciones(pIdGrupo, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosGrupo);
+        }
+
+        /// <summary>
+        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaColaboradoresMainResearcherGrupo")]
+        public IActionResult DatosGraficaColaboradoresMainResearcherGrupo(string pIdGrupo, string pParametros)
+        {
+            List<DataGraficaColaboradores> datosGrupo = null;
+
+            try
+            {
+                AccionesGroup accionGrupo = new AccionesGroup();
+                datosGrupo = accionGrupo.GetDatosGraficaRedColaboradoresMainResearcher(pIdGrupo, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosGrupo);
+        }
+
+
+        /// <summary>
+        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaColaboradoresMainResearcherFueraGrupo")]
+        public IActionResult DatosGraficaColaboradoresMainResearcherFueraGrupo(string pIdGrupo, string pParametros)
+        {
+            List<DataGraficaColaboradores> datosGrupo = null;
+
+            try
+            {
+                AccionesGroup accionGrupo = new AccionesGroup();
+                datosGrupo = accionGrupo.GetDatosGraficaRedColaboradoresMainResearcherFuera(pIdGrupo, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosGrupo);
+        }
+
+
+
+        /// <summary>
+        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaProyectosGrupo")]
+        public IActionResult DatosGraficaProyectosGrupo(string pIdGrupo, string pParametros)
+        {
+            DataGraficaPublicaciones datos = null;
+
+            try
+            {
+                AccionesGroup accionGrupo = new AccionesGroup();
+                datos = accionGrupo.GetDatosGraficaProyectos(pIdGrupo, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datos);
+        }
+
+
+        /// <summary>
+        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaTopicsGrupo")]
+        public IActionResult DatosGraficaTopicsGrupo(string pIdGrupo, string pParametros)
+        {
+            DataGraficaPublicacionesHorizontal datos = null;
+
+            try
+            {
+                AccionesGroup accionGrupo = new AccionesGroup();
+                datos = accionGrupo.GetDatosGraficaTopicsHorizontal(pIdGrupo, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datos);
+        }
+
+
+
+        /// <summary>
+        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para pintar los topics.</returns>
+        [HttpGet("DatosCategoriasGrupo")]
+        public IActionResult DatosCategoriasGrupo(string pIdGrupo)
+        {
+            List<string> datos = null;
+
+            try
+            {
+                AccionesGroup accionGrupo = new AccionesGroup();
+                datos = accionGrupo.GetTopicsGrupo(pIdGrupo);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datos);
+        }
+        #endregion
+
         /// <summary>
         /// Controlador para obtener los datos del proyecto en la cabecera de la ficha.
         /// </summary>
@@ -44,101 +220,6 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok(datosCabeceraFichas);
         }
 
-        /// <summary>
-        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
-        /// </summary>
-        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
-        /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet("DatosFichaGrupo")]
-        public IActionResult DatosFichaGrupo(string pIdGrupo)
-        {
-            Dictionary<string, int> datosCabeceraFichas = null;
-
-            try
-            {
-                AccionesGroup accionProyecto = new AccionesGroup();
-                datosCabeceraFichas = accionProyecto.GetDatosCabeceraGrupo(pIdGrupo);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return Ok(datosCabeceraFichas);
-        }
-
-        /// <summary>
-        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
-        /// </summary>
-        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
-        /// <param name="pParametros">Filtros de las facetas.</param>
-        /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet("DatosGraficaPublicacionesGrupo")]
-        public IActionResult DatosGraficaPublicacionesGrupo(string pIdGrupo, string pParametros)
-        {
-            DataGraficaPublicaciones datosCabeceraFichas = null;
-
-            try
-            {
-                AccionesGroup accionProyecto = new AccionesGroup();
-                datosCabeceraFichas = accionProyecto.GetDatosGraficaPublicaciones(pIdGrupo, pParametros);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return Ok(datosCabeceraFichas);
-        }
-
-        /// <summary>
-        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
-        /// </summary>
-        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
-        /// <param name="pParametros">Filtros de las facetas.</param>
-        /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet("DatosGraficaColaboradoresMainResearcherGrupo")]
-        public IActionResult DatosGraficaColaboradoresMainResearcherGrupo(string pIdGrupo, string pParametros)
-        {
-            List<DataGraficaColaboradores> datosCabeceraFichas = null;
-
-            try
-            {
-                AccionesGroup accionProyecto = new AccionesGroup();
-                datosCabeceraFichas = accionProyecto.GetDatosGraficaRedColaboradoresMainResearcher(pIdGrupo, pParametros);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return Ok(datosCabeceraFichas);
-        }
-
-
-        /// <summary>
-        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
-        /// </summary>
-        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
-        /// <param name="pParametros">Filtros de las facetas.</param>
-        /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet("DatosGraficaProyectosGrupo")]
-        public IActionResult DatosGraficaProyectosGrupo(string pIdGrupo, string pParametros)
-        {
-            DataGraficaPublicaciones datosCabeceraFichas = null;
-
-            try
-            {
-                AccionesGroup accionProyecto = new AccionesGroup();
-                datosCabeceraFichas = accionProyecto.GetDatosGraficaProyectos(pIdGrupo, pParametros);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return Ok(datosCabeceraFichas);
-        }
 
         /// <summary>
         /// Controlador para obtener los datos de la gráfica de red de colaboradores.

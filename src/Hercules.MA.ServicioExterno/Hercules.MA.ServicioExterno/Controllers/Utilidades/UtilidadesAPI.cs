@@ -68,8 +68,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         /// <param name="pDicFiltros">Diccionario con los filtros.</param>
         /// <param name="pVarAnterior">Variable anterior para no repetir nombre.</param>
         /// <param name="pAux">Variable auxiliar para que no se repitan los nombres.</param>
+        /// <param name="pVarFechaInicio">Variable auxiliar para la fecha inicio.</param>
+        /// <param name="pVarFechaFin">Variable auxiliar para la fecha fin.</param>
         /// <returns>String con los filtros creados.</returns>
-        public static string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux)
+        public static string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux, string pVarFechaInicio = "", string pVarFechaFin = "")
         {
             string varInicial = pVarAnterior;
 
@@ -86,6 +88,20 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         {
                             filtro.Append($@"FILTER(?fecha >= {fecha.Split('-')[0]}000000) ");
                             filtro.Append($@"FILTER(?fecha <= {fecha.Split('-')[1]}000000) ");
+                        }
+                    }
+                    else if (item.Key == "vivo:start")
+                    {
+                        foreach (string fecha in item.Value)
+                        {
+                            filtro.Append($@"FILTER(?{pVarFechaInicio} >= {fecha.Split('-')[0]}000000 AND ?{pVarFechaInicio} < {fecha.Split('-')[1]}000000)");
+                        }
+                    }
+                    else if (item.Key == "vivo:end")
+                    {
+                        foreach (string fecha in item.Value)
+                        {
+                            filtro.Append($@"FILTER(?{pVarFechaFin} >= {fecha.Split('-')[0]}000000 AND ?{pVarFechaFin} < {fecha.Split('-')[1]}000000)");
                         }
                     }
                     else
