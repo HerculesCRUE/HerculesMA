@@ -541,7 +541,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 int aux = 0;
                 Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
                 string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?proyecto", ref aux);
-                where2.Append(filtros);
+				where2.Append(filtros);
             }
             where2.Append("} ");
             where2.Append("ORDER BY ?anyoFin ");
