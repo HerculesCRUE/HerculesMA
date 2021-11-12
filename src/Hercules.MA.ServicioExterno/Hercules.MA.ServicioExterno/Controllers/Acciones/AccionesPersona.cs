@@ -186,7 +186,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         public ObjGrafica GetDatosGraficaProyectos(string pIdPersona, string pParametros)
         {
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdPersona);
-            Dictionary<string, DataFechas> dicResultados = new ();
+            Dictionary<string, DataFechas> dicResultados = new();
             SparqlObject resultadoQuery = null;
             StringBuilder select1 = new(), where1 = new();
             StringBuilder select2 = new(), where2 = new();
@@ -209,7 +209,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Creación de los filtros obtenidos por parámetros.
                 int aux = 0;
                 Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                string filtros = CrearFiltros(dicParametros, "?proyecto", ref aux, pVarFechaInicio:"fecha", pVarFechaFin:"fechaFin");
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?proyecto", ref aux);
                 where1.Append(filtros);
             }
             where1.Append("} ");
@@ -257,7 +257,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Creación de los filtros obtenidos por parámetros.
                 int aux = 0;
                 Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                string filtros = CrearFiltros(dicParametros, "?proyecto", ref aux, pVarFechaInicio: "fecha", pVarFechaFin: "fechaFin");
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?proyecto", ref aux);
                 where2.Append(filtros);
             }
             where2.Append("} ");
@@ -292,7 +292,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Rellenar años intermedios y ordenarlos.
             string max = "2100";
             string min = "1900";
-            if(dicResultados != null && dicResultados.Count > 0)
+            if (dicResultados != null && dicResultados.Count > 0)
             {
                 max = dicResultados.Keys.First();
                 min = dicResultados.Keys.Last();
@@ -428,26 +428,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?documento bibo:authorList ?listaAutores.
                         ?listaAutores rdf:member ?personaDoc.
                         FILTER(?personaDoc = <{idGrafoBusqueda}>)";
-                        if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
-                        {
-                            // Creación de los filtros obtenidos por parámetros.
-                            int aux = 0;
-                            Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                            string filtros = CrearFiltros(dicParametros, "?personaDoc", ref aux);
-                            where += filtros;
-                        }
             where += $@"?documento bibo:authorList ?listaAutores2.
                         ?listaAutores2 rdf:member ?id.
                         ?id foaf:name ?nombre.
                         FILTER(?id != <{idGrafoBusqueda}>)";
-                        if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
-                        {
-                            // Creación de los filtros obtenidos por parámetros.
-                            int aux = 0;
-                            Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                            string filtros = CrearFiltros(dicParametros, "?id", ref aux);
-                            where += filtros;
-                        }
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?id", ref aux);
+                where += filtros;
+            }
             where += $@"}}
                     }} UNION {{
                         SELECT *
@@ -455,26 +447,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?proyecto vivo:relates ?relacion.
                         ?relacion roh:roleOf ?persona.
                         FILTER(?persona = <{idGrafoBusqueda}>)";
-                        if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
-                        {
-                            // Creación de los filtros obtenidos por parámetros.
-                            int aux = 0;
-                            Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                            string filtros = CrearFiltros(dicParametros, "?persona", ref aux);
-                            where += filtros;
-                        }
             where += $@"?proyecto vivo:relates ?relacion2.
                         ?relacion2 roh:roleOf ?id.
                         ?id foaf:name ?nombre.
                         FILTER(?id != <{idGrafoBusqueda}>)";
-                        if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
-                        {
-                            // Creación de los filtros obtenidos por parámetros.
-                            int aux = 0;
-                            Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
-                            string filtros = CrearFiltros(dicParametros, "?id", ref aux);
-                            where += filtros;
-                        }
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = ObtenerParametros(pParametros);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?id", ref aux);
+                where += filtros;
+            }
             where += $@"}} }} }} ORDER BY DESC (COUNT(*)) LIMIT 10";
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -543,16 +527,82 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     // Guarda en una lista para sacar el máximo de relaciones que hay entre los nodos.
                     numColaboraciones.Add(veces);
 
+                    // TODO: REVISAR QUE FUNCIONA BIEN DEL TODO
                     // Crea las relaciones entre personas.
                     if (!dicRelaciones.ContainsKey(persona1))
                     {
-                        dicRelaciones.Add(persona1, new DataQueryRelaciones(new List<Datos> { new Datos(persona2, veces) }));
+                        //dicRelaciones.Add(persona1, new DataQueryRelaciones(new List<Datos> { new Datos(persona2, veces) }));
+                        if (!dicRelaciones.ContainsKey(persona1))
+                        {
+                            bool encontrado = false;
+                            foreach (KeyValuePair<string, DataQueryRelaciones> relaciones in dicRelaciones)
+                            {
+                                foreach (Datos datos in relaciones.Value.idRelacionados)
+                                {
+                                    if (datos.idRelacionado == persona1)
+                                    {
+                                        encontrado = true;
+                                        break;
+                                    }
+                                }
+
+                                if (encontrado) break;
+                            }
+
+                            if (encontrado == false)
+                            {
+                                dicRelaciones.Add(persona1, new DataQueryRelaciones(new List<Datos> { new Datos(persona2, veces) }));
+                            }
+                        }
+                        else
+                        {
+                            bool encontrado = false;
+                            foreach (Datos relaciones in dicRelaciones[persona2].idRelacionados)
+                            {
+                                if (relaciones.idRelacionado == persona1)
+                                {
+                                    encontrado = true;
+                                    break;
+                                }
+                            }
+                            foreach (Datos relaciones in dicRelaciones[persona1].idRelacionados)
+                            {
+                                if (relaciones.idRelacionado == persona2)
+                                {
+                                    encontrado = true;
+                                    break;
+                                }
+                            }
+
+                            if (!encontrado)
+                            {
+                                dicRelaciones[persona1].idRelacionados.Add(new Datos(persona2, veces));
+                            }
+                        }
                     }
                     else
                     {
                         if (!dicRelaciones.ContainsKey(persona2))
                         {
-                            dicRelaciones.Add(persona2, new DataQueryRelaciones(new List<Datos> { new Datos(persona1, veces) }));
+                            bool encontrado = false;
+                            foreach (KeyValuePair<string, DataQueryRelaciones> relaciones in dicRelaciones)
+                            {
+                                foreach (Datos datos in relaciones.Value.idRelacionados)
+                                {
+                                    if (datos.idRelacionado == persona2)
+                                    {
+                                        encontrado = true;
+                                        break;
+                                    }
+                                }
+
+                                if (encontrado) break;
+                            }
+
+                            if (encontrado == false)
+                            {
+                                dicRelaciones.Add(persona2, new DataQueryRelaciones(new List<Datos> { new Datos(persona1, veces) }));
+                            }
                         }
                         else
                         {
@@ -587,7 +637,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Construcción del objeto de la gráfica.            
             List<DataGraficaColaboradores> colaboradores = new List<DataGraficaColaboradores>();
             int maximasRelaciones = 1;
-            if(dicPersonasColabo.Values.Max() > numColaboraciones.Max())
+            if (dicPersonasColabo.Values.Max() > numColaboraciones.Max())
             {
                 maximasRelaciones = dicPersonasColabo.Values.Max();
             }
@@ -749,87 +799,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return null;
         }
 
-        /// <summary>
-        /// Crea los filtros en formato sparql.
-        /// </summary>
-        /// <param name="pDicFiltros">Diccionario con los filtros.</param>
-        /// <param name="pVarAnterior">Variable anterior para no repetir nombre.</param>
-        /// <param name="pAux">Variable auxiliar para que no se repitan los nombres.</param>
-        /// <returns>String con los filtros creados.</returns>
-        private string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux, string pVarFechaInicio = "", string pVarFechaFin = "")
-        {
-            string varInicial = pVarAnterior;
-
-            if (pDicFiltros != null && pDicFiltros.Count > 0)
-            {
-                StringBuilder filtro = new StringBuilder();
-
-                foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
-                {
-                    // Filtro de fechas.
-                    if (item.Key == "dct:issued")
-                    {
-                        foreach (string fecha in item.Value)
-                        {
-                            filtro.Append($@"FILTER(?fecha >= {fecha.Split('-')[0]}000000) ");
-                            filtro.Append($@"FILTER(?fecha <= {fecha.Split('-')[1]}000000) ");
-                        }
-                    }
-                    else if (item.Key == "vivo:start")
-                    {
-                        foreach (string fecha in item.Value)
-                        {
-                            filtro.Append($@"FILTER(?{pVarFechaInicio} >= {fecha.Split('-')[0]}000000 AND ?{pVarFechaInicio} < {fecha.Split('-')[1]}000000)");
-                        }
-                    }
-                    else if (item.Key == "vivo:end")
-                    {
-                        foreach (string fecha in item.Value)
-                        {
-                            filtro.Append($@"FILTER(?{pVarFechaFin} >= {fecha.Split('-')[0]}000000 AND ?{pVarFechaFin} < {fecha.Split('-')[1]}000000)");
-                        }
-                    }
-                    else
-                    {
-                        // Filtros normales.
-                        foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                            filtro.Append($@"{pVarAnterior} ");
-                            filtro.Append($@"{parteFiltro} ");
-                            filtro.Append($@"{varActual}. ");
-                            pVarAnterior = varActual;
-                            pAux++;
-                        }
-
-                        string valorFiltro = string.Empty;
-                        foreach (string valor in item.Value)
-                        {
-                            Uri uriAux = null;
-                            bool esUri = Uri.TryCreate(valor, UriKind.Absolute, out uriAux);
-                            if (esUri)
-                            {
-                                valorFiltro += $@",<{valor}>";
-                            }
-                            else
-                            {
-                                valorFiltro += $@",'{valor}'";
-                            }
-                        }
-
-                        if (valorFiltro.Length > 0)
-                        {
-                            valorFiltro = valorFiltro.Substring(1);
-                        }
-
-                        filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
-                        pVarAnterior = varInicial;
-                    }
-                }
-                return filtro.ToString();
-            }
-            return string.Empty;
-        }
 
         /// <summary>
         /// Rellenar los años faltantes del diccionario.
