@@ -117,18 +117,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                     }
                     else
                     {
-                        foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                            filtro.Append($@"{pVarAnterior} ");
-                            filtro.Append($@"{parteFiltro} ");
-                            filtro.Append($@"{varActual}. ");
-                            pVarAnterior = varActual;
-                            pAux++;
-                        }
-                    }
-                    else
-                    {
                         int index = filtrosReciprocos[item.Key];
                         pVarAnterior = "?varAuxiliar";
                         pVarAnteriorAux = pVarAnterior;
