@@ -1,7 +1,9 @@
 ﻿using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
+using Hercules.MA.ServicioExterno.Models.DataFechas;
 using Hercules.MA.ServicioExterno.Models.DataGraficaColaboradores;
+using Hercules.MA.ServicioExterno.Models.DataGraficaProyectosGroupBars;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicaciones;
 using Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal;
 using Hercules.MA.ServicioExterno.Models.DataQueryRelaciones;
@@ -46,6 +48,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         
                         ?proyecto a 'project'.
                         ?proyecto <http://vivoweb.org/ontology/core#relates> ?members.
+                        ?proyecto gnoss:hasprivacidadCom 'publico'.
                         ?members <http://w3id.org/roh/roleOf> ?people. 
                         OPTIONAL{{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}}
                         OPTIONAL{{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}}
@@ -187,6 +190,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?mainrp roh:roleOf ?mainresearcher.
 
                         ?proyecto a 'project'.
+                        ?proyecto gnoss:hasprivacidadCom 'publico'.
                         ?proyecto vivo:relates ?relacion.
                         ?relacion roh:roleOf ?mainresearcher.
                         ?proyecto vivo:relates ?relacion2.
@@ -427,82 +431,185 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pIdGroup">ID del recurso del grupo.</param>
         /// <param name="pParametros">Filtros aplicados en las facetas.</param>
         /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
-        public DataGraficaPublicaciones GetDatosGraficaProyectos(string pIdGroup, string pParametros)
+        public ObjGrafica GetDatosGraficaProyectos(string pIdGroup, string pParametros)
         {
+
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdGroup);
-            Dictionary<string, int> dicResultados = new Dictionary<string, int>(); // Dictionary<año, numDocumentos>
+            Dictionary<string, DataFechas> dicResultados = new();
             SparqlObject resultadoQuery = null;
-            StringBuilder select = new StringBuilder();
-            string where;
+            StringBuilder select1 = new(), where1 = new();
+            StringBuilder select2 = new(), where2 = new();
 
-            // Consulta sparql.
-            select.Append(mPrefijos);
-            select.Append("SELECT ?fechaProjInitAux COUNT(DISTINCT ?proyecto) AS ?NumProyectos");
-            where = $@"
-                WHERE 
-                {{
-                    ?proyecto a 'project'.
-                    ?proyecto <http://vivoweb.org/ontology/core#relates> ?members.
-                    ?members <http://w3id.org/roh/roleOf> ?people. 
-                    OPTIONAL{{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}}
-                    OPTIONAL{{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}}
-                    BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)
-                    BIND(IF(bound(?fechaProjInit), ?fechaProjInit, 10000000000000) as ?fechaProjInitAux)
- 
-                    <{idGrafoBusqueda}> ?p2 ?members2.
-                    FILTER (?p2 IN (<http://xmlns.com/foaf/0.1/member>, <http://w3id.org/roh/mainResearcher> ) )
-                    ?members2 <http://w3id.org/roh/roleOf> ?people. 
-                    OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#start> ?fechaGroupInit.}}
-                    OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#end> ?fechaGroupEnd.}}
-                    BIND(IF(bound(?fechaGroupEnd), ?fechaGroupEnd, 30000000000000) as ?fechaGroupEndAux)
-                    BIND(IF(bound(?fechaGroupInit), ?fechaGroupInit, 10000000000000) as ?fechaGroupInitAux)
-      
-                    FILTER(?fechaGroupEndAux >= ?fechaProjInitAux AND ?fechaGroupInitAux <= ?fechaProjEndAux)
-            ";
+            // Consultas sparql.
 
+            #region --- Obtención de datos del año de inicio de los proyectos
+            select1.Append(mPrefijos);
+            select1.Append("SELECT COUNT(DISTINCT(?proyecto)) AS ?numPublicaciones ?anyoInicio ");
+            where1.Append("WHERE { ");
+            where1.Append("?proyecto vivo:relates ?relacion. ");
+            where1.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
+            where1.Append("?proyecto vivo:start ?fechaProjInit. ");
+            where1.Append("?proyecto vivo:end ?fechaProjEnd. ");
+            where1.Append("?relacion roh:roleOf ?persona. ");
+            where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}");
+            where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}");
+            where1.Append("BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)");
+            where1.Append("BIND(IF(bound(?fechaProjInit), ?fechaProjInit, 10000000000000) as ?fechaProjInitAux)");
+            where1.Append("BIND( SUBSTR( STR(?fechaProjInit), 0, 4) AS ?anyoInicio) ");
 
+            where1.Append($@"<{idGrafoBusqueda}> ?p2 ?members2.");
+            where1.Append("FILTER (?p2 IN (<http://xmlns.com/foaf/0.1/member>, <http://w3id.org/roh/mainResearcher> ))");
+            where1.Append("?members2 <http://w3id.org/roh/roleOf> ?persona. ");
+            where1.Append("OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#start> ?fechaGroupInit.}}");
+            where1.Append("OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#end> ?fechaGroupEnd.}}");
+            where1.Append("BIND(IF(bound(?fechaGroupEnd), ?fechaGroupEnd, 30000000000000) as ?fechaGroupEndAux)");
+            where1.Append("BIND(IF(bound(?fechaGroupInit), ?fechaGroupInit, 10000000000000) as ?fechaGroupInitAux)");
 
+            where1.Append("FILTER(?fechaGroupEndAux >= ?fechaProjInitAux AND ?fechaGroupInitAux <= ?fechaProjEndAux)");
+
+            // where1.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
             if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
             {
                 // Creación de los filtros obtenidos por parámetros.
                 int aux = 0;
                 Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
-                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?proyecto", ref aux, "fechaProjInit", "fechaProjEnd");
-                where += filtros;
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?proyecto", ref aux);
+                where1.Append(filtros);
             }
+            where1.Append("} ");
+            where1.Append("ORDER BY ?anyoInicio ");
 
-            where += ("} ");
-            where += ("ORDER BY ?fechaProjInitAux ");
-
-
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+            resultadoQuery = mResourceApi.VirtuosoQuery(select1.ToString(), where1.ToString(), mIdComunidad);
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
-                    string fechaProjInitAux = UtilidadesAPI.GetValorFilaSparqlObject(fila, "fechaProjInitAux");
-                    int NumProyectos = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumProyectos"));
-                    dicResultados.Add(fechaProjInitAux, NumProyectos);
+                    string anyo = UtilidadesAPI.GetValorFilaSparqlObject(fila, "anyoInicio");
+                    int numProyectos = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numPublicaciones"));
+
+                    try
+                    {
+                        if (!dicResultados.ContainsKey(anyo))
+                        {
+                            // Si no contiene el año, creo el objeto.
+                            DataFechas data = new();
+                            data.numProyectosInicio = numProyectos;
+                            data.numProyectosFin = 0;
+                            dicResultados.Add(anyo, data);
+                        }
+                        else
+                        {
+                            // Si lo contiene, se lo agrego.
+                            dicResultados[anyo].numProyectosInicio += numProyectos;
+                        }
+                    }
+                    catch (Exception e) { }
                 }
             }
+            #endregion
 
-            // Rellenar, agrupar y ordenar los años.
-            if (dicResultados != null && dicResultados.Count > 0)
+            #region --- Obtención de datos del año de fin de los proyectos
+            select2.Append(mPrefijos);
+            select2.Append("SELECT COUNT(DISTINCT(?proyecto)) AS ?numPublicaciones ?anyoFin ");
+            where2.Append("WHERE { ");
+            where1.Append("?proyecto vivo:relates ?relacion. ");
+            where1.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
+            where1.Append("?proyecto vivo:start ?fechaProjInit. ");
+            where1.Append("?proyecto vivo:end ?fechaProjEnd. ");
+            where1.Append("?relacion roh:roleOf ?persona. ");
+            where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}");
+            where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}");
+            where1.Append("BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)");
+            where1.Append("BIND(IF(bound(?fechaProjInit), ?fechaProjInit, 10000000000000) as ?fechaProjInitAux)");
+            where2.Append("BIND( SUBSTR( STR(?fechaProjEnd), 0, 4) AS ?anyoFin) ");
+
+            where1.Append($@"<{idGrafoBusqueda}> ?p2 ?members2.");
+            where1.Append("FILTER (?p2 IN (<http://xmlns.com/foaf/0.1/member>, <http://w3id.org/roh/mainResearcher> ))");
+            where1.Append("?members2 <http://w3id.org/roh/roleOf> ?persona. ");
+            where1.Append("OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#start> ?fechaGroupInit.}}");
+            where1.Append("OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#end> ?fechaGroupEnd.}}");
+            where1.Append("BIND(IF(bound(?fechaGroupEnd), ?fechaGroupEnd, 30000000000000) as ?fechaGroupEndAux)");
+            where1.Append("BIND(IF(bound(?fechaGroupInit), ?fechaGroupInit, 10000000000000) as ?fechaGroupInitAux)");
+
+            where1.Append("FILTER(?fechaGroupEndAux >= ?fechaProjInitAux AND ?fechaGroupInitAux <= ?fechaProjEndAux)");
+
+            // where2.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
             {
-                UtilidadesAPI.RellenarAnys(dicResultados, dicResultados.First().Key, dicResultados.Last().Key);
-                dicResultados = UtilidadesAPI.AgruparAnys(dicResultados);
-                dicResultados = dicResultados.OrderBy(item => item.Key).ToDictionary((keyItem) => keyItem.Key, (valueItem) => valueItem.Value);
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?proyecto", ref aux);
+                where2.Append(filtros);
             }
+            where2.Append("} ");
+            where2.Append("ORDER BY ?anyoFin ");
 
-            // Contruir el objeto de la gráfica.
-            List<string> listaColores = UtilidadesAPI.CrearListaColores(dicResultados.Count, COLOR_GRAFICAS);
-            Models.DataGraficaPublicaciones.Datasets datasets = new Models.DataGraficaPublicaciones.Datasets("Proyectos", UtilidadesAPI.GetValuesList(dicResultados), listaColores, listaColores, 1);
-            Models.DataGraficaPublicaciones.Data data = new Models.DataGraficaPublicaciones.Data(UtilidadesAPI.GetKeysList(dicResultados), new List<Models.DataGraficaPublicaciones.Datasets> { datasets });
-            Models.DataGraficaPublicaciones.Options options = new Models.DataGraficaPublicaciones.Options(new Models.DataGraficaPublicaciones.Scales(new Y(true)), new Models.DataGraficaPublicaciones.Plugins(new Models.DataGraficaPublicaciones.Title(true, "Evolución temporal proyectos"), new Models.DataGraficaPublicaciones.Legend(new Labels(true), "top", "end")));
-            DataGraficaPublicaciones dataGrafica = new DataGraficaPublicaciones("bar", data, options);
+            resultadoQuery = mResourceApi.VirtuosoQuery(select2.ToString(), where2.ToString(), mIdComunidad);
 
-            return dataGrafica;
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string anyo = UtilidadesAPI.GetValorFilaSparqlObject(fila, "anyoFin");
+                    int numProyectos = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numPublicaciones"));
+
+                    try
+                    {
+                        if (!dicResultados.ContainsKey(anyo))
+                        {
+                            // Si no contiene el año, creo el objeto.
+                            DataFechas data = new();
+                            data.numProyectosInicio = 0;
+                            data.numProyectosFin = numProyectos;
+                            dicResultados.Add(anyo, data);
+                        }
+                        else
+                        {
+                            // Si lo contiene, se lo agrego.
+                            dicResultados[anyo].numProyectosFin += numProyectos;
+                        }
+                    }
+                    catch (Exception e) {}
+                }
+            }
+            #endregion
+
+            try
+            {
+                // Rellenar años intermedios y ordenarlos.
+                string max = "2100";
+                string min = "1900";
+                if (dicResultados != null && dicResultados.Count > 0)
+                {
+                    max = dicResultados.Keys.First();
+                    min = dicResultados.Keys.Last();
+                }
+                UtilidadesAPI.RellenarAnys(dicResultados, max, min);
+                dicResultados = dicResultados.OrderBy(item => item.Key).ToDictionary((keyItem) => keyItem.Key, (valueItem) => valueItem.Value);
+
+                // Se coge los datos del número de proyectos.
+                List<int> listaInicios = new();
+                List<int> listaFines = new();
+                foreach (KeyValuePair<string, DataFechas> item in dicResultados)
+                {
+                    listaInicios.Add(item.Value.numProyectosInicio);
+                    listaFines.Add(item.Value.numProyectosFin);
+                }
+            
+                // Se construye el objeto con los datos.
+                List<DatosAnyo> listaDatos = new List<DatosAnyo>();
+                listaDatos.Add(new DatosAnyo("Inicio", "green", listaInicios));
+                listaDatos.Add(new DatosAnyo("Fin", "red", listaFines));
+
+                // Se crea el objeto de la gráfica.
+                DataGraficaProyectosGroupBars dataObj = new DataGraficaProyectosGroupBars(dicResultados.Keys.ToList(), listaDatos);
+
+                return new ObjGrafica("bar", dataObj, new Models.DataGraficaProyectosGroupBars.Options(20, new Models.DataGraficaProyectosGroupBars.Scales(new List<YAxes>() { new YAxes(new Models.DataGraficaProyectosGroupBars.Ticks(0)) })));
+
+            }
+            catch (Exception e) { return null; }
         }
 
 

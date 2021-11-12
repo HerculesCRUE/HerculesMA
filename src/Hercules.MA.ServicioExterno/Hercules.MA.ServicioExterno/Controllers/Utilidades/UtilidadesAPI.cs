@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Gnoss.ApiWrapper;
 using System.Text;
 using System.Web;
+using Hercules.MA.ServicioExterno.Models.DataFechas;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 {
@@ -224,6 +225,40 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             }
         }
 
+        /// <summary>
+        /// Rellenar los años faltantes del diccionario.
+        /// </summary>
+        /// <param name="pDicResultados">Diccionario a rellenar.</param>
+        /// <param name="pFechaInicial">Primer año.</param>
+        /// <param name="pFechaFinal">Último año.</param>
+        public static void RellenarAnys(Dictionary<string, DataFechas> pDicResultados, string pFechaInicial, string pFechaFinal)
+        {
+            // Fecha inicial.
+            int dia1 = 01;
+            int mes1 = 01;
+            int anio1 = int.Parse(pFechaInicial);
+            DateTime fecha1 = new DateTime(anio1, mes1, dia1);
+
+            // Fecha final.
+            int dia2 = 01;
+            int mes2 = 01;
+            int anio2 = int.Parse(pFechaFinal);
+            DateTime fecha2 = new DateTime(anio2, mes2, dia2);
+
+            while (fecha1 <= fecha2)
+            {
+                // Hay que rellenar con los años intermedios.
+                string fechaString = $@"{fecha1.ToString("yyyy")}";
+                if (!pDicResultados.ContainsKey(fechaString))
+                {
+                    DataFechas data = new();
+                    data.numProyectosInicio = 0;
+                    data.numProyectosFin = 0;
+                    pDicResultados.Add(fechaString, data);
+                }
+                fecha1 = fecha1.AddYears(1);
+            }
+        }
 
         /// <summary>
         /// Obtiene los filtros por los parámetros de la URL.
