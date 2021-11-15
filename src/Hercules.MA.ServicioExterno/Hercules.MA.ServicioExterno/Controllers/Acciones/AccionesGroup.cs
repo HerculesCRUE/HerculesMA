@@ -448,13 +448,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where1.Append("WHERE { ");
             where1.Append("?proyecto vivo:relates ?relacion. ");
             where1.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
-            where1.Append("?proyecto vivo:start ?fechaProjInit. ");
-            where1.Append("?proyecto vivo:end ?fechaProjEnd. ");
             where1.Append("?relacion roh:roleOf ?persona. ");
             where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}");
             where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}");
-            where1.Append("BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)");
             where1.Append("BIND(IF(bound(?fechaProjInit), ?fechaProjInit, 10000000000000) as ?fechaProjInitAux)");
+            where1.Append("BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)");
             where1.Append("BIND( SUBSTR( STR(?fechaProjInit), 0, 4) AS ?anyoInicio) ");
 
             where1.Append($@"<{idGrafoBusqueda}> ?p2 ?members2.");
@@ -513,26 +511,24 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select2.Append(mPrefijos);
             select2.Append("SELECT COUNT(DISTINCT(?proyecto)) AS ?numPublicaciones ?anyoFin ");
             where2.Append("WHERE { ");
-            where1.Append("?proyecto vivo:relates ?relacion. ");
-            where1.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
-            where1.Append("?proyecto vivo:start ?fechaProjInit. ");
-            where1.Append("?proyecto vivo:end ?fechaProjEnd. ");
-            where1.Append("?relacion roh:roleOf ?persona. ");
-            where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}");
-            where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}");
-            where1.Append("BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)");
-            where1.Append("BIND(IF(bound(?fechaProjInit), ?fechaProjInit, 10000000000000) as ?fechaProjInitAux)");
+            where2.Append("?proyecto vivo:relates ?relacion. ");
+            where2.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
+            where2.Append("?relacion roh:roleOf ?persona. ");
+            where2.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}");
+            where2.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}");
+            where2.Append("BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)");
+            where2.Append("BIND(IF(bound(?fechaProjInit), ?fechaProjInit, 10000000000000) as ?fechaProjInitAux)");
             where2.Append("BIND( SUBSTR( STR(?fechaProjEnd), 0, 4) AS ?anyoFin) ");
 
-            where1.Append($@"<{idGrafoBusqueda}> ?p2 ?members2.");
-            where1.Append("FILTER (?p2 IN (<http://xmlns.com/foaf/0.1/member>, <http://w3id.org/roh/mainResearcher> ))");
-            where1.Append("?members2 <http://w3id.org/roh/roleOf> ?persona. ");
-            where1.Append("OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#start> ?fechaGroupInit.}}");
-            where1.Append("OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#end> ?fechaGroupEnd.}}");
-            where1.Append("BIND(IF(bound(?fechaGroupEnd), ?fechaGroupEnd, 30000000000000) as ?fechaGroupEndAux)");
-            where1.Append("BIND(IF(bound(?fechaGroupInit), ?fechaGroupInit, 10000000000000) as ?fechaGroupInitAux)");
+            where2.Append($@"<{idGrafoBusqueda}> ?p2 ?members2.");
+            where2.Append("FILTER (?p2 IN (<http://xmlns.com/foaf/0.1/member>, <http://w3id.org/roh/mainResearcher> ))");
+            where2.Append("?members2 <http://w3id.org/roh/roleOf> ?persona. ");
+            where2.Append("OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#start> ?fechaGroupInit.}}");
+            where2.Append("OPTIONAL{{?members2 <http://vivoweb.org/ontology/core#end> ?fechaGroupEnd.}}");
+            where2.Append("BIND(IF(bound(?fechaGroupEnd), ?fechaGroupEnd, 30000000000000) as ?fechaGroupEndAux)");
+            where2.Append("BIND(IF(bound(?fechaGroupInit), ?fechaGroupInit, 10000000000000) as ?fechaGroupInitAux)");
 
-            where1.Append("FILTER(?fechaGroupEndAux >= ?fechaProjInitAux AND ?fechaGroupInitAux <= ?fechaProjEndAux)");
+            where2.Append("FILTER(?fechaGroupEndAux >= ?fechaProjInitAux AND ?fechaGroupInitAux <= ?fechaProjEndAux)");
 
             // where2.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
             if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
