@@ -817,7 +817,68 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
                     }
                 }
+            } else
+            {
+                // Set the main researcher default
+                idGrafoBusqueda = ObtenerIdBusqueda(pIdGroup);
+                dicNodos = new Dictionary<string, string>();
+                dicRelaciones = new Dictionary<string, DataQueryRelaciones>();
+                dicPersonasColabo = new();
+                resultadoQuery = null;
+                colaboradores = new List<DataGraficaColaboradores>();
+
+                personas = $@"<{idGrafoBusqueda}>";
+
+
+                // Consulta sparql.
+                select = mPrefijos;
+                select += "SELECT ?mainresearcher ?nombre COUNT(*) AS ?numRelaciones";
+                where = $@"
+                WHERE {{ 
+                        <{idGrafoBusqueda}> roh:mainResearcher ?mainrp.
+                        ?mainrp roh:roleOf ?mainresearcher.
+                        ?mainresearcher foaf:name ?nombre.
+                    }} ORDER BY DESC (COUNT(*)) LIMIT 10
+                ";
+
+                resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                mainresearcher = "";
+
+                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                {
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    {
+                        try
+                        {
+                            string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "mainresearcher");
+                            int proyectosComun = Int32.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelaciones"));
+                            string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
+                            mainresearcher = UtilidadesAPI.GetValorFilaSparqlObject(fila, "mainresearcher");
+
+                            dicPersonasColabo.Add(id, proyectosComun);
+                            dicNodos.Add(id, nombreColaborador.ToLower().Trim());
+                            personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "mainresearcher") + ">";
+
+
+                            colaboradores = new List<DataGraficaColaboradores>();
+
+                            string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nombreColaborador);
+                            Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(id, valor, null, null, null, "nodes");
+                            DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, true, true);
+                            colaboradores.Add(dataColabo);
+                        }
+                        catch (Exception e) {}
+                        
+                    }
+                }
+
+                // colaboradores.Add(new DataGraficaColaboradores(new SparqlObject.Data(), true, true));
+
+               
+
             }
+
             
 
             return colaboradores;
