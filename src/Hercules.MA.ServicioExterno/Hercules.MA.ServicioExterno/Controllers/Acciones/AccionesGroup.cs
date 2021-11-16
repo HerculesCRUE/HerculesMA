@@ -918,6 +918,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         WHERE {{
                         <{idGrafoBusqueda}> roh:mainResearcher ?mainrp.
                         ?mainrp roh:roleOf ?mainresearcher.
+
+                        <{idGrafoBusqueda}> <http://xmlns.com/foaf/0.1/member> ?members1.
+                        ?members1 roh:roleOf ?membersID.
                         
                         ?documento a 'document'.
                         ?documento bibo:authorList ?listaAutores.
@@ -926,13 +929,29 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?listaAutores2 rdf:member ?id.
 
                         FILTER(?id != ?mainresearcher)
+                        FILTER(?id != ?membersID)
                         ?id foaf:name ?nombre.
-                    }}
-                    }} UNION {{
+                ";
+
+            // Parameters
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?id", ref aux);
+                where += filtros;
+            }
+
+            where += $@"
+                   }} }} UNION {{
                         SELECT *
                         WHERE {{
                         <{idGrafoBusqueda}> roh:mainResearcher ?mainrp.
                         ?mainrp roh:roleOf ?mainresearcher.
+
+                        <{idGrafoBusqueda}> <http://xmlns.com/foaf/0.1/member> ?members1.
+                        ?members1 roh:roleOf ?membersID.
 
                         ?proyecto a 'project'.
                         ?proyecto vivo:relates ?relacion.
@@ -941,10 +960,22 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?relacion2 roh:roleOf ?id.
 
                         FILTER(?id != ?mainresearcher)
+                        FILTER(?id != ?membersID)
                         ?id foaf:name ?nombre.
-                    }} }} }} ORDER BY DESC (COUNT(*)) LIMIT 10
                 ";
 
+            // Parameters
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?id", ref aux);
+                where += filtros;
+            }
+            where += $@"
+                    }} }} }} ORDER BY DESC (COUNT(*)) LIMIT 10
+                ";
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
