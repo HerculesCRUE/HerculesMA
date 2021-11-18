@@ -266,6 +266,7 @@ namespace CurriculumvitaeOntology
 					}
 				}
 			}
+			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/ScientificActivity"; } }
@@ -352,10 +353,15 @@ namespace CurriculumvitaeOntology
 		[RDFProperty("http://w3id.org/roh/worksSubmittedSeminars")]
 		public  List<RelatedWorkSubmittedSeminars> Roh_worksSubmittedSeminars { get; set;}
 
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/title")]
+		[RDFProperty("http://w3id.org/roh/title")]
+		public  string Roh_title { get; set;}
+
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
+			propList.Add(new StringOntologyProperty("roh:title", this.Roh_title));
 		}
 
 		internal override void GetEntities()

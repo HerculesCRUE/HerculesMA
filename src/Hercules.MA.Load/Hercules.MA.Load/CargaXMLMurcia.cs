@@ -86,58 +86,58 @@ namespace Hercules.MA.Load
 
             //Cargar organizaciones.
             CambiarOntologia("organization");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
             Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas, fuentesFinanciacionProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar personas.
             CambiarOntologia("person");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar, datoEquiposInvestigacion);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar grupos de investigación.
             CambiarOntologia("group");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
-            Dictionary<string, string> gruposCargar = ObtenerGrupos(personasACargar, personasCargar, ref listaRecursosCargar, personas, gruposInvestigacion, datoEquiposInvestigacion, organizacionesCargar);
-            CargarDatos(listaRecursosCargar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
+            Dictionary<string, string> gruposCargar = ObtenerGrupos(personasACargar, personasCargar, ref listaRecursosCargar, personas, gruposInvestigacion, datoEquiposInvestigacion, organizacionesCargar, lineasDeInvestigacion, lineasInvestigador);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar proyectos.
             CambiarOntologia("project");
-            EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
+            //EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
             Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, fechasEquiposProyectos, areasUnescoProyectos, codigosUnesco, fuentesFinanciacionProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar revistas.
             CambiarOntologia("maindocument");
-            EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
+            //EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
             Dictionary<string, string> revistarCargar = ObtenerMainDocuments(personasACargar, ref listaRecursosCargar, articulos, autoresArticulos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Publicaciones)
             CambiarOntologia("document");
-            EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
+            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
             Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Congresos)
             CambiarOntologia("document");
-            EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
+            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
             Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar curriculums
             CambiarOntologia("curriculumvitae");
-            EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
+            //EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
             Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar, documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Secundarios
@@ -786,9 +786,9 @@ namespace Hercules.MA.Load
                     }
 
                     //Localidad
-                    //direccion.Vcard_locality = "Murcia";
-                    //direccion.IdVcard_hasRegion = "http://gnoss.com/items/feature_ADM1_ES62";
-                    //direccion.IdVcard_hasCountryName = "http://gnoss.com/items/feature_PCLD_724";
+                    documentoACargar.Vcard_locality = "Murcia";
+                    documentoACargar.IdVcard_hasRegion = "http://gnoss.com/items/feature_ADM1_ES62";
+                    documentoACargar.IdVcard_hasCountryName = "http://gnoss.com/items/feature_PCLD_724";
 
                     //FreeTextKeyword
                     documentoACargar.Vivo_freeTextKeyword = pListaPalabrasClave.Where(x => x.PC_ARTI_CODIGO == articulo.CODIGO).Select(x => x.PC_PALABRA).ToList();
@@ -848,7 +848,7 @@ namespace Hercules.MA.Load
                     DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
                     documentoACargar.IdRoh_scientificActivityDocument = "http://gnoss.com/items/scientificactivitydocument_SAD2";
                     documentoACargar.Roh_title = congreso.TITULO_CONTRIBUCION;
-                    //TODO: locality Pendiente a la ontología
+                    documentoACargar.Vcard_locality = congreso.LUGAR_CELEBRACION;
 
                     //Fecha
                     if (!string.IsNullOrEmpty(congreso.FECHA_CELEBRACION))
@@ -922,7 +922,7 @@ namespace Hercules.MA.Load
             return dicIDs;
         }
 
-        private static Dictionary<string, string> ObtenerGrupos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pListaPersonas, List<GrupoInvestigacion> pListaGrupoInvestigacion, List<DatoEquipoInvestigacion> pListaDatoEquipoInvestigacion, Dictionary<string, string> pOrganizacionesCargar)
+        private static Dictionary<string, string> ObtenerGrupos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pListaPersonas, List<GrupoInvestigacion> pListaGrupoInvestigacion, List<DatoEquipoInvestigacion> pListaDatoEquipoInvestigacion, Dictionary<string, string> pOrganizacionesCargar, List<LineasDeInvestigacion> pListaLineasDeInvestigacion, List<LineasInvestigador> pListaLineasInvestigador)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsGruposACargar = new HashSet<string>();
@@ -1005,7 +1005,14 @@ namespace Hercules.MA.Load
                                 persona.Vivo_end = fechaFin;
                             }
 
-                            //TODO: investigationLines Pendiente a la ontología
+                            // Líneas de investigación
+                            persona.Vivo_hasResearchArea = new List<string>();
+                            List<LineasInvestigador> lineasIngestigador = pListaLineasInvestigador.Where(x => x.IDPERSONAINVESTIGADOR == equipo.IDPERSONA).ToList();
+                            foreach(LineasInvestigador linea in lineasIngestigador)
+                            {
+                                LineasDeInvestigacion item = pListaLineasDeInvestigacion.FirstOrDefault(x => x.LINE_CODIGO == linea.LINE_CODIGO);
+                                persona.Vivo_hasResearchArea.Add(item.LINE_DESCRIPCION);
+                            }
 
                             if (equipo.CODTIPOPARTICIPACION == "IP")
                             {
@@ -1061,9 +1068,9 @@ namespace Hercules.MA.Load
                     cvACargar.IdRoh_cvOf = pDicPersonasCargadas[id];
                     cvACargar.Roh_personalData = new PersonalData();
                     cvACargar.Roh_scientificExperience = new ScientificExperience();
-                    //TODO: cvACargar.Roh_scientificExperience.title Pendiente a la Ontología.
+                    cvACargar.Roh_scientificExperience.Roh_title = "-";
                     cvACargar.Roh_scientificActivity = new ScientificActivity();
-                    //TODO: cvACargar.Roh_scientificActivity.title Pendiente a la Ontología.
+                    cvACargar.Roh_scientificActivity.Roh_title = "-";
 
                     //PersonalData
                     if (persona.SEXO == "M")
@@ -1083,7 +1090,7 @@ namespace Hercules.MA.Load
                     {
                         RelatedScientificPublication relatedDocuments = new RelatedScientificPublication();
                         relatedDocuments.IdVivo_relatedBy = pDicDocumentosCargados[idArticulo];
-                        relatedDocuments.Roh_isPublic = false;
+                        relatedDocuments.Roh_isPublic = true;
                         cvACargar.Roh_scientificActivity.Roh_scientificPublications.Add(relatedDocuments);
                     }
 

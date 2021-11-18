@@ -21,7 +21,7 @@ namespace DocumentOntology
 	public class CategoryPath : GnossOCBase
 	{
 
-		public CategoryPath() : base() { }
+		public CategoryPath() : base() { } 
 
 		public CategoryPath(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
@@ -29,13 +29,12 @@ namespace DocumentOntology
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
 			this.Roh_categoryNode = new List<Concept>();
 			SemanticPropertyModel propRoh_categoryNode = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/categoryNode");
-			if (propRoh_categoryNode != null && propRoh_categoryNode.PropertyValues.Count > 0)
+			if(propRoh_categoryNode != null && propRoh_categoryNode.PropertyValues.Count > 0)
 			{
 				foreach (SemanticPropertyModel.PropertyValue propValue in propRoh_categoryNode.PropertyValues)
 				{
-					if (propValue.RelatedEntity != null)
-					{
-						Concept roh_categoryNode = new Concept(propValue.RelatedEntity, idiomaUsuario);
+					if(propValue.RelatedEntity!=null){
+						Concept roh_categoryNode = new Concept(propValue.RelatedEntity,idiomaUsuario);
 						this.Roh_categoryNode.Add(roh_categoryNode);
 					}
 				}
@@ -46,10 +45,10 @@ namespace DocumentOntology
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/CategoryPath"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es, "http://w3id.org/roh/categoryNode")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/categoryNode")]
 		[RDFProperty("http://w3id.org/roh/categoryNode")]
-		public List<Concept> Roh_categoryNode { get; set; }
-		public List<string> IdsRoh_categoryNode { get; set; }
+		public  List<Concept> Roh_categoryNode { get; set;}
+		public List<string> IdsRoh_categoryNode { get; set;}
 
 
 		internal override void GetProperties()
@@ -61,7 +60,7 @@ namespace DocumentOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
-		}
+		} 
 
 
 
@@ -69,7 +68,7 @@ namespace DocumentOntology
 		protected List<object> ObtenerObjetosDePropiedad(object propiedad)
 		{
 			List<object> lista = new List<object>();
-			if (propiedad is IList)
+			if(propiedad is IList)
 			{
 				foreach (object item in (IList)propiedad)
 				{
@@ -99,14 +98,14 @@ namespace DocumentOntology
 					if (((IDictionary)propiedad)[key] is IList)
 					{
 						List<string> listaValores = (List<string>)((IDictionary)propiedad)[key];
-						foreach (string valor in listaValores)
+						foreach(string valor in listaValores)
 						{
 							lista.Add(valor);
 						}
 					}
 					else
 					{
-						lista.Add((string)((IDictionary)propiedad)[key]);
+					lista.Add((string)((IDictionary)propiedad)[key]);
 					}
 				}
 			}
@@ -126,15 +125,15 @@ namespace DocumentOntology
 
 		private void AgregarTripleALista(string pSujeto, string pPredicado, string pObjeto, List<string> pLista, string pDatosExtra)
 		{
-			if (!string.IsNullOrEmpty(pObjeto) && !pObjeto.Equals("\"\"") && !pObjeto.Equals("<>"))
+			if(!string.IsNullOrEmpty(pObjeto) && !pObjeto.Equals("\"\"") && !pObjeto.Equals("<>"))
 			{
 				pLista.Add($"<{pSujeto}> <{pPredicado}> {pObjeto}{pDatosExtra}");
-			}
-		}
+			} 
+		} 
 
 		private void AgregarTags(List<string> pListaTriples)
 		{
-			foreach (string tag in tagList)
+			foreach(string tag in tagList)
 			{
 				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://rdfs.org/sioc/types#Tag", tag.ToLower(), pListaTriples, " . ");
 			}

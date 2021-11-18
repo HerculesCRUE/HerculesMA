@@ -21,42 +21,42 @@ namespace CurriculumvitaeOntology
 	public class RelatedSupervisedArtisticProject : GnossOCBase
 	{
 
-		public RelatedSupervisedArtisticProject() : base() { }
+		public RelatedSupervisedArtisticProject() : base() { } 
 
 		public RelatedSupervisedArtisticProject(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
 			SemanticPropertyModel propRoh_relatedSupervisedArtisticProjectCV = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/relatedSupervisedArtisticProjectCV");
-			if (propRoh_relatedSupervisedArtisticProjectCV != null && propRoh_relatedSupervisedArtisticProjectCV.PropertyValues.Count > 0)
+			if(propRoh_relatedSupervisedArtisticProjectCV != null && propRoh_relatedSupervisedArtisticProjectCV.PropertyValues.Count > 0)
 			{
-				this.Roh_relatedSupervisedArtisticProjectCV = new RelatedSupervisedArtisticProjectCV(propRoh_relatedSupervisedArtisticProjectCV.PropertyValues[0].RelatedEntity, idiomaUsuario);
+				this.Roh_relatedSupervisedArtisticProjectCV = new RelatedSupervisedArtisticProjectCV(propRoh_relatedSupervisedArtisticProjectCV.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			SemanticPropertyModel propVivo_relatedBy = pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#relatedBy");
-			if (propVivo_relatedBy != null && propVivo_relatedBy.PropertyValues.Count > 0)
+			if(propVivo_relatedBy != null && propVivo_relatedBy.PropertyValues.Count > 0)
 			{
-				this.Vivo_relatedBy = new SupervisedArtisticProject(propVivo_relatedBy.PropertyValues[0].RelatedEntity, idiomaUsuario);
+				this.Vivo_relatedBy = new SupervisedArtisticProject(propVivo_relatedBy.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
-			this.Roh_isPublic = GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/isPublic"));
+			this.Roh_isPublic= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/isPublic"));
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/RelatedSupervisedArtisticProject"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/RelatedSupervisedArtisticProject"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es, "http://w3id.org/roh/relatedSupervisedArtisticProjectCV")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/relatedSupervisedArtisticProjectCV")]
 		[RDFProperty("http://w3id.org/roh/relatedSupervisedArtisticProjectCV")]
-		public RelatedSupervisedArtisticProjectCV Roh_relatedSupervisedArtisticProjectCV { get; set; }
+		public  RelatedSupervisedArtisticProjectCV Roh_relatedSupervisedArtisticProjectCV { get; set;}
 
-		[LABEL(LanguageEnum.es, "http://vivoweb.org/ontology/core#relatedBy")]
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#relatedBy")]
 		[RDFProperty("http://vivoweb.org/ontology/core#relatedBy")]
 		[Required]
-		public SupervisedArtisticProject Vivo_relatedBy { get; set; }
-		public string IdVivo_relatedBy { get; set; }
+		public  SupervisedArtisticProject Vivo_relatedBy  { get; set;} 
+		public string IdVivo_relatedBy  { get; set;} 
 
-		[LABEL(LanguageEnum.es, "http://w3id.org/roh/isPublic")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/isPublic")]
 		[RDFProperty("http://w3id.org/roh/isPublic")]
-		public bool Roh_isPublic { get; set; }
+		public  bool Roh_isPublic { get; set;}
 
 
 		internal override void GetProperties()
@@ -69,14 +69,13 @@ namespace CurriculumvitaeOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
-			if (Roh_relatedSupervisedArtisticProjectCV != null)
-			{
+			if(Roh_relatedSupervisedArtisticProjectCV!=null){
 				Roh_relatedSupervisedArtisticProjectCV.GetProperties();
 				Roh_relatedSupervisedArtisticProjectCV.GetEntities();
 				OntologyEntity entityRoh_relatedSupervisedArtisticProjectCV = new OntologyEntity("http://w3id.org/roh/RelatedSupervisedArtisticProjectCV", "http://w3id.org/roh/RelatedSupervisedArtisticProjectCV", "roh:relatedSupervisedArtisticProjectCV", Roh_relatedSupervisedArtisticProjectCV.propList, Roh_relatedSupervisedArtisticProjectCV.entList);
 				entList.Add(entityRoh_relatedSupervisedArtisticProjectCV);
 			}
-		}
+		} 
 
 
 
@@ -84,7 +83,7 @@ namespace CurriculumvitaeOntology
 		protected List<object> ObtenerObjetosDePropiedad(object propiedad)
 		{
 			List<object> lista = new List<object>();
-			if (propiedad is IList)
+			if(propiedad is IList)
 			{
 				foreach (object item in (IList)propiedad)
 				{
@@ -114,14 +113,14 @@ namespace CurriculumvitaeOntology
 					if (((IDictionary)propiedad)[key] is IList)
 					{
 						List<string> listaValores = (List<string>)((IDictionary)propiedad)[key];
-						foreach (string valor in listaValores)
+						foreach(string valor in listaValores)
 						{
 							lista.Add(valor);
 						}
 					}
 					else
 					{
-						lista.Add((string)((IDictionary)propiedad)[key]);
+					lista.Add((string)((IDictionary)propiedad)[key]);
 					}
 				}
 			}
@@ -141,15 +140,15 @@ namespace CurriculumvitaeOntology
 
 		private void AgregarTripleALista(string pSujeto, string pPredicado, string pObjeto, List<string> pLista, string pDatosExtra)
 		{
-			if (!string.IsNullOrEmpty(pObjeto) && !pObjeto.Equals("\"\"") && !pObjeto.Equals("<>"))
+			if(!string.IsNullOrEmpty(pObjeto) && !pObjeto.Equals("\"\"") && !pObjeto.Equals("<>"))
 			{
 				pLista.Add($"<{pSujeto}> <{pPredicado}> {pObjeto}{pDatosExtra}");
-			}
-		}
+			} 
+		} 
 
 		private void AgregarTags(List<string> pListaTriples)
 		{
-			foreach (string tag in tagList)
+			foreach(string tag in tagList)
 			{
 				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://rdfs.org/sioc/types#Tag", tag.ToLower(), pListaTriples, " . ");
 			}
