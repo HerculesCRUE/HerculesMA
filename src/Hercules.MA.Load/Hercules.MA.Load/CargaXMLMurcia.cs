@@ -381,6 +381,37 @@ namespace Hercules.MA.Load
                     personaCarga.Roh_isSynchronized = false;
                     personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
 
+                    // ---------- ÑAPA
+                    if (idPersona == "79")
+                    {                        
+                        personaCarga.Roh_hasPosition = "Catedrático de universidad";
+                        personaCarga.IdVivo_departmentOrSchool = "Ingeniería de la información y las comunicaciones";
+                        personaCarga.Roh_h_index = 55;
+                        personaCarga.Roh_ORCID = "0000-0002-5525-1259";
+                        personaCarga.Foaf_homepage = "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD";
+                        personaCarga.Vcard_email = "skarmeta@um.es";
+                        personaCarga.Vcard_hasTelephone = "+34868884607";
+                        personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
+                        personaCarga.Vivo_description = $@"Nacido en Santiago de Chile en Abril de 1965, obtuvo la licenciatura en Informática por la Universidad de Granada en el año 1991
+y el Doctorado en Informática por la Universidad de Murcia en el año 1995. Se convirtió en profesor titular de la Universidad de Murcia en al año 1997
+y es Catedrático en Ingeniería Telemática desde el año 2009. Vicedecano de Infraestructuras de la Facultad de Informática entre los años 1991 a 1993 y,
+posteriormente, vicedecano de Relaciones Externas del 1997 a 1999. Ha sido director del departamento de Ingeniería de la Información y las
+Comunicaciones desde 2001 hasta 2007. Coordinador del programa de doctorado en Tecnologías de la Información y Telemáticas Avanzadas desde el 2002
+hasta el 2010, con mención de calidad del Ministerio. Desde el año 2008 es coordinador de la Oficina de Proyectos Europeos de la Universidad de Murcia,
+adscrita al vicerrectorado de Investigación. Desde la misma ha sido responsable del proyecto de Eurociencia concedido a la Universidad de Murcia,
+así como del proyecto COFUND concedido asociado al proyecto U-IMPACT-COFUND que ha coordinado como investigador principal.
+
+Actualmente es, además, representante nacional del MINECO en el programa H2020 para el pilar de Ciencia Excelente en el área de MARIE SKŁODOWSKA-CURIE,
+así como representante en el grupo de Recursos Humanos y movilidad de la Comisión Europea.
+
+Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacionales, 200 artículos en congresos y ha sido investigador principal de más
+de 15 proyectos europeos, habiendo dirigido más de 20 tesis de doctorado. Además, ha participado en numerosos comités de programas de conferencias en informática,
+seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM Group, IEEE MSN, TrustBus, etc., siendo co-chair del Second International
+Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless
+Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los
+de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
+                    }
+
                     //Creamos el recurso.
                     ComplexOntologyResource resource = personaCarga.ToGnossApiResource(mResourceApi, new List<string>());
                     pListaRecursosCargar.Add(resource);
@@ -1027,6 +1058,12 @@ namespace Hercules.MA.Load
 
                     //ResearchersNumber
                     grupoCargar.Roh_researchersNumber = grupoCargar.Roh_mainResearcher.Select(x => x.IdRoh_roleOf).Union(grupoCargar.Foaf_member.Select(x => x.IdRoh_roleOf)).Distinct().Count();
+
+                    // --- ÑAPA
+                    if (grupo.IDGRUPOINVESTIGACION == "E096-02")
+                    {
+                        //grupoCargar.Vivo_description = "";
+                    }
 
                     //Creamos el recurso.
                     ComplexOntologyResource resource = grupoCargar.ToGnossApiResource(mResourceApi, new List<string>());
