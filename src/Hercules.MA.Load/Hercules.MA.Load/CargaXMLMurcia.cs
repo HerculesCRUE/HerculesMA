@@ -28,6 +28,12 @@ namespace Hercules.MA.Load
         //Resource API.
         public static ResourceApi mResourceApi { get; set; }
 
+        //Comunidad.
+        public static Guid mIdComunidad { get; set; }
+
+        //Diccionario secundarias.
+        public static Dictionary<string, string> dicAreasCategoria { get; set; }
+
         /// <summary>
         /// Método para cargar las entidades principales.
         /// </summary>
@@ -65,29 +71,15 @@ namespace Hercules.MA.Load
             List<TipoParticipacionGrupo> tipoParticipacionGrupos = LeerTipoParticipacionGrupos(inputFolder + "/Tipo participacion grupo.xml");
             List<TiposEventos> tiposEventos = LeerTiposEventos(inputFolder + "/Tipos eventos.xml");
 
+            // Obtención del ImpactIndexCategory (Secundaria).
+            dicAreasCategoria = CargaListadosAreasRevistas();
+
             //Persona en específico a cargar.
-            //HashSet<string> personasACargar = new HashSet<string>() { "79" };
-            HashSet<string> personasACargar = new HashSet<string>();
+            HashSet<string> personasACargar = new HashSet<string>() { "79", "1276" };
+            //HashSet<string> personasACargar = new HashSet<string>();
 
             //Recursos para NO borrarlos.
             HashSet<string> listaNoBorrar = new HashSet<string>();
-            listaNoBorrar.Add("http://gnoss.com/items/Person_21c0c51d-7a1e-1222-c23e-e8370eb10488_b51f0913-39cd-439d-980e-6cdb108d70e2");
-            listaNoBorrar.Add("http://gnoss.com/items/CV_1fca886e-da0b-770e-1171-963e7ca03db8_2eb3851b-5489-47b2-b541-f99b37d83922");
-            listaNoBorrar.Add("http://gnoss.com/items/Document_4656ba9a-af48-4bdd-83a4-832ccff0356f_df774a2a-5a9a-44b4-955d-8d631eed399b");
-            listaNoBorrar.Add("http://gnoss.com/items/Document_0e80c969-015e-4fcb-a049-4c225e340490_0cfb6939-5067-4504-afdd-789307a48112");
-            listaNoBorrar.Add("http://gnoss.com/items/Project_87ca995e-8ed0-4878-be62-6c0c16baa3f3_27c97476-1194-4107-85b4-a09e8c9304af");
-            listaNoBorrar.Add("http://gnoss.com/items/Project_26be071f-5640-477e-b596-d0f429e2ac21_c1545417-1173-4d7e-a350-f8c645963ab2");
-            listaNoBorrar.Add("http://gnoss.com/items/Project_ef0fc429-4dd9-4402-b55c-19c7562fbbfd_2697e5f6-465e-42ce-86fd-bdf61abb3375");
-            listaNoBorrar.Add("http://gnoss.com/items/Project_dc1323a3-1c8f-4b87-8fdf-ec703bae3ffd_997cb1d7-8b90-4ee1-ad06-97d9a5231d9d");
-            listaNoBorrar.Add("http://gnoss.com/items/Project_2e9e1645-d3e0-4303-a034-653e18137fdc_4aa03cfa-790e-4404-808e-c909f39e57f4");
-            listaNoBorrar.Add("http://gnoss.com/items/Person_e55eaec7-e020-4839-aaa4-042a07dfd823_f92b6662-8514-422a-ab31-040b8c1908af");
-            listaNoBorrar.Add("http://gnoss.com/items/Person_516e29e5-6ba5-4b2e-9ecb-53a900121386_00f01033-b255-4073-95cf-8d5c331b10f9");
-            listaNoBorrar.Add("http://gnoss.com/items/Person_21f63d02-c1f9-4202-9839-4b1c069aadcf_5ee49ae7-1dc8-42b5-b62b-4c1280366a62");
-            listaNoBorrar.Add("http://gnoss.com/items/Person_7964a83b-4aab-4614-a219-f3200a0d3477_6669764e-f17b-4c96-a643-8a775865ee72");
-            listaNoBorrar.Add("http://gnoss.com/items/Person_8c5317f2-f967-49bf-b270-2faf97adaf7c_daa5f283-e693-48a3-8b6c-098864b9137e");
-            listaNoBorrar.Add("http://gnoss.com/items/Person_e55eaec7-e020-4839-aaa4-042a07dfd823_f92b6662-8514-422a-ab31-040b8c1908af");
-            listaNoBorrar.Add("http://gnoss.com/items/Person_32616992-5ae9-4c6a-b047-10bf9717332f_ef14e2e4-018a-4cf9-b15d-500e890bb1d6");
-            listaNoBorrar.Add("http://gnoss.com/items/Person_516e29e5-6ba5-4b2e-9ecb-53a900121386_00f01033-b255-4073-95cf-8d5c331b10f9");
 
             //Lista de recursos a cargar.
             List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
@@ -102,7 +94,14 @@ namespace Hercules.MA.Load
             //Cargar personas.
             CambiarOntologia("person");
             //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
-            Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar);
+            Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar, datoEquiposInvestigacion);
+            //CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
+
+            //Cargar grupos de investigación.
+            CambiarOntologia("group");
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
+            Dictionary<string, string> gruposCargar = ObtenerGrupos(personasACargar, personasCargar, ref listaRecursosCargar, personas, gruposInvestigacion, datoEquiposInvestigacion, organizacionesCargar, lineasDeInvestigacion, lineasInvestigador);
             //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
@@ -113,10 +112,24 @@ namespace Hercules.MA.Load
             //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
-            //Cargar documentos.
+            //Cargar revistas.
+            CambiarOntologia("maindocument");
+            //EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
+            Dictionary<string, string> revistarCargar = ObtenerMainDocuments(personasACargar, ref listaRecursosCargar, articulos, autoresArticulos);
+            //CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
+
+            //Cargar documentos. (Publicaciones)
             CambiarOntologia("document");
             //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
-            Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos);
+            Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos);
+            //CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
+
+            //Cargar documentos. (Congresos)
+            CambiarOntologia("document");
+            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
+            Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
             //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
@@ -262,7 +275,7 @@ namespace Hercules.MA.Load
         /// <param name="pPersonas">Datos de las personas.</param>
         /// <param name="pAutoresArticulos">Datos de los artículos.</param>
         /// <returns>Diccionario con el ID persona / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerPersonas(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pPersonas, List<AutorArticulo> pAutoresArticulos, List<AutorCongreso> pAutoresCongreso, List<AutorExposicion> pAutoresExposicion, List<DirectoresTesis> pDirectoresTesis, List<EquipoProyecto> pEquiposProyectos, List<InventoresPatentes> pInventoresPatentes, Dictionary<string, string> pOrganizacionesCargar)
+        private static Dictionary<string, string> ObtenerPersonas(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pPersonas, List<AutorArticulo> pAutoresArticulos, List<AutorCongreso> pAutoresCongreso, List<AutorExposicion> pAutoresExposicion, List<DirectoresTesis> pDirectoresTesis, List<EquipoProyecto> pEquiposProyectos, List<InventoresPatentes> pInventoresPatentes, Dictionary<string, string> pOrganizacionesCargar, List<DatoEquipoInvestigacion> pListaDatoEquipoInvestigacions)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> listaPersonasCargarDefinitiva = new HashSet<string>();
@@ -330,6 +343,16 @@ namespace Hercules.MA.Load
                 }
                 listaPersonasCargarDefinitiva.UnionWith(pInventoresPatentes.Where(x => idsPatentes.Contains(x.IDPATENTE)).Select(x => x.IDPERSONAINVENTOR));
                 #endregion
+
+                #region --- Personas que han participado en los mismos grupos.
+                HashSet<string> idsGrupos = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsGrupos.UnionWith(pListaDatoEquipoInvestigacions.Where(x => x.IDPERSONA == personaID).Select(x => x.IDGRUPOINVESTIGACION));
+                }
+                idsGrupos.Remove("INVES/POSTGRADO");
+                listaPersonasCargarDefinitiva.UnionWith(pListaDatoEquipoInvestigacions.Where(x => idsGrupos.Contains(x.IDGRUPOINVESTIGACION)).Select(x => x.IDPERSONA));
+                #endregion
             }
 
             foreach (string idPersona in listaPersonasCargarDefinitiva)
@@ -354,6 +377,39 @@ namespace Hercules.MA.Load
                     if (persona.PERSONAL_UMU == "S")
                     {
                         personaCarga.IdRoh_hasRole = pOrganizacionesCargar["UMU"];
+                    }
+                    personaCarga.Roh_isSynchronized = false;
+                    personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
+
+                    // ---------- ÑAPA
+                    if (idPersona == "79")
+                    {                        
+                        personaCarga.Roh_hasPosition = "Catedrático de universidad";
+                        personaCarga.IdVivo_departmentOrSchool = "Ingeniería de la información y las comunicaciones";
+                        personaCarga.Roh_h_index = 55;
+                        personaCarga.Roh_ORCID = "0000-0002-5525-1259";
+                        personaCarga.Foaf_homepage = "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD";
+                        personaCarga.Vcard_email = "skarmeta@um.es";
+                        personaCarga.Vcard_hasTelephone = "+34868884607";
+                        personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
+                        personaCarga.Vivo_description = $@"Nacido en Santiago de Chile en Abril de 1965, obtuvo la licenciatura en Informática por la Universidad de Granada en el año 1991
+y el Doctorado en Informática por la Universidad de Murcia en el año 1995. Se convirtió en profesor titular de la Universidad de Murcia en al año 1997
+y es Catedrático en Ingeniería Telemática desde el año 2009. Vicedecano de Infraestructuras de la Facultad de Informática entre los años 1991 a 1993 y,
+posteriormente, vicedecano de Relaciones Externas del 1997 a 1999. Ha sido director del departamento de Ingeniería de la Información y las
+Comunicaciones desde 2001 hasta 2007. Coordinador del programa de doctorado en Tecnologías de la Información y Telemáticas Avanzadas desde el 2002
+hasta el 2010, con mención de calidad del Ministerio. Desde el año 2008 es coordinador de la Oficina de Proyectos Europeos de la Universidad de Murcia,
+adscrita al vicerrectorado de Investigación. Desde la misma ha sido responsable del proyecto de Eurociencia concedido a la Universidad de Murcia,
+así como del proyecto COFUND concedido asociado al proyecto U-IMPACT-COFUND que ha coordinado como investigador principal.
+
+Actualmente es, además, representante nacional del MINECO en el programa H2020 para el pilar de Ciencia Excelente en el área de MARIE SKŁODOWSKA-CURIE,
+así como representante en el grupo de Recursos Humanos y movilidad de la Comisión Europea.
+
+Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacionales, 200 artículos en congresos y ha sido investigador principal de más
+de 15 proyectos europeos, habiendo dirigido más de 20 tesis de doctorado. Además, ha participado en numerosos comités de programas de conferencias en informática,
+seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM Group, IEEE MSN, TrustBus, etc., siendo co-chair del Second International
+Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless
+Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los
+de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
                     }
 
                     //Creamos el recurso.
@@ -550,27 +606,27 @@ namespace Hercules.MA.Load
                         {
                             persona.IdRoh_roleOf = pDicPersonasCargadas[equipo.IDPERSONA];
                         }
-                        persona.Roh_order = equipo.NUMEROCOLABORADOR;
+                        persona.Vivo_preferredDisplayOrder = Int32.Parse(equipo.NUMEROCOLABORADOR);
 
-                        //Tipo de participación.
-                        string tipoParticipacion = pFechaEquipoProyectos.FirstOrDefault(x => x.IDPROYECTO == proyectoID && x.NUMEROCOLABORADOR == equipo.NUMEROCOLABORADOR).CODTIPOPARTICIPACION;
-                        switch (tipoParticipacion)
-                        {
-                            case "IP":
-                                persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_050";
-                                break;
-                            case "IPRE":
-                                persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_OTHERS";
-                                persona.Roh_participationTypeOther = "Investigador principal responsable económico";
-                                break;
-                            case "INV":
-                                persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_060";
-                                break;
-                            case "RE":
-                                persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_OTHERS";
-                                persona.Roh_participationTypeOther = "Responsable económico";
-                                break;
-                        }
+                        //TODO Tipo de participación.
+                        //string tipoParticipacion = pFechaEquipoProyectos.FirstOrDefault(x => x.IDPROYECTO == proyectoID && x.NUMEROCOLABORADOR == equipo.NUMEROCOLABORADOR).CODTIPOPARTICIPACION;
+                        //switch (tipoParticipacion)
+                        //{
+                        //    case "IP":
+                        //        persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_050";
+                        //        break;
+                        //    case "IPRE":
+                        //        persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_OTHERS";
+                        //        persona.Roh_participationTypeOther = "Investigador principal responsable económico";
+                        //        break;
+                        //    case "INV":
+                        //        persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_060";
+                        //        break;
+                        //    case "RE":
+                        //        persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_OTHERS";
+                        //        persona.Roh_participationTypeOther = "Responsable económico";
+                        //        break;
+                        //}
 
                         proyectoCargar.Vivo_relates.Add(persona);
                     }
@@ -632,10 +688,13 @@ namespace Hercules.MA.Load
                     {
                         fuentesFinanciacion.Add(fuente.FUEN_NOMBRE);
                     }
-                    foreach(string nomFuente in fuentesFinanciacion)
+                    foreach (string nomFuente in fuentesFinanciacion)
                     {
                         proyectoCargar.IdsRoh_grantedBy.Add(pDicOrganizacionesCargadas[nomFuente]);
                     }
+
+                    //isSynchronized
+                    proyectoCargar.Roh_isSynchronized = false;
 
                     ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, new List<string>());
                     pListaRecursosCargar.Add(resource);
@@ -649,7 +708,7 @@ namespace Hercules.MA.Load
         }
 
         /// <summary>
-        /// Proceso de obtención de los datos de documentos.
+        /// Proceso de obtención de los datos de documentos. (Publicaciones)
         /// </summary>
         /// <param name="pPersonasACargar"></param>
         /// <param name="pDicPersonasCargadas"></param>
@@ -659,7 +718,7 @@ namespace Hercules.MA.Load
         /// <param name="pListaPersonas"></param>
         /// <param name="pListaPalabrasClave"></param>
         /// <returns>Diccionario con el ID documento / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerDocumentos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave, List<Proyecto> pListaProyectos, List<EquipoProyecto> pEquipoProyectos)
+        private static Dictionary<string, string> ObtenerDocumentos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicRevistasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave, List<Proyecto> pListaProyectos, List<EquipoProyecto> pEquipoProyectos)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsArticulosACargar = new HashSet<string>();
@@ -687,23 +746,12 @@ namespace Hercules.MA.Load
                 if (articulo != null)
                 {
                     DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
+                    documentoACargar.IdRoh_scientificActivityDocument = "http://gnoss.com/items/scientificactivitydocument_SAD1";
                     documentoACargar.IdDc_type = "http://gnoss.com/items/publicationtype_020";
-                    if (!string.IsNullOrEmpty(articulo.NOMBRE_REVISTA))
-                    {
-                        documentoACargar.IdRoh_supportType = "http://gnoss.com/items/supporttype_057";
-                        documentoACargar.Vivo_hasPublicationVenue = articulo.NOMBRE_REVISTA;
-                    }
-                    if (!string.IsNullOrEmpty(articulo.VOLUMEN))
-                    {
-                        documentoACargar.Bibo_volume = articulo.VOLUMEN;
-                    }
-                    if (!string.IsNullOrEmpty(articulo.NUMERO))
-                    {
-                        documentoACargar.Bibo_issue = articulo.NUMERO;
-                    }
-
+                    documentoACargar.IdVivo_hasPublicationVenue = pDicRevistasCargadas[articulo.NOMBRE_REVISTA];
                     documentoACargar.Roh_title = articulo.TITULO;
                     documentoACargar.Roh_crisIdentifier = articulo.CODIGO;
+
                     if (!string.IsNullOrEmpty(articulo.ANO))
                     {
                         documentoACargar.Dct_issued = new DateTime(Int32.Parse(articulo.ANO), 01, 01, 00, 00, 00);
@@ -717,7 +765,6 @@ namespace Hercules.MA.Load
                         documentoACargar.Bibo_pageEnd = Int32.Parse(articulo.PAGHASTA);
                     }
                     documentoACargar.Bibo_authorList = new List<DocumentOntology.BFO_0000023>();
-                    documentoACargar.Roh_dataAuthor = new List<DocumentOntology.DataAuthor>();
                     List<AutorArticulo> listaAutores = pListaAutoresArticulos.Where(x => x.ARTI_CODIGO == articulo.CODIGO).ToList();
                     int numAutores = 0;
                     foreach (AutorArticulo autor in listaAutores)
@@ -731,15 +778,10 @@ namespace Hercules.MA.Load
                             persona.Foaf_nick = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA).NOMBRE);
                             documentoACargar.Bibo_authorList.Add(persona);
 
-                            //DataAuthor
-                            DocumentOntology.DataAuthor dataAuthor = new DocumentOntology.DataAuthor();
-                            dataAuthor.IdRdf_member = pDicPersonasCargadas[autor.IDPERSONA];
-                            documentoACargar.Roh_dataAuthor.Add(dataAuthor);
-
                             numAutores++;
 
                             //Proyectos
-                            documentoACargar.IdsRoh_project = new List<string>();
+                            //TODO cambiar
                             List<EquipoProyecto> listaEquipos = pEquipoProyectos.Where(x => x.IDPERSONA == autor.IDPERSONA).ToList();
                             foreach (EquipoProyecto equipo in listaEquipos)
                             {
@@ -757,35 +799,14 @@ namespace Hercules.MA.Load
                                 {
                                     if (pDicProyectosACargar.ContainsKey(equipo.IDPROYECTO))
                                     {
-                                        documentoACargar.IdsRoh_project.Add(pDicProyectosACargar[equipo.IDPROYECTO]);
+                                        documentoACargar.IdRoh_project = pDicProyectosACargar[equipo.IDPROYECTO];
+                                        break;
                                     }
                                 }
                             }
                         }
                     }
                     documentoACargar.Roh_authorsNumber = numAutores;
-
-                    //Address
-                    DocumentOntology.Address direccion = new DocumentOntology.Address();
-                    direccion.Vcard_locality = "Murcia";
-                    direccion.IdVcard_hasRegion = "http://gnoss.com/items/feature_ADM1_ES62";
-                    direccion.IdVcard_hasCountryName = "http://gnoss.com/items/feature_PCLD_724";
-
-                    //ImpactIndex
-                    DocumentOntology.ImpactIndex impacto = new DocumentOntology.ImpactIndex();
-                    impacto.IdRoh_impactSource = "http://gnoss.com/items/impactindexcategory_OTHERS";
-                    impacto.Roh_impactSourceOther = "Universidad de Murcia";
-                    impacto.Roh_impactIndexInYear = articulo.IMPACTO_REVISTA;
-                    if (articulo.CUARTIL_REVISTA == "1")
-                    {
-                        impacto.Roh_journalTop25 = true;
-                    }
-                    else
-                    {
-                        impacto.Roh_journalTop25 = false;
-                    }
-                    documentoACargar.Roh_impactIndex = new List<DocumentOntology.ImpactIndex>();
-                    documentoACargar.Roh_impactIndex.Add(impacto);
 
                     if (!string.IsNullOrEmpty(articulo.AREA))
                     {
@@ -795,6 +816,10 @@ namespace Hercules.MA.Load
                         documentoACargar.Roh_hasKnowledgeArea.Add(categoryPath);
                     }
 
+                    //Localidad
+                    documentoACargar.Vcard_locality = "Murcia";
+                    documentoACargar.IdVcard_hasRegion = "http://gnoss.com/items/feature_ADM1_ES62";
+                    documentoACargar.IdVcard_hasCountryName = "http://gnoss.com/items/feature_PCLD_724";
 
                     //FreeTextKeyword
                     documentoACargar.Vivo_freeTextKeyword = pListaPalabrasClave.Where(x => x.PC_ARTI_CODIGO == articulo.CODIGO).Select(x => x.PC_PALABRA).ToList();
@@ -802,10 +827,15 @@ namespace Hercules.MA.Load
                     //DOI
                     if (!string.IsNullOrEmpty(articulo.ARTI_DOI))
                     {
-                        documentoACargar.Bibo_identifier = new DocumentOntology.fDocument();
-                        documentoACargar.Bibo_identifier.Dc_title = LimpiarDoi(articulo.ARTI_DOI);
-                        documentoACargar.Bibo_identifier.Foaf_primaryTopic = "DOI";
+                        documentoACargar.Bibo_identifier = new List<DocumentOntology.fDocument>();
+                        DocumentOntology.fDocument docu = new DocumentOntology.fDocument();
+                        docu.IdFoaf_primaryTopic = "http://gnoss.com/items/publicationidentifiertype_040";
+                        docu.Dc_title = LimpiarDoi(articulo.ARTI_DOI);
+                        documentoACargar.Bibo_identifier.Add(docu);
                     }
+
+                    //Validación.
+                    documentoACargar.Roh_isValidated = true;
 
                     //Creamos el recurso.
                     ComplexOntologyResource resource = documentoACargar.ToGnossApiResource(mResourceApi, new List<string>());
@@ -813,6 +843,234 @@ namespace Hercules.MA.Load
 
                     //Guardamos los IDs en la lista.
                     dicIDs.Add(articulo.CODIGO, resource.GnossId);
+                }
+            }
+
+            return dicIDs;
+        }
+
+        private static Dictionary<string, string> ObtenerCongresos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicRevistasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Congreso> pListaCongresos, List<AutorCongreso> pListaAutoresCongreso, List<Persona> pListaPersonas, List<EquipoProyecto> pListaEquipoProyectos)
+        {
+            Dictionary<string, string> dicIDs = new Dictionary<string, string>();
+            HashSet<string> idsCongresosACargar = new HashSet<string>();
+
+            if (pPersonasACargar == null || pPersonasACargar.Count == 0)
+            {
+                //Si viene vacía la lista de personas, cargamos todas.
+                idsCongresosACargar = new HashSet<string>(pListaCongresos.Select(x => x.CONG_NUMERO));
+            }
+            else
+            {
+                //Obtengo los IDs de los artículos.
+                HashSet<string> idsArticulos = new HashSet<string>();
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsCongresosACargar.UnionWith(pListaAutoresCongreso.Where(x => x.IDPERSONA == personaID).Select(x => x.CONG_NUMERO));
+                }
+            }
+
+            //Obtengo los datos de los documentos.
+            foreach (string documentoID in idsCongresosACargar)
+            {
+                Congreso congreso = pListaCongresos.FirstOrDefault(x => x.CONG_NUMERO == documentoID);
+
+                if (congreso != null)
+                {
+                    DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
+                    documentoACargar.IdRoh_scientificActivityDocument = "http://gnoss.com/items/scientificactivitydocument_SAD2";
+                    documentoACargar.Roh_title = congreso.TITULO_CONTRIBUCION;
+                    documentoACargar.Vcard_locality = congreso.LUGAR_CELEBRACION;
+
+                    //Fecha
+                    if (!string.IsNullOrEmpty(congreso.FECHA_CELEBRACION))
+                    {
+                        DateTime fecha = new DateTime();
+                        int anio = Int32.Parse(congreso.FECHA_CELEBRACION.Substring(0, 4));
+                        int mes = Int32.Parse(congreso.FECHA_CELEBRACION.Substring(5, 2));
+                        int dia = Int32.Parse(congreso.FECHA_CELEBRACION.Substring(8, 2));
+                        int horas = Int32.Parse(congreso.FECHA_CELEBRACION.Substring(11, 2));
+                        int minutos = Int32.Parse(congreso.FECHA_CELEBRACION.Substring(14, 2));
+                        int segundos = Int32.Parse(congreso.FECHA_CELEBRACION.Substring(17, 2));
+                        fecha = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                        documentoACargar.Dct_issued = fecha;
+                    }
+
+                    documentoACargar.Bibo_authorList = new List<DocumentOntology.BFO_0000023>();
+                    List<AutorCongreso> listaAutores = pListaAutoresCongreso.Where(x => x.CONG_NUMERO == congreso.CONG_NUMERO).ToList();
+                    int numAutores = 0;
+                    foreach (AutorCongreso autor in listaAutores)
+                    {
+                        if (pListaPersonas.Exists(x => x.IDPERSONA == autor.IDPERSONA))
+                        {
+                            //BFO_0000023
+                            DocumentOntology.BFO_0000023 persona = new DocumentOntology.BFO_0000023();
+                            persona.IdRdf_member = pDicPersonasCargadas[autor.IDPERSONA];
+                            persona.Rdf_comment = Int32.Parse(autor.ORDEN);
+                            persona.Foaf_nick = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA).NOMBRE);
+                            documentoACargar.Bibo_authorList.Add(persona);
+                            numAutores++;
+
+                            //TODO: Proyectos
+                            List<EquipoProyecto> listaEquipos = pListaEquipoProyectos.Where(x => x.IDPERSONA == autor.IDPERSONA).ToList();
+                            foreach (EquipoProyecto equipo in listaEquipos)
+                            {
+                                int anyIncio = 0;
+                                int anyFin = DateTime.Now.Year;
+                                if (!string.IsNullOrEmpty(equipo.FECHAINICIO))
+                                {
+                                    anyIncio = Int32.Parse(equipo.FECHAINICIO.Split('/')[0]);
+                                }
+                                if (!string.IsNullOrEmpty(equipo.FECHAFIN))
+                                {
+                                    anyFin = Int32.Parse(equipo.FECHAFIN.Split('/')[0]);
+                                }
+                                if (!string.IsNullOrEmpty(congreso.FECHA_CELEBRACION) && Int32.Parse(congreso.FECHA_CELEBRACION.Substring(0, 4)) >= anyIncio && Int32.Parse(congreso.FECHA_CELEBRACION.Substring(0, 4)) <= anyFin)
+                                {
+                                    if (pDicProyectosACargar.ContainsKey(equipo.IDPROYECTO))
+                                    {
+                                        documentoACargar.IdRoh_project = pDicProyectosACargar[equipo.IDPROYECTO];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    documentoACargar.Roh_authorsNumber = numAutores;
+
+                    //Evento
+                    documentoACargar.Bibo_presentedAt = new DocumentOntology.Event();
+                    documentoACargar.Bibo_presentedAt.Dc_title = congreso.TITULO_CONGRESO;
+
+                    //Creamos el recurso.
+                    ComplexOntologyResource resource = documentoACargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    pListaRecursosCargar.Add(resource);
+
+                    //Guardamos los IDs en la lista.
+                    dicIDs.Add(congreso.CONG_NUMERO, resource.GnossId);
+                }                
+            }
+
+            return dicIDs;
+        }
+
+        private static Dictionary<string, string> ObtenerGrupos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pListaPersonas, List<GrupoInvestigacion> pListaGrupoInvestigacion, List<DatoEquipoInvestigacion> pListaDatoEquipoInvestigacion, Dictionary<string, string> pOrganizacionesCargar, List<LineasDeInvestigacion> pListaLineasDeInvestigacion, List<LineasInvestigador> pListaLineasInvestigador)
+        {
+            Dictionary<string, string> dicIDs = new Dictionary<string, string>();
+            HashSet<string> idsGruposACargar = new HashSet<string>();
+
+            if (pPersonasACargar == null || pPersonasACargar.Count == 0)
+            {
+                //Si viene vacía la lista de personas, cargamos todas.
+                idsGruposACargar = new HashSet<string>(pListaGrupoInvestigacion.Select(x => x.IDGRUPOINVESTIGACION));
+            }
+            else
+            {
+                //Cargamos las personas de la lista.
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsGruposACargar.UnionWith(pListaDatoEquipoInvestigacion.Where(x => x.IDPERSONA == personaID).Select(x => x.IDGRUPOINVESTIGACION));
+                }
+            }
+            idsGruposACargar.Remove("INVES/POSTGRADO");
+
+            foreach (string grupoID in idsGruposACargar)
+            {
+                GrupoInvestigacion grupo = pListaGrupoInvestigacion.FirstOrDefault(x => x.IDGRUPOINVESTIGACION == grupoID);
+
+                if (grupo != null)
+                {
+                    //Agregamos las propiedades con los datos pertinentes.
+                    GroupOntology.Group grupoCargar = new GroupOntology.Group();
+
+                    //CrisIdentifier
+                    grupoCargar.Roh_crisIdentifier = grupo.IDGRUPOINVESTIGACION;
+
+                    //Title
+                    grupoCargar.Roh_title = grupo.DESCRIPCION;
+
+                    //AffiliatedOrganization
+                    grupoCargar.IdVivo_affiliatedOrganization = pOrganizacionesCargar["UMU"];
+
+                    //FoundationDate
+                    int anio = Int32.Parse(grupo.FECHACREACION.Substring(0, 4));
+                    int mes = Int32.Parse(grupo.FECHACREACION.Substring(5, 2));
+                    int dia = Int32.Parse(grupo.FECHACREACION.Substring(8, 2));
+                    int horas = Int32.Parse(grupo.FECHACREACION.Substring(11, 2));
+                    int minutos = Int32.Parse(grupo.FECHACREACION.Substring(14, 2));
+                    int segundos = Int32.Parse(grupo.FECHACREACION.Substring(17, 2));
+                    DateTime fechaCreacion = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                    grupoCargar.Roh_foundationDate = fechaCreacion;
+
+                    //MainResearcher y Member
+                    grupoCargar.Roh_mainResearcher = new List<GroupOntology.BFO_0000023>();
+                    grupoCargar.Foaf_member = new List<GroupOntology.BFO_0000023>();
+
+                    List<DatoEquipoInvestigacion> equipoInvestigacion = pListaDatoEquipoInvestigacion.Where(x => x.IDGRUPOINVESTIGACION == grupo.IDGRUPOINVESTIGACION).ToList();
+                    foreach (DatoEquipoInvestigacion equipo in equipoInvestigacion)
+                    {
+                        if (pDicPersonasCargadas.ContainsKey(equipo.IDPERSONA))
+                        {
+                            //BFO_0000023
+                            GroupOntology.BFO_0000023 persona = new GroupOntology.BFO_0000023();
+                            persona.IdRoh_roleOf = pDicPersonasCargadas[equipo.IDPERSONA];
+                            if (!string.IsNullOrEmpty(equipo.FECHAINICIOPERIODO))
+                            {
+                                anio = Int32.Parse(equipo.FECHAINICIOPERIODO.Substring(0, 4));
+                                mes = Int32.Parse(equipo.FECHAINICIOPERIODO.Substring(5, 2));
+                                dia = Int32.Parse(equipo.FECHAINICIOPERIODO.Substring(8, 2));
+                                horas = Int32.Parse(equipo.FECHAINICIOPERIODO.Substring(11, 2));
+                                minutos = Int32.Parse(equipo.FECHAINICIOPERIODO.Substring(14, 2));
+                                segundos = Int32.Parse(equipo.FECHAINICIOPERIODO.Substring(17, 2));
+                                DateTime fechaInicio = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                                persona.Vivo_start = fechaInicio;
+                            }
+                            if (!string.IsNullOrEmpty(equipo.FECHAFINPERIODO))
+                            {
+                                anio = Int32.Parse(equipo.FECHAFINPERIODO.Substring(0, 4));
+                                mes = Int32.Parse(equipo.FECHAFINPERIODO.Substring(5, 2));
+                                dia = Int32.Parse(equipo.FECHAFINPERIODO.Substring(8, 2));
+                                horas = Int32.Parse(equipo.FECHAFINPERIODO.Substring(11, 2));
+                                minutos = Int32.Parse(equipo.FECHAFINPERIODO.Substring(14, 2));
+                                segundos = Int32.Parse(equipo.FECHAFINPERIODO.Substring(17, 2));
+                                DateTime fechaFin = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                                persona.Vivo_end = fechaFin;
+                            }
+
+                            // Líneas de investigación
+                            persona.Vivo_hasResearchArea = new List<string>();
+                            List<LineasInvestigador> lineasIngestigador = pListaLineasInvestigador.Where(x => x.IDPERSONAINVESTIGADOR == equipo.IDPERSONA).ToList();
+                            foreach(LineasInvestigador linea in lineasIngestigador)
+                            {
+                                LineasDeInvestigacion item = pListaLineasDeInvestigacion.FirstOrDefault(x => x.LINE_CODIGO == linea.LINE_CODIGO);
+                                persona.Vivo_hasResearchArea.Add(item.LINE_DESCRIPCION);
+                            }
+
+                            if (equipo.CODTIPOPARTICIPACION == "IP")
+                            {
+                                grupoCargar.Roh_mainResearcher.Add(persona);
+                            }
+                            else
+                            {
+                                grupoCargar.Foaf_member.Add(persona);
+                            }
+                        }
+                    }
+
+                    //ResearchersNumber
+                    grupoCargar.Roh_researchersNumber = grupoCargar.Roh_mainResearcher.Select(x => x.IdRoh_roleOf).Union(grupoCargar.Foaf_member.Select(x => x.IdRoh_roleOf)).Distinct().Count();
+
+                    // --- ÑAPA
+                    if (grupo.IDGRUPOINVESTIGACION == "E096-02")
+                    {
+                        //grupoCargar.Vivo_description = "";
+                    }
+
+                    //Creamos el recurso.
+                    ComplexOntologyResource resource = grupoCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    pListaRecursosCargar.Add(resource);
+
+                    //Guardamos los IDs en la lista.
+                    dicIDs.Add(grupo.IDGRUPOINVESTIGACION, resource.GnossId);
                 }
             }
 
@@ -847,9 +1105,9 @@ namespace Hercules.MA.Load
                     cvACargar.IdRoh_cvOf = pDicPersonasCargadas[id];
                     cvACargar.Roh_personalData = new PersonalData();
                     cvACargar.Roh_scientificExperience = new ScientificExperience();
-                    cvACargar.Roh_scientificExperience.Foaf_name = "Experiencia científica";
+                    cvACargar.Roh_scientificExperience.Roh_title = "-";
                     cvACargar.Roh_scientificActivity = new ScientificActivity();
-                    cvACargar.Roh_scientificActivity.Foaf_name = "Actividad científica";
+                    cvACargar.Roh_scientificActivity.Roh_title = "-";
 
                     //PersonalData
                     if (persona.SEXO == "M")
@@ -863,13 +1121,13 @@ namespace Hercules.MA.Load
                     cvACargar.Roh_personalData.Vcard_email = persona.EMAIL;
 
                     //ScientificActivity
-                    cvACargar.Roh_scientificActivity.Roh_scientificPublications = new List<RelatedDocuments>();
+                    cvACargar.Roh_scientificActivity.Roh_scientificPublications = new List<RelatedScientificPublication>();
 
                     foreach (string idArticulo in pListaAutoresArticulos.Where(x => x.IDPERSONA == id && pDicDocumentosCargados.ContainsKey(x.ARTI_CODIGO)).Select(x => x.ARTI_CODIGO))
                     {
-                        RelatedDocuments relatedDocuments = new RelatedDocuments();
-                        relatedDocuments.IdRoh_relatedDocument = pDicDocumentosCargados[idArticulo];
-                        relatedDocuments.Roh_isPublic = false;
+                        RelatedScientificPublication relatedDocuments = new RelatedScientificPublication();
+                        relatedDocuments.IdVivo_relatedBy = pDicDocumentosCargados[idArticulo];
+                        relatedDocuments.Roh_isPublic = true;
                         cvACargar.Roh_scientificActivity.Roh_scientificPublications.Add(relatedDocuments);
                     }
 
@@ -885,6 +1143,154 @@ namespace Hercules.MA.Load
             return dicIDs;
         }
 
+        private static Dictionary<string, string> ObtenerMainDocuments(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutorArticulos)
+        {
+            Dictionary<string, string> dicIDs = new Dictionary<string, string>();
+            HashSet<string> idsRevistasACargar = new HashSet<string>();
+            Dictionary<string, HashSet<string>> tituloRevistas = new Dictionary<string, HashSet<string>>();
+
+            if (pPersonasACargar == null || pPersonasACargar.Count == 0)
+            {
+                //Si viene vacía la lista de personas, cargamos todas.
+                idsRevistasACargar = new HashSet<string>(pListaArticulos.Select(x => x.CODIGO));
+            }
+            else
+            {
+                //Cargamos las personas de la lista.
+                foreach (string personaID in pPersonasACargar)
+                {
+                    idsRevistasACargar.UnionWith(pListaAutorArticulos.Where(x => x.IDPERSONA == personaID).Select(x => x.ARTI_CODIGO));
+                }
+            }
+
+            List<MaindocumentOntology.MainDocument> listaRevistas = new List<MaindocumentOntology.MainDocument>();
+
+            foreach (string id in idsRevistasACargar)
+            {
+                Articulo articulo = pListaArticulos.FirstOrDefault(x => x.CODIGO == id);
+                if (articulo != null)
+                {
+                    if (!tituloRevistas.ContainsKey(articulo.NOMBRE_REVISTA))
+                    {
+                        MaindocumentOntology.MainDocument revista = new MaindocumentOntology.MainDocument();
+                        revista.Roh_crisIdentifier = articulo.NOMBRE_REVISTA;
+                        revista.Roh_title = articulo.NOMBRE_REVISTA;
+                        revista.Bibo_issn = articulo.REIS_ISSN;
+                        revista.IdRoh_format = "http://gnoss.com/items/documentformat_057"; // De momento, todos son revistas.
+
+                        // Índice de impacto.
+                        revista.Roh_impactIndex = new List<MaindocumentOntology.ImpactIndex>();
+
+                        MaindocumentOntology.ImpactIndex indice = new MaindocumentOntology.ImpactIndex();
+                        indice.IdRoh_impactSource = "http://gnoss.com/items/referencesource_OTHERS";
+                        indice.Roh_impactSourceOther = "Murcia";
+                        foreach (KeyValuePair<string, string> item in dicAreasCategoria)
+                        {
+                            if (item.Value.Contains(articulo.DESCRI_AREA))
+                            {
+                                indice.IdRoh_impactCategory = item.Key;
+                                break;
+                            }
+                        }
+
+                        indice.Roh_impactIndexInYear = float.Parse(articulo.IMPACTO_REVISTA);
+
+                        if (articulo.CUARTIL_REVISTA == "1")
+                        {
+                            indice.Roh_journalTop25 = true;
+                        }
+                        else
+                        {
+                            indice.Roh_journalTop25 = false;
+                        }
+
+                        DateTime fecha = new DateTime();
+                        if (!string.IsNullOrEmpty(articulo.ANO))
+                        {
+                            int anio = Int32.Parse(articulo.ANO);
+                            int mes = Int32.Parse("01");
+                            int dia = Int32.Parse("01");
+                            int horas = Int32.Parse("00");
+                            int minutos = Int32.Parse("00");
+                            int segundos = Int32.Parse("00");
+                            fecha = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                            indice.Roh_year = fecha;
+                        }
+
+
+                        revista.Roh_impactIndex.Add(indice);
+
+                        // Guardo el título.
+                        tituloRevistas.Add(articulo.NOMBRE_REVISTA, new HashSet<string>() { articulo.ANO });
+
+                        // Guardo la revista.
+                        listaRevistas.Add(revista);
+                    }
+                    else if (!tituloRevistas[articulo.NOMBRE_REVISTA].Contains(articulo.ANO))
+                    {
+                        MaindocumentOntology.MainDocument revista = listaRevistas.FirstOrDefault(x => x.Roh_title == articulo.NOMBRE_REVISTA);
+
+                        if (revista != null)
+                        {
+                            // Índice de impacto.
+                            MaindocumentOntology.ImpactIndex indice = new MaindocumentOntology.ImpactIndex();
+                            indice.IdRoh_impactSource = "http://gnoss.com/items/referencesource_OTHERS";
+                            indice.Roh_impactSourceOther = "Murcia";
+                            foreach (KeyValuePair<string, string> item in dicAreasCategoria)
+                            {
+                                if (item.Value.Contains(articulo.DESCRI_AREA))
+                                {
+                                    indice.IdRoh_impactCategory = item.Key;
+                                    break;
+                                }
+                            }
+
+                            indice.Roh_impactIndexInYear = float.Parse(articulo.IMPACTO_REVISTA);
+
+                            if (articulo.CUARTIL_REVISTA == "1")
+                            {
+                                indice.Roh_journalTop25 = true;
+                            }
+                            else
+                            {
+                                indice.Roh_journalTop25 = false;
+                            }
+
+                            DateTime fecha = new DateTime();
+                            if (!string.IsNullOrEmpty(articulo.ANO))
+                            {
+                                int anio = Int32.Parse(articulo.ANO);
+                                int mes = Int32.Parse("01");
+                                int dia = Int32.Parse("01");
+                                int horas = Int32.Parse("01");
+                                int minutos = Int32.Parse("00");
+                                int segundos = Int32.Parse("00");
+                                fecha = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                                indice.Roh_year = fecha;
+                            }
+
+
+                            revista.Roh_impactIndex.Add(indice);
+
+                            // Guardo el título.
+                            tituloRevistas[articulo.NOMBRE_REVISTA].Add(articulo.ANO);
+                        }
+                    }
+                }
+            }
+
+            foreach (MaindocumentOntology.MainDocument revista in listaRevistas)
+            {
+                ComplexOntologyResource resource = revista.ToGnossApiResource(mResourceApi, new List<string>());
+                pListaRecursosCargar.Add(resource);
+
+                //Guardamos los IDs en la lista.
+                dicIDs.Add(revista.Roh_crisIdentifier, resource.GnossId);
+            }
+
+            return dicIDs;
+        }
+
         /// <summary>
         /// Permite cargar los recursos.
         /// </summary>
@@ -895,7 +1301,14 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (ComplexOntologyResource recursoCargar in pListaRecursosCargar)
             {
-                mResourceApi.LoadComplexSemanticResource(recursoCargar);
+                if (pListaRecursosCargar.Last() == recursoCargar)
+                {
+                    mResourceApi.LoadComplexSemanticResource(recursoCargar, false, true);
+                }
+                else
+                {
+                    mResourceApi.LoadComplexSemanticResource(recursoCargar);
+                }
             }
         }
 
@@ -934,16 +1347,14 @@ namespace Hercules.MA.Load
                 //Obtiene las URLs de los recursos a borrar.
                 List<string> listaUrl = new List<string>();
                 SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, pOntology);
-                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+
+                max = resultadoQuery.results.bindings.Count;
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
-                    max = resultadoQuery.results.bindings.Count;
-                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    string recurso = GetValorFilaSparqlObject(fila, "s");
+                    if (!pListaRecursosNoBorrar.Contains(recurso))
                     {
-                        string recurso = GetValorFilaSparqlObject(fila, "s");
-                        if (!pListaRecursosNoBorrar.Contains(recurso))
-                        {
-                            listaUrl.Add(recurso);
-                        }
+                        listaUrl.Add(recurso);
                     }
                 }
 
@@ -2289,10 +2700,42 @@ namespace Hercules.MA.Load
                 Uri uri = new Uri(pDoi);
                 return uri.AbsolutePath.Substring(1);
             }
-            catch (Exception) 
-            { 
-                return pDoi; 
+            catch (Exception)
+            {
+                return pDoi;
             }
+        }
+
+        /// <summary>
+        /// Consulta la BBDD para obtener un diccionario con el id de la secundaria y su nombre.
+        /// </summary>
+        /// <returns>Diccionario con ID y nombre de la secundaria.</returns>
+        private static Dictionary<string, string> CargaListadosAreasRevistas()
+        {
+            Dictionary<string, string> dicResultados = new Dictionary<string, string>();
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append("SELECT ?ID ?Nombre ");
+            where.Append("WHERE { ");
+            where.Append("?ID ?p ?o. ");
+            where.Append("?o <http://purl.org/dc/elements/1.1/title> ?Nombre. FILTER(lang(?Nombre)='es')");
+            where.Append("} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "impactindexcategory");
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string id = fila["ID"].value;
+                    string nombre = fila["Nombre"].value;
+                    dicResultados.Add(id, nombre);
+                }
+            }
+
+            return dicResultados;
         }
     }
 }

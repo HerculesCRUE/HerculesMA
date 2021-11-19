@@ -16,7 +16,9 @@ using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
 using Organization = OrganizationOntology.Organization;
 using GeographicRegion = GeographicregionOntology.GeographicRegion;
-using Modality = ModalityOntology.Modality;
+using ProjectType = ProjecttypeOntology.ProjectType;
+using ProjectModality = ProjectmodalityOntology.ProjectModality;
+using ScientificExperienceProject = ScientificexperienceprojectOntology.ScientificExperienceProject;
 
 namespace ProjectOntology
 {
@@ -91,6 +93,11 @@ namespace ProjectOntology
 					}
 				}
 			}
+			SemanticPropertyModel propRoh_projectType = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/projectType");
+			if(propRoh_projectType != null && propRoh_projectType.PropertyValues.Count > 0)
+			{
+				this.Roh_projectType = new ProjectType(propRoh_projectType.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
 			this.Vivo_relates = new List<BFO_0000023>();
 			SemanticPropertyModel propVivo_relates = pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#relates");
 			if(propVivo_relates != null && propVivo_relates.PropertyValues.Count > 0)
@@ -106,20 +113,28 @@ namespace ProjectOntology
 			SemanticPropertyModel propRoh_modality = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/modality");
 			if(propRoh_modality != null && propRoh_modality.PropertyValues.Count > 0)
 			{
-				this.Roh_modality = new Modality(propRoh_modality.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				this.Roh_modality = new ProjectModality(propRoh_modality.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			this.Roh_relevantResults = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/relevantResults"));
 			this.Roh_peopleYearNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/peopleYearNumber"));
 			this.Roh_durationMonths = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationMonths"));
 			this.Roh_geographicFocusOther = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/geographicFocusOther"));
-			this.Roh_researchersNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/researchersNumber"));
 			this.Roh_durationDays = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationDays"));
+			this.Roh_researchersNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/researchersNumber"));
 			this.Vivo_start= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#start"));
 			this.Roh_durationYears = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationYears"));
+			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
 			this.Vivo_end= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#end"));
 			this.Roh_monetaryAmount = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/monetaryAmount"));
+			this.Vivo_abbreviation = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#abbreviation"));
+			SemanticPropertyModel propRoh_scientificExperienceProject = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/scientificExperienceProject");
+			if(propRoh_scientificExperienceProject != null && propRoh_scientificExperienceProject.PropertyValues.Count > 0)
+			{
+				this.Roh_scientificExperienceProject = new ScientificExperienceProject(propRoh_scientificExperienceProject.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
+			this.Roh_classificationCVN = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/classificationCVN"));
+			this.Roh_isSynchronized= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/isSynchronized"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
-			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
 		}
 
 		public Project(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
@@ -189,6 +204,11 @@ namespace ProjectOntology
 					}
 				}
 			}
+			SemanticPropertyModel propRoh_projectType = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/projectType");
+			if(propRoh_projectType != null && propRoh_projectType.PropertyValues.Count > 0)
+			{
+				this.Roh_projectType = new ProjectType(propRoh_projectType.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
 			this.Vivo_relates = new List<BFO_0000023>();
 			SemanticPropertyModel propVivo_relates = pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#relates");
 			if(propVivo_relates != null && propVivo_relates.PropertyValues.Count > 0)
@@ -204,111 +224,141 @@ namespace ProjectOntology
 			SemanticPropertyModel propRoh_modality = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/modality");
 			if(propRoh_modality != null && propRoh_modality.PropertyValues.Count > 0)
 			{
-				this.Roh_modality = new Modality(propRoh_modality.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				this.Roh_modality = new ProjectModality(propRoh_modality.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			this.Roh_relevantResults = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/relevantResults"));
 			this.Roh_peopleYearNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/peopleYearNumber"));
 			this.Roh_durationMonths = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationMonths"));
 			this.Roh_geographicFocusOther = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/geographicFocusOther"));
-			this.Roh_researchersNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/researchersNumber"));
 			this.Roh_durationDays = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationDays"));
+			this.Roh_researchersNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/researchersNumber"));
 			this.Vivo_start= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#start"));
 			this.Roh_durationYears = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationYears"));
+			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
 			this.Vivo_end= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#end"));
 			this.Roh_monetaryAmount = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/monetaryAmount"));
+			this.Vivo_abbreviation = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#abbreviation"));
+			SemanticPropertyModel propRoh_scientificExperienceProject = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/scientificExperienceProject");
+			if(propRoh_scientificExperienceProject != null && propRoh_scientificExperienceProject.PropertyValues.Count > 0)
+			{
+				this.Roh_scientificExperienceProject = new ScientificExperienceProject(propRoh_scientificExperienceProject.PropertyValues[0].RelatedEntity,idiomaUsuario);
+			}
+			this.Roh_classificationCVN = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/classificationCVN"));
+			this.Roh_isSynchronized= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/isSynchronized"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
-			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
 		}
 
 		public virtual string RdfType { get { return "http://vivoweb.org/ontology/core#Project"; } }
 		public virtual string RdfsLabel { get { return "http://vivoweb.org/ontology/core#Project"; } }
-
-		[LABEL(LanguageEnum.es, "Identificador")]
-		[RDFProperty("http://w3id.org/roh/crisIdentifier")]
-		public string Roh_crisIdentifier { get; set; }
-
-		[LABEL(LanguageEnum.es,"Financiación")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/isSupportedBy")]
 		[RDFProperty("http://w3id.org/roh/isSupportedBy")]
 		public  Funding Roh_isSupportedBy { get; set;}
 
-		[LABEL(LanguageEnum.es,"Entidad/es participante/s")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/participates")]
 		[RDFProperty("http://w3id.org/roh/participates")]
 		public  List<Organization> Roh_participates { get; set;}
 		public List<string> IdsRoh_participates { get; set;}
 
-		[LABEL(LanguageEnum.es,"Entidad de realización")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/conductedBy")]
 		[RDFProperty("http://w3id.org/roh/conductedBy")]
 		public  Organization Roh_conductedBy  { get; set;} 
 		public string IdRoh_conductedBy  { get; set;} 
 
-		[LABEL(LanguageEnum.es,"Ámbito geográfico")]
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#geographicFocus")]
 		[RDFProperty("http://vivoweb.org/ontology/core#geographicFocus")]
 		public  GeographicRegion Vivo_geographicFocus  { get; set;} 
 		public string IdVivo_geographicFocus  { get; set;} 
 
-		[LABEL(LanguageEnum.es,"Entidad/es financiadora/s")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/grantedBy")]
 		[RDFProperty("http://w3id.org/roh/grantedBy")]
 		public  List<Organization> Roh_grantedBy { get; set;}
 		public List<string> IdsRoh_grantedBy { get; set;}
 
-		[LABEL(LanguageEnum.es,"Resultados de la clasificación del proyecto")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/hasResultsProjectClassification")]
 		[RDFProperty("http://w3id.org/roh/hasResultsProjectClassification")]
 		public  List<ProjectClassification> Roh_hasResultsProjectClassification { get; set;}
 
-		[LABEL(LanguageEnum.es,"Clasificación del proyecto")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/hasProjectClassification")]
 		[RDFProperty("http://w3id.org/roh/hasProjectClassification")]
 		public  List<ProjectClassification> Roh_hasProjectClassification { get; set;}
 
-		[LABEL(LanguageEnum.es,"Relacionado con")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/projectType")]
+		[RDFProperty("http://w3id.org/roh/projectType")]
+		public  ProjectType Roh_projectType  { get; set;} 
+		public string IdRoh_projectType  { get; set;} 
+
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#relates")]
 		[RDFProperty("http://vivoweb.org/ontology/core#relates")]
 		public  List<BFO_0000023> Vivo_relates { get; set;}
 
-		[LABEL(LanguageEnum.es,"Modalidad de proyecto")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/modality")]
 		[RDFProperty("http://w3id.org/roh/modality")]
-		public  Modality Roh_modality  { get; set;} 
+		public  ProjectModality Roh_modality  { get; set;} 
 		public string IdRoh_modality  { get; set;} 
 
-		[LABEL(LanguageEnum.es,"Resultados relevantes")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/relevantResults")]
 		[RDFProperty("http://w3id.org/roh/relevantResults")]
 		public  string Roh_relevantResults { get; set;}
 
-		[LABEL(LanguageEnum.es,"Nº de personas/año")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/peopleYearNumber")]
 		[RDFProperty("http://w3id.org/roh/peopleYearNumber")]
 		public  int? Roh_peopleYearNumber { get; set;}
 
-		[LABEL(LanguageEnum.es,"Duración (meses)")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/durationMonths")]
 		[RDFProperty("http://w3id.org/roh/durationMonths")]
 		public  string Roh_durationMonths { get; set;}
 
-		[LABEL(LanguageEnum.es,"Ámbito geográfico, otros")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/geographicFocusOther")]
 		[RDFProperty("http://w3id.org/roh/geographicFocusOther")]
 		public  string Roh_geographicFocusOther { get; set;}
 
-		[LABEL(LanguageEnum.es,"Nº de investigadores/as")]
-		[RDFProperty("http://w3id.org/roh/researchersNumber")]
-		public  int? Roh_researchersNumber { get; set;}
-
-		[LABEL(LanguageEnum.es,"Duración (días)")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/durationDays")]
 		[RDFProperty("http://w3id.org/roh/durationDays")]
 		public  string Roh_durationDays { get; set;}
 
-		[LABEL(LanguageEnum.es,"Fecha de inicio")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/researchersNumber")]
+		[RDFProperty("http://w3id.org/roh/researchersNumber")]
+		public  int? Roh_researchersNumber { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#start")]
 		[RDFProperty("http://vivoweb.org/ontology/core#start")]
 		public  DateTime? Vivo_start { get; set;}
 
-		[LABEL(LanguageEnum.es,"Duración (años)")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/durationYears")]
 		[RDFProperty("http://w3id.org/roh/durationYears")]
 		public  string Roh_durationYears { get; set;}
 
-		[LABEL(LanguageEnum.es,"Fecha de finalización")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/crisIdentifier")]
+		[RDFProperty("http://w3id.org/roh/crisIdentifier")]
+		public  string Roh_crisIdentifier { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#end")]
 		[RDFProperty("http://vivoweb.org/ontology/core#end")]
 		public  DateTime? Vivo_end { get; set;}
 
-		[LABEL(LanguageEnum.es,"Cuantía total")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/monetaryAmount")]
 		[RDFProperty("http://w3id.org/roh/monetaryAmount")]
 		public  float? Roh_monetaryAmount { get; set;}
 
-		[LABEL(LanguageEnum.es,"Nombre del proyecto")]
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#abbreviation")]
+		[RDFProperty("http://vivoweb.org/ontology/core#abbreviation")]
+		public  string Vivo_abbreviation { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/scientificExperienceProject")]
+		[RDFProperty("http://w3id.org/roh/scientificExperienceProject")]
+		[Required]
+		public  ScientificExperienceProject Roh_scientificExperienceProject  { get; set;} 
+		public string IdRoh_scientificExperienceProject  { get; set;} 
+
+		[LABEL(LanguageEnum.es,"Clasificación CVN")]
+		[RDFProperty("http://w3id.org/roh/classificationCVN")]
+		public  string Roh_classificationCVN { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/isSynchronized")]
+		[RDFProperty("http://w3id.org/roh/isSynchronized")]
+		public  bool Roh_isSynchronized { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/title")]
 		[RDFProperty("http://w3id.org/roh/title")]
 		public  string Roh_title { get; set;}
 
@@ -320,23 +370,28 @@ namespace ProjectOntology
 			propList.Add(new StringOntologyProperty("roh:conductedBy", this.IdRoh_conductedBy));
 			propList.Add(new StringOntologyProperty("vivo:geographicFocus", this.IdVivo_geographicFocus));
 			propList.Add(new ListStringOntologyProperty("roh:grantedBy", this.IdsRoh_grantedBy));
+			propList.Add(new StringOntologyProperty("roh:projectType", this.IdRoh_projectType));
 			propList.Add(new StringOntologyProperty("roh:modality", this.IdRoh_modality));
 			propList.Add(new StringOntologyProperty("roh:relevantResults", this.Roh_relevantResults));
 			propList.Add(new StringOntologyProperty("roh:peopleYearNumber", this.Roh_peopleYearNumber.ToString()));
 			propList.Add(new StringOntologyProperty("roh:durationMonths", this.Roh_durationMonths));
 			propList.Add(new StringOntologyProperty("roh:geographicFocusOther", this.Roh_geographicFocusOther));
-			propList.Add(new StringOntologyProperty("roh:researchersNumber", this.Roh_researchersNumber.ToString()));
 			propList.Add(new StringOntologyProperty("roh:durationDays", this.Roh_durationDays));
+			propList.Add(new StringOntologyProperty("roh:researchersNumber", this.Roh_researchersNumber.ToString()));
 			if (this.Vivo_start.HasValue){
 				propList.Add(new DateOntologyProperty("vivo:start", this.Vivo_start.Value));
 				}
 			propList.Add(new StringOntologyProperty("roh:durationYears", this.Roh_durationYears));
+			propList.Add(new StringOntologyProperty("roh:crisIdentifier", this.Roh_crisIdentifier));
 			if (this.Vivo_end.HasValue){
 				propList.Add(new DateOntologyProperty("vivo:end", this.Vivo_end.Value));
 				}
 			propList.Add(new StringOntologyProperty("roh:monetaryAmount", this.Roh_monetaryAmount.ToString()));
+			propList.Add(new StringOntologyProperty("vivo:abbreviation", this.Vivo_abbreviation));
+			propList.Add(new StringOntologyProperty("roh:scientificExperienceProject", this.IdRoh_scientificExperienceProject));
+			propList.Add(new StringOntologyProperty("roh:classificationCVN", this.Roh_classificationCVN));
+			propList.Add(new BoolOntologyProperty("roh:isSynchronized", this.Roh_isSynchronized));
 			propList.Add(new StringOntologyProperty("roh:title", this.Roh_title));
-			propList.Add(new StringOntologyProperty("roh:crisIdentifier", this.Roh_crisIdentifier));
 		}
 
 		internal override void GetEntities()
@@ -432,10 +487,6 @@ namespace ProjectOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Funding_{ResourceID}_{this.Roh_isSupportedBy.ArticleID}",  "http://w3id.org/roh/grantsPercentage", $"{this.Roh_isSupportedBy.Roh_grantsPercentage.Value.ToString(new CultureInfo("en-US"))}", list, " . ");
 				}
-				if(this.Roh_isSupportedBy.Vivo_description != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Funding_{ResourceID}_{this.Roh_isSupportedBy.ArticleID}",  "http://vivoweb.org/ontology/core#description", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_isSupportedBy.Vivo_description)}\"", list, " . ");
-				}
 				if(this.Roh_isSupportedBy.Roh_monetaryAmount != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Funding_{ResourceID}_{this.Roh_isSupportedBy.ArticleID}",  "http://w3id.org/roh/monetaryAmount", $"{this.Roh_isSupportedBy.Roh_monetaryAmount.Value.ToString(new CultureInfo("en-US"))}", list, " . ");
@@ -483,29 +534,9 @@ namespace ProjectOntology
 				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://purl.obolibrary.org/obo/BFO_0000023\"", list, " . ");
 				AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}>", list, " . ");
 				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}", "http://vivoweb.org/ontology/core#relates", $"<{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}>", list, " . ");
-				if(item0.IdRoh_participationType != null)
+				if(item0.Vivo_preferredDisplayOrder != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/participationType", $"<{item0.IdRoh_participationType}>", list, " . ");
-				}
-				if(item0.IdRoh_contributionGrade != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/contributionGrade", $"<{item0.IdRoh_contributionGrade}>", list, " . ");
-				}
-				if(item0.Roh_dedicationRegime != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/dedicationRegime", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_dedicationRegime)}\"", list, " . ");
-				}
-				if(item0.Roh_participationTypeOther != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/participationTypeOther", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_participationTypeOther)}\"", list, " . ");
-				}
-				if(item0.Roh_applicantContribution != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/applicantContribution", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_applicantContribution)}\"", list, " . ");
-				}
-				if(item0.Roh_contributionGradeOther != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/contributionGradeOther", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_contributionGradeOther)}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://vivoweb.org/ontology/core#preferredDisplayOrder", $"{item0.Vivo_preferredDisplayOrder.ToString()}", list, " . ");
 				}
 				if(item0.IdRoh_roleOf != null)
 				{
@@ -514,6 +545,10 @@ namespace ProjectOntology
 				if(item0.Roh_order != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/order", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_order)}\"", list, " . ");
+				}
+				if(item0.Roh_title != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/BFO_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/title", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_title)}\"", list, " . ");
 				}
 			}
 			}
@@ -539,6 +574,10 @@ namespace ProjectOntology
 						AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}", "http://w3id.org/roh/grantedBy", $"<{item2}>", list, " . ");
 					}
 				}
+				if(this.IdRoh_projectType != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/projectType", $"<{this.IdRoh_projectType}>", list, " . ");
+				}
 				if(this.IdRoh_modality != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/modality", $"<{this.IdRoh_modality}>", list, " . ");
@@ -559,13 +598,13 @@ namespace ProjectOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/geographicFocusOther", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_geographicFocusOther)}\"", list, " . ");
 				}
-				if(this.Roh_researchersNumber != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/researchersNumber", $"{this.Roh_researchersNumber.Value.ToString()}", list, " . ");
-				}
 				if(this.Roh_durationDays != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/durationDays", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_durationDays)}\"", list, " . ");
+				}
+				if(this.Roh_researchersNumber != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/researchersNumber", $"{this.Roh_researchersNumber.Value.ToString()}", list, " . ");
 				}
 				if(this.Vivo_start != null)
 				{
@@ -575,6 +614,10 @@ namespace ProjectOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/durationYears", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_durationYears)}\"", list, " . ");
 				}
+				if(this.Roh_crisIdentifier != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier)}\"", list, " . ");
+				}
 				if(this.Vivo_end != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://vivoweb.org/ontology/core#end", $"\"{this.Vivo_end.Value.ToString("yyyyMMddHHmmss")}\"", list, " . ");
@@ -583,14 +626,26 @@ namespace ProjectOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/monetaryAmount", $"{this.Roh_monetaryAmount.Value.ToString(new CultureInfo("en-US"))}", list, " . ");
 				}
+				if(this.Vivo_abbreviation != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://vivoweb.org/ontology/core#abbreviation", $"\"{GenerarTextoSinSaltoDeLinea(this.Vivo_abbreviation)}\"", list, " . ");
+				}
+				if(this.IdRoh_scientificExperienceProject != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/scientificExperienceProject", $"<{this.IdRoh_scientificExperienceProject}>", list, " . ");
+				}
+				if(this.Roh_classificationCVN != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/classificationCVN", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_classificationCVN)}\"", list, " . ");
+				}
+				if(this.Roh_isSynchronized != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/isSynchronized", $"\"{this.Roh_isSynchronized.ToString()}\"", list, " . ");
+				}
 				if(this.Roh_title != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Project_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/title", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_title)}\"", list, " . ");
 				}
-			if (this.Roh_crisIdentifier != null)
-			{
-				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Organization_{ResourceID}_{ArticleID}", "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier)}\"", list, " . ");
-			}
 			return list;
 		}
 
@@ -627,10 +682,6 @@ namespace ProjectOntology
 				if(this.Roh_isSupportedBy.Roh_grantsPercentage != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/funding_{ResourceID}_{this.Roh_isSupportedBy.ArticleID}",  "http://w3id.org/roh/grantsPercentage", $"{this.Roh_isSupportedBy.Roh_grantsPercentage.Value.ToString(new CultureInfo("en-US"))}", list, " . ");
-				}
-				if(this.Roh_isSupportedBy.Vivo_description != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/funding_{ResourceID}_{this.Roh_isSupportedBy.ArticleID}",  "http://vivoweb.org/ontology/core#description", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_isSupportedBy.Vivo_description).ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_isSupportedBy.Roh_monetaryAmount != null)
 				{
@@ -690,49 +741,9 @@ namespace ProjectOntology
 			foreach(var item0 in this.Vivo_relates)
 			{
 				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://vivoweb.org/ontology/core#relates", $"<{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}>", list, " . ");
-				if(item0.IdRoh_participationType != null)
+				if(item0.Vivo_preferredDisplayOrder != null)
 				{
-					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
-					string itemRegex = item0.IdRoh_participationType;
-					if (regex.IsMatch(itemRegex))
-					{
-						itemRegex = $"http://gnoss/{resourceAPI.GetShortGuid(itemRegex).ToString().ToUpper()}";
-					}
-					else
-					{
-						itemRegex = itemRegex.ToLower();
-					}
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/participationType", $"<{itemRegex}>", list, " . ");
-				}
-				if(item0.IdRoh_contributionGrade != null)
-				{
-					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
-					string itemRegex = item0.IdRoh_contributionGrade;
-					if (regex.IsMatch(itemRegex))
-					{
-						itemRegex = $"http://gnoss/{resourceAPI.GetShortGuid(itemRegex).ToString().ToUpper()}";
-					}
-					else
-					{
-						itemRegex = itemRegex.ToLower();
-					}
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/contributionGrade", $"<{itemRegex}>", list, " . ");
-				}
-				if(item0.Roh_dedicationRegime != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/dedicationRegime", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_dedicationRegime).ToLower()}\"", list, " . ");
-				}
-				if(item0.Roh_participationTypeOther != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/participationTypeOther", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_participationTypeOther).ToLower()}\"", list, " . ");
-				}
-				if(item0.Roh_applicantContribution != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/applicantContribution", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_applicantContribution).ToLower()}\"", list, " . ");
-				}
-				if(item0.Roh_contributionGradeOther != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/contributionGradeOther", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_contributionGradeOther).ToLower()}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://vivoweb.org/ontology/core#preferredDisplayOrder", $"{item0.Vivo_preferredDisplayOrder.ToString()}", list, " . ");
 				}
 				if(item0.IdRoh_roleOf != null)
 				{
@@ -751,6 +762,10 @@ namespace ProjectOntology
 				if(item0.Roh_order != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/order", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_order).ToLower()}\"", list, " . ");
+				}
+				if(item0.Roh_title != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/bfo_0000023_{ResourceID}_{item0.ArticleID}",  "http://w3id.org/roh/title", $"\"{GenerarTextoSinSaltoDeLinea(item0.Roh_title).ToLower()}\"", list, " . ");
 				}
 			}
 			}
@@ -816,6 +831,20 @@ namespace ProjectOntology
 						AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://w3id.org/roh/grantedBy", $"<{itemRegex}>", list, " . ");
 					}
 				}
+				if(this.IdRoh_projectType != null)
+				{
+					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
+					string itemRegex = this.IdRoh_projectType;
+					if (regex.IsMatch(itemRegex))
+					{
+						itemRegex = $"http://gnoss/{resourceAPI.GetShortGuid(itemRegex).ToString().ToUpper()}";
+					}
+					else
+					{
+						itemRegex = itemRegex.ToLower();
+					}
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/projectType", $"<{itemRegex}>", list, " . ");
+				}
 				if(this.IdRoh_modality != null)
 				{
 					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
@@ -846,13 +875,13 @@ namespace ProjectOntology
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/geographicFocusOther", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_geographicFocusOther).ToLower()}\"", list, " . ");
 				}
-				if(this.Roh_researchersNumber != null)
-				{
-					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/researchersNumber", $"{this.Roh_researchersNumber.Value.ToString()}", list, " . ");
-				}
 				if(this.Roh_durationDays != null)
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/durationDays", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_durationDays).ToLower()}\"", list, " . ");
+				}
+				if(this.Roh_researchersNumber != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/researchersNumber", $"{this.Roh_researchersNumber.Value.ToString()}", list, " . ");
 				}
 				if(this.Vivo_start != null)
 				{
@@ -862,6 +891,10 @@ namespace ProjectOntology
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/durationYears", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_durationYears).ToLower()}\"", list, " . ");
 				}
+				if(this.Roh_crisIdentifier != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier).ToLower()}\"", list, " . ");
+				}
 				if(this.Vivo_end != null)
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://vivoweb.org/ontology/core#end", $"{this.Vivo_end.Value.ToString("yyyyMMddHHmmss")}", list, " . ");
@@ -869,6 +902,32 @@ namespace ProjectOntology
 				if(this.Roh_monetaryAmount != null)
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/monetaryAmount", $"{this.Roh_monetaryAmount.Value.ToString(new CultureInfo("en-US"))}", list, " . ");
+				}
+				if(this.Vivo_abbreviation != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://vivoweb.org/ontology/core#abbreviation", $"\"{GenerarTextoSinSaltoDeLinea(this.Vivo_abbreviation).ToLower()}\"", list, " . ");
+				}
+				if(this.IdRoh_scientificExperienceProject != null)
+				{
+					Regex regex = new Regex(@"\/items\/.+_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}_[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}");
+					string itemRegex = this.IdRoh_scientificExperienceProject;
+					if (regex.IsMatch(itemRegex))
+					{
+						itemRegex = $"http://gnoss/{resourceAPI.GetShortGuid(itemRegex).ToString().ToUpper()}";
+					}
+					else
+					{
+						itemRegex = itemRegex.ToLower();
+					}
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/scientificExperienceProject", $"<{itemRegex}>", list, " . ");
+				}
+				if(this.Roh_classificationCVN != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/classificationCVN", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_classificationCVN).ToLower()}\"", list, " . ");
+				}
+				if(this.Roh_isSynchronized != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/isSynchronized", $"\"{this.Roh_isSynchronized.ToString().ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_title != null)
 				{
@@ -884,10 +943,6 @@ namespace ProjectOntology
 			if(!string.IsNullOrEmpty(search))
 			{
 				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/search", $"\"{search.ToLower()}\"", list, " . ");
-			}
-			if (this.Roh_crisIdentifier != null)
-			{
-				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier).ToLower()}\"", list, " . ");
 			}
 			return list;
 		}

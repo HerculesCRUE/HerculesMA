@@ -40,17 +40,17 @@ namespace DocumentOntology
 		public virtual string RdfsLabel { get { return "http://purl.obolibrary.org/obo/BFO_0000023"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"Firma")]
+		[LABEL(LanguageEnum.es,"http://xmlns.com/foaf/0.1/nick")]
 		[RDFProperty("http://xmlns.com/foaf/0.1/nick")]
 		public  string Foaf_nick { get; set;}
 
-		[LABEL(LanguageEnum.es,"Autor")]
+		[LABEL(LanguageEnum.es,"http://www.w3.org/1999/02/22-rdf-syntax-ns#member")]
 		[RDFProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#member")]
 		[Required]
 		public  Person Rdf_member  { get; set;} 
 		public string IdRdf_member  { get; set;} 
 
-		[LABEL(LanguageEnum.es,"Posición")]
+		[LABEL(LanguageEnum.es,"http://www.w3.org/1999/02/22-rdf-syntax-ns#comment")]
 		[RDFProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#comment")]
 		public  int Rdf_comment { get; set;}
 

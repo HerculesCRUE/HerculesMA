@@ -40,17 +40,17 @@ namespace DocumentOntology
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/PublicationMetric"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"Nombre de la métrica, otros")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/metricNameOther")]
 		[RDFProperty("http://w3id.org/roh/metricNameOther")]
 		public  string Roh_metricNameOther { get; set;}
 
-		[LABEL(LanguageEnum.es,"Nombre de la métrica")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/metricName")]
 		[RDFProperty("http://w3id.org/roh/metricName")]
 		[Required]
 		public  ReferenceSource Roh_metricName  { get; set;} 
 		public string IdRoh_metricName  { get; set;} 
 
-		[LABEL(LanguageEnum.es,"Número de citas")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/citationCount")]
 		[RDFProperty("http://w3id.org/roh/citationCount")]
 		public  int Roh_citationCount { get; set;}
 

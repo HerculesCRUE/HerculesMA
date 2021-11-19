@@ -14,8 +14,6 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
-using ParticipationType = ParticipationtypeOntology.ParticipationType;
-using DedicationRegime = DedicationregimeOntology.DedicationRegime;
 using Person = PersonOntology.Person;
 
 namespace ProjectOntology
@@ -29,75 +27,46 @@ namespace ProjectOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
-			SemanticPropertyModel propRoh_participationType = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/participationType");
-			if(propRoh_participationType != null && propRoh_participationType.PropertyValues.Count > 0)
-			{
-				this.Roh_participationType = new ParticipationType(propRoh_participationType.PropertyValues[0].RelatedEntity,idiomaUsuario);
-			}
-			this.Roh_dedicationRegime = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/dedicationRegime"));
-			this.Roh_participationTypeOther = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/participationTypeOther"));
-			this.Roh_applicantContribution = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/applicantContribution"));
-			this.Roh_contributionGradeOther = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/contributionGradeOther"));
+			this.Vivo_preferredDisplayOrder = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#preferredDisplayOrder")).Value;
 			SemanticPropertyModel propRoh_roleOf = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/roleOf");
 			if(propRoh_roleOf != null && propRoh_roleOf.PropertyValues.Count > 0)
 			{
 				this.Roh_roleOf = new Person(propRoh_roleOf.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
 			this.Roh_order = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/order"));
+			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 		}
 
 		public virtual string RdfType { get { return "http://purl.obolibrary.org/obo/BFO_0000023"; } }
 		public virtual string RdfsLabel { get { return "http://purl.obolibrary.org/obo/BFO_0000023"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"Tipo de participación")]
-		[RDFProperty("http://w3id.org/roh/participationType")]
-		public  ParticipationType Roh_participationType  { get; set;} 
-		public string IdRoh_participationType  { get; set;} 
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#preferredDisplayOrder")]
+		[RDFProperty("http://vivoweb.org/ontology/core#preferredDisplayOrder")]
+		public  int Vivo_preferredDisplayOrder { get; set;}
 
-		[LABEL(LanguageEnum.es,"Grado de contribución")]
-		[RDFProperty("http://w3id.org/roh/contributionGrade")]
-		public  object Roh_contributionGrade  { get; set;} 
-		public string IdRoh_contributionGrade  { get; set;} 
-
-		[LABEL(LanguageEnum.es,"Régimen de dedicación")]
-		[RDFProperty("http://w3id.org/roh/dedicationRegime")]
-		public  string Roh_dedicationRegime { get; set;}
-
-		[LABEL(LanguageEnum.es,"Tipo de participación, otros")]
-		[RDFProperty("http://w3id.org/roh/participationTypeOther")]
-		public  string Roh_participationTypeOther { get; set;}
-
-		[LABEL(LanguageEnum.es,"Aportación del solicitante")]
-		[RDFProperty("http://w3id.org/roh/applicantContribution")]
-		public  string Roh_applicantContribution { get; set;}
-
-		[LABEL(LanguageEnum.es,"Grado de contribución, otros")]
-		[RDFProperty("http://w3id.org/roh/contributionGradeOther")]
-		public  string Roh_contributionGradeOther { get; set;}
-
-		[LABEL(LanguageEnum.es,"Rol de")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/roleOf")]
 		[RDFProperty("http://w3id.org/roh/roleOf")]
 		[Required]
 		public  Person Roh_roleOf  { get; set;} 
 		public string IdRoh_roleOf  { get; set;} 
 
-		[LABEL(LanguageEnum.es,"Posición")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/order")]
 		[RDFProperty("http://w3id.org/roh/order")]
 		public  string Roh_order { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/title")]
+		[RDFProperty("http://w3id.org/roh/title")]
+		public  string Roh_title { get; set;}
 
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
-			propList.Add(new StringOntologyProperty("roh:participationType", this.IdRoh_participationType));
-			//propList.Add(new StringOntologyProperty("roh:contributionGrade", this.Roh_contributionGrade));
-			propList.Add(new StringOntologyProperty("roh:dedicationRegime", this.Roh_dedicationRegime));
-			propList.Add(new StringOntologyProperty("roh:participationTypeOther", this.Roh_participationTypeOther));
-			propList.Add(new StringOntologyProperty("roh:applicantContribution", this.Roh_applicantContribution));
-			propList.Add(new StringOntologyProperty("roh:contributionGradeOther", this.Roh_contributionGradeOther));
+			propList.Add(new StringOntologyProperty("vivo:preferredDisplayOrder", this.Vivo_preferredDisplayOrder.ToString()));
 			propList.Add(new StringOntologyProperty("roh:roleOf", this.IdRoh_roleOf));
 			propList.Add(new StringOntologyProperty("roh:order", this.Roh_order));
+			propList.Add(new StringOntologyProperty("roh:title", this.Roh_title));
 		}
 
 		internal override void GetEntities()

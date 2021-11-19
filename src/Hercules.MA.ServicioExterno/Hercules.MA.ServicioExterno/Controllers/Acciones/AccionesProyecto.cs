@@ -83,6 +83,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
         public List<DataGraficaColaboradores> GetDatosGraficaRedColaboradores(string pIdProyecto, string pParametros)
         {
+            mResourceApi = new ResourceApi(RUTA_OAUTH);
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdProyecto);
             Dictionary<string, string> dicNodos = new Dictionary<string, string>();
             Dictionary<string, DataQueryRelaciones> dicRelaciones = new Dictionary<string, DataQueryRelaciones>();

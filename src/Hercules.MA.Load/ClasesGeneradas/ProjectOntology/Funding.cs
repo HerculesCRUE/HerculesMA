@@ -30,7 +30,6 @@ namespace ProjectOntology
 			this.Roh_creditPercentage = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/creditPercentage"));
 			this.Vivo_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#identifier"));
 			this.Roh_grantsPercentage = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/grantsPercentage"));
-			this.Vivo_description = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#description"));
 			this.Roh_monetaryAmount = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/monetaryAmount"));
 		}
 
@@ -38,27 +37,23 @@ namespace ProjectOntology
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/Funding"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"Porcentaje mixto")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/mixedPercentage")]
 		[RDFProperty("http://w3id.org/roh/mixedPercentage")]
 		public  float? Roh_mixedPercentage { get; set;}
 
-		[LABEL(LanguageEnum.es,"Porcentaje en crédito")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/creditPercentage")]
 		[RDFProperty("http://w3id.org/roh/creditPercentage")]
 		public  float? Roh_creditPercentage { get; set;}
 
-		[LABEL(LanguageEnum.es,"Cód. según financiadora")]
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#identifier")]
 		[RDFProperty("http://vivoweb.org/ontology/core#identifier")]
 		public  string Vivo_identifier { get; set;}
 
-		[LABEL(LanguageEnum.es,"Porcentaje en subvención")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/grantsPercentage")]
 		[RDFProperty("http://w3id.org/roh/grantsPercentage")]
 		public  float? Roh_grantsPercentage { get; set;}
 
-		[LABEL(LanguageEnum.es,"Descripción del programa")]
-		[RDFProperty("http://vivoweb.org/ontology/core#description")]
-		public  string Vivo_description { get; set;}
-
-		[LABEL(LanguageEnum.es,"Cuantía del programa")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/monetaryAmount")]
 		[RDFProperty("http://w3id.org/roh/monetaryAmount")]
 		public  float? Roh_monetaryAmount { get; set;}
 
@@ -70,7 +65,6 @@ namespace ProjectOntology
 			propList.Add(new StringOntologyProperty("roh:creditPercentage", this.Roh_creditPercentage.ToString()));
 			propList.Add(new StringOntologyProperty("vivo:identifier", this.Vivo_identifier));
 			propList.Add(new StringOntologyProperty("roh:grantsPercentage", this.Roh_grantsPercentage.ToString()));
-			propList.Add(new StringOntologyProperty("vivo:description", this.Vivo_description));
 			propList.Add(new StringOntologyProperty("roh:monetaryAmount", this.Roh_monetaryAmount.ToString()));
 		}
 

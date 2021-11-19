@@ -45,7 +45,7 @@ namespace DocumentOntology
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/CategoryPath"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"")]
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/categoryNode")]
 		[RDFProperty("http://w3id.org/roh/categoryNode")]
 		public  List<Concept> Roh_categoryNode { get; set;}
 		public List<string> IdsRoh_categoryNode { get; set;}
