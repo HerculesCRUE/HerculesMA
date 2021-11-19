@@ -597,7 +597,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Se construye el objeto con los datos.
                 List<DatosAnyo> listaDatos = new List<DatosAnyo>();
                 listaDatos.Add(new DatosAnyo("Inicio", "green", listaInicios));
-                listaDatos.Add(new DatosAnyo("Fin", "red", listaFines));
+                listaDatos.Add(new DatosAnyo("Fin", "#AB1B2B", listaFines));
 
                 // Se crea el objeto de la gráfica.
                 DataGraficaProyectosGroupBars dataObj = new DataGraficaProyectosGroupBars(dicResultados.Keys.ToList(), listaDatos);
