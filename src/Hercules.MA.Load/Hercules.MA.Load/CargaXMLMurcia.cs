@@ -75,7 +75,7 @@ namespace Hercules.MA.Load
             dicAreasCategoria = CargaListadosAreasRevistas();
 
             //Persona en específico a cargar.
-            HashSet<string> personasACargar = new HashSet<string>() { "79", "1276" };
+            HashSet<string> personasACargar = new HashSet<string>() { "79", "1276" }; // Otro investigador: 1276
             //HashSet<string> personasACargar = new HashSet<string>();
 
             //Recursos para NO borrarlos.
@@ -373,7 +373,7 @@ namespace Hercules.MA.Load
                     personaCarga.Foaf_name = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(persona.NOMBRE);
                     personaCarga.Foaf_firstName = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(partesNombre[0]);
                     personaCarga.Foaf_lastName = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(apellidos.Trim());
-                    personaCarga.Roh_crisIdentifier = persona.IDPERSONA;
+                    personaCarga.Roh_crisIdentifier = persona.NUMERODOCUMENTO;
                     if (persona.PERSONAL_UMU == "S")
                     {
                         personaCarga.IdRoh_hasRole = pOrganizacionesCargar["UMU"];
@@ -383,7 +383,7 @@ namespace Hercules.MA.Load
 
                     // ---------- ÑAPA
                     if (idPersona == "79")
-                    {                        
+                    {
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
                         personaCarga.IdVivo_departmentOrSchool = "Ingeniería de la información y las comunicaciones";
                         personaCarga.Roh_h_index = 55;
@@ -410,6 +410,25 @@ seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM 
 Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless
 Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los
 de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
+                    }
+                    else if (idPersona == "1276")
+                    {
+                        personaCarga.Roh_crisIdentifier = "27443184";
+                        personaCarga.Roh_hasPosition = "Catedrático de universidad";
+                        personaCarga.IdVivo_departmentOrSchool = "Matemáticas";
+                        personaCarga.Roh_h_index = 51;
+                        personaCarga.Roh_ORCID = "0000-0003-4550-0183";
+                        //personaCarga.Foaf_homepage = "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD";
+                        personaCarga.Vcard_email = "fem@um.es";
+                        //personaCarga.Vcard_hasTelephone = "+34868884607";
+                        //personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
+                        personaCarga.Vivo_description = $@"Catedrático de Análisis Matemático en el Departamento de Matemáticas, desempeña sus labores docentes en la Facultad de Matemáticas, entre las que cabe destacar la asignatura de Laboratorio de Modelización y la coordinación de las prácticas externas del grado en Matemáticas.
+
+Su investigación se centra en la Modelización Matemática y la Simulación, así como en la Enseñanza Asistida por Ordenador. Ha participado en siete proyectos regionales, nueve nacionales y diez internacionales. Es miembro de las organizaciones internacionales Multimedia in Physics Teaching and Learning, que co-preside, GIREP y del proyecto Open Source Physics (EE. UU.).
+
+Su trabajo, en colaboración con investigadores de otros países, ha recibido varios premios internacionales: SPORE Prize de la revista Science en 2011, MPTL Excellence Award en 2015 y UNESCO King Hamad Bin Isa Al-Khalifa Prize en 2016.
+
+Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Director General de Universidades de la Comunidad Autónoma de la Región de Murcia y Patrono Apoderado de la Fundación Séneca, Agencia Regional de Investigación, cuatro años director de la OTRI de la Universidad de Murcia, cuatro años miembro de la Comisión de Investigación y ocho años decano de la Facultad de Matemáticas.";
                     }
 
                     //Creamos el recurso.
@@ -695,6 +714,27 @@ de IEE Proc. Communication, IJIPT journal, Computer Networks y International Jou
 
                     //isSynchronized
                     proyectoCargar.Roh_isSynchronized = false;
+
+                    // ---------- ÑAPA
+                    if(proyectoID == "solayudas|13334")
+                    {
+                        proyectoCargar.Vivo_description = $@"El objetivo general del proyecto Hidroleaf es desarrollar y validar un sistema integral para la producción sostenible de plantas hortícolas de hoja en invernadero y en cultivo de interior mediante luz artificial, aplicando las nuevas tecnologías TICs para optimizar las condiciones de cultivo de las plantas.
+
+
+
+En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de hortalizas en contenedores inteligentes. La idea es reconvertir contenedores de mercancías para ser usados como medios de cultivo. Dentro de dichos contenedores se establecerán las condiciones óptimas para que la producción agrícola se pueda llevar a cabo, controlando los parámetros de humedad, temperatura, luminosidad, etc empleando para ello sistemas de sensorización y automatización, lo que permite encuadrar este proyecto dentro del ámbito de la Industria 4.0.";
+                        proyectoCargar.Roh_isSupportedBy = new ProjectOntology.Funding();
+                        proyectoCargar.Roh_isSupportedBy.Roh_fundedBy = new List<ProjectOntology.FundingProgram>();
+                        proyectoCargar.Roh_isSupportedBy.Roh_fundedBy.Add(new ProjectOntology.FundingProgram { Roh_title = "Programa Estatal de I+D+i Orientada a los Retos de la Sociedad" });
+                        proyectoCargar.IdRoh_scientificExperienceProject = "http://gnoss.com/items/scientificexperienceproject_SEP1";
+                        proyectoCargar.Vivo_relates = new List<ProjectOntology.BFO_0000023>();
+                        ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
+                        persona.IdRoh_roleOf = pDicPersonasCargadas["79"];
+                        persona.Vivo_preferredDisplayOrder = 1;
+                        proyectoCargar.Vivo_relates.Add(persona);
+                        proyectoCargar.Roh_hasResultsProjectClassification = new List<ProjectOntology.ProjectClassification>();
+                        //TODO: ProjectClassification
+                    }
 
                     ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, new List<string>());
                     pListaRecursosCargar.Add(resource);
@@ -1061,8 +1101,14 @@ de IEE Proc. Communication, IJIPT journal, Computer Networks y International Jou
 
                     // --- ÑAPA
                     if (grupo.IDGRUPOINVESTIGACION == "E096-02")
-                    {
-                        //grupoCargar.Vivo_description = "";
+                    {                        
+                        grupoCargar.Vivo_description = $@"El grupo de investigación de Sistemas Inteligentes de la Universidad de Murcia desarrolla su investigación dentro de diversas líneas de investigación de vanguardia de Soft Computing y Sistemas Inteligentes desde 1997.
+Actualmente el grupo desarrolla su labor en líneas de investigación como los sistemas embebidos, el telecontrol y la telemática aplicada al transporte, el procesamiento sensorial y la fusión de datos o los sistemas cooperativos inteligentes.
+Las técnicas utilizadas por este grupo son: los sistemas automáticos, las redes causales, el soft computing o la minería de datos, entre otros.
+
+
+
+Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departamento de Ingeniería de la Información y las Comunicaciones de la Universidad de Murcia.";
                     }
 
                     //Creamos el recurso.
@@ -2416,6 +2462,12 @@ de IEE Proc. Communication, IJIPT journal, Computer Networks y International Jou
                     {
                         case "IDPERSONA":
                             elemento.IDPERSONA = node.SelectSingleNode("IDPERSONA").InnerText;
+                            break;
+                        case "NUMERODOCUMENTO":
+                            elemento.NUMERODOCUMENTO = node.SelectSingleNode("NUMERODOCUMENTO").InnerText;
+                            break;
+                        case "LETRADOCUMENTO":
+                            elemento.LETRADOCUMENTO = node.SelectSingleNode("LETRADOCUMENTO").InnerText;
                             break;
                         case "NOMBRE":
                             elemento.NOMBRE = node.SelectSingleNode("NOMBRE").InnerText;

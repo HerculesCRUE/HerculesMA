@@ -77,6 +77,7 @@ namespace GroupOntology
 			this.Roh_durationDays = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationDays"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 			this.Roh_normalizedCode = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/normalizedCode"));
+			this.Vivo_description = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#description"));
 			this.Roh_otherRelevantResults = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/otherRelevantResults"));
 			this.Roh_durationMonths = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationMonths"));
 			this.Roh_directedPostdocsNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/directedPostdocsNumber"));
@@ -141,6 +142,7 @@ namespace GroupOntology
 			this.Roh_durationDays = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationDays"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 			this.Roh_normalizedCode = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/normalizedCode"));
+			this.Vivo_description = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#description"));
 			this.Roh_otherRelevantResults = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/otherRelevantResults"));
 			this.Roh_durationMonths = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/durationMonths"));
 			this.Roh_directedPostdocsNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/directedPostdocsNumber"));
@@ -191,6 +193,10 @@ namespace GroupOntology
 		[RDFProperty("http://w3id.org/roh/normalizedCode")]
 		public  string Roh_normalizedCode { get; set;}
 
+		[LABEL(LanguageEnum.es,"Descripción")]
+		[RDFProperty("http://vivoweb.org/ontology/core#description")]
+		public  string Vivo_description { get; set;}
+
 		[LABEL(LanguageEnum.es,"Resultados relevantes, otros")]
 		[RDFProperty("http://w3id.org/roh/otherRelevantResults")]
 		public  string Roh_otherRelevantResults { get; set;}
@@ -233,6 +239,7 @@ namespace GroupOntology
 			propList.Add(new StringOntologyProperty("roh:durationDays", this.Roh_durationDays));
 			propList.Add(new StringOntologyProperty("roh:title", this.Roh_title));
 			propList.Add(new StringOntologyProperty("roh:normalizedCode", this.Roh_normalizedCode));
+			propList.Add(new StringOntologyProperty("vivo:description", this.Vivo_description));
 			propList.Add(new StringOntologyProperty("roh:otherRelevantResults", this.Roh_otherRelevantResults));
 			propList.Add(new StringOntologyProperty("roh:durationMonths", this.Roh_durationMonths));
 			propList.Add(new StringOntologyProperty("roh:directedPostdocsNumber", this.Roh_directedPostdocsNumber.ToString()));
@@ -416,6 +423,10 @@ namespace GroupOntology
 				if(this.Roh_normalizedCode != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Group_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/normalizedCode", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_normalizedCode)}\"", list, " . ");
+				}
+				if(this.Vivo_description != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Group_{ResourceID}_{ArticleID}",  "http://vivoweb.org/ontology/core#description", $"\"{GenerarTextoSinSaltoDeLinea(this.Vivo_description)}\"", list, " . ");
 				}
 				if(this.Roh_otherRelevantResults != null)
 				{
@@ -614,6 +625,10 @@ namespace GroupOntology
 				if(this.Roh_normalizedCode != null)
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/normalizedCode", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_normalizedCode).ToLower()}\"", list, " . ");
+				}
+				if(this.Vivo_description != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://vivoweb.org/ontology/core#description", $"\"{GenerarTextoSinSaltoDeLinea(this.Vivo_description).ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_otherRelevantResults != null)
 				{

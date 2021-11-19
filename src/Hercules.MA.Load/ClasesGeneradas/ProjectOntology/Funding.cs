@@ -26,6 +26,18 @@ namespace ProjectOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
+			this.Roh_fundedBy = new List<FundingProgram>();
+			SemanticPropertyModel propRoh_fundedBy = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/fundedBy");
+			if(propRoh_fundedBy != null && propRoh_fundedBy.PropertyValues.Count > 0)
+			{
+				foreach (SemanticPropertyModel.PropertyValue propValue in propRoh_fundedBy.PropertyValues)
+				{
+					if(propValue.RelatedEntity!=null){
+						FundingProgram roh_fundedBy = new FundingProgram(propValue.RelatedEntity,idiomaUsuario);
+						this.Roh_fundedBy.Add(roh_fundedBy);
+					}
+				}
+			}
 			this.Roh_mixedPercentage = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/mixedPercentage"));
 			this.Roh_creditPercentage = GetNumberFloatPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/creditPercentage"));
 			this.Vivo_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#identifier"));
@@ -36,6 +48,9 @@ namespace ProjectOntology
 		public virtual string RdfType { get { return "http://w3id.org/roh/Funding"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/Funding"; } }
 		public OntologyEntity Entity { get; set; }
+
+		[RDFProperty("http://w3id.org/roh/fundedBy")]
+		public  List<FundingProgram> Roh_fundedBy { get; set;}
 
 		[LABEL(LanguageEnum.es,"http://w3id.org/roh/mixedPercentage")]
 		[RDFProperty("http://w3id.org/roh/mixedPercentage")]
@@ -71,6 +86,15 @@ namespace ProjectOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
+			if(Roh_fundedBy!=null){
+				foreach(FundingProgram prop in Roh_fundedBy){
+					prop.GetProperties();
+					prop.GetEntities();
+					OntologyEntity entityFundingProgram = new OntologyEntity("http://w3id.org/roh/FundingProgram", "http://w3id.org/roh/FundingProgram", "roh:fundedBy", prop.propList, prop.entList);
+				entList.Add(entityFundingProgram);
+				prop.Entity= entityFundingProgram;
+				}
+			}
 		} 
 
 

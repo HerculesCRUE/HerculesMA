@@ -9,6 +9,8 @@ namespace Hercules.MA.Load.Models.UMU
     public class Persona
     {
         public string IDPERSONA { get; set; }
+        public string NUMERODOCUMENTO { get; set; }
+        public string LETRADOCUMENTO { get; set; }
         public string NOMBRE { get; set; }
         public string PERS_CENT_CODIGO { get; set; }
         public string CED_NOMBRE { get; set; }
