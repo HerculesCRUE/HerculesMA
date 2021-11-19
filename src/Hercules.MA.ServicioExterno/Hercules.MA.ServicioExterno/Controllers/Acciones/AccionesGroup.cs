@@ -634,37 +634,42 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             string select = mPrefijos;
-            select += "SELECT ?id ?nombre COUNT(*) AS ?numRelaciones";
+            select += "SELECT ?theId ?nombre COUNT(*) AS ?numRelaciones";
             string where = $@"
                 WHERE {{ {{
                         SELECT *
                         WHERE {{
                         <{idGrafoBusqueda}> <http://w3id.org/roh/mainResearcher> ?mainrp.
-                        <{idGrafoBusqueda}> <http://xmlns.com/foaf/0.1/member> ?members1.
-                        ?members1 <http://w3id.org/roh/roleOf> ?membersids.
                         ?mainrp <http://w3id.org/roh/roleOf> ?mainresearcher.
+
+                        <{idGrafoBusqueda}> <http://xmlns.com/foaf/0.1/member> ?members1.
+                        ?members1 <http://w3id.org/roh/roleOf> ?theId.
+
                         ?documento a 'document'.
-                        ?documento bibo:authorList ?listaAutores.
-                        ?listaAutores rdf:member ?membersids.
-                        ?listaAutores rdf:member ?id.
-                        FILTER(?id != ?mainresearcher)
-                        ?id foaf:name ?nombre.
+                        OPTIONAL{{?documento bibo:authorList ?listaAutores.
+                        ?listaAutores rdf:member ?theId.}}
+                        FILTER(?theId != ?mainresearcher)
+                        ?theId foaf:name ?nombre.
                     }}
                     }} UNION {{
                         SELECT *
                         WHERE {{
                         <{idGrafoBusqueda}> <http://w3id.org/roh/mainResearcher> ?mainrp.
+                        ?mainrp <http://w3id.org/roh/roleOf> ?mainresearcher.
+
                         <{idGrafoBusqueda}> <http://xmlns.com/foaf/0.1/member> ?members2.
                         ?members2 <http://w3id.org/roh/roleOf> ?membersids2.
-                        ?mainrp <http://w3id.org/roh/roleOf> ?mainresearcher.
+
                         ?proyecto a 'project'.
-                        ?proyecto vivo:relates ?relacion.
+                        OPTIONAL{{?proyecto vivo:relates ?relacion.
                         ?relacion roh:roleOf ?membersids2.
                         ?proyecto vivo:relates ?relacion2.
-                        ?relacion2 roh:roleOf ?id.
-                        FILTER(?id != ?mainresearcher)
-                        ?id foaf:name ?nombre.
-                    }} }} }} ORDER BY DESC (COUNT(*)) LIMIT 10
+                        ?relacion2 roh:roleOf ?id.}}
+                        FILTER (?theId IN (?id, ?membersids2 ))
+                        FILTER(?theId != ?mainresearcher)
+                        ?theId foaf:name ?nombre.
+
+                    }} }} }} ORDER BY DESC (COUNT(*))
                 ";
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -675,14 +680,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
-                    string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "id");
+                    string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "theId");
                     int proyectosComun = Int32.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelaciones"));
                     string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
                     mainresearcher = UtilidadesAPI.GetValorFilaSparqlObject(fila, "mainresearcher");
 
                     dicPersonasColabo.Add(id, proyectosComun);
                     dicNodos.Add(id, nombreColaborador.ToLower().Trim());
-                    personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "id") + ">";
+                    personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "theId") + ">";
                 }
             }
 
@@ -781,15 +786,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 // Construcción del objeto de la gráfica.            
                 int maximasRelaciones = 1;
-                if (dicPersonasColabo.Values.Max() > numColaboraciones.Max())
+                if (numColaboraciones.Count != 0)
                 {
-                    maximasRelaciones = dicPersonasColabo.Values.Max();
+                    if (dicPersonasColabo.Values.Max() > numColaboraciones.Max())
+                    {
+                        maximasRelaciones = dicPersonasColabo.Values.Max();
+                    }
+                    else
+                    {
+                        maximasRelaciones = numColaboraciones.Max();
+                    }
+                    
                 }
-                else
-                {
-                    maximasRelaciones = numColaboraciones.Max();
-                }
-
                 // Nodos. 
                 if (dicNodos != null && dicNodos.Count > 0)
                 {
@@ -817,6 +825,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
                     }
                 }
+
             } else
             {
                 // Set the main researcher default
