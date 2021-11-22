@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using CurriculumvitaeOntology;
+using ExcelDataReader;
 using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
@@ -73,6 +76,9 @@ namespace Hercules.MA.Load
 
             // Obtención del ImpactIndexCategory (Secundaria).
             dicAreasCategoria = CargaListadosAreasRevistas();
+
+            //Prueba.
+            ObtenerTesauroExcel();
 
             //Persona en específico a cargar.
             HashSet<string> personasACargar = new HashSet<string>() { "79", "1276" }; // Otro investigador: 1276
@@ -145,11 +151,13 @@ namespace Hercules.MA.Load
 
             //Categorización UM
             CambiarOntologia("taxonomy");
-            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "um");
-            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "um");
-            ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar, "um");
+            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "researcharea");
+            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "researcharea");
+            ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar, "researcharea");
+            ObtenerTesauroExcel();
             CargarDatosSecundarios(listaRecursosSecundariosCargar);
             listaRecursosSecundariosCargar.Clear();
+
 
             //TODO
             //Categorización UNESCO
@@ -213,6 +221,45 @@ namespace Hercules.MA.Load
             foreach (ConceptEDMA concept in listConcepts)
             {
                 pListaRecursosCargar.Add(concept.ToGnossApiResource(mResourceApi, concept.Dc_identifier));
+            }
+        }
+
+        private static void ObtenerTesauroExcel()
+        {
+            // Lectura del Excel.
+            DataSet ds = new DataSet();
+            string ruta = $@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx";
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (var stream = File.Open(ruta, FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    ds = reader.AsDataSet(new ExcelDataSetConfiguration()
+                    {
+                        ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
+                        {
+                            UseHeaderRow = true,
+                        }
+                    });
+                }
+            }
+
+            // Lectura de datos
+            List<ObjExcelTaxonomia> listaTaxonomia = new List<ObjExcelTaxonomia>();
+            string padreLevel1 = string.Empty;
+            string padreLevel2 = string.Empty;
+            string padreLevel3 = string.Empty;
+            foreach (DataRow fila in ds.Tables["Hércules-KA-taxonomy (clean)"].Rows)
+            {
+                ObjExcelTaxonomia objTaxonomia = new ObjExcelTaxonomia();
+                
+                objTaxonomia.level0 = fila["Level 0"].ToString();
+                objTaxonomia.level1 = fila["Level 1"].ToString();
+                objTaxonomia.level2 = fila["Level 2"].ToString();
+                objTaxonomia.level3 = fila["Level 3"].ToString();
+                objTaxonomia.WoSJCR = fila["WoS-JCR"].ToString();
+
+                listaTaxonomia.Add(objTaxonomia);
             }
         }
 
@@ -385,49 +432,31 @@ namespace Hercules.MA.Load
                     if (idPersona == "79")
                     {
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
-                        personaCarga.IdVivo_departmentOrSchool = "Ingeniería de la información y las comunicaciones";
+                        personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E096";
                         personaCarga.Roh_h_index = 55;
                         personaCarga.Roh_ORCID = "0000-0002-5525-1259";
                         personaCarga.Foaf_homepage = "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD";
                         personaCarga.Vcard_email = "skarmeta@um.es";
                         personaCarga.Vcard_hasTelephone = "+34868884607";
                         personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
-                        personaCarga.Vivo_description = $@"Nacido en Santiago de Chile en Abril de 1965, obtuvo la licenciatura en Informática por la Universidad de Granada en el año 1991
-y el Doctorado en Informática por la Universidad de Murcia en el año 1995. Se convirtió en profesor titular de la Universidad de Murcia en al año 1997
-y es Catedrático en Ingeniería Telemática desde el año 2009. Vicedecano de Infraestructuras de la Facultad de Informática entre los años 1991 a 1993 y,
-posteriormente, vicedecano de Relaciones Externas del 1997 a 1999. Ha sido director del departamento de Ingeniería de la Información y las
-Comunicaciones desde 2001 hasta 2007. Coordinador del programa de doctorado en Tecnologías de la Información y Telemáticas Avanzadas desde el 2002
-hasta el 2010, con mención de calidad del Ministerio. Desde el año 2008 es coordinador de la Oficina de Proyectos Europeos de la Universidad de Murcia,
-adscrita al vicerrectorado de Investigación. Desde la misma ha sido responsable del proyecto de Eurociencia concedido a la Universidad de Murcia,
-así como del proyecto COFUND concedido asociado al proyecto U-IMPACT-COFUND que ha coordinado como investigador principal.
-
-Actualmente es, además, representante nacional del MINECO en el programa H2020 para el pilar de Ciencia Excelente en el área de MARIE SKŁODOWSKA-CURIE,
-así como representante en el grupo de Recursos Humanos y movilidad de la Comisión Europea.
-
-Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacionales, 200 artículos en congresos y ha sido investigador principal de más
-de 15 proyectos europeos, habiendo dirigido más de 20 tesis de doctorado. Además, ha participado en numerosos comités de programas de conferencias en informática,
-seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM Group, IEEE MSN, TrustBus, etc., siendo co-chair del Second International
-Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless
-Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los
-de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
+                        personaCarga.Vivo_description = $@"Nacido en Santiago de Chile en Abril de 1965, obtuvo la licenciatura en Informática por la Universidad de Granada en el año 1991 y el Doctorado en Informática por la Universidad de Murcia en el año 1995. Se convirtió en profesor titular de la Universidad de Murcia en al año 1997 y es Catedrático en Ingeniería Telemática desde el año 2009. Vicedecano de Infraestructuras de la Facultad de Informática entre los años 1991 a 1993 y, posteriormente, vicedecano de Relaciones Externas del 1997 a 1999. Ha sido director del departamento de Ingeniería de la Información y las Comunicaciones desde 2001 hasta 2007. Coordinador del programa de doctorado en Tecnologías de la Información y Telemáticas Avanzadas desde el 2002 hasta el 2010, con mención de calidad del Ministerio. Desde el año 2008 es coordinador de la Oficina de Proyectos Europeos de la Universidad de Murcia, adscrita al vicerrectorado de Investigación. Desde la misma ha sido responsable del proyecto de Eurociencia concedido a la Universidad de Murcia, así como del proyecto COFUND concedido asociado al proyecto U-IMPACT-COFUND que ha coordinado como investigador principal. 
+Actualmente es, además, representante nacional del MINECO en el programa H2020 para el pilar de Ciencia Excelente en el área de MARIE SKŁODOWSKA-CURIE, así como representante en el grupo de Recursos Humanos y movilidad de la Comisión Europea. 
+Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacionales, 200 artículos en congresos y ha sido investigador principal de más de 15 proyectos europeos, habiendo dirigido más de 20 tesis de doctorado. Además, ha participado en numerosos comités de programas de conferencias en informática, seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM Group, IEEE MSN, TrustBus, etc., siendo co-chair del Second International Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
                     }
                     else if (idPersona == "1276")
                     {
                         personaCarga.Roh_crisIdentifier = "27443184";
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
-                        personaCarga.IdVivo_departmentOrSchool = "Matemáticas";
+                        personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E036";
                         personaCarga.Roh_h_index = 51;
                         personaCarga.Roh_ORCID = "0000-0003-4550-0183";
                         //personaCarga.Foaf_homepage = "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD";
-                        personaCarga.Vcard_email = "fem@um.es";
-                        //personaCarga.Vcard_hasTelephone = "+34868884607";
+                        personaCarga.Vcard_email = "vicinves@um.es";
+                        personaCarga.Vcard_hasTelephone = "+34868888386";
                         //personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
-                        personaCarga.Vivo_description = $@"Catedrático de Análisis Matemático en el Departamento de Matemáticas, desempeña sus labores docentes en la Facultad de Matemáticas, entre las que cabe destacar la asignatura de Laboratorio de Modelización y la coordinación de las prácticas externas del grado en Matemáticas.
-
+                        personaCarga.Vivo_description = $@"Catedrático de Análisis Matemático en el Departamento de Matemáticas, desempeña sus labores docentes en la Facultad de Matemáticas, entre las que cabe destacar la asignatura de Laboratorio de Modelización y la coordinación de las prácticas externas del grado en Matemáticas. 
 Su investigación se centra en la Modelización Matemática y la Simulación, así como en la Enseñanza Asistida por Ordenador. Ha participado en siete proyectos regionales, nueve nacionales y diez internacionales. Es miembro de las organizaciones internacionales Multimedia in Physics Teaching and Learning, que co-preside, GIREP y del proyecto Open Source Physics (EE. UU.).
-
 Su trabajo, en colaboración con investigadores de otros países, ha recibido varios premios internacionales: SPORE Prize de la revista Science en 2011, MPTL Excellence Award en 2015 y UNESCO King Hamad Bin Isa Al-Khalifa Prize en 2016.
-
 Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Director General de Universidades de la Comunidad Autónoma de la Región de Murcia y Patrono Apoderado de la Fundación Séneca, Agencia Regional de Investigación, cuatro años director de la OTRI de la Universidad de Murcia, cuatro años miembro de la Comisión de Investigación y ocho años decano de la Facultad de Matemáticas.";
                     }
 
@@ -716,7 +745,7 @@ Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Di
                     proyectoCargar.Roh_isSynchronized = false;
 
                     // ---------- ÑAPA
-                    if(proyectoID == "solayudas|13334")
+                    if(proyectoID == "SOLAYUDAS|13334")
                     {
                         proyectoCargar.Vivo_description = $@"El objetivo general del proyecto Hidroleaf es desarrollar y validar un sistema integral para la producción sostenible de plantas hortícolas de hoja en invernadero y en cultivo de interior mediante luz artificial, aplicando las nuevas tecnologías TICs para optimizar las condiciones de cultivo de las plantas.
 
@@ -783,7 +812,7 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
             {
                 Articulo articulo = pListaArticulos.FirstOrDefault(x => x.CODIGO == documentoID);
 
-                if (articulo != null)
+                if (articulo != null && !string.IsNullOrEmpty(articulo.TITULO))
                 {
                     DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
                     documentoACargar.IdRoh_scientificActivityDocument = "http://gnoss.com/items/scientificactivitydocument_SAD1";
@@ -1077,21 +1106,36 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
                             }
 
                             // Líneas de investigación
-                            persona.Vivo_hasResearchArea = new List<string>();
+                            persona.Vivo_hasResearchArea = new List<GroupOntology.ResearchArea>();
                             List<LineasInvestigador> lineasIngestigador = pListaLineasInvestigador.Where(x => x.IDPERSONAINVESTIGADOR == equipo.IDPERSONA).ToList();
-                            foreach(LineasInvestigador linea in lineasIngestigador)
+                            foreach (LineasInvestigador linea in lineasIngestigador)
                             {
+                                GroupOntology.ResearchArea lineaArea = new GroupOntology.ResearchArea();
                                 LineasDeInvestigacion item = pListaLineasDeInvestigacion.FirstOrDefault(x => x.LINE_CODIGO == linea.LINE_CODIGO);
-                                persona.Vivo_hasResearchArea.Add(item.LINE_DESCRIPCION);
-                            }
-
-                            if (equipo.CODTIPOPARTICIPACION == "IP")
-                            {
-                                grupoCargar.Roh_mainResearcher.Add(persona);
-                            }
-                            else
-                            {
-                                grupoCargar.Foaf_member.Add(persona);
+                                lineaArea.Roh_title = item.LINE_DESCRIPCION;
+                                if (!string.IsNullOrEmpty(linea.FECHAINICIOTRABAJOLINEA))
+                                {
+                                    anio = Int32.Parse(linea.FECHAINICIOTRABAJOLINEA.Substring(0, 4));
+                                    mes = Int32.Parse(linea.FECHAINICIOTRABAJOLINEA.Substring(5, 2));
+                                    dia = Int32.Parse(linea.FECHAINICIOTRABAJOLINEA.Substring(8, 2));
+                                    horas = Int32.Parse(linea.FECHAINICIOTRABAJOLINEA.Substring(11, 2));
+                                    minutos = Int32.Parse(linea.FECHAINICIOTRABAJOLINEA.Substring(14, 2));
+                                    segundos = Int32.Parse(linea.FECHAINICIOTRABAJOLINEA.Substring(17, 2));
+                                    DateTime fechaInicio = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                                    lineaArea.Vivo_start = fechaInicio;
+                                }
+                                if (!string.IsNullOrEmpty(linea.FECHAFINTRABAJOLINEA))
+                                {
+                                    anio = Int32.Parse(linea.FECHAFINTRABAJOLINEA.Substring(0, 4));
+                                    mes = Int32.Parse(linea.FECHAFINTRABAJOLINEA.Substring(5, 2));
+                                    dia = Int32.Parse(linea.FECHAFINTRABAJOLINEA.Substring(8, 2));
+                                    horas = Int32.Parse(linea.FECHAFINTRABAJOLINEA.Substring(11, 2));
+                                    minutos = Int32.Parse(linea.FECHAFINTRABAJOLINEA.Substring(14, 2));
+                                    segundos = Int32.Parse(linea.FECHAFINTRABAJOLINEA.Substring(17, 2));
+                                    DateTime fechaFin = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                                    lineaArea.Vivo_end = fechaFin;
+                                }
+                                persona.Vivo_hasResearchArea.Add(lineaArea);
                             }
                         }
                     }
@@ -1102,12 +1146,7 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
                     // --- ÑAPA
                     if (grupo.IDGRUPOINVESTIGACION == "E096-02")
                     {                        
-                        grupoCargar.Vivo_description = $@"El grupo de investigación de Sistemas Inteligentes de la Universidad de Murcia desarrolla su investigación dentro de diversas líneas de investigación de vanguardia de Soft Computing y Sistemas Inteligentes desde 1997.
-Actualmente el grupo desarrolla su labor en líneas de investigación como los sistemas embebidos, el telecontrol y la telemática aplicada al transporte, el procesamiento sensorial y la fusión de datos o los sistemas cooperativos inteligentes.
-Las técnicas utilizadas por este grupo son: los sistemas automáticos, las redes causales, el soft computing o la minería de datos, entre otros.
-
-
-
+                        grupoCargar.Vivo_description = $@"El grupo de investigación de Sistemas Inteligentes de la Universidad de Murcia desarrolla su investigación dentro de diversas líneas de investigación de vanguardia de Soft Computing y Sistemas Inteligentes desde 1997. Actualmente el grupo desarrolla su labor en líneas de investigación como los sistemas embebidos, el telecontrol y la telemática aplicada al transporte, el procesamiento sensorial y la fusión de datos o los sistemas cooperativos inteligentes. Las técnicas utilizadas por este grupo son: los sistemas automáticos, las redes causales, el soft computing o la minería de datos, entre otros.
 Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departamento de Ingeniería de la Información y las Comunicaciones de la Universidad de Murcia.";
                     }
 
