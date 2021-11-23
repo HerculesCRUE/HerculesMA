@@ -448,6 +448,30 @@ namespace Hercules.MA.Load
                     personaCarga.Roh_isSynchronized = false;
                     personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
 
+                    // ORCID
+                    DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\personas_hercules.xlsx");
+                    List<Tuple<string, string, string>> listaDatos = new List<Tuple<string, string, string>>();
+                    foreach (DataRow fila in ds.Tables["Hoja 1"].Rows)
+                    {
+                        Tuple<string, string, string> tupla = new Tuple<string, string, string>(fila["id"].ToString(), fila["name"].ToString(), fila["orcid"].ToString());
+                        listaDatos.Add(tupla);
+                    }
+
+                    Tuple<string, string, string> datoPersonaOrcid = null;
+                    if (!string.IsNullOrEmpty(persona.NUMERODOCUMENTO))
+                    {
+                        datoPersonaOrcid = listaDatos.FirstOrDefault(x => x.Item1 == persona.NUMERODOCUMENTO);
+                    }
+                    else if (!string.IsNullOrEmpty(persona.NOMBRE))
+                    {
+                        datoPersonaOrcid = listaDatos.FirstOrDefault(x => x.Item2.ToLower() == persona.NOMBRE.ToLower());
+                    }
+
+                    if(datoPersonaOrcid != null)
+                    {
+                        personaCarga.Roh_ORCID = datoPersonaOrcid.Item3;
+                    }
+
                     // ---------- ÑAPA
                     if (idPersona == "79")
                     {
@@ -459,9 +483,7 @@ namespace Hercules.MA.Load
                         personaCarga.Vcard_email = "skarmeta@um.es";
                         personaCarga.Vcard_hasTelephone = "+34868884607";
                         personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
-                        personaCarga.Vivo_description = $@"Nacido en Santiago de Chile en Abril de 1965, obtuvo la licenciatura en Informática por la Universidad de Granada en el año 1991 y el Doctorado en Informática por la Universidad de Murcia en el año 1995. Se convirtió en profesor titular de la Universidad de Murcia en al año 1997 y es Catedrático en Ingeniería Telemática desde el año 2009. Vicedecano de Infraestructuras de la Facultad de Informática entre los años 1991 a 1993 y, posteriormente, vicedecano de Relaciones Externas del 1997 a 1999. Ha sido director del departamento de Ingeniería de la Información y las Comunicaciones desde 2001 hasta 2007. Coordinador del programa de doctorado en Tecnologías de la Información y Telemáticas Avanzadas desde el 2002 hasta el 2010, con mención de calidad del Ministerio. Desde el año 2008 es coordinador de la Oficina de Proyectos Europeos de la Universidad de Murcia, adscrita al vicerrectorado de Investigación. Desde la misma ha sido responsable del proyecto de Eurociencia concedido a la Universidad de Murcia, así como del proyecto COFUND concedido asociado al proyecto U-IMPACT-COFUND que ha coordinado como investigador principal. 
-Actualmente es, además, representante nacional del MINECO en el programa H2020 para el pilar de Ciencia Excelente en el área de MARIE SKŁODOWSKA-CURIE, así como representante en el grupo de Recursos Humanos y movilidad de la Comisión Europea. 
-Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacionales, 200 artículos en congresos y ha sido investigador principal de más de 15 proyectos europeos, habiendo dirigido más de 20 tesis de doctorado. Además, ha participado en numerosos comités de programas de conferencias en informática, seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM Group, IEEE MSN, TrustBus, etc., siendo co-chair del Second International Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
+                        personaCarga.Vivo_description = $@"Nacido en Santiago de Chile en Abril de 1965, obtuvo la licenciatura en Informática por la Universidad de Granada en el año 1991 y el Doctorado en Informática por la Universidad de Murcia en el año 1995. Se convirtió en profesor titular de la Universidad de Murcia en al año 1997 y es Catedrático en Ingeniería Telemática desde el año 2009. Vicedecano de Infraestructuras de la Facultad de Informática entre los años 1991 a 1993 y, posteriormente, vicedecano de Relaciones Externas del 1997 a 1999. Ha sido director del departamento de Ingeniería de la Información y las Comunicaciones desde 2001 hasta 2007. Coordinador del programa de doctorado en Tecnologías de la Información y Telemáticas Avanzadas desde el 2002 hasta el 2010, con mención de calidad del Ministerio. Desde el año 2008 es coordinador de la Oficina de Proyectos Europeos de la Universidad de Murcia, adscrita al vicerrectorado de Investigación. Desde la misma ha sido responsable del proyecto de Eurociencia concedido a la Universidad de Murcia, así como del proyecto COFUND concedido asociado al proyecto U-IMPACT-COFUND que ha coordinado como investigador principal. Actualmente es, además, representante nacional del MINECO en el programa H2020 para el pilar de Ciencia Excelente en el área de MARIE SKŁODOWSKA-CURIE, así como representante en el grupo de Recursos Humanos y movilidad de la Comisión Europea. Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacionales, 200 artículos en congresos y ha sido investigador principal de más de 15 proyectos europeos, habiendo dirigido más de 20 tesis de doctorado. Además, ha participado en numerosos comités de programas de conferencias en informática, seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM Group, IEEE MSN, TrustBus, etc., siendo co-chair del Second International Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
                     }
                     else if (idPersona == "1276")
                     {
@@ -474,10 +496,7 @@ Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacional
                         personaCarga.Vcard_email = "vicinves@um.es";
                         personaCarga.Vcard_hasTelephone = "+34868888386";
                         //personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
-                        personaCarga.Vivo_description = $@"Catedrático de Análisis Matemático en el Departamento de Matemáticas, desempeña sus labores docentes en la Facultad de Matemáticas, entre las que cabe destacar la asignatura de Laboratorio de Modelización y la coordinación de las prácticas externas del grado en Matemáticas. 
-Su investigación se centra en la Modelización Matemática y la Simulación, así como en la Enseñanza Asistida por Ordenador. Ha participado en siete proyectos regionales, nueve nacionales y diez internacionales. Es miembro de las organizaciones internacionales Multimedia in Physics Teaching and Learning, que co-preside, GIREP y del proyecto Open Source Physics (EE. UU.).
-Su trabajo, en colaboración con investigadores de otros países, ha recibido varios premios internacionales: SPORE Prize de la revista Science en 2011, MPTL Excellence Award en 2015 y UNESCO King Hamad Bin Isa Al-Khalifa Prize en 2016.
-Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Director General de Universidades de la Comunidad Autónoma de la Región de Murcia y Patrono Apoderado de la Fundación Séneca, Agencia Regional de Investigación, cuatro años director de la OTRI de la Universidad de Murcia, cuatro años miembro de la Comisión de Investigación y ocho años decano de la Facultad de Matemáticas.";
+                        personaCarga.Vivo_description = $@"Catedrático de Análisis Matemático en el Departamento de Matemáticas, desempeña sus labores docentes en la Facultad de Matemáticas, entre las que cabe destacar la asignatura de Laboratorio de Modelización y la coordinación de las prácticas externas del grado en Matemáticas. Su investigación se centra en la Modelización Matemática y la Simulación, así como en la Enseñanza Asistida por Ordenador. Ha participado en siete proyectos regionales, nueve nacionales y diez internacionales. Es miembro de las organizaciones internacionales Multimedia in Physics Teaching and Learning, que co-preside, GIREP y del proyecto Open Source Physics (EE. UU.). Su trabajo, en colaboración con investigadores de otros países, ha recibido varios premios internacionales: SPORE Prize de la revista Science en 2011, MPTL Excellence Award en 2015 y UNESCO King Hamad Bin Isa Al-Khalifa Prize en 2016. Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Director General de Universidades de la Comunidad Autónoma de la Región de Murcia y Patrono Apoderado de la Fundación Séneca, Agencia Regional de Investigación, cuatro años director de la OTRI de la Universidad de Murcia, cuatro años miembro de la Comisión de Investigación y ocho años decano de la Facultad de Matemáticas.";
                     }
 
                     //Creamos el recurso.
@@ -767,11 +786,7 @@ Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Di
                     // ---------- ÑAPA
                     if (proyectoID == "SOLAYUDAS|13334")
                     {
-                        proyectoCargar.Vivo_description = $@"El objetivo general del proyecto Hidroleaf es desarrollar y validar un sistema integral para la producción sostenible de plantas hortícolas de hoja en invernadero y en cultivo de interior mediante luz artificial, aplicando las nuevas tecnologías TICs para optimizar las condiciones de cultivo de las plantas.
-
-
-
-En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de hortalizas en contenedores inteligentes. La idea es reconvertir contenedores de mercancías para ser usados como medios de cultivo. Dentro de dichos contenedores se establecerán las condiciones óptimas para que la producción agrícola se pueda llevar a cabo, controlando los parámetros de humedad, temperatura, luminosidad, etc empleando para ello sistemas de sensorización y automatización, lo que permite encuadrar este proyecto dentro del ámbito de la Industria 4.0.";
+                        proyectoCargar.Vivo_description = $@"El objetivo general del proyecto Hidroleaf es desarrollar y validar un sistema integral para la producción sostenible de plantas hortícolas de hoja en invernadero y en cultivo de interior mediante luz artificial, aplicando las nuevas tecnologías TICs para optimizar las condiciones de cultivo de las plantas. En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de hortalizas en contenedores inteligentes. La idea es reconvertir contenedores de mercancías para ser usados como medios de cultivo. Dentro de dichos contenedores se establecerán las condiciones óptimas para que la producción agrícola se pueda llevar a cabo, controlando los parámetros de humedad, temperatura, luminosidad, etc empleando para ello sistemas de sensorización y automatización, lo que permite encuadrar este proyecto dentro del ámbito de la Industria 4.0.";
                         proyectoCargar.Roh_isSupportedBy = new ProjectOntology.Funding();
                         proyectoCargar.Roh_isSupportedBy.Roh_fundedBy = new List<ProjectOntology.FundingProgram>();
                         proyectoCargar.Roh_isSupportedBy.Roh_fundedBy.Add(new ProjectOntology.FundingProgram { Roh_title = "Programa Estatal de I+D+i Orientada a los Retos de la Sociedad" });
@@ -896,13 +911,13 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
                     }
                     documentoACargar.Roh_authorsNumber = numAutores;
 
-                    if (!string.IsNullOrEmpty(articulo.AREA))
-                    {
-                        documentoACargar.Roh_hasKnowledgeArea = new List<DocumentOntology.CategoryPath>();
-                        DocumentOntology.CategoryPath categoryPath = new DocumentOntology.CategoryPath();
-                        categoryPath.IdsRoh_categoryNode = new List<string>() { "http://gnoss.com/items/um_" + articulo.AREA };
-                        documentoACargar.Roh_hasKnowledgeArea.Add(categoryPath);
-                    }
+                    //if (!string.IsNullOrEmpty(articulo.AREA))
+                    //{
+                    //    documentoACargar.Roh_hasKnowledgeArea = new List<DocumentOntology.CategoryPath>();
+                    //    DocumentOntology.CategoryPath categoryPath = new DocumentOntology.CategoryPath();
+                    //    categoryPath.IdsRoh_categoryNode = new List<string>() { "http://gnoss.com/items/um_" + articulo.AREA };
+                    //    documentoACargar.Roh_hasKnowledgeArea.Add(categoryPath);
+                    //}
 
                     //Localidad
                     documentoACargar.Vcard_locality = "Murcia";
@@ -926,26 +941,26 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
                     }
 
                     //Obtención del código
-                    string codigo = listaDatos.FirstOrDefault(x => x.Item2 == articulo.DESCRI_AREA).Item1;
+                    string codigo = listaDatos.FirstOrDefault(x => x.Item2.ToLower() == articulo.DESCRI_AREA.ToLower()).Item1;
 
                     //Obtención de la tupla con las categorías
-                    Tuple<string, string, string, string, string> dataCategorias = pListaTaxonomia.FirstOrDefault(x => x.Item5 == codigo);
+                    Tuple<string, string, string, string, string> dataCategorias = pListaTaxonomia.FirstOrDefault(x => x.Item5.ToLower() == codigo.ToLower());
 
                     if(!string.IsNullOrEmpty(dataCategorias.Item1))
                     {
-                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_"+ pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel == dataCategorias.Item1).Dc_identifier);
+                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_"+ pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower()).Dc_identifier);
                     }
                     if (!string.IsNullOrEmpty(dataCategorias.Item2))
                     {
-                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel == dataCategorias.Item2).Dc_identifier);
+                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item2.ToLower()).Dc_identifier);
                     }
                     if (!string.IsNullOrEmpty(dataCategorias.Item3))
                     {
-                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel == dataCategorias.Item3).Dc_identifier);
+                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item3.ToLower()).Dc_identifier);
                     }
                     if (!string.IsNullOrEmpty(dataCategorias.Item4))
                     {
-                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel == dataCategorias.Item4).Dc_identifier);
+                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item4.ToLower()).Dc_identifier);
                     }
 
                     documentoACargar.Roh_hasKnowledgeArea.Add(categoria);
