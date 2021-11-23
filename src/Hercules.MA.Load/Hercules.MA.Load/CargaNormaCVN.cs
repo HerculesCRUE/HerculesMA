@@ -43,6 +43,7 @@ using ScientificactivitydocumentOntology;
 using DepartmentOntology;
 using Hercules.MA.Load.Models.UMU;
 using ScientificexperienceprojectOntology;
+using ActivitymodalityOntology;
 
 namespace Hercules.MA.Load
 {
@@ -88,6 +89,7 @@ namespace Hercules.MA.Load
         private static readonly string idStayGoal = "CVN_STAY_A";
         private static readonly string idGrantAim = "CVN_SUMMONS_A";
         private static readonly string idRelationshipType = "CVN_COLLABORATION_A";
+        private static readonly string idActivityModality = "CVN_ACTIVITY_A";
 
         /// <summary>
         /// Método para cargar las entidades secundarias.
@@ -132,6 +134,7 @@ namespace Hercules.MA.Load
             CargarScientificActivityDocument("scientificactivitydocument");
             CargarScientificExperienceProject("scientificexperienceproject");
             CargarDepartment("department");
+            CargarActivityModality(tablas, "activitymodality");
         }
 
         /// <summary>
@@ -1995,6 +1998,71 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosRelationshipType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria ActivityModality.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarActivityModality(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ActivityModality", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ActivityModality> modalidad = new List<ActivityModality>();
+            modalidad = ObtenerDatosActivityModality(pTablas, idActivityModality, modalidad);
+
+            //Carga.
+            foreach (ActivityModality modality in modalidad)
+            {
+                mResourceApi.LoadSecondaryResource(modality.ToGnossApiResource(mResourceApi, pOntology + "_" + modality.Dc_identifier));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los objetos RelationshipType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosActivityModality">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ActivityModality> ObtenerDatosActivityModality(ReferenceTables pTablas, string pCodigoTabla, List<ActivityModality> pListaDatosActivityModality)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        ActivityModality modality = new ActivityModality();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        modality.Dc_identifier = identificador;
+                        modality.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosActivityModality.Add(modality);
+                    }
+                }
+            }
+
+            return pListaDatosActivityModality;
         }
 
         /// <summary>

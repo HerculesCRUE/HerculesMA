@@ -93,7 +93,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                 foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
                 {
-                    // Filtro de fechas.
                     if (!filtrosReciprocos.ContainsKey(item.Key))
                     {
                         foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
@@ -161,7 +160,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }
                             else
                             {
-                                valorFiltro += $@",'{valor}'";
+                                //MultiIdioma.
+                                if (valor.Length > 3 && valor[valor.Length - 3] == '@')
+                                {
+                                    valorFiltro += $@",'{valor.Substring(0,valor.Length-3)}'{valor.Substring(valor.Length - 3)}";
+                                }
+                                else
+                                {
+                                    valorFiltro += $@",'{valor}'";
+                                }
                             }
                         }
 

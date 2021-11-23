@@ -26,6 +26,9 @@
     <None Update="Dataset\Hércules-ED_Taxonomías_v1.1.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Dataset\personas_hercules.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Dataset\UMU\Areas UNESCO Proyectos.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
