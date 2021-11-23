@@ -77,11 +77,19 @@ namespace Hercules.MA.Load
             // Obtención del ImpactIndexCategory (Secundaria).
             dicAreasCategoria = CargaListadosAreasRevistas();
 
-            //Prueba.
-            ObtenerTesauroExcel();
+            //Taxonomía 
+            List<SecondaryResource> listaRecursosSecundariosCargar = new List<SecondaryResource>();
+            List<Tuple<string, string, string, string, string>> listaTuplas = new List<Tuple<string, string, string, string, string>>();
+            List<Concept> listaConcepts = new List<Concept>();
+            CambiarOntologia("taxonomy");
+            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "researcharea");
+            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "researcharea");
+            ObtenerTesauroExcel(ref listaRecursosSecundariosCargar, ref listaTuplas, ref listaConcepts, "researcharea");
+            CargarDatosSecundarios(listaRecursosSecundariosCargar);
+            listaRecursosSecundariosCargar.Clear();
 
             //Persona en específico a cargar.
-            HashSet<string> personasACargar = new HashSet<string>() { "79", "1276" }; // Otro investigador: 1276
+            HashSet<string> personasACargar = new HashSet<string>() { "79", "1276" }; // Investigadores ejemplo: 79 y 1276
             //HashSet<string> personasACargar = new HashSet<string>();
 
             //Recursos para NO borrarlos.
@@ -92,79 +100,64 @@ namespace Hercules.MA.Load
 
             //Cargar organizaciones.
             CambiarOntologia("organization");
-            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
             Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas, fuentesFinanciacionProyectos);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar personas.
             CambiarOntologia("person");
-            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar, datoEquiposInvestigacion);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar grupos de investigación.
             CambiarOntologia("group");
-            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
             Dictionary<string, string> gruposCargar = ObtenerGrupos(personasACargar, personasCargar, ref listaRecursosCargar, personas, gruposInvestigacion, datoEquiposInvestigacion, organizacionesCargar, lineasDeInvestigacion, lineasInvestigador);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar proyectos.
             CambiarOntologia("project");
-            //EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
+            EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
             Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, fechasEquiposProyectos, areasUnescoProyectos, codigosUnesco, fuentesFinanciacionProyectos);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar revistas.
             CambiarOntologia("maindocument");
-            //EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
+            EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
             Dictionary<string, string> revistarCargar = ObtenerMainDocuments(personasACargar, ref listaRecursosCargar, articulos, autoresArticulos);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Publicaciones)
             CambiarOntologia("document");
-            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
-            Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos);
-            //CargarDatos(listaRecursosCargar);
+            EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
+            Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos, listaTuplas, listaConcepts);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Congresos)
             CambiarOntologia("document");
-            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
             Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar curriculums
             CambiarOntologia("curriculumvitae");
-            //EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
+            EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
             Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar, documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
-            //Secundarios
-            List<SecondaryResource> listaRecursosSecundariosCargar = new List<SecondaryResource>();
-
             //Categorización UM
-            CambiarOntologia("taxonomy");
-            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "researcharea");
-            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "researcharea");
-            ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar, "researcharea");
-            ObtenerTesauroExcel();
-            CargarDatosSecundarios(listaRecursosSecundariosCargar);
-            listaRecursosSecundariosCargar.Clear();
-
-
-            //TODO
-            //Categorización UNESCO
             //CambiarOntologia("taxonomy");
-            //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "unesco");
-            //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "unesco");
-            //ObtenerTesauroUMUnesco(articulos, ref listaRecursosSecundariosCargar, "unesco");
+            //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "um");
+            //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "um");
+            //ObtenerTesauroUMDocumentos(articulos, ref listaRecursosSecundariosCargar, "um");
             //CargarDatosSecundarios(listaRecursosSecundariosCargar);
             //listaRecursosSecundariosCargar.Clear();
         }
@@ -224,95 +217,122 @@ namespace Hercules.MA.Load
             }
         }
 
-        private static void ObtenerTesauroExcel()
+        private static void ObtenerTesauroExcel(ref List<SecondaryResource> pListaRecursosCargar, ref List<Tuple<string, string, string, string, string>> pListaTuplas, ref List<Concept> pListaConcepts, string pSource)
         {
-            // Lectura del Excel.
-            DataSet ds = new DataSet();
-            string ruta = $@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx";
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            using (var stream = File.Open(ruta, FileMode.Open, FileAccess.Read))
-            {
-                using (var reader = ExcelReaderFactory.CreateReader(stream))
-                {
-                    ds = reader.AsDataSet(new ExcelDataSetConfiguration()
-                    {
-                        ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
-                        {
-                            UseHeaderRow = true,
-                        }
-                    });
-                }
-            }
+            DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx");
 
-            // Lectura de datos
-            List<ObjExcelTaxonomia> listaTaxonomia = new List<ObjExcelTaxonomia>();
-            string padreLevel1 = string.Empty;
-            string padreLevel2 = string.Empty;
-            string padreLevel3 = string.Empty;
+            List<Tuple<string, string, string, string, string>> listaDatos = new List<Tuple<string, string, string, string, string>>();
             foreach (DataRow fila in ds.Tables["Hércules-KA-taxonomy (clean)"].Rows)
             {
-                ObjExcelTaxonomia objTaxonomia = new ObjExcelTaxonomia();
-                
-                objTaxonomia.level0 = fila["Level 0"].ToString();
-                objTaxonomia.level1 = fila["Level 1"].ToString();
-                objTaxonomia.level2 = fila["Level 2"].ToString();
-                objTaxonomia.level3 = fila["Level 3"].ToString();
-                objTaxonomia.WoSJCR = fila["WoS-JCR"].ToString();
-
-                listaTaxonomia.Add(objTaxonomia);
+                Tuple<string, string, string, string, string> tupla = new Tuple<string, string, string, string, string>(fila["Level 0"].ToString(), fila["Level 1"].ToString(), fila["Level 2"].ToString(), fila["Level 3"].ToString(), fila["WoS-JCR"].ToString());
+                listaDatos.Add(tupla);
             }
-        }
 
-        /// <summary>
-        /// TODO: Tesauro UNESCO.
-        /// </summary>
-        /// <param name="articulos"></param>
-        /// <param name="pListaRecursosCargar"></param>
-        /// <param name="pSource"></param>
-        private static void ObtenerTesauroUMUnesco(List<CodigosUnesco> codigosUnesco, ref List<SecondaryResource> pListaRecursosCargar, string pSource)
-        {
-            Dictionary<string, string> listaCategorias = new Dictionary<string, string>();
-            foreach (CodigosUnesco codigo in codigosUnesco)
-            {
-                string codigoUnesco = codigo.UNES_UNAR_CODIGO;
-                if (!string.IsNullOrEmpty(codigo.UNES_UNCA_CODIGO) && codigo.UNES_UNCA_CODIGO != "00")
-                {
-                    codigoUnesco += $@"_{codigo.UNES_UNCA_CODIGO}";
-                }
-                if (!string.IsNullOrEmpty(codigo.UNES_CODIGO) && codigo.UNES_CODIGO != "00")
-                {
-                    codigoUnesco += $@"_{codigo.UNES_CODIGO}";
-                }
-
-                if (!listaCategorias.ContainsKey(codigo.UNES_NOMBRE))
-                {
-                    listaCategorias.Add(codigo.UNES_NOMBRE, codigoUnesco);
-                }
-            }
+            pListaTuplas = listaDatos;
 
             List<Concept> listConcepts = new List<Concept>();
-            foreach (string id in listaCategorias.Keys)
+            int lv1 = 0;
+            int lv2 = 0;
+            int lv3 = 0;
+            int lv4 = 0;
+            string lastLv1 = "";
+            string lastLv2 = "";
+            string lastLv3 = "";
+            string lastLv4 = "";
+            foreach (Tuple<string, string, string, string, string> tupla in listaDatos)
             {
-                ConceptEDMA concept = new ConceptEDMA();
-                concept.Dc_identifier = id;
-                concept.Dc_source = pSource;
-                concept.Skos_prefLabel = listaCategorias[id];
-                concept.Skos_symbol = "1";
-                listConcepts.Add(concept);
+                if (!string.IsNullOrEmpty(tupla.Item1) && lastLv1 != tupla.Item1)
+                {
+                    lv1++;
+                    lv2 = 0;
+                    lv3 = 0;
+                    lv4 = 0;
+                    string id = lv1.ToString() + "." + lv2.ToString() + "." + lv3.ToString() + "." + lv4.ToString();
+                    ConceptEDMA concept = new ConceptEDMA();
+                    concept.Dc_identifier = id;
+                    concept.Dc_source = pSource;
+                    concept.Skos_prefLabel = tupla.Item1;
+                    concept.Skos_symbol = "1";
+                    listConcepts.Add(concept); 
+                }
+                if (!string.IsNullOrEmpty(tupla.Item2) && lastLv2 != tupla.Item2)
+                {
+                    lv2++;
+                    lv3 = 0;
+                    lv4 = 0;
+                    string id = lv1.ToString() + "." + lv2.ToString() + "." + lv3.ToString() + "." + lv4.ToString();
+                    ConceptEDMA concept = new ConceptEDMA();
+                    concept.Dc_identifier = id;
+                    concept.Dc_source = pSource;
+                    concept.Skos_prefLabel = tupla.Item2;
+                    concept.Skos_symbol = "2";
+                    listConcepts.Add(concept);
+                }
+                if (!string.IsNullOrEmpty(tupla.Item3) && lastLv3 != tupla.Item3)
+                {
+                    lv3++;
+                    lv4 = 0;
+                    string id = lv1.ToString() + "." + lv2.ToString() + "." + lv3.ToString() + "." + lv4.ToString();
+                    ConceptEDMA concept = new ConceptEDMA();
+                    concept.Dc_identifier = id;
+                    concept.Dc_source = pSource;
+                    concept.Skos_prefLabel = tupla.Item3;
+                    concept.Skos_symbol = "3";
+                    listConcepts.Add(concept);
+
+                }
+                if (!string.IsNullOrEmpty(tupla.Item4) && lastLv4 != tupla.Item4)
+                {
+                    lv4++;
+                    string id = lv1.ToString() + "." + lv2.ToString() + "." + lv3.ToString() + "." + lv4.ToString();
+                    ConceptEDMA concept = new ConceptEDMA();
+                    concept.Dc_identifier = id;
+                    concept.Dc_source = pSource;
+                    concept.Skos_prefLabel = tupla.Item4;
+                    concept.Skos_symbol = "4";
+                    listConcepts.Add(concept);
+                }
+
+                lastLv1 = tupla.Item1;
+                lastLv2 = tupla.Item2;
+                lastLv3 = tupla.Item3;
+                lastLv4 = tupla.Item4;
+            }
+
+            pListaConcepts = listConcepts;
+
+            foreach(Concept concept in listConcepts)
+            {
+                string[] idSplit=concept.Dc_identifier.Split('.');
+                concept.Skos_narrower = new List<Concept>();
+                concept.Skos_broader = new List<Concept>();
+                if(concept.Dc_identifier.EndsWith(".0.0.0"))
+                {
+                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + ".") && x.Dc_identifier.EndsWith(".0.0") && x.Dc_identifier != concept.Dc_identifier).ToList();
+                }
+                else if (concept.Dc_identifier.EndsWith(".0.0"))
+                {
+                    concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.EndsWith(".0.0.0") && x.Dc_identifier.StartsWith(idSplit[0]+".")).ToList();
+                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + "."+ idSplit[1] + ".") && x.Dc_identifier.EndsWith(".0") && x.Dc_identifier != concept.Dc_identifier).ToList();
+                }
+                else if (concept.Dc_identifier.EndsWith(".0"))
+                {
+                    concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.EndsWith(".0.0") && x.Dc_identifier.StartsWith(idSplit[0] + "." + idSplit[1] + ".")).ToList();
+                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + "." + idSplit[1] + "." + idSplit[2] + ".") && x.Dc_identifier != concept.Dc_identifier).ToList();
+                }
+                else 
+                {
+                    concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + "." + idSplit[1] + "." + idSplit[2] + ".") && x.Dc_identifier.EndsWith(".0") && x.Dc_identifier != concept.Dc_identifier).ToList();
+                }
+                pListaRecursosCargar.Add(((ConceptEDMA)concept).ToGnossApiResource(mResourceApi, concept.Dc_identifier));
             }
 
             CollectionEDMA collection = new CollectionEDMA();
             collection.Dc_source = pSource;
-            collection.Skos_member = listConcepts;
-            collection.Skos_scopeNote = "Tesauro UM";
+            collection.Skos_member = listConcepts.Where(x=>x.Dc_identifier.EndsWith(".0.0.0")).ToList();
+            collection.Skos_scopeNote = "Research areas";
             pListaRecursosCargar.Add(collection.ToGnossApiResource(mResourceApi, "0"));
-
-            foreach (ConceptEDMA concept in listConcepts)
-            {
-                pListaRecursosCargar.Add(concept.ToGnossApiResource(mResourceApi, concept.Dc_identifier));
-            }
-        }
-
+        }   
 
         /// <summary>
         /// Proceso de obtención de datos de las Personas.
@@ -745,7 +765,7 @@ Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Di
                     proyectoCargar.Roh_isSynchronized = false;
 
                     // ---------- ÑAPA
-                    if(proyectoID == "SOLAYUDAS|13334")
+                    if (proyectoID == "SOLAYUDAS|13334")
                     {
                         proyectoCargar.Vivo_description = $@"El objetivo general del proyecto Hidroleaf es desarrollar y validar un sistema integral para la producción sostenible de plantas hortícolas de hoja en invernadero y en cultivo de interior mediante luz artificial, aplicando las nuevas tecnologías TICs para optimizar las condiciones de cultivo de las plantas.
 
@@ -787,7 +807,7 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
         /// <param name="pListaPersonas"></param>
         /// <param name="pListaPalabrasClave"></param>
         /// <returns>Diccionario con el ID documento / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerDocumentos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicRevistasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave, List<Proyecto> pListaProyectos, List<EquipoProyecto> pEquipoProyectos)
+        private static Dictionary<string, string> ObtenerDocumentos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicRevistasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave, List<Proyecto> pListaProyectos, List<EquipoProyecto> pEquipoProyectos, List<Tuple<string, string, string, string, string>> pListaTaxonomia, List<Concept> pListaConcepts)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsArticulosACargar = new HashSet<string>();
@@ -850,7 +870,6 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
                             numAutores++;
 
                             //Proyectos
-                            //TODO cambiar
                             List<EquipoProyecto> listaEquipos = pEquipoProyectos.Where(x => x.IDPERSONA == autor.IDPERSONA).ToList();
                             foreach (EquipoProyecto equipo in listaEquipos)
                             {
@@ -892,6 +911,44 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
 
                     //FreeTextKeyword
                     documentoACargar.Vivo_freeTextKeyword = pListaPalabrasClave.Where(x => x.PC_ARTI_CODIGO == articulo.CODIGO).Select(x => x.PC_PALABRA).ToList();
+
+                    //KnowledgeArea (Tesauro)
+                    documentoACargar.Roh_hasKnowledgeArea = new List<DocumentOntology.CategoryPath>();
+                    DocumentOntology.CategoryPath categoria = new DocumentOntology.CategoryPath();
+                    categoria.IdsRoh_categoryNode = new List<string>();
+                   
+                    DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx");
+                    List<Tuple<string, string>> listaDatos = new List<Tuple<string, string>>();
+                    foreach (DataRow fila in ds.Tables["WoS-JCR"].Rows)
+                    {
+                        Tuple<string, string> tupla = new Tuple<string, string>(fila["Code"].ToString(), fila["tASCA"].ToString());
+                        listaDatos.Add(tupla);
+                    }
+
+                    //Obtención del código
+                    string codigo = listaDatos.FirstOrDefault(x => x.Item2 == articulo.DESCRI_AREA).Item1;
+
+                    //Obtención de la tupla con las categorías
+                    Tuple<string, string, string, string, string> dataCategorias = pListaTaxonomia.FirstOrDefault(x => x.Item5 == codigo);
+
+                    if(!string.IsNullOrEmpty(dataCategorias.Item1))
+                    {
+                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_"+ pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel == dataCategorias.Item1).Dc_identifier);
+                    }
+                    if (!string.IsNullOrEmpty(dataCategorias.Item2))
+                    {
+                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel == dataCategorias.Item2).Dc_identifier);
+                    }
+                    if (!string.IsNullOrEmpty(dataCategorias.Item3))
+                    {
+                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel == dataCategorias.Item3).Dc_identifier);
+                    }
+                    if (!string.IsNullOrEmpty(dataCategorias.Item4))
+                    {
+                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel == dataCategorias.Item4).Dc_identifier);
+                    }
+
+                    documentoACargar.Roh_hasKnowledgeArea.Add(categoria);
 
                     //DOI
                     if (!string.IsNullOrEmpty(articulo.ARTI_DOI))
@@ -943,7 +1000,7 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
             {
                 Congreso congreso = pListaCongresos.FirstOrDefault(x => x.CONG_NUMERO == documentoID);
 
-                if (congreso != null)
+                if (congreso != null && !string.IsNullOrEmpty(congreso.TITULO_CONTRIBUCION))
                 {
                     DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
                     documentoACargar.IdRoh_scientificActivityDocument = "http://gnoss.com/items/scientificactivitydocument_SAD2";
@@ -1016,7 +1073,7 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
 
                     //Guardamos los IDs en la lista.
                     dicIDs.Add(congreso.CONG_NUMERO, resource.GnossId);
-                }                
+                }
             }
 
             return dicIDs;
@@ -1137,6 +1194,17 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
                                 }
                                 persona.Vivo_hasResearchArea.Add(lineaArea);
                             }
+
+
+                            if(equipo.CODTIPOPARTICIPACION=="IP")
+                            {
+                                grupoCargar.Roh_mainResearcher.Add(persona);
+                            }
+                            else
+                            {
+                                grupoCargar.Foaf_member.Add(persona);
+                            }
+
                         }
                     }
 
@@ -1145,7 +1213,7 @@ En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de ho
 
                     // --- ÑAPA
                     if (grupo.IDGRUPOINVESTIGACION == "E096-02")
-                    {                        
+                    {
                         grupoCargar.Vivo_description = $@"El grupo de investigación de Sistemas Inteligentes de la Universidad de Murcia desarrolla su investigación dentro de diversas líneas de investigación de vanguardia de Soft Computing y Sistemas Inteligentes desde 1997. Actualmente el grupo desarrolla su labor en líneas de investigación como los sistemas embebidos, el telecontrol y la telemática aplicada al transporte, el procesamiento sensorial y la fusión de datos o los sistemas cooperativos inteligentes. Las técnicas utilizadas por este grupo son: los sistemas automáticos, las redes causales, el soft computing o la minería de datos, entre otros.
 Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departamento de Ingeniería de la Información y las Comunicaciones de la Universidad de Murcia.";
                     }
@@ -1406,7 +1474,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             //Carga.
             foreach (SecondaryResource recursoCargar in pListaRecursosCargar)
             {
-                mResourceApi.LoadSecondaryResource(recursoCargar);
+                var x=mResourceApi.LoadSecondaryResource(recursoCargar);
             }
         }
 
@@ -2827,6 +2895,32 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             }
 
             return dicResultados;
+        }
+
+        /// <summary>
+        /// Permite leer los datos de un excel.
+        /// </summary>
+        /// <param name="pRuta">Ruta del excel.</param>
+        /// <returns>Objeto con los datos leidos.</returns>
+        private static DataSet LeerDatosExcel(string pRuta)
+        {
+            // Lectura del Excel.
+            DataSet ds = new DataSet();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (var stream = File.Open(pRuta, FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    ds = reader.AsDataSet(new ExcelDataSetConfiguration()
+                    {
+                        ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
+                        {
+                            UseHeaderRow = true,
+                        }
+                    });
+                }
+            }
+            return ds;
         }
     }
 }
