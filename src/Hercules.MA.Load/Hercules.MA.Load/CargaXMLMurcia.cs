@@ -82,10 +82,10 @@ namespace Hercules.MA.Load
             List<Tuple<string, string, string, string, string>> listaTuplas = new List<Tuple<string, string, string, string, string>>();
             List<Concept> listaConcepts = new List<Concept>();
             CambiarOntologia("taxonomy");
-            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "researcharea");
-            CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "researcharea");
+            //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "researcharea");
+            //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "researcharea");
             ObtenerTesauroExcel(ref listaRecursosSecundariosCargar, ref listaTuplas, ref listaConcepts, "researcharea");
-            CargarDatosSecundarios(listaRecursosSecundariosCargar);
+            //CargarDatosSecundarios(listaRecursosSecundariosCargar);
             listaRecursosSecundariosCargar.Clear();
 
             //Persona en específico a cargar.
@@ -253,7 +253,7 @@ namespace Hercules.MA.Load
                     concept.Dc_source = pSource;
                     concept.Skos_prefLabel = tupla.Item1;
                     concept.Skos_symbol = "1";
-                    listConcepts.Add(concept); 
+                    listConcepts.Add(concept);
                 }
                 if (!string.IsNullOrEmpty(tupla.Item2) && lastLv2 != tupla.Item2)
                 {
@@ -301,26 +301,26 @@ namespace Hercules.MA.Load
 
             pListaConcepts = listConcepts;
 
-            foreach(Concept concept in listConcepts)
+            foreach (Concept concept in listConcepts)
             {
-                string[] idSplit=concept.Dc_identifier.Split('.');
+                string[] idSplit = concept.Dc_identifier.Split('.');
                 concept.Skos_narrower = new List<Concept>();
                 concept.Skos_broader = new List<Concept>();
-                if(concept.Dc_identifier.EndsWith(".0.0.0"))
+                if (concept.Dc_identifier.EndsWith(".0.0.0"))
                 {
                     concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + ".") && x.Dc_identifier.EndsWith(".0.0") && x.Dc_identifier != concept.Dc_identifier).ToList();
                 }
                 else if (concept.Dc_identifier.EndsWith(".0.0"))
                 {
-                    concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.EndsWith(".0.0.0") && x.Dc_identifier.StartsWith(idSplit[0]+".")).ToList();
-                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + "."+ idSplit[1] + ".") && x.Dc_identifier.EndsWith(".0") && x.Dc_identifier != concept.Dc_identifier).ToList();
+                    concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.EndsWith(".0.0.0") && x.Dc_identifier.StartsWith(idSplit[0] + ".")).ToList();
+                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + "." + idSplit[1] + ".") && x.Dc_identifier.EndsWith(".0") && x.Dc_identifier != concept.Dc_identifier).ToList();
                 }
                 else if (concept.Dc_identifier.EndsWith(".0"))
                 {
                     concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.EndsWith(".0.0") && x.Dc_identifier.StartsWith(idSplit[0] + "." + idSplit[1] + ".")).ToList();
                     concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + "." + idSplit[1] + "." + idSplit[2] + ".") && x.Dc_identifier != concept.Dc_identifier).ToList();
                 }
-                else 
+                else
                 {
                     concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.StartsWith(idSplit[0] + "." + idSplit[1] + "." + idSplit[2] + ".") && x.Dc_identifier.EndsWith(".0") && x.Dc_identifier != concept.Dc_identifier).ToList();
                 }
@@ -329,10 +329,10 @@ namespace Hercules.MA.Load
 
             CollectionEDMA collection = new CollectionEDMA();
             collection.Dc_source = pSource;
-            collection.Skos_member = listConcepts.Where(x=>x.Dc_identifier.EndsWith(".0.0.0")).ToList();
+            collection.Skos_member = listConcepts.Where(x => x.Dc_identifier.EndsWith(".0.0.0")).ToList();
             collection.Skos_scopeNote = "Research areas";
             pListaRecursosCargar.Add(collection.ToGnossApiResource(mResourceApi, "0"));
-        }   
+        }
 
         /// <summary>
         /// Proceso de obtención de datos de las Personas.
@@ -422,6 +422,8 @@ namespace Hercules.MA.Load
                 #endregion
             }
 
+            DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\personas_hercules.xlsx");
+
             foreach (string idPersona in listaPersonasCargarDefinitiva)
             {
                 Persona persona = pPersonas.FirstOrDefault(x => x.IDPERSONA == idPersona);
@@ -448,10 +450,9 @@ namespace Hercules.MA.Load
                     personaCarga.Roh_isSynchronized = false;
                     personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
 
-                    // ORCID
-                    DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\personas_hercules.xlsx");
+                    // ORCID                    
                     List<Tuple<string, string, string>> listaDatos = new List<Tuple<string, string, string>>();
-                    foreach (DataRow fila in ds.Tables["Hoja 1"].Rows)
+                    foreach (DataRow fila in ds.Tables["Hoja1"].Rows)
                     {
                         Tuple<string, string, string> tupla = new Tuple<string, string, string>(fila["id"].ToString(), fila["name"].ToString(), fila["orcid"].ToString());
                         listaDatos.Add(tupla);
@@ -467,7 +468,7 @@ namespace Hercules.MA.Load
                         datoPersonaOrcid = listaDatos.FirstOrDefault(x => x.Item2.ToLower() == persona.NOMBRE.ToLower());
                     }
 
-                    if(datoPersonaOrcid != null)
+                    if (datoPersonaOrcid != null)
                     {
                         personaCarga.Roh_ORCID = datoPersonaOrcid.Item3;
                     }
@@ -842,6 +843,8 @@ namespace Hercules.MA.Load
                 }
             }
 
+            DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx");
+
             //Obtengo los datos de los documentos.
             foreach (string documentoID in idsArticulosACargar)
             {
@@ -931,8 +934,7 @@ namespace Hercules.MA.Load
                     documentoACargar.Roh_hasKnowledgeArea = new List<DocumentOntology.CategoryPath>();
                     DocumentOntology.CategoryPath categoria = new DocumentOntology.CategoryPath();
                     categoria.IdsRoh_categoryNode = new List<string>();
-                   
-                    DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx");
+
                     List<Tuple<string, string>> listaDatos = new List<Tuple<string, string>>();
                     foreach (DataRow fila in ds.Tables["WoS-JCR"].Rows)
                     {
@@ -941,29 +943,34 @@ namespace Hercules.MA.Load
                     }
 
                     //Obtención del código
-                    string codigo = listaDatos.FirstOrDefault(x => x.Item2.ToLower() == articulo.DESCRI_AREA.ToLower()).Item1;
+                    string codigo = listaDatos.FirstOrDefault(x => x.Item2.ToLower() == articulo.DESCRI_AREA.ToLower())?.Item1;
 
-                    //Obtención de la tupla con las categorías
-                    Tuple<string, string, string, string, string> dataCategorias = pListaTaxonomia.FirstOrDefault(x => x.Item5.ToLower() == codigo.ToLower());
+                    if (!string.IsNullOrEmpty(codigo))
+                    {
+                        //Obtención de la tupla con las categorías
+                        Tuple<string, string, string, string, string> dataCategorias = pListaTaxonomia.FirstOrDefault(x => x.Item5.ToLower() == codigo.ToLower());
 
-                    if(!string.IsNullOrEmpty(dataCategorias.Item1))
-                    {
-                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_"+ pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower()).Dc_identifier);
+                        if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item1))
+                        {
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower()).Dc_identifier);
+                        }
+                        if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item2))
+                        {
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item2.ToLower()).Dc_identifier);
+                        }
+                        if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item3))
+                        {
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item3.ToLower()).Dc_identifier);
+                        }
+                        if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item4))
+                        {
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item4.ToLower()).Dc_identifier);
+                        }
+                        if (categoria.IdsRoh_categoryNode.Count > 0)
+                        {
+                            documentoACargar.Roh_hasKnowledgeArea.Add(categoria);
+                        }
                     }
-                    if (!string.IsNullOrEmpty(dataCategorias.Item2))
-                    {
-                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item2.ToLower()).Dc_identifier);
-                    }
-                    if (!string.IsNullOrEmpty(dataCategorias.Item3))
-                    {
-                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item3.ToLower()).Dc_identifier);
-                    }
-                    if (!string.IsNullOrEmpty(dataCategorias.Item4))
-                    {
-                        categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item4.ToLower()).Dc_identifier);
-                    }
-
-                    documentoACargar.Roh_hasKnowledgeArea.Add(categoria);
 
                     //DOI
                     if (!string.IsNullOrEmpty(articulo.ARTI_DOI))
@@ -1211,7 +1218,7 @@ namespace Hercules.MA.Load
                             }
 
 
-                            if(equipo.CODTIPOPARTICIPACION=="IP")
+                            if (equipo.CODTIPOPARTICIPACION == "IP")
                             {
                                 grupoCargar.Roh_mainResearcher.Add(persona);
                             }
@@ -1489,7 +1496,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             //Carga.
             foreach (SecondaryResource recursoCargar in pListaRecursosCargar)
             {
-                var x=mResourceApi.LoadSecondaryResource(recursoCargar);
+                var x = mResourceApi.LoadSecondaryResource(recursoCargar);
             }
         }
 
@@ -2935,6 +2942,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                     });
                 }
             }
+
             return ds;
         }
     }
