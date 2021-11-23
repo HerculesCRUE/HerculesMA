@@ -662,10 +662,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         ?proyecto a 'project'.
                         OPTIONAL{{?proyecto vivo:relates ?relacion.
-                        ?relacion roh:roleOf ?membersids2.
+                        ?relacion roh:roleOf ?mainresearcher.
                         ?proyecto vivo:relates ?relacion2.
                         ?relacion2 roh:roleOf ?id.}}
-                        FILTER (?theId IN (?id, ?membersids2 ))
+                        FILTER (?theId IN (?membersids2 ))
                         FILTER(?theId != ?mainresearcher)
                         ?theId foaf:name ?nombre.
 
