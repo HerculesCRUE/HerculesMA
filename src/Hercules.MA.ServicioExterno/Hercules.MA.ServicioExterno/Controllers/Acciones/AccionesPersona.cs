@@ -28,7 +28,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string COLOR_GRAFICAS = "#6cafe3";
-        private static string COLOR_GRAFICAS_HORIZONTAL = "#1177ff";
+        private static string COLOR_GRAFICAS_HORIZONTAL = "#6cafe3";
         #endregion
 
         /// <summary>
@@ -311,8 +311,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Se construye el objeto con los datos.
             List<DatosAnyo> listaDatos = new List<DatosAnyo>();
-            listaDatos.Add(new DatosAnyo("Inicio", "green", listaInicios));
-            listaDatos.Add(new DatosAnyo("Fin", "#AB1B2B", listaFines));
+            listaDatos.Add(new DatosAnyo("Inicio", "#6cafe3", listaInicios));
+            listaDatos.Add(new DatosAnyo("Fin", "#BF4858", listaFines));
 
             // Se crea el objeto de la gráfica.
             DataGraficaProyectosGroupBars dataObj = new DataGraficaProyectosGroupBars(dicResultados.Keys.ToList(), listaDatos);

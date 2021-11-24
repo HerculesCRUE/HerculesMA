@@ -27,7 +27,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string COLOR_GRAFICAS = "#6cafe3";
-        private static string COLOR_GRAFICAS_HORIZONTAL = "#1177ff";
+        private static string COLOR_GRAFICAS_HORIZONTAL = "#6cafe3"; //#1177ff
         #endregion
 
         /// <summary>
