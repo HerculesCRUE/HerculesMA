@@ -80,6 +80,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             filtrosFecha.Add("vivo:start");
             filtrosFecha.Add("vivo:end");
 
+            // Filtros de eteros.
+            List<string> filtrosEnteros = new List<string>();
+            filtrosEnteros.Add("roh:publicationsNumber");
+            filtrosEnteros.Add("roh:projectsNumber");
+            filtrosEnteros.Add("roh:publicationsNumber");
+
             // Filtros de inversas.
             Dictionary<string, int> filtrosReciprocos = new Dictionary<string, int>();
             filtrosReciprocos.Add("foaf:member@@@roh:roleOf@@@roh:title", 2);
@@ -147,6 +153,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             filtro.Append($@"FILTER({pVarAnterior} <= {fecha.Split('-')[1]}000000) ");
                         }
                     }
+                    else if(filtrosEnteros.Contains(item.Key))
+                    {
+                        string valorFiltro = string.Empty;
+                        
+                        foreach (string valor in item.Value)
+                        {
+                            valorFiltro += $@",{valor}";
+                        }
+
+                        if (valorFiltro.Length > 0)
+                        {
+                            valorFiltro = valorFiltro.Substring(1);
+                        }
+
+                        if (!filtrosReciprocos.ContainsKey(item.Key))
+                        {
+                            filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                        }
+                    }
                     else
                     {
                         string valorFiltro = string.Empty;
@@ -157,6 +182,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             if (esUri)
                             {
                                 valorFiltro += $@",<{valor}>";
+                            } else if(valor.All(char.IsNumber))
+                            {
+                                valorFiltro += $@",{valor}";
                             }
                             else
                             {

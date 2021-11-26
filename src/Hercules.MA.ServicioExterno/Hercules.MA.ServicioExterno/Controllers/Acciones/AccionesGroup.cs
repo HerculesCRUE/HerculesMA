@@ -553,7 +553,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     try
                     {
-                        if (!dicResultados.ContainsKey(anyo))
+                        if (anyo != null && !dicResultados.ContainsKey(anyo))
                         {
                             // Si no contiene el año, creo el objeto.
                             DataFechas data = new();
@@ -561,7 +561,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             data.numProyectosFin = numProyectos;
                             dicResultados.Add(anyo, data);
                         }
-                        else
+                        else if(anyo != null)
                         {
                             // Si lo contiene, se lo agrego.
                             dicResultados[anyo].numProyectosFin += numProyectos;
@@ -635,6 +635,43 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Consulta sparql.
             string select = mPrefijos;
             select += "SELECT ?theId ?nombre COUNT(*) AS ?numRelaciones";
+            //string where = $@"
+            //    WHERE {{ {{
+            //            SELECT *
+            //            WHERE {{
+            //            <{idGrafoBusqueda}> <http://w3id.org/roh/mainResearcher> ?mainrp.
+            //            ?mainrp <http://w3id.org/roh/roleOf> ?mainresearcher.
+
+            //            <{idGrafoBusqueda}> <http://xmlns.com/foaf/0.1/member> ?members1.
+            //            ?members1 <http://w3id.org/roh/roleOf> ?theId.
+
+            //            ?documento a 'document'.
+            //            OPTIONAL{{?documento bibo:authorList ?listaAutores.
+            //            ?listaAutores rdf:member ?theId.}}
+            //            FILTER(?theId != ?mainresearcher)
+            //            ?theId foaf:name ?nombre.
+            //        }}
+            //        }} UNION {{
+            //            SELECT *
+            //            WHERE {{
+            //            <{idGrafoBusqueda}> <http://w3id.org/roh/mainResearcher> ?mainrp.
+            //            ?mainrp <http://w3id.org/roh/roleOf> ?mainresearcher.
+
+            //            <{idGrafoBusqueda}> <http://xmlns.com/foaf/0.1/member> ?members2.
+            //            ?members2 <http://w3id.org/roh/roleOf> ?membersids2.
+
+            //            ?proyecto a 'project'.
+            //            OPTIONAL{{?proyecto vivo:relates ?relacion.
+            //            ?relacion roh:roleOf ?mainresearcher.
+            //            ?proyecto vivo:relates ?relacion2.
+            //            ?relacion2 roh:roleOf ?id.}}
+            //            FILTER (?theId IN (?membersids2 ))
+            //            FILTER(?theId != ?mainresearcher)
+            //            ?theId foaf:name ?nombre.
+
+            //        }} }} }} ORDER BY DESC (COUNT(*))
+            //    ";
+
             string where = $@"
                 WHERE {{ {{
                         SELECT *
@@ -650,6 +687,20 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?listaAutores rdf:member ?theId.}}
                         FILTER(?theId != ?mainresearcher)
                         ?theId foaf:name ?nombre.
+                ";
+
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?theId", ref aux);
+                where += filtros;
+            }
+
+
+
+            where += $@"
                     }}
                     }} UNION {{
                         SELECT *
@@ -664,13 +715,24 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         OPTIONAL{{?proyecto vivo:relates ?relacion.
                         ?relacion roh:roleOf ?mainresearcher.
                         ?proyecto vivo:relates ?relacion2.
-                        ?relacion2 roh:roleOf ?id.}}
+                        ?relacion2 roh:roleOf ?membersids2.}}
                         FILTER (?theId IN (?membersids2 ))
                         FILTER(?theId != ?mainresearcher)
                         ?theId foaf:name ?nombre.
+                ";
 
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?theId", ref aux);
+                where += filtros;
+            }
+            where += $@"
                     }} }} }} ORDER BY DESC (COUNT(*))
                 ";
+
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 

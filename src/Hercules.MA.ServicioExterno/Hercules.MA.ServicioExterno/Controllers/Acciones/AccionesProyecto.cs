@@ -125,6 +125,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"<{idGrafoBusqueda}> vivo:relates ?relacion. ");
             where.Append("?relacion roh:roleOf ?persona. ");
             where.Append("?persona foaf:name ?nombre. ");
+
+            // Add the filter over the person
+            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            {
+                // Creación de los filtros obtenidos por parámetros.
+                int aux = 0;
+                Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?persona", ref aux);
+                where.Append(filtros);
+            }
             where.Append("} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
