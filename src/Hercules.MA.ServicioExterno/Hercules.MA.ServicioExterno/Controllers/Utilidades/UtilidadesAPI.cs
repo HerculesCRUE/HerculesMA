@@ -99,26 +99,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                 foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
                 {
-                    if (!filtrosReciprocos.ContainsKey(item.Key))
+                    foreach (string valorFiltroIn in item.Value)
                     {
-                        foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
+
+                        if (!filtrosReciprocos.ContainsKey(item.Key))
                         {
-                            string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                            filtro.Append($@"{pVarAnterior} ");
-                            filtro.Append($@"{parteFiltro} ");
-                            filtro.Append($@"{varActual}. ");
-                            pVarAnterior = varActual;
-                            pAux++;
-                        }
-                    }
-                    else
-                    {
-                        int index = filtrosReciprocos[item.Key];
-                        pVarAnterior = "?varAuxiliar";
-                        pVarAnteriorAux = pVarAnterior;
-                        foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            if ((pAux + 1) < index)
+                            foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
                             {
                                 string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                                 filtro.Append($@"{pVarAnterior} ");
@@ -127,90 +113,110 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                 pVarAnterior = varActual;
                                 pAux++;
                             }
-                            else if ((pAux + 1) == index)
-                            {
-                                string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                                filtro.Append($@"{pVarAnterior} ");
-                                filtro.Append($@"{parteFiltro} ");
-                                filtro.Append($@"{varInicial}. ");
-                                pAux++;
-                            }
-                            else
-                            {
-                                filtro.Append($@"{pVarAnteriorAux} ");
-                                filtro.Append($@"{parteFiltro} ");
-                                filtro.Append($@"'{HttpUtility.UrlDecode(item.Value[0])}'. ");
-                            }
                         }
-                    }
-
-                    // Filtro de fechas.
-                    if (filtrosFecha.Contains(item.Key))
-                    {
-                        foreach (string fecha in item.Value)
+                        else
                         {
-                            filtro.Append($@"FILTER({pVarAnterior} >= {fecha.Split('-')[0]}000000) ");
-                            filtro.Append($@"FILTER({pVarAnterior} <= {fecha.Split('-')[1]}000000) ");
-                        }
-                    }
-                    else if(filtrosEnteros.Contains(item.Key))
-                    {
-                        string valorFiltro = string.Empty;
-                        
-                        foreach (string valor in item.Value)
-                        {
-                            valorFiltro += $@",{valor}";
-                        }
-
-                        if (valorFiltro.Length > 0)
-                        {
-                            valorFiltro = valorFiltro.Substring(1);
-                        }
-
-                        if (!filtrosReciprocos.ContainsKey(item.Key))
-                        {
-                            filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
-                        }
-                    }
-                    else
-                    {
-                        string valorFiltro = string.Empty;
-                        foreach (string valor in item.Value)
-                        {
-                            Uri uriAux = null;
-                            bool esUri = Uri.TryCreate(valor, UriKind.Absolute, out uriAux);
-                            if (esUri)
+                            int index = filtrosReciprocos[item.Key];
+                            pVarAnterior = "?varAuxiliar";
+                            pVarAnteriorAux = pVarAnterior;
+                            foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
                             {
-                                valorFiltro += $@",<{valor}>";
-                            } else if(valor.All(char.IsNumber))
-                            {
-                                valorFiltro += $@",{valor}";
-                            }
-                            else
-                            {
-                                //MultiIdioma.
-                                if (valor.Length > 3 && valor[valor.Length - 3] == '@')
+                                if ((pAux + 1) < index)
                                 {
-                                    valorFiltro += $@",'{valor.Substring(0,valor.Length-3)}'{valor.Substring(valor.Length - 3)}";
+                                    string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
+                                    filtro.Append($@"{pVarAnterior} ");
+                                    filtro.Append($@"{parteFiltro} ");
+                                    filtro.Append($@"{varActual}. ");
+                                    pVarAnterior = varActual;
+                                    pAux++;
+                                }
+                                else if ((pAux + 1) == index)
+                                {
+                                    string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
+                                    filtro.Append($@"{pVarAnterior} ");
+                                    filtro.Append($@"{parteFiltro} ");
+                                    filtro.Append($@"{varInicial}. ");
+                                    pAux++;
                                 }
                                 else
                                 {
-                                    valorFiltro += $@",'{valor}'";
+                                    filtro.Append($@"{pVarAnteriorAux} ");
+                                    filtro.Append($@"{parteFiltro} ");
+                                    //filtro.Append($@"'{HttpUtility.UrlDecode(item.Value[0])}'. ");
+                                    filtro.Append($@"'{HttpUtility.UrlDecode(valorFiltroIn)}'. ");
                                 }
                             }
                         }
 
-                        if (valorFiltro.Length > 0)
+                        // Filtro de fechas.
+                        if (filtrosFecha.Contains(item.Key))
                         {
-                            valorFiltro = valorFiltro.Substring(1);
+                            //foreach (string fecha in item.Value)
+                            //{
+                            //    filtro.Append($@"FILTER({pVarAnterior} >= {fecha.Split('-')[0]}000000) ");
+                            //    filtro.Append($@"FILTER({pVarAnterior} <= {fecha.Split('-')[1]}000000) ");
+                            //}
+                            filtro.Append($@"FILTER({pVarAnterior} >= {valorFiltroIn.Split('-')[0]}000000) ");
+                            filtro.Append($@"FILTER({pVarAnterior} <= {valorFiltroIn.Split('-')[1]}000000) ");
                         }
-
-                        if (!filtrosReciprocos.ContainsKey(item.Key))
+                        else if (filtrosEnteros.Contains(item.Key))
                         {
-                            filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
-                        }                      
+                            string valorFiltro = string.Empty;
+
+                            //foreach (string valor in item.Value)
+                            //{
+                            //    valorFiltro += $@",{valor}";
+                            //}
+
+                            valorFiltro += $@",{valorFiltroIn}";
+
+                            if (valorFiltro.Length > 0)
+                            {
+                                valorFiltro = valorFiltro.Substring(1);
+                            }
+
+                            if (!filtrosReciprocos.ContainsKey(item.Key))
+                            {
+                                filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                            }
+                        }
+                        else
+                        {
+                            string valorFiltro = string.Empty;
+                            //foreach (string valor in item.Value)
+                            //{
+                                Uri uriAux = null;
+                                bool esUri = Uri.TryCreate(valorFiltroIn, UriKind.Absolute, out uriAux);
+                                if (esUri)
+                                {
+                                    valorFiltro += $@",<{valorFiltroIn}>";
+                                }
+                                else
+                                {
+                                    //MultiIdioma.
+                                    if (valorFiltroIn.Length > 3 && valorFiltroIn[valorFiltroIn.Length - 3] == '@')
+                                    {
+                                        valorFiltro += $@",'{valorFiltroIn.Substring(0, valorFiltroIn.Length-3)}'{valorFiltroIn.Substring(valorFiltroIn.Length - 3)}";
+                                    }
+                                    else
+                                    {
+                                        valorFiltro += $@",'{valorFiltroIn}'";
+                                    }
+                                }
+                            //}
+
+                            if (valorFiltro.Length > 0)
+                            {
+                                valorFiltro = valorFiltro.Substring(1);
+                            }
+
+                            if (!filtrosReciprocos.ContainsKey(item.Key))
+                            {
+                                filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                            }
+                        }
+                        pVarAnterior = varInicial;
                     }
-                    pVarAnterior = varInicial;
                 }
                 return filtro.ToString();
             }
