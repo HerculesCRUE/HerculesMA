@@ -49,7 +49,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?proyecto a 'project'.
                         ?proyecto <http://vivoweb.org/ontology/core#relates> ?members.
                         ?proyecto gnoss:hasprivacidadCom 'publico'.
-                        ?members <http://w3id.org/roh/roleOf> ?people. 
+                        ?members <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?people. 
                         OPTIONAL{{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}}
                         OPTIONAL{{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}}
                         BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)
@@ -194,7 +194,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?proyecto vivo:relates ?relacion.
                         ?relacion roh:roleOf ?mainresearcher.
                         ?proyecto vivo:relates ?relacion2.
-                        ?relacion2 roh:roleOf ?id.
+                        ?relacion2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?id.
 
                         FILTER(?id != ?mainresearcher)
                         ?id foaf:name ?nombre.
@@ -448,7 +448,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where1.Append("WHERE { ");
             where1.Append("?proyecto vivo:relates ?relacion. ");
             where1.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
-            where1.Append("?relacion roh:roleOf ?persona. ");
+            where1.Append("?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona. ");
             where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}");
             where1.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}");
             where1.Append("BIND(IF(bound(?fechaProjInit), ?fechaProjInit, 10000000000000) as ?fechaProjInitAux)");
@@ -513,7 +513,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where2.Append("WHERE { ");
             where2.Append("?proyecto vivo:relates ?relacion. ");
             where2.Append("?proyecto gnoss:hasprivacidadCom 'publico'. ");
-            where2.Append("?relacion roh:roleOf ?persona. ");
+            where2.Append("?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona. ");
             where2.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#start> ?fechaProjInit.}");
             where2.Append("OPTIONAL{?proyecto <http://vivoweb.org/ontology/core#end> ?fechaProjEnd.}");
             where2.Append("BIND(IF(bound(?fechaProjEnd), ?fechaProjEnd, 30000000000000) as ?fechaProjEndAux)");
@@ -713,9 +713,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         ?proyecto a 'project'.
                         OPTIONAL{{?proyecto vivo:relates ?relacion.
-                        ?relacion roh:roleOf ?mainresearcher.
+                        ?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?mainresearcher.
                         ?proyecto vivo:relates ?relacion2.
-                        ?relacion2 roh:roleOf ?membersids2.}}
+                        ?relacion2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?membersids2.}}
                         FILTER (?theId IN (?membersids2 ))
                         FILTER(?theId != ?mainresearcher)
                         ?theId foaf:name ?nombre.
@@ -772,10 +772,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 select2.Append("SELECT ?persona1 ?persona2 (COUNT(DISTINCT ?proyectos) + COUNT(DISTINCT ?publicaciones)) AS ?numVeces ");
                 StringBuilder where2 = new StringBuilder("WHERE {{ ");
                 where2.Append("?proyectos vivo:relates ?personas. ");
-                where2.Append("?personas roh:roleOf ?persona1. ");
+                where2.Append("?personas <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona1. ");
                 where2.Append("BIND(?proyectos AS ?proyectos2) ");
                 where2.Append("?proyectos2 vivo:relates ?personas2. ");
-                where2.Append("?personas2 roh:roleOf ?persona2. ");
+                where2.Append("?personas2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona2. ");
                 where2.Append("?persona2 foaf:name ?nombre. ");
                 where2.Append("FILTER(?persona1 != ?persona2) ");
                 where2.Append($@"FILTER(?persona1 IN ({personas})) ");
@@ -1026,9 +1026,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         ?proyecto a 'project'.
                         ?proyecto vivo:relates ?relacion.
-                        ?relacion roh:roleOf ?mainresearcher.
+                        ?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?mainresearcher.
                         ?proyecto vivo:relates ?relacion2.
-                        ?relacion2 roh:roleOf ?id.
+                        ?relacion2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?id.
 
                         FILTER(?id != ?mainresearcher)
                         FILTER(?id != ?membersID)
@@ -1086,10 +1086,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 select2.Append("SELECT ?persona1 ?persona2 (COUNT(DISTINCT ?proyectos) + COUNT(DISTINCT ?publicaciones)) AS ?numVeces ");
                 StringBuilder where2 = new StringBuilder("WHERE {{ ");
                 where2.Append("?proyectos vivo:relates ?personas. ");
-                where2.Append("?personas roh:roleOf ?persona1. ");
+                where2.Append("?personas <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona1. ");
                 where2.Append("BIND(?proyectos AS ?proyectos2) ");
                 where2.Append("?proyectos2 vivo:relates ?personas2. ");
-                where2.Append("?personas2 roh:roleOf ?persona2. ");
+                where2.Append("?personas2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona2. ");
                 where2.Append("?persona2 foaf:name ?nombre. ");
                 where2.Append("FILTER(?persona1 != ?persona2) ");
                 where2.Append($@"FILTER(?persona1 IN ({personas})) ");

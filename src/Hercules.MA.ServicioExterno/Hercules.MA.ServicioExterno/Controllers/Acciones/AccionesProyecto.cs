@@ -47,7 +47,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select.Append("SELECT COUNT(DISTINCT ?persona) AS ?NumParticipantes COUNT(DISTINCT ?documento) AS ?NumPublicaciones COUNT(DISTINCT ?nombreCategoria) AS ?NumCategorias ");
             where.Append("WHERE {{ "); // Total de Participantes.
             where.Append($@"<{idGrafoBusqueda}> vivo:relates ?relacion. ");
-            where.Append("?relacion roh:roleOf ?persona. ");
+            where.Append("?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona. ");
             where.Append("} UNION { "); // Total Publicaciones.
             where.Append($@"?documento roh:project <{idGrafoBusqueda}>. ");
             where.Append("} UNION { "); // Total Categorías.
@@ -123,7 +123,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select.Append("SELECT ?nombre ?persona AS ?id ");
             where = new StringBuilder("WHERE { ");
             where.Append($@"<{idGrafoBusqueda}> vivo:relates ?relacion. ");
-            where.Append("?relacion roh:roleOf ?persona. ");
+            where.Append("?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona. ");
             where.Append("?persona foaf:name ?nombre. ");
 
             // Add the filter over the person
