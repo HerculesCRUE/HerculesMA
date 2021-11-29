@@ -408,7 +408,5 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             }
             return listaColores;
         }
-
-
     }
 }

@@ -453,5 +453,56 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(datosPublicacionesPersona);
         }
+
+
+        /// <summary>
+        /// Controlador para obtener las citas a un documento.
+        /// </summary>
+        /// <param name="pIdDocumento">ID del documento en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaCitas")]
+        public IActionResult DatosGraficaCitas(string pIdDocumento, string pParametros)
+        {
+            List<DataGraficaColaboradores> datosGrupo = null;
+
+            try
+            {
+                AccionesPublicaciones accionGrupo = new AccionesPublicaciones();
+                datosGrupo = accionGrupo.GetDatosGraficaCitas(pIdDocumento, pParametros);
+                // GetDatosGraficaReferencias
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosGrupo);
+        }
+
+
+        /// <summary>
+        /// Controlador para obtener las referencias de un documento.
+        /// </summary>
+        /// <param name="pIdDocumento">ID del documento en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaReferencias")]
+        public IActionResult DatosGraficaReferencias(string pIdDocumento, string pParametros)
+        {
+            List<DataGraficaColaboradores> datosGrupo = null;
+
+            try
+            {
+                AccionesPublicaciones accionGrupo = new AccionesPublicaciones();
+                datosGrupo = accionGrupo.GetDatosGraficaReferencias(pIdDocumento, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosGrupo);
+        }
     }
 }
