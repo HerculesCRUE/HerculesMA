@@ -10,6 +10,7 @@ namespace Hercules.MA.Load.Models.UMU
     {
         public string ARTI_CODIGO { get; set; }
         public string IDPERSONA { get; set; }
+        public string FIRMANTE { get; set; }
         public string ORDEN { get; set; }
     }
 }

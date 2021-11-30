@@ -89,7 +89,7 @@ namespace Hercules.MA.Load
             listaRecursosSecundariosCargar.Clear();
 
             //Persona en específico a cargar.
-            HashSet<string> personasACargar = new HashSet<string>() { "79", "1276" }; // Investigadores ejemplo: 79 y 1276
+            HashSet<string> personasACargar = new HashSet<string>() { "6811", "7747", "9292" }; // Investigadores: 6811, 7747, 9292
             //HashSet<string> personasACargar = new HashSet<string>();
 
             //Recursos para NO borrarlos.
@@ -100,57 +100,57 @@ namespace Hercules.MA.Load
 
             //Cargar organizaciones.
             CambiarOntologia("organization");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
             Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas, fuentesFinanciacionProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar personas.
             CambiarOntologia("person");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar, datoEquiposInvestigacion);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar grupos de investigación.
             CambiarOntologia("group");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
             Dictionary<string, string> gruposCargar = ObtenerGrupos(personasACargar, personasCargar, ref listaRecursosCargar, personas, gruposInvestigacion, datoEquiposInvestigacion, organizacionesCargar, lineasDeInvestigacion, lineasInvestigador);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar proyectos.
             CambiarOntologia("project");
-            EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
+            //EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
             Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, fechasEquiposProyectos, areasUnescoProyectos, codigosUnesco, fuentesFinanciacionProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar revistas.
             CambiarOntologia("maindocument");
-            EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
+            //EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
             Dictionary<string, string> revistarCargar = ObtenerMainDocuments(personasACargar, ref listaRecursosCargar, articulos, autoresArticulos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Publicaciones)
             CambiarOntologia("document");
-            EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
+            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
             Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos, listaTuplas, listaConcepts);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Congresos)
             CambiarOntologia("document");
             Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar curriculums
             CambiarOntologia("curriculumvitae");
-            EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
+            //EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
             Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar, documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Categorización UM
@@ -231,14 +231,8 @@ namespace Hercules.MA.Load
             pListaTuplas = listaDatos;
 
             List<Concept> listConcepts = new List<Concept>();
-            int lv1 = 0;
-            int lv2 = 0;
-            int lv3 = 0;
-            int lv4 = 0;
-            string lastLv1 = "";
-            string lastLv2 = "";
-            string lastLv3 = "";
-            string lastLv4 = "";
+            int lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0;
+            string lastLv1 = "", lastLv2 = "", lastLv3 = "", lastLv4 = "";
             foreach (Tuple<string, string, string, string, string> tupla in listaDatos)
             {
                 if (!string.IsNullOrEmpty(tupla.Item1) && lastLv1 != tupla.Item1)
@@ -447,6 +441,7 @@ namespace Hercules.MA.Load
                     {
                         personaCarga.IdRoh_hasRole = pOrganizacionesCargar["UMU"];
                     }
+                    personaCarga.Vcard_email = persona.EMAIL;
                     personaCarga.Roh_isSynchronized = false;
                     personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
 
@@ -474,7 +469,7 @@ namespace Hercules.MA.Load
                     }
 
                     // ---------- ÑAPA
-                    if (idPersona == "79")
+                    if (idPersona == "7747") // Skarmeta
                     {
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
                         personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E096";
@@ -486,7 +481,7 @@ namespace Hercules.MA.Load
                         personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
                         personaCarga.Vivo_description = $@"Nacido en Santiago de Chile en Abril de 1965, obtuvo la licenciatura en Informática por la Universidad de Granada en el año 1991 y el Doctorado en Informática por la Universidad de Murcia en el año 1995. Se convirtió en profesor titular de la Universidad de Murcia en al año 1997 y es Catedrático en Ingeniería Telemática desde el año 2009. Vicedecano de Infraestructuras de la Facultad de Informática entre los años 1991 a 1993 y, posteriormente, vicedecano de Relaciones Externas del 1997 a 1999. Ha sido director del departamento de Ingeniería de la Información y las Comunicaciones desde 2001 hasta 2007. Coordinador del programa de doctorado en Tecnologías de la Información y Telemáticas Avanzadas desde el 2002 hasta el 2010, con mención de calidad del Ministerio. Desde el año 2008 es coordinador de la Oficina de Proyectos Europeos de la Universidad de Murcia, adscrita al vicerrectorado de Investigación. Desde la misma ha sido responsable del proyecto de Eurociencia concedido a la Universidad de Murcia, así como del proyecto COFUND concedido asociado al proyecto U-IMPACT-COFUND que ha coordinado como investigador principal. Actualmente es, además, representante nacional del MINECO en el programa H2020 para el pilar de Ciencia Excelente en el área de MARIE SKŁODOWSKA-CURIE, así como representante en el grupo de Recursos Humanos y movilidad de la Comisión Europea. Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacionales, 200 artículos en congresos y ha sido investigador principal de más de 15 proyectos europeos, habiendo dirigido más de 20 tesis de doctorado. Además, ha participado en numerosos comités de programas de conferencias en informática, seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM Group, IEEE MSN, TrustBus, etc., siendo co-chair del Second International Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
                     }
-                    else if (idPersona == "1276")
+                    else if (idPersona == "6811") // Francisco Esquembre
                     {
                         personaCarga.Roh_crisIdentifier = "27443184";
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
@@ -498,6 +493,10 @@ namespace Hercules.MA.Load
                         personaCarga.Vcard_hasTelephone = "+34868888386";
                         //personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
                         personaCarga.Vivo_description = $@"Catedrático de Análisis Matemático en el Departamento de Matemáticas, desempeña sus labores docentes en la Facultad de Matemáticas, entre las que cabe destacar la asignatura de Laboratorio de Modelización y la coordinación de las prácticas externas del grado en Matemáticas. Su investigación se centra en la Modelización Matemática y la Simulación, así como en la Enseñanza Asistida por Ordenador. Ha participado en siete proyectos regionales, nueve nacionales y diez internacionales. Es miembro de las organizaciones internacionales Multimedia in Physics Teaching and Learning, que co-preside, GIREP y del proyecto Open Source Physics (EE. UU.). Su trabajo, en colaboración con investigadores de otros países, ha recibido varios premios internacionales: SPORE Prize de la revista Science en 2011, MPTL Excellence Award en 2015 y UNESCO King Hamad Bin Isa Al-Khalifa Prize en 2016. Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Director General de Universidades de la Comunidad Autónoma de la Región de Murcia y Patrono Apoderado de la Fundación Séneca, Agencia Regional de Investigación, cuatro años director de la OTRI de la Universidad de Murcia, cuatro años miembro de la Comisión de Investigación y ocho años decano de la Facultad de Matemáticas.";
+                    }
+                    else if (idPersona == "9292") // Manuel Campos TODO
+                    {
+
                     }
 
                     //Creamos el recurso.
@@ -692,30 +691,9 @@ namespace Hercules.MA.Load
                         ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
                         if (pDicPersonasCargadas.ContainsKey(equipo.IDPERSONA))
                         {
-                            persona.IdRoh_roleOf = pDicPersonasCargadas[equipo.IDPERSONA];
+                            persona.IdRdf_member = pDicPersonasCargadas[equipo.IDPERSONA];
                         }
-                        persona.Vivo_preferredDisplayOrder = Int32.Parse(equipo.NUMEROCOLABORADOR);
-
-                        //TODO Tipo de participación.
-                        //string tipoParticipacion = pFechaEquipoProyectos.FirstOrDefault(x => x.IDPROYECTO == proyectoID && x.NUMEROCOLABORADOR == equipo.NUMEROCOLABORADOR).CODTIPOPARTICIPACION;
-                        //switch (tipoParticipacion)
-                        //{
-                        //    case "IP":
-                        //        persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_050";
-                        //        break;
-                        //    case "IPRE":
-                        //        persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_OTHERS";
-                        //        persona.Roh_participationTypeOther = "Investigador principal responsable económico";
-                        //        break;
-                        //    case "INV":
-                        //        persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_060";
-                        //        break;
-                        //    case "RE":
-                        //        persona.IdRoh_participationType = "http://gnoss.com/items/participationtype_OTHERS";
-                        //        persona.Roh_participationTypeOther = "Responsable económico";
-                        //        break;
-                        //}
-
+                        persona.Rdf_comment = Int32.Parse(equipo.NUMEROCOLABORADOR);
                         proyectoCargar.Vivo_relates.Add(persona);
                     }
 
@@ -784,6 +762,16 @@ namespace Hercules.MA.Load
                     //isSynchronized
                     proyectoCargar.Roh_isSynchronized = false;
 
+                    //ScientificExperienceProject
+                    if(proyecto.IDPROYECTO.Contains("RRHH"))
+                    {
+                        proyectoCargar.IdRoh_scientificExperienceProject = "http://gnoss.com/items/scientificexperienceproject_SEP2";
+                    }
+                    else
+                    {
+                        proyectoCargar.IdRoh_scientificExperienceProject = "http://gnoss.com/items/scientificexperienceproject_SEP1";
+                    }
+                    
                     // ---------- ÑAPA
                     if (proyectoID == "SOLAYUDAS|13334")
                     {
@@ -791,14 +779,11 @@ namespace Hercules.MA.Load
                         proyectoCargar.Roh_isSupportedBy = new ProjectOntology.Funding();
                         proyectoCargar.Roh_isSupportedBy.Roh_fundedBy = new List<ProjectOntology.FundingProgram>();
                         proyectoCargar.Roh_isSupportedBy.Roh_fundedBy.Add(new ProjectOntology.FundingProgram { Roh_title = "Programa Estatal de I+D+i Orientada a los Retos de la Sociedad" });
-                        proyectoCargar.IdRoh_scientificExperienceProject = "http://gnoss.com/items/scientificexperienceproject_SEP1";
                         proyectoCargar.Vivo_relates = new List<ProjectOntology.BFO_0000023>();
                         ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
-                        persona.IdRoh_roleOf = pDicPersonasCargadas["79"];
-                        persona.Vivo_preferredDisplayOrder = 1;
+                        persona.IdRdf_member = pDicPersonasCargadas["79"];
+                        persona.Rdf_comment = 1;
                         proyectoCargar.Vivo_relates.Add(persona);
-                        proyectoCargar.Roh_hasResultsProjectClassification = new List<ProjectOntology.ProjectClassification>();
-                        //TODO: ProjectClassification
                     }
 
                     ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, new List<string>());
@@ -882,7 +867,7 @@ namespace Hercules.MA.Load
                             DocumentOntology.BFO_0000023 persona = new DocumentOntology.BFO_0000023();
                             persona.IdRdf_member = pDicPersonasCargadas[autor.IDPERSONA];
                             persona.Rdf_comment = Int32.Parse(autor.ORDEN);
-                            persona.Foaf_nick = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA).NOMBRE);
+                            persona.Foaf_nick = autor.FIRMANTE;
                             documentoACargar.Bibo_authorList.Add(persona);
 
                             numAutores++;
@@ -913,14 +898,6 @@ namespace Hercules.MA.Load
                         }
                     }
                     documentoACargar.Roh_authorsNumber = numAutores;
-
-                    //if (!string.IsNullOrEmpty(articulo.AREA))
-                    //{
-                    //    documentoACargar.Roh_hasKnowledgeArea = new List<DocumentOntology.CategoryPath>();
-                    //    DocumentOntology.CategoryPath categoryPath = new DocumentOntology.CategoryPath();
-                    //    categoryPath.IdsRoh_categoryNode = new List<string>() { "http://gnoss.com/items/um_" + articulo.AREA };
-                    //    documentoACargar.Roh_hasKnowledgeArea.Add(categoryPath);
-                    //}
 
                     //Localidad
                     documentoACargar.Vcard_locality = "Murcia";
@@ -1054,11 +1031,11 @@ namespace Hercules.MA.Load
                             DocumentOntology.BFO_0000023 persona = new DocumentOntology.BFO_0000023();
                             persona.IdRdf_member = pDicPersonasCargadas[autor.IDPERSONA];
                             persona.Rdf_comment = Int32.Parse(autor.ORDEN);
-                            persona.Foaf_nick = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA).NOMBRE);
+                            persona.Foaf_nick = autor.FIRMANTE;
                             documentoACargar.Bibo_authorList.Add(persona);
                             numAutores++;
 
-                            //TODO: Proyectos
+                            //Proyectos
                             List<EquipoProyecto> listaEquipos = pListaEquipoProyectos.Where(x => x.IDPERSONA == autor.IDPERSONA).ToList();
                             foreach (EquipoProyecto equipo in listaEquipos)
                             {
@@ -1233,7 +1210,7 @@ namespace Hercules.MA.Load
                     //ResearchersNumber
                     grupoCargar.Roh_researchersNumber = grupoCargar.Roh_mainResearcher.Select(x => x.IdRoh_roleOf).Union(grupoCargar.Foaf_member.Select(x => x.IdRoh_roleOf)).Distinct().Count();
 
-                    // --- ÑAPA
+                    // ---------- ÑAPA
                     if (grupo.IDGRUPOINVESTIGACION == "E096-02")
                     {
                         grupoCargar.Vivo_description = $@"El grupo de investigación de Sistemas Inteligentes de la Universidad de Murcia desarrolla su investigación dentro de diversas líneas de investigación de vanguardia de Soft Computing y Sistemas Inteligentes desde 1997. Actualmente el grupo desarrolla su labor en líneas de investigación como los sistemas embebidos, el telecontrol y la telemática aplicada al transporte, el procesamiento sensorial y la fusión de datos o los sistemas cooperativos inteligentes. Las técnicas utilizadas por este grupo son: los sistemas automáticos, las redes causales, el soft computing o la minería de datos, entre otros.
@@ -1715,6 +1692,9 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                         case "IDPERSONA":
                             elemento.IDPERSONA = node.SelectSingleNode("IDPERSONA").InnerText;
                             break;
+                        case "FIRMANTE":
+                            elemento.FIRMANTE = node.SelectSingleNode("FIRMANTE").InnerText;
+                            break;
                         case "ORDEN":
                             elemento.ORDEN = node.SelectSingleNode("ORDEN").InnerText;
                             break;
@@ -1748,6 +1728,9 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                             break;
                         case "IDPERSONA":
                             elemento.IDPERSONA = node.SelectSingleNode("IDPERSONA").InnerText;
+                            break;
+                        case "FIRMANTE":
+                            elemento.FIRMANTE = node.SelectSingleNode("FIRMANTE").InnerText;
                             break;
                         case "ORDEN":
                             elemento.ORDEN = node.SelectSingleNode("ORDEN").InnerText;

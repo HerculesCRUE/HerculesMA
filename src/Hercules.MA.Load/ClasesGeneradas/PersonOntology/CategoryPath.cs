@@ -14,57 +14,47 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
-using Feature = FeatureOntology.Feature;
+using Concept = TaxonomyOntology.Concept;
 
-namespace OrganizationOntology
+namespace PersonOntology
 {
-	public class Address : GnossOCBase
+	public class CategoryPath : GnossOCBase
 	{
 
-		public Address() : base() { } 
+		public CategoryPath() : base() { } 
 
-		public Address(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
+		public CategoryPath(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
-			SemanticPropertyModel propVcard_hasRegion = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasRegion");
-			if(propVcard_hasRegion != null && propVcard_hasRegion.PropertyValues.Count > 0)
+			this.Roh_categoryNode = new List<Concept>();
+			SemanticPropertyModel propRoh_categoryNode = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/categoryNode");
+			if(propRoh_categoryNode != null && propRoh_categoryNode.PropertyValues.Count > 0)
 			{
-				this.Vcard_hasRegion = new Feature(propVcard_hasRegion.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				foreach (SemanticPropertyModel.PropertyValue propValue in propRoh_categoryNode.PropertyValues)
+				{
+					if(propValue.RelatedEntity!=null){
+						Concept roh_categoryNode = new Concept(propValue.RelatedEntity,idiomaUsuario);
+						this.Roh_categoryNode.Add(roh_categoryNode);
+					}
+				}
 			}
-			SemanticPropertyModel propVcard_hasCountryName = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#hasCountryName");
-			if(propVcard_hasCountryName != null && propVcard_hasCountryName.PropertyValues.Count > 0)
-			{
-				this.Vcard_hasCountryName = new Feature(propVcard_hasCountryName.PropertyValues[0].RelatedEntity,idiomaUsuario);
-			}
-			this.Vcard_locality = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#locality"));
 		}
 
-		public virtual string RdfType { get { return "https://www.w3.org/2006/vcard/ns#Address"; } }
-		public virtual string RdfsLabel { get { return "https://www.w3.org/2006/vcard/ns#Address"; } }
+		public virtual string RdfType { get { return "http://w3id.org/roh/CategoryPath"; } }
+		public virtual string RdfsLabel { get { return "http://w3id.org/roh/CategoryPath"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"C. Autón./Reg. entidad")]
-		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasRegion")]
-		public  Feature Vcard_hasRegion  { get; set;} 
-		public string IdVcard_hasRegion  { get; set;} 
-
-		[LABEL(LanguageEnum.es,"País entidad")]
-		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasCountryName")]
-		public  Feature Vcard_hasCountryName  { get; set;} 
-		public string IdVcard_hasCountryName  { get; set;} 
-
-		[LABEL(LanguageEnum.es,"Ciudad entidad")]
-		[RDFProperty("https://www.w3.org/2006/vcard/ns#locality")]
-		public  string Vcard_locality { get; set;}
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/categoryNode")]
+		[RDFProperty("http://w3id.org/roh/categoryNode")]
+		public  List<Concept> Roh_categoryNode { get; set;}
+		public List<string> IdsRoh_categoryNode { get; set;}
 
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
-			propList.Add(new StringOntologyProperty("vcard:hasRegion", this.IdVcard_hasRegion));
-			propList.Add(new StringOntologyProperty("vcard:hasCountryName", this.IdVcard_hasCountryName));
-			propList.Add(new StringOntologyProperty("vcard:locality", this.Vcard_locality));
+			propList.Add(new ListStringOntologyProperty("roh:categoryNode", this.IdsRoh_categoryNode));
 		}
 
 		internal override void GetEntities()
