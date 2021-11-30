@@ -370,7 +370,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("DatosCategoriasPersona")]
         public IActionResult DatosCategoriasPersona(string pIdPersona)
         {
-            List<string> datosPublicacionesPersona = null;
+            List<Dictionary<string, string>> datosPublicacionesPersona = null;
 
             try
             {
