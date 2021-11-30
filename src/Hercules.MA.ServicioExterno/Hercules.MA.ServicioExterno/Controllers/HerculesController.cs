@@ -181,7 +181,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("DatosCategoriasGrupo")]
         public IActionResult DatosCategoriasGrupo(string pIdGrupo)
         {
-            List<string> datos = null;
+            List<Dictionary<string, string>> datos = null;
 
             try
             {
@@ -504,5 +504,31 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(datosGrupo);
         }
+
+
+
+        /// <summary>
+        /// Controlador para obtener los datos del documento en la cabecera de la ficha.
+        /// </summary>
+        /// <param name="pIdDocumento">ID del documento en cuestión.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("GetDatosCabeceraDocumento")]
+        public IActionResult GetDatosCabeceraDocumento(string pIdDocumento)
+        {
+            Dictionary<string, int> datosCabeceraFichas = null;
+
+            try
+            {
+                AccionesPublicaciones accionDocumento = new AccionesPublicaciones();
+                datosCabeceraFichas = accionDocumento.GetDatosCabeceraDocumento(pIdDocumento);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosCabeceraFichas);
+        }
+
     }
 }

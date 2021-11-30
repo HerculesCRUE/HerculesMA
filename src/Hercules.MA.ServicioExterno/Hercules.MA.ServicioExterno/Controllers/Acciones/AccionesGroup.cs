@@ -226,16 +226,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pIdGrupo">ID del recurso del grupo.</param>
         /// <returns>Listado de topics del grupo.</returns>
-        public List<string> GetTopicsGrupo(string pIdGrupo)
+        public List<Dictionary<string, string>> GetTopicsGrupo(string pIdGrupo)
         {
             string idGrafoBusqueda = ObtenerIdBusqueda(pIdGrupo);
-            List<string> categorias = new List<string>();
+            List<Dictionary<string, string>> categorias = new List<Dictionary<string, string>>();
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder(), where = new StringBuilder();
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT DISTINCT(?nombreCategoria) ");
+            select.Append("SELECT DISTINCT ?nombreCategoria ?source ?identifier ");
             where.Append("WHERE { ");
             where.Append($@"<{idGrafoBusqueda}> ?propmembers ?members.");
             where.Append("FILTER(?propmembers  in (foaf:member, roh:mainResearcher))");
@@ -246,6 +246,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("?documento roh:hasKnowledgeArea ?area. ");
             where.Append("?area roh:categoryNode ?categoria. ");
             where.Append("?categoria skos:prefLabel ?nombreCategoria. ");
+            where.Append("?categoria <http://purl.org/dc/elements/1.1/source> ?source. ");
+            where.Append("?categoria <http://purl.org/dc/elements/1.1/identifier> ?identifier. ");
             where.Append("FILTER(?persona = ?people)");
             where.Append("} ");
 
@@ -255,7 +257,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
-                    categorias.Add(UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombreCategoria"));
+                    var dictRes = new Dictionary<string, string>();
+                    dictRes.Add("nombreCategoria", UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombreCategoria"));
+                    dictRes.Add("source", UtilidadesAPI.GetValorFilaSparqlObject(fila, "source"));
+                    dictRes.Add("identifier", UtilidadesAPI.GetValorFilaSparqlObject(fila, "identifier"));
+                    categorias.Add(dictRes);
                 }
             }
 

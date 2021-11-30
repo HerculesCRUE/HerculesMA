@@ -31,6 +31,54 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         #endregion
 
 
+        /// <summary>
+        /// Obtienes los datos de las pestañas de cada sección de la ficha.
+        /// </summary>
+        /// <param name="pPersona">Nombre de la persona.</param>
+        /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
+        public Dictionary<string, int> GetDatosCabeceraDocumento(string pDocumento)
+        {
+            string idGrafoBusqueda = ObtenerIdBusqueda(pDocumento);
+            Dictionary<string, int> dicResultados = new Dictionary<string, int>();
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder();
+            String where = "";
+
+            // Consulta sparql.
+            select.Append(mPrefijos);
+            select.Append("SELECT count(DISTINCT ?s ) as ?numRelacionados");
+            where = $@"
+               WHERE
+               {{
+                  FILTER(?item = <{idGrafoBusqueda}>)
+                  ?item  <http://w3id.org/roh/hasKnowledgeArea> ?areaConocimiento.
+                  ?areaConocimiento <http://w3id.org/roh/categoryNode> ?id_areaConocimiento.
+                  ?s <http://w3id.org/roh/hasKnowledgeArea> ?areaConocimiento2.  
+                  ?areaConocimiento2 <http://w3id.org/roh/categoryNode> ?id_areaConocimiento
+                  OPTIONAL {{
+                        ?s <http://vivoweb.org/ontology/core#freeTextKeyword> ?etiquetasRelacionadosDocumento.
+                       ?item <http://vivoweb.org/ontology/core#freeTextKeyword> ?etiquetasRelacionadosDocumento.
+                  }}
+                  FILTER(?s != ?item)
+               }} ";
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where, mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    int numRelacionados = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelacionados"));
+                    if(numRelacionados > 20)
+                    {
+                        numRelacionados = 20;
+                    }
+                    dicResultados.Add("numRelacionados", numRelacionados);
+                }
+            }
+
+            return dicResultados;
+        }
 
 
 
