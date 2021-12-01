@@ -217,6 +217,13 @@ namespace Hercules.MA.Load
             }
         }
 
+        /// <summary>
+        /// Proceso para contruir el tesáuro con la taxonomía unificada.
+        /// </summary>
+        /// <param name="pListaRecursosCargar">Lista de recursos a cargar.</param>
+        /// <param name="pListaTuplas">Lista de tuplas con datos. Tupla<Cat. 1er Nivel, Cat. 2o Nivel, Cat. 3er Nivel, Cat. 4o Nivel, ID de WoS></param>
+        /// <param name="pListaConcepts">Lista con los objetos Concepts para el tesáuro.</param>
+        /// <param name="pSource">Nombre del tesáuro.</param>
         private static void ObtenerTesauroExcel(ref List<SecondaryResource> pListaRecursosCargar, ref List<Tuple<string, string, string, string, string>> pListaTuplas, ref List<Concept> pListaConcepts, string pSource)
         {
             DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx");
@@ -471,6 +478,7 @@ namespace Hercules.MA.Load
                     // ---------- ÑAPA
                     if (idPersona == "7747") // Skarmeta
                     {
+                        personaCarga.Roh_crisIdentifier = "28710458";
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
                         personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E096";
                         personaCarga.Roh_h_index = 55;
@@ -488,15 +496,22 @@ namespace Hercules.MA.Load
                         personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E036";
                         personaCarga.Roh_h_index = 51;
                         personaCarga.Roh_ORCID = "0000-0003-4550-0183";
-                        //personaCarga.Foaf_homepage = "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD";
                         personaCarga.Vcard_email = "vicinves@um.es";
                         personaCarga.Vcard_hasTelephone = "+34868888386";
-                        //personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
                         personaCarga.Vivo_description = $@"Catedrático de Análisis Matemático en el Departamento de Matemáticas, desempeña sus labores docentes en la Facultad de Matemáticas, entre las que cabe destacar la asignatura de Laboratorio de Modelización y la coordinación de las prácticas externas del grado en Matemáticas. Su investigación se centra en la Modelización Matemática y la Simulación, así como en la Enseñanza Asistida por Ordenador. Ha participado en siete proyectos regionales, nueve nacionales y diez internacionales. Es miembro de las organizaciones internacionales Multimedia in Physics Teaching and Learning, que co-preside, GIREP y del proyecto Open Source Physics (EE. UU.). Su trabajo, en colaboración con investigadores de otros países, ha recibido varios premios internacionales: SPORE Prize de la revista Science en 2011, MPTL Excellence Award en 2015 y UNESCO King Hamad Bin Isa Al-Khalifa Prize en 2016. Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Director General de Universidades de la Comunidad Autónoma de la Región de Murcia y Patrono Apoderado de la Fundación Séneca, Agencia Regional de Investigación, cuatro años director de la OTRI de la Universidad de Murcia, cuatro años miembro de la Comisión de Investigación y ocho años decano de la Facultad de Matemáticas.";
                     }
-                    else if (idPersona == "9292") // Manuel Campos TODO
+                    else if (idPersona == "9292") // Manuel Campos 
                     {
-
+                        personaCarga.Roh_crisIdentifier = "34822542";
+                        personaCarga.Roh_hasPosition = "Profesor Titular de Universidad";
+                        personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E031";
+                        personaCarga.Roh_h_index = 16;
+                        personaCarga.Roh_ORCID = "0000-0002-5233-3769";
+                        personaCarga.Foaf_homepage = "https://webs.um.es/manuelcampos/";
+                        personaCarga.Vcard_email = "manuelcampos@um.es";
+                        personaCarga.Vcard_hasTelephone = "+34868888521";
+                        personaCarga.Vcard_address = "Despacho 2.25. Facultad de Informatica. Universidad de Murcia. Campus de Espinardo. CP. 30100, Murcia, SPAIN";
+                        personaCarga.Vivo_description = $@"Manuel Campos inició su actividad investigadora en el grupo de investigación AIKE, ha participado en varios proyectos de investigación nacionales y contratos enfocados a las líneas de investigación de aplicaciones clínicas, con más de 50 congresos y revistas nacionales e internacionales. Ha sido Vicedecano de Relaciones Externas de la Facultad de Informática (2010-2012). Ha sido Coordinador de Prácticas en el Vicerrectorado de Estudios de la Universidad de Murcia (2012-2017).";
                     }
 
                     //Creamos el recurso.
@@ -763,7 +778,7 @@ namespace Hercules.MA.Load
                     proyectoCargar.Roh_isSynchronized = false;
 
                     //ScientificExperienceProject
-                    if(proyecto.IDPROYECTO.Contains("RRHH"))
+                    if (proyecto.IDPROYECTO.Contains("RRHH"))
                     {
                         proyectoCargar.IdRoh_scientificExperienceProject = "http://gnoss.com/items/scientificexperienceproject_SEP2";
                     }
@@ -771,7 +786,7 @@ namespace Hercules.MA.Load
                     {
                         proyectoCargar.IdRoh_scientificExperienceProject = "http://gnoss.com/items/scientificexperienceproject_SEP1";
                     }
-                    
+
                     // ---------- ÑAPA
                     if (proyectoID == "SOLAYUDAS|13334")
                     {
@@ -781,7 +796,7 @@ namespace Hercules.MA.Load
                         proyectoCargar.Roh_isSupportedBy.Roh_fundedBy.Add(new ProjectOntology.FundingProgram { Roh_title = "Programa Estatal de I+D+i Orientada a los Retos de la Sociedad" });
                         proyectoCargar.Vivo_relates = new List<ProjectOntology.BFO_0000023>();
                         ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
-                        persona.IdRdf_member = pDicPersonasCargadas["79"];
+                        persona.IdRdf_member = pDicPersonasCargadas["7747"];
                         persona.Rdf_comment = 1;
                         proyectoCargar.Vivo_relates.Add(persona);
                     }
@@ -974,6 +989,19 @@ namespace Hercules.MA.Load
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de los datos de documentos. (Congresos)
+        /// </summary>
+        /// <param name="pDicProyectosACargar"></param>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pDicPersonasCargadas"></param>
+        /// <param name="pDicRevistasCargadas"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaCongresos"></param>
+        /// <param name="pListaAutoresCongreso"></param>
+        /// <param name="pListaPersonas"></param>
+        /// <param name="pListaEquipoProyectos"></param>
+        /// <returns></returns>
         private static Dictionary<string, string> ObtenerCongresos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicRevistasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Congreso> pListaCongresos, List<AutorCongreso> pListaAutoresCongreso, List<Persona> pListaPersonas, List<EquipoProyecto> pListaEquipoProyectos)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
@@ -1078,6 +1106,19 @@ namespace Hercules.MA.Load
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de los datos de grupos.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pDicPersonasCargadas"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaPersonas"></param>
+        /// <param name="pListaGrupoInvestigacion"></param>
+        /// <param name="pListaDatoEquipoInvestigacion"></param>
+        /// <param name="pOrganizacionesCargar"></param>
+        /// <param name="pListaLineasDeInvestigacion"></param>
+        /// <param name="pListaLineasInvestigador"></param>
+        /// <returns></returns>
         private static Dictionary<string, string> ObtenerGrupos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pListaPersonas, List<GrupoInvestigacion> pListaGrupoInvestigacion, List<DatoEquipoInvestigacion> pListaDatoEquipoInvestigacion, Dictionary<string, string> pOrganizacionesCargar, List<LineasDeInvestigacion> pListaLineasDeInvestigacion, List<LineasInvestigador> pListaLineasInvestigador)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
@@ -1229,6 +1270,17 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de datos de los CV.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pDicPersonasCargadas"></param>
+        /// <param name="pDicDocumentosCargados"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaArticulos"></param>
+        /// <param name="pListaAutoresArticulos"></param>
+        /// <param name="pListaPersonas"></param>
+        /// <returns></returns>
         private static Dictionary<string, string> ObtenerCVs(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicDocumentosCargados, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
@@ -1295,6 +1347,14 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de datos de los MainDocument.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaArticulos"></param>
+        /// <param name="pListaAutorArticulos"></param>
+        /// <returns></returns>
         private static Dictionary<string, string> ObtenerMainDocuments(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutorArticulos)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
@@ -1473,7 +1533,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             //Carga.
             foreach (SecondaryResource recursoCargar in pListaRecursosCargar)
             {
-                var x = mResourceApi.LoadSecondaryResource(recursoCargar);
+                mResourceApi.LoadSecondaryResource(recursoCargar);
             }
         }
 

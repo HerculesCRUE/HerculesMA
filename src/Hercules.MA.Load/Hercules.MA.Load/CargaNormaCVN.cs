@@ -103,38 +103,38 @@ namespace Hercules.MA.Load
             ReferenceTables tablas = (ReferenceTables)serializer.Deserialize(new StringReader(documento.InnerXml));
 
             //Carga de entidades secundarias.
-            CargarFeatures(tablas, "feature");
-            CargarProjectModality(tablas, "projectmodality");
-            CargarContributionGradeProject(tablas, "contributiongradeproject");
-            CargarParticipationTypeProject(tablas, "participationtypeproject");
-            CargarDedicationRegime(tablas, "dedicationregime");
-            CargarEventInscriptionType(tablas, "eventinscriptiontype");
-            CargarContributionGradeDocument(tablas, "contributiongradedocument");
-            CargarReferenceSource(tablas, "referencesource");
-            CargarImpactIndexCategory(tablas, "impactindexcategory");
-            CargarLanguage(tablas, "language");
-            CargarPublicationType(tablas, "publicationtype");
-            CargarEventType(tablas, "eventtype");
-            CargarGeographicRegion(tablas, "geographicregion");
-            CargarOrganizationType(tablas, "organizationtype");
-            CargarDocumentFormat(tablas, "documentformat");
-            CargarGender(tablas, "gender");
-            CargarProjectType(tablas, "projecttype");
-            CargarParticipationTypeDocument(tablas, "participationtypedocument");
-            CargarIndustrialPropertyType(tablas, "industrialpropertytype");
-            CargarColaborationTypeGroup(tablas, "colaborationtypegroup");
-            CargarPublicationIdentifierType(tablas, "publicationidentifiertype");
-            CargarManagementTypeActivity(tablas, "managementtypeactivity");
-            CargarTargetGroupProfile(tablas, "targetgroupprofile");
-            CargarAccessSystemActivity(tablas, "accesssystemactivity");
-            CargarParticipationTypeActivity(tablas, "participationtypeactivity");
-            CargarStayGoal(tablas, "staygoal");
-            CargarGrantAim(tablas, "grantaim");
-            CargarRelationshipType(tablas, "relationshiptype");
-            CargarScientificActivityDocument("scientificactivitydocument");
-            CargarScientificExperienceProject("scientificexperienceproject");
+            //CargarFeatures(tablas, "feature");
+            //CargarProjectModality(tablas, "projectmodality");
+            //CargarContributionGradeProject(tablas, "contributiongradeproject");
+            //CargarParticipationTypeProject(tablas, "participationtypeproject");
+            //CargarDedicationRegime(tablas, "dedicationregime");
+            //CargarEventInscriptionType(tablas, "eventinscriptiontype");
+            //CargarContributionGradeDocument(tablas, "contributiongradedocument");
+            //CargarReferenceSource(tablas, "referencesource");
+            //CargarImpactIndexCategory(tablas, "impactindexcategory");
+            //CargarLanguage(tablas, "language");
+            //CargarPublicationType(tablas, "publicationtype");
+            //CargarEventType(tablas, "eventtype");
+            //CargarGeographicRegion(tablas, "geographicregion");
+            //CargarOrganizationType(tablas, "organizationtype");
+            //CargarDocumentFormat(tablas, "documentformat");
+            //CargarGender(tablas, "gender");
+            //CargarProjectType(tablas, "projecttype");
+            //CargarParticipationTypeDocument(tablas, "participationtypedocument");
+            //CargarIndustrialPropertyType(tablas, "industrialpropertytype");
+            //CargarColaborationTypeGroup(tablas, "colaborationtypegroup");
+            //CargarPublicationIdentifierType(tablas, "publicationidentifiertype");
+            //CargarManagementTypeActivity(tablas, "managementtypeactivity");
+            //CargarTargetGroupProfile(tablas, "targetgroupprofile");
+            //CargarAccessSystemActivity(tablas, "accesssystemactivity");
+            //CargarParticipationTypeActivity(tablas, "participationtypeactivity");
+            //CargarStayGoal(tablas, "staygoal");
+            //CargarGrantAim(tablas, "grantaim");
+            //CargarRelationshipType(tablas, "relationshiptype");
+            //CargarScientificActivityDocument("scientificactivitydocument");
+            //CargarScientificExperienceProject("scientificexperienceproject");
             CargarDepartment("department");
-            CargarActivityModality(tablas, "activitymodality");
+            //CargarActivityModality(tablas, "activitymodality");
         }
 
         /// <summary>
@@ -2157,10 +2157,6 @@ namespace Hercules.MA.Load
             foreach (Department department in departamentos)
             {
                 var x=mResourceApi.LoadSecondaryResource(department.ToGnossApiResource(mResourceApi, pOntology + "_" + department.Dc_identifier));
-                if(x==false)
-                {
-
-                }
             }
         }
 
@@ -2180,17 +2176,10 @@ namespace Hercules.MA.Load
             foreach(Departamento dept in departamentos)
             {
                 Department department = new Department();
-                Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                
-                foreach (KeyValuePair<string, LanguageEnum> item in dicIdiomasMapeados)
-                {
-                    LanguageEnum idioma = dicIdiomasMapeados[item.Key];
-                    dicIdioma.Add(idioma, dept.DEP_NOMBRE);
-                }
 
                 //Se agrega las propiedades.
                 department.Dc_identifier = dept.DEP_CODIGO;
-                department.Dc_title = dicIdioma;
+                department.Dc_title = dept.DEP_NOMBRE;
 
                 //Se guarda el objeto a la lista.
                 pListaDatosDepartment.Add(department);
