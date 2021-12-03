@@ -383,8 +383,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("?categoria skos:prefLabel ?nombreCategoria. ");
             where.Append("?categoria <http://purl.org/dc/elements/1.1/source> ?source. ");
             where.Append("?categoria <http://purl.org/dc/elements/1.1/identifier> ?identifier. ");
-
-
+            
             where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>)");
             where.Append("} ");
 

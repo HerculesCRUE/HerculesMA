@@ -17,7 +17,7 @@ namespace Hercules.MA.Load
             CargaXMLMurcia.mResourceApi = mResourceApi;
             CargaXMLMurcia.mIdComunidad = mCommunityApi.GetCommunityId();
             //CargaNormaCVN.CargarEntidadesSecundarias();
-            //CargaXMLMurcia.CargarEntidadesPrincipales();
+            CargaXMLMurcia.CargarEntidadesPrincipales();
         }
     }
 }

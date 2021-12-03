@@ -54,7 +54,7 @@ namespace GnossBase
 			ca,
 			eu,
 			gl,
-			fr
+			fr,
 		}
 		internal List<OntologyEntity> entList = new List<OntologyEntity>();
 		internal List<OntologyProperty> propList = new List<OntologyProperty>();

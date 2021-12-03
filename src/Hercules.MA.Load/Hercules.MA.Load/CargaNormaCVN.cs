@@ -31,7 +31,6 @@ using ProjecttypeOntology;
 using ParticipationtypedocumentOntology;
 using IndustrialpropertytypeOntology;
 using ColaborationtypegroupOntology;
-using PublicationidentifiertypeOntology;
 using ManagementtypeactivityOntology;
 using TargetgroupprofileOntology;
 using AccesssystemactivityOntology;
@@ -123,7 +122,6 @@ namespace Hercules.MA.Load
             //CargarParticipationTypeDocument(tablas, "participationtypedocument");
             //CargarIndustrialPropertyType(tablas, "industrialpropertytype");
             //CargarColaborationTypeGroup(tablas, "colaborationtypegroup");
-            //CargarPublicationIdentifierType(tablas, "publicationidentifiertype");
             //CargarManagementTypeActivity(tablas, "managementtypeactivity");
             //CargarTargetGroupProfile(tablas, "targetgroupprofile");
             //CargarAccessSystemActivity(tablas, "accesssystemactivity");
@@ -133,7 +131,7 @@ namespace Hercules.MA.Load
             //CargarRelationshipType(tablas, "relationshiptype");
             //CargarScientificActivityDocument("scientificactivitydocument");
             //CargarScientificExperienceProject("scientificexperienceproject");
-            CargarDepartment("department");
+            //CargarDepartment("department");
             //CargarActivityModality(tablas, "activitymodality");
         }
 
@@ -1478,71 +1476,6 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosColaborationTypeGroup;
-        }
-
-        /// <summary>
-        /// Carga la entidad secundaria PublicationIdentifierType.
-        /// </summary>
-        /// <param name="pTablas">Tablas con los datos a obtener.</param>
-        /// <param name="pOntology">Ontología.</param>
-        private static void CargarPublicationIdentifierType(ReferenceTables pTablas, string pOntology)
-        {
-            //Cambio de ontología.
-            mResourceApi.ChangeOntoly(pOntology);
-
-            //Elimina los datos cargados antes de volverlos a cargar.
-            EliminarDatosCargados("http://w3id.org/roh/PublicationIdentifierType", pOntology);
-
-            //Obtención de los objetos a cargar.
-            List<PublicationIdentifierType> tipoIdPublicaciones = new List<PublicationIdentifierType>();
-            tipoIdPublicaciones = ObtenerDatosPublicationIdentifierType(pTablas, idPublicationIdentifierType, tipoIdPublicaciones);
-
-            //Carga.
-            foreach (PublicationIdentifierType type in tipoIdPublicaciones)
-            {
-                mResourceApi.LoadSecondaryResource(type.ToGnossApiResource(mResourceApi, pOntology + "_" + type.Dc_identifier));
-            }
-        }
-
-        /// <summary>
-        /// Obtiene los objetos PublicationIdentifierType a cargar.
-        /// </summary>
-        /// <param name="pTablas">Objetos con los datos a obtener.</param>
-        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
-        /// <param name="pListaDatosPublicationIdentifierType">Lista dónde guardar los objetos.</param>
-        /// <returns>Lista con los objetos creados.</returns>
-        private static List<PublicationIdentifierType> ObtenerDatosPublicationIdentifierType(ReferenceTables pTablas, string pCodigoTabla, List<PublicationIdentifierType> pListaDatosPublicationIdentifierType)
-        {
-            //Mapea los idiomas.
-            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
-
-            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
-            {
-                foreach (TableItem item in tabla.Item)
-                {
-                    if (string.IsNullOrEmpty(item.Delegate))
-                    {
-                        PublicationIdentifierType identifierType = new PublicationIdentifierType();
-                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                        string identificador = item.Code;
-                        foreach (TableItemNameDetail tipoIdentificador in item.Name)
-                        {
-                            LanguageEnum idioma = dicIdiomasMapeados[tipoIdentificador.lang];
-                            string nombre = tipoIdentificador.Name;
-                            dicIdioma.Add(idioma, nombre);
-                        }
-
-                        //Se agrega las propiedades.
-                        identifierType.Dc_identifier = identificador;
-                        identifierType.Dc_title = dicIdioma;
-
-                        //Se guarda el objeto a la lista.
-                        pListaDatosPublicationIdentifierType.Add(identifierType);
-                    }
-                }
-            }
-
-            return pListaDatosPublicationIdentifierType;
         }
 
         /// <summary>
