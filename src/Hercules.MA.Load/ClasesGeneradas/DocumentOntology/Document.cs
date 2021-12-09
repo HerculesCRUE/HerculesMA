@@ -236,6 +236,7 @@ namespace DocumentOntology
 			}
 			this.Roh_legalDeposit = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/legalDeposit"));
 			this.Roh_scopus = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/scopus"));
+			this.Roh_assessmentStatus = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/assessmentStatus"));
 			this.Roh_publicationTitle = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/publicationTitle"));
 			this.Vcard_locality = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#locality"));
 			this.Roh_authorsNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/authorsNumber"));
@@ -288,8 +289,8 @@ namespace DocumentOntology
 			this.Dct_issued= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/terms/issued"));
 			this.Roh_typeOthers = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/typeOthers"));
 			this.Bibo_pageStart = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/ontology/bibo/pageStart"));
-			this.Roh_congressProceedingsPublication= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/congressProceedingsPublication"));
 			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
+			this.Roh_congressProceedingsPublication= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/congressProceedingsPublication"));
 			SemanticPropertyModel propVcard_url = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#url");
 			this.Vcard_url = new List<string>();
 			if (propVcard_url != null && propVcard_url.PropertyValues.Count > 0)
@@ -527,6 +528,7 @@ namespace DocumentOntology
 			}
 			this.Roh_legalDeposit = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/legalDeposit"));
 			this.Roh_scopus = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/scopus"));
+			this.Roh_assessmentStatus = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/assessmentStatus"));
 			this.Roh_publicationTitle = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/publicationTitle"));
 			this.Vcard_locality = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#locality"));
 			this.Roh_authorsNumber = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/authorsNumber"));
@@ -579,8 +581,8 @@ namespace DocumentOntology
 			this.Dct_issued= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/terms/issued"));
 			this.Roh_typeOthers = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/typeOthers"));
 			this.Bibo_pageStart = GetNumberIntPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/ontology/bibo/pageStart"));
-			this.Roh_congressProceedingsPublication= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/congressProceedingsPublication"));
 			this.Roh_crisIdentifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/crisIdentifier"));
+			this.Roh_congressProceedingsPublication= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/congressProceedingsPublication"));
 			SemanticPropertyModel propVcard_url = pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#url");
 			this.Vcard_url = new List<string>();
 			if (propVcard_url != null && propVcard_url.PropertyValues.Count > 0)
@@ -715,6 +717,10 @@ namespace DocumentOntology
 		[RDFProperty("http://w3id.org/roh/scopus")]
 		public  int? Roh_scopus { get; set;}
 
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/assessmentStatus")]
+		[RDFProperty("http://w3id.org/roh/assessmentStatus")]
+		public  string Roh_assessmentStatus { get; set;}
+
 		[LABEL(LanguageEnum.es,"http://w3id.org/roh/publicationTitle")]
 		[RDFProperty("http://w3id.org/roh/publicationTitle")]
 		public  string Roh_publicationTitle { get; set;}
@@ -793,13 +799,13 @@ namespace DocumentOntology
 		[RDFProperty("http://purl.org/ontology/bibo/pageStart")]
 		public  int? Bibo_pageStart { get; set;}
 
-		[LABEL(LanguageEnum.es,"http://w3id.org/roh/congressProceedingsPublication")]
-		[RDFProperty("http://w3id.org/roh/congressProceedingsPublication")]
-		public  bool Roh_congressProceedingsPublication { get; set;}
-
 		[LABEL(LanguageEnum.es,"http://w3id.org/roh/crisIdentifier")]
 		[RDFProperty("http://w3id.org/roh/crisIdentifier")]
 		public  string Roh_crisIdentifier { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/congressProceedingsPublication")]
+		[RDFProperty("http://w3id.org/roh/congressProceedingsPublication")]
+		public  bool Roh_congressProceedingsPublication { get; set;}
 
 		[LABEL(LanguageEnum.es,"https://www.w3.org/2006/vcard/ns#url")]
 		[RDFProperty("https://www.w3.org/2006/vcard/ns#url")]
@@ -863,6 +869,7 @@ namespace DocumentOntology
 			propList.Add(new StringOntologyProperty("vivo:hasPublicationVenue", this.IdVivo_hasPublicationVenue));
 			propList.Add(new StringOntologyProperty("roh:legalDeposit", this.Roh_legalDeposit));
 			propList.Add(new StringOntologyProperty("roh:scopus", this.Roh_scopus.ToString()));
+			propList.Add(new StringOntologyProperty("roh:assessmentStatus", this.Roh_assessmentStatus));
 			propList.Add(new StringOntologyProperty("roh:publicationTitle", this.Roh_publicationTitle));
 			propList.Add(new StringOntologyProperty("vcard:locality", this.Vcard_locality));
 			propList.Add(new StringOntologyProperty("roh:authorsNumber", this.Roh_authorsNumber.ToString()));
@@ -885,8 +892,8 @@ namespace DocumentOntology
 				}
 			propList.Add(new StringOntologyProperty("roh:typeOthers", this.Roh_typeOthers));
 			propList.Add(new StringOntologyProperty("bibo:pageStart", this.Bibo_pageStart.ToString()));
-			propList.Add(new BoolOntologyProperty("roh:congressProceedingsPublication", this.Roh_congressProceedingsPublication));
 			propList.Add(new StringOntologyProperty("roh:crisIdentifier", this.Roh_crisIdentifier));
+			propList.Add(new BoolOntologyProperty("roh:congressProceedingsPublication", this.Roh_congressProceedingsPublication));
 			propList.Add(new ListStringOntologyProperty("vcard:url", this.Vcard_url));
 			propList.Add(new StringOntologyProperty("bibo:pageEnd", this.Bibo_pageEnd.ToString()));
 			propList.Add(new StringOntologyProperty("roh:collection", this.Roh_collection));
@@ -1283,6 +1290,10 @@ namespace DocumentOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/scopus", $"{this.Roh_scopus.Value.ToString()}", list, " . ");
 				}
+				if(this.Roh_assessmentStatus != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/assessmentStatus", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_assessmentStatus)}\"", list, " . ");
+				}
 				if(this.Roh_publicationTitle != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/publicationTitle", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_publicationTitle)}\"", list, " . ");
@@ -1375,13 +1386,13 @@ namespace DocumentOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{ArticleID}",  "http://purl.org/ontology/bibo/pageStart", $"{this.Bibo_pageStart.Value.ToString()}", list, " . ");
 				}
-				if(this.Roh_congressProceedingsPublication != null)
-				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/congressProceedingsPublication", $"\"{this.Roh_congressProceedingsPublication.ToString()}\"", list, " . ");
-				}
 				if(this.Roh_crisIdentifier != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier)}\"", list, " . ");
+				}
+				if(this.Roh_congressProceedingsPublication != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/Document_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/congressProceedingsPublication", $"\"{this.Roh_congressProceedingsPublication.ToString()}\"", list, " . ");
 				}
 				if(this.Vcard_url != null)
 				{
@@ -1911,6 +1922,10 @@ namespace DocumentOntology
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/scopus", $"{this.Roh_scopus.Value.ToString()}", list, " . ");
 				}
+				if(this.Roh_assessmentStatus != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/assessmentStatus", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_assessmentStatus).ToLower()}\"", list, " . ");
+				}
 				if(this.Roh_publicationTitle != null)
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/publicationTitle", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_publicationTitle).ToLower()}\"", list, " . ");
@@ -2003,13 +2018,13 @@ namespace DocumentOntology
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://purl.org/ontology/bibo/pageStart", $"{this.Bibo_pageStart.Value.ToString()}", list, " . ");
 				}
-				if(this.Roh_congressProceedingsPublication != null)
-				{
-					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/congressProceedingsPublication", $"\"{this.Roh_congressProceedingsPublication.ToString().ToLower()}\"", list, " . ");
-				}
 				if(this.Roh_crisIdentifier != null)
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/crisIdentifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_crisIdentifier).ToLower()}\"", list, " . ");
+				}
+				if(this.Roh_congressProceedingsPublication != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/congressProceedingsPublication", $"\"{this.Roh_congressProceedingsPublication.ToString().ToLower()}\"", list, " . ");
 				}
 				if(this.Vcard_url != null)
 				{

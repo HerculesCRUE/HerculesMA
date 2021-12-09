@@ -77,24 +77,6 @@ namespace Hercules.MA.Load
             // Obtención del ImpactIndexCategory (Secundaria).
             dicAreasCategoria = CargaListadosAreasRevistas();
 
-            //Dictionary<Guid, List<TriplesToInclude>> triples = new Dictionary<Guid, List<TriplesToInclude>>();
-            //triples.Add(mResourceApi.GetShortGuid("http://gnoss.com/items/Document_125d9e4a-fc84-4104-a1ba-c1b23e80a86b_d8595cba-7f11-4bbe-8c7e-e18c9291babc"), new List<TriplesToInclude>() {
-            //            new TriplesToInclude(){
-            //            Predicate="http://w3id.org/roh/externalKeywords",
-            //            NewValue="Etiqueta Externa"
-            //            },
-            //            new TriplesToInclude(){
-            //            Predicate="http://w3id.org/roh/enrichedKeywords",
-            //            NewValue="Etiqueta Enriquecida"
-            //            },
-            //            new TriplesToInclude(){
-            //            Predicate="http://w3id.org/roh/suggestedKeywords",
-            //            NewValue="Etiqueta Sugerida"
-            //            }
-            //        });
-            //mResourceApi.InsertPropertiesLoadedResources(triples);
-
-
             //Taxonomía 
             List<SecondaryResource> listaRecursosSecundariosCargar = new List<SecondaryResource>();
             List<Tuple<string, string, string, string, string>> listaTuplas = new List<Tuple<string, string, string, string, string>>();
@@ -118,57 +100,57 @@ namespace Hercules.MA.Load
 
             //Cargar organizaciones.
             CambiarOntologia("organization");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
             Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas, fuentesFinanciacionProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar personas.
             CambiarOntologia("person");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar, datoEquiposInvestigacion);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar grupos de investigación.
             CambiarOntologia("group");
-            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
+            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
             Dictionary<string, string> gruposCargar = ObtenerGrupos(personasACargar, personasCargar, ref listaRecursosCargar, personas, gruposInvestigacion, datoEquiposInvestigacion, organizacionesCargar, lineasDeInvestigacion, lineasInvestigador);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar proyectos.
             CambiarOntologia("project");
-            EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
+            //EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
             Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, fechasEquiposProyectos, areasUnescoProyectos, codigosUnesco, fuentesFinanciacionProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar revistas.
             CambiarOntologia("maindocument");
-            EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
+            //EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
             Dictionary<string, string> revistarCargar = ObtenerMainDocuments(personasACargar, ref listaRecursosCargar, articulos, autoresArticulos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Publicaciones)
             CambiarOntologia("document");
-            EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
+            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
             Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos, listaTuplas, listaConcepts);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Congresos)
             CambiarOntologia("document");
             Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar curriculums
             CambiarOntologia("curriculumvitae");
-            EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
+            //EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
             Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar, documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
-            CargarDatos(listaRecursosCargar);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Categorización UM
@@ -993,7 +975,7 @@ namespace Hercules.MA.Load
                     documentoACargar.Roh_userKeywords = pListaPalabrasClave.Where(x => x.PC_ARTI_CODIGO == articulo.CODIGO).Select(x => x.PC_PALABRA).ToList();
 
                     //KnowledgeArea (Tesauro)
-                    documentoACargar.Roh_hasKnowledgeArea = new List<DocumentOntology.CategoryPath>();
+                    documentoACargar.Roh_userKnowledgeArea = new List<DocumentOntology.CategoryPath>();
                     DocumentOntology.CategoryPath categoria = new DocumentOntology.CategoryPath();
                     categoria.IdsRoh_categoryNode = new List<string>();
 
@@ -1014,19 +996,19 @@ namespace Hercules.MA.Load
 
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item1))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower()).Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower() && x.Skos_symbol=="1").Dc_identifier);
                         }
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item2))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item2.ToLower()).Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item2.ToLower() && x.Skos_symbol == "2").Dc_identifier);
                         }
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item3))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item3.ToLower()).Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item3.ToLower() && x.Skos_symbol == "3").Dc_identifier);
                         }
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item4))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item4.ToLower()).Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item4.ToLower() && x.Skos_symbol == "4").Dc_identifier);
                         }
                         if (categoria.IdsRoh_categoryNode.Count > 0)
                         {
