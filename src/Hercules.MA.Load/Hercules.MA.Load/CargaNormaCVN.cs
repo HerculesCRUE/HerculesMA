@@ -31,7 +31,6 @@ using ProjecttypeOntology;
 using ParticipationtypedocumentOntology;
 using IndustrialpropertytypeOntology;
 using ColaborationtypegroupOntology;
-using PublicationidentifiertypeOntology;
 using ManagementtypeactivityOntology;
 using TargetgroupprofileOntology;
 using AccesssystemactivityOntology;
@@ -103,38 +102,37 @@ namespace Hercules.MA.Load
             ReferenceTables tablas = (ReferenceTables)serializer.Deserialize(new StringReader(documento.InnerXml));
 
             //Carga de entidades secundarias.
-            CargarFeatures(tablas, "feature");
-            CargarProjectModality(tablas, "projectmodality");
-            CargarContributionGradeProject(tablas, "contributiongradeproject");
-            CargarParticipationTypeProject(tablas, "participationtypeproject");
-            CargarDedicationRegime(tablas, "dedicationregime");
-            CargarEventInscriptionType(tablas, "eventinscriptiontype");
-            CargarContributionGradeDocument(tablas, "contributiongradedocument");
-            CargarReferenceSource(tablas, "referencesource");
-            CargarImpactIndexCategory(tablas, "impactindexcategory");
-            CargarLanguage(tablas, "language");
-            CargarPublicationType(tablas, "publicationtype");
-            CargarEventType(tablas, "eventtype");
-            CargarGeographicRegion(tablas, "geographicregion");
-            CargarOrganizationType(tablas, "organizationtype");
-            CargarDocumentFormat(tablas, "documentformat");
-            CargarGender(tablas, "gender");
-            CargarProjectType(tablas, "projecttype");
-            CargarParticipationTypeDocument(tablas, "participationtypedocument");
-            CargarIndustrialPropertyType(tablas, "industrialpropertytype");
-            CargarColaborationTypeGroup(tablas, "colaborationtypegroup");
-            CargarPublicationIdentifierType(tablas, "publicationidentifiertype");
-            CargarManagementTypeActivity(tablas, "managementtypeactivity");
-            CargarTargetGroupProfile(tablas, "targetgroupprofile");
-            CargarAccessSystemActivity(tablas, "accesssystemactivity");
-            CargarParticipationTypeActivity(tablas, "participationtypeactivity");
-            CargarStayGoal(tablas, "staygoal");
-            CargarGrantAim(tablas, "grantaim");
-            CargarRelationshipType(tablas, "relationshiptype");
-            CargarScientificActivityDocument("scientificactivitydocument");
-            CargarScientificExperienceProject("scientificexperienceproject");
-            CargarDepartment("department");
-            CargarActivityModality(tablas, "activitymodality");
+            //CargarFeatures(tablas, "feature");
+            //CargarProjectModality(tablas, "projectmodality");
+            //CargarContributionGradeProject(tablas, "contributiongradeproject");
+            //CargarParticipationTypeProject(tablas, "participationtypeproject");
+            //CargarDedicationRegime(tablas, "dedicationregime");
+            //CargarEventInscriptionType(tablas, "eventinscriptiontype");
+            //CargarContributionGradeDocument(tablas, "contributiongradedocument");
+            //CargarReferenceSource(tablas, "referencesource");
+            //CargarImpactIndexCategory(tablas, "impactindexcategory");
+            //CargarLanguage(tablas, "language");
+            //CargarPublicationType(tablas, "publicationtype");
+            //CargarEventType(tablas, "eventtype");
+            //CargarGeographicRegion(tablas, "geographicregion");
+            //CargarOrganizationType(tablas, "organizationtype");
+            //CargarDocumentFormat(tablas, "documentformat");
+            //CargarGender(tablas, "gender");
+            //CargarProjectType(tablas, "projecttype");
+            //CargarParticipationTypeDocument(tablas, "participationtypedocument");
+            //CargarIndustrialPropertyType(tablas, "industrialpropertytype");
+            //CargarColaborationTypeGroup(tablas, "colaborationtypegroup");
+            //CargarManagementTypeActivity(tablas, "managementtypeactivity");
+            //CargarTargetGroupProfile(tablas, "targetgroupprofile");
+            //CargarAccessSystemActivity(tablas, "accesssystemactivity");
+            //CargarParticipationTypeActivity(tablas, "participationtypeactivity");
+            //CargarStayGoal(tablas, "staygoal");
+            //CargarGrantAim(tablas, "grantaim");
+            //CargarRelationshipType(tablas, "relationshiptype");
+            //CargarScientificActivityDocument("scientificactivitydocument");
+            //CargarScientificExperienceProject("scientificexperienceproject");
+            //CargarDepartment("department");
+            //CargarActivityModality(tablas, "activitymodality");
         }
 
         /// <summary>
@@ -1481,71 +1479,6 @@ namespace Hercules.MA.Load
         }
 
         /// <summary>
-        /// Carga la entidad secundaria PublicationIdentifierType.
-        /// </summary>
-        /// <param name="pTablas">Tablas con los datos a obtener.</param>
-        /// <param name="pOntology">Ontología.</param>
-        private static void CargarPublicationIdentifierType(ReferenceTables pTablas, string pOntology)
-        {
-            //Cambio de ontología.
-            mResourceApi.ChangeOntoly(pOntology);
-
-            //Elimina los datos cargados antes de volverlos a cargar.
-            EliminarDatosCargados("http://w3id.org/roh/PublicationIdentifierType", pOntology);
-
-            //Obtención de los objetos a cargar.
-            List<PublicationIdentifierType> tipoIdPublicaciones = new List<PublicationIdentifierType>();
-            tipoIdPublicaciones = ObtenerDatosPublicationIdentifierType(pTablas, idPublicationIdentifierType, tipoIdPublicaciones);
-
-            //Carga.
-            foreach (PublicationIdentifierType type in tipoIdPublicaciones)
-            {
-                mResourceApi.LoadSecondaryResource(type.ToGnossApiResource(mResourceApi, pOntology + "_" + type.Dc_identifier));
-            }
-        }
-
-        /// <summary>
-        /// Obtiene los objetos PublicationIdentifierType a cargar.
-        /// </summary>
-        /// <param name="pTablas">Objetos con los datos a obtener.</param>
-        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
-        /// <param name="pListaDatosPublicationIdentifierType">Lista dónde guardar los objetos.</param>
-        /// <returns>Lista con los objetos creados.</returns>
-        private static List<PublicationIdentifierType> ObtenerDatosPublicationIdentifierType(ReferenceTables pTablas, string pCodigoTabla, List<PublicationIdentifierType> pListaDatosPublicationIdentifierType)
-        {
-            //Mapea los idiomas.
-            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
-
-            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
-            {
-                foreach (TableItem item in tabla.Item)
-                {
-                    if (string.IsNullOrEmpty(item.Delegate))
-                    {
-                        PublicationIdentifierType identifierType = new PublicationIdentifierType();
-                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                        string identificador = item.Code;
-                        foreach (TableItemNameDetail tipoIdentificador in item.Name)
-                        {
-                            LanguageEnum idioma = dicIdiomasMapeados[tipoIdentificador.lang];
-                            string nombre = tipoIdentificador.Name;
-                            dicIdioma.Add(idioma, nombre);
-                        }
-
-                        //Se agrega las propiedades.
-                        identifierType.Dc_identifier = identificador;
-                        identifierType.Dc_title = dicIdioma;
-
-                        //Se guarda el objeto a la lista.
-                        pListaDatosPublicationIdentifierType.Add(identifierType);
-                    }
-                }
-            }
-
-            return pListaDatosPublicationIdentifierType;
-        }
-
-        /// <summary>
         /// Carga la entidad secundaria ManagementTypeActivity.
         /// </summary>
         /// <param name="pTablas">Tablas con los datos a obtener.</param>
@@ -2157,10 +2090,6 @@ namespace Hercules.MA.Load
             foreach (Department department in departamentos)
             {
                 var x=mResourceApi.LoadSecondaryResource(department.ToGnossApiResource(mResourceApi, pOntology + "_" + department.Dc_identifier));
-                if(x==false)
-                {
-
-                }
             }
         }
 
@@ -2180,17 +2109,10 @@ namespace Hercules.MA.Load
             foreach(Departamento dept in departamentos)
             {
                 Department department = new Department();
-                Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
-                
-                foreach (KeyValuePair<string, LanguageEnum> item in dicIdiomasMapeados)
-                {
-                    LanguageEnum idioma = dicIdiomasMapeados[item.Key];
-                    dicIdioma.Add(idioma, dept.DEP_NOMBRE);
-                }
 
                 //Se agrega las propiedades.
                 department.Dc_identifier = dept.DEP_CODIGO;
-                department.Dc_title = dicIdioma;
+                department.Dc_title = dept.DEP_NOMBRE;
 
                 //Se guarda el objeto a la lista.
                 pListaDatosDepartment.Add(department);

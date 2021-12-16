@@ -27,6 +27,8 @@ namespace ProjectOntology
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
+			this.Vivo_start= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#start"));
+			this.Vivo_end= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#end"));
 			this.Foaf_nick = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/nick"));
 			SemanticPropertyModel propRdf_member = pSemCmsModel.GetPropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#member");
 			if(propRdf_member != null && propRdf_member.PropertyValues.Count > 0)
@@ -39,6 +41,14 @@ namespace ProjectOntology
 		public virtual string RdfType { get { return "http://purl.obolibrary.org/obo/BFO_0000023"; } }
 		public virtual string RdfsLabel { get { return "http://purl.obolibrary.org/obo/BFO_0000023"; } }
 		public OntologyEntity Entity { get; set; }
+
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#start")]
+		[RDFProperty("http://vivoweb.org/ontology/core#start")]
+		public  DateTime? Vivo_start { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#end")]
+		[RDFProperty("http://vivoweb.org/ontology/core#end")]
+		public  DateTime? Vivo_end { get; set;}
 
 		[LABEL(LanguageEnum.es,"http://xmlns.com/foaf/0.1/nick")]
 		[RDFProperty("http://xmlns.com/foaf/0.1/nick")]
@@ -58,6 +68,12 @@ namespace ProjectOntology
 		internal override void GetProperties()
 		{
 			base.GetProperties();
+			if (this.Vivo_start.HasValue){
+				propList.Add(new DateOntologyProperty("vivo:start", this.Vivo_start.Value));
+				}
+			if (this.Vivo_end.HasValue){
+				propList.Add(new DateOntologyProperty("vivo:end", this.Vivo_end.Value));
+				}
 			propList.Add(new StringOntologyProperty("foaf:nick", this.Foaf_nick));
 			propList.Add(new StringOntologyProperty("rdf:member", this.IdRdf_member));
 			propList.Add(new StringOntologyProperty("rdf:comment", this.Rdf_comment.ToString()));

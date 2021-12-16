@@ -47,7 +47,7 @@ namespace Hercules.MA.Load
             List<Articulo> articulos = LeerArticulos(inputFolder + "/Articulos.xml");
             List<AutorArticulo> autoresArticulos = LeerAutoresArticulos(inputFolder + "/Autores articulos.xml");
             List<AutorCongreso> autoresCongresos = LeerAutoresCongresos(inputFolder + "/Autores congresos.xml");
-            List<AutorExposicion> autoresExposiciones = LeerAutoresExposiciones(inputFolder + "/Autores exposiciones.xml");
+            List<AutorExposicion> autoresExposiciones = LeerAutoresExposiciones(inputFolder + "/Autores exposicion.xml");
             List<Centro> centros = LeerCentros(inputFolder + "/Centros.xml");
             List<CodigosUnesco> codigosUnesco = LeerCodigosUnesco(inputFolder + "/Codigos UNESCO.xml");
             List<Congreso> congresos = LeerCongresos(inputFolder + "/Congresos.xml");
@@ -217,6 +217,13 @@ namespace Hercules.MA.Load
             }
         }
 
+        /// <summary>
+        /// Proceso para contruir el tesáuro con la taxonomía unificada.
+        /// </summary>
+        /// <param name="pListaRecursosCargar">Lista de recursos a cargar.</param>
+        /// <param name="pListaTuplas">Lista de tuplas con datos. Tupla<Cat. 1er Nivel, Cat. 2o Nivel, Cat. 3er Nivel, Cat. 4o Nivel, ID de WoS></param>
+        /// <param name="pListaConcepts">Lista con los objetos Concepts para el tesáuro.</param>
+        /// <param name="pSource">Nombre del tesáuro.</param>
         private static void ObtenerTesauroExcel(ref List<SecondaryResource> pListaRecursosCargar, ref List<Tuple<string, string, string, string, string>> pListaTuplas, ref List<Concept> pListaConcepts, string pSource)
         {
             DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx");
@@ -437,11 +444,15 @@ namespace Hercules.MA.Load
                     personaCarga.Foaf_firstName = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(partesNombre[0]);
                     personaCarga.Foaf_lastName = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(apellidos.Trim());
                     personaCarga.Roh_crisIdentifier = persona.NUMERODOCUMENTO;
+                    if(persona.PERSONAL_ACTIVO == "S")
+                    {
+                        personaCarga.Roh_isActive = true;
+                    }
                     if (persona.PERSONAL_UMU == "S")
                     {
                         personaCarga.IdRoh_hasRole = pOrganizacionesCargar["UMU"];
                     }
-                    personaCarga.Vcard_email = persona.EMAIL;
+                    personaCarga.Vcard_email = new List<string>() { persona.EMAIL };
                     personaCarga.Roh_isSynchronized = false;
                     personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
 
@@ -471,13 +482,14 @@ namespace Hercules.MA.Load
                     // ---------- ÑAPA
                     if (idPersona == "7747") // Skarmeta
                     {
+                        personaCarga.Roh_crisIdentifier = "28710458";
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
                         personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E096";
                         personaCarga.Roh_h_index = 55;
                         personaCarga.Roh_ORCID = "0000-0002-5525-1259";
-                        personaCarga.Foaf_homepage = "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD";
-                        personaCarga.Vcard_email = "skarmeta@um.es";
-                        personaCarga.Vcard_hasTelephone = "+34868884607";
+                        personaCarga.Foaf_homepage = new List<string>() { "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD" };
+                        personaCarga.Vcard_email = new List<string>() { "skarmeta@um.es" };
+                        personaCarga.Vcard_hasTelephone = new List<string>() { "+34868884607" };
                         personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
                         personaCarga.Vivo_description = $@"Nacido en Santiago de Chile en Abril de 1965, obtuvo la licenciatura en Informática por la Universidad de Granada en el año 1991 y el Doctorado en Informática por la Universidad de Murcia en el año 1995. Se convirtió en profesor titular de la Universidad de Murcia en al año 1997 y es Catedrático en Ingeniería Telemática desde el año 2009. Vicedecano de Infraestructuras de la Facultad de Informática entre los años 1991 a 1993 y, posteriormente, vicedecano de Relaciones Externas del 1997 a 1999. Ha sido director del departamento de Ingeniería de la Información y las Comunicaciones desde 2001 hasta 2007. Coordinador del programa de doctorado en Tecnologías de la Información y Telemáticas Avanzadas desde el 2002 hasta el 2010, con mención de calidad del Ministerio. Desde el año 2008 es coordinador de la Oficina de Proyectos Europeos de la Universidad de Murcia, adscrita al vicerrectorado de Investigación. Desde la misma ha sido responsable del proyecto de Eurociencia concedido a la Universidad de Murcia, así como del proyecto COFUND concedido asociado al proyecto U-IMPACT-COFUND que ha coordinado como investigador principal. Actualmente es, además, representante nacional del MINECO en el programa H2020 para el pilar de Ciencia Excelente en el área de MARIE SKŁODOWSKA-CURIE, así como representante en el grupo de Recursos Humanos y movilidad de la Comisión Europea. Antonio Skarmeta es autor de más de 100 publicaciones en revistas internacionales, 200 artículos en congresos y ha sido investigador principal de más de 15 proyectos europeos, habiendo dirigido más de 20 tesis de doctorado. Además, ha participado en numerosos comités de programas de conferencias en informática, seguridad, redes móviles e internet de las cosas como Adhoc NoW, IEEE SMC, ACM Group, IEEE MSN, TrustBus, etc., siendo co-chair del Second International Conference on Dependability DEPEND 2009, y chair del Workshop on Research and Deployment Possibilities based on MIPv6 in the 16th IST Mobile & Wireless Communications Summit, 2007. Además es editor asociado de la revista IEEE Trans SMC.Part B y ha participado como editor en diversos special issue como los de IEE Proc. Communication, IJIPT journal, Computer Networks y International Journal of Web and Grid Services.";
                     }
@@ -488,15 +500,22 @@ namespace Hercules.MA.Load
                         personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E036";
                         personaCarga.Roh_h_index = 51;
                         personaCarga.Roh_ORCID = "0000-0003-4550-0183";
-                        //personaCarga.Foaf_homepage = "https://curie.um.es/curie/servlet/um.curie.ginvest.ControlGrinvest?accion=fichainvestigador&dept_codigo=E096&grin_codigo=02&grin_nombre=SISTEMAS%20INTELIGENTES%20Y%20TELEM%C3%uFFFDTICA&d=EA641347CE5593612D1D3BB52DFCCBAD";
-                        personaCarga.Vcard_email = "vicinves@um.es";
-                        personaCarga.Vcard_hasTelephone = "+34868888386";
-                        //personaCarga.Vcard_address = "Despacho 1.09, Facultad de Informática, Campus de Espinardo, 30100 Murcia";
+                        personaCarga.Vcard_email = new List<string>() { "vicinves@um.es" };
+                        personaCarga.Vcard_hasTelephone = new List<string>() { "+34868888386" };
                         personaCarga.Vivo_description = $@"Catedrático de Análisis Matemático en el Departamento de Matemáticas, desempeña sus labores docentes en la Facultad de Matemáticas, entre las que cabe destacar la asignatura de Laboratorio de Modelización y la coordinación de las prácticas externas del grado en Matemáticas. Su investigación se centra en la Modelización Matemática y la Simulación, así como en la Enseñanza Asistida por Ordenador. Ha participado en siete proyectos regionales, nueve nacionales y diez internacionales. Es miembro de las organizaciones internacionales Multimedia in Physics Teaching and Learning, que co-preside, GIREP y del proyecto Open Source Physics (EE. UU.). Su trabajo, en colaboración con investigadores de otros países, ha recibido varios premios internacionales: SPORE Prize de la revista Science en 2011, MPTL Excellence Award en 2015 y UNESCO King Hamad Bin Isa Al-Khalifa Prize en 2016. Ha sido dos años asesor de la Consejería de Cultura y Educación, dos años Director General de Universidades de la Comunidad Autónoma de la Región de Murcia y Patrono Apoderado de la Fundación Séneca, Agencia Regional de Investigación, cuatro años director de la OTRI de la Universidad de Murcia, cuatro años miembro de la Comisión de Investigación y ocho años decano de la Facultad de Matemáticas.";
                     }
-                    else if (idPersona == "9292") // Manuel Campos TODO
+                    else if (idPersona == "9292") // Manuel Campos 
                     {
-
+                        personaCarga.Roh_crisIdentifier = "34822542";
+                        personaCarga.Roh_hasPosition = "Profesor Titular de Universidad";
+                        personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E031";
+                        personaCarga.Roh_h_index = 16;
+                        personaCarga.Roh_ORCID = "0000-0002-5233-3769";
+                        personaCarga.Foaf_homepage = new List<string>() { "https://webs.um.es/manuelcampos/" };
+                        personaCarga.Vcard_email = new List<string>() { "manuelcampos@um.es" };
+                        personaCarga.Vcard_hasTelephone = new List<string>() { "+34868888521" };
+                        personaCarga.Vcard_address = "Despacho 2.25. Facultad de Informatica. Universidad de Murcia. Campus de Espinardo. CP. 30100, Murcia, SPAIN";
+                        personaCarga.Vivo_description = $@"Manuel Campos inició su actividad investigadora en el grupo de investigación AIKE, ha participado en varios proyectos de investigación nacionales y contratos enfocados a las líneas de investigación de aplicaciones clínicas, con más de 50 congresos y revistas nacionales e internacionales. Ha sido Vicedecano de Relaciones Externas de la Facultad de Informática (2010-2012). Ha sido Coordinador de Prácticas en el Vicerrectorado de Estudios de la Universidad de Murcia (2012-2017).";
                     }
 
                     //Creamos el recurso.
@@ -644,6 +663,7 @@ namespace Hercules.MA.Load
                     proyectoCargar.Roh_title = proyecto.NOMBRE;
                     proyectoCargar.Roh_researchersNumber = pEquiposProyectos.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO).Count();
                     proyectoCargar.Vivo_relates = new List<ProjectOntology.BFO_0000023>();
+                    proyectoCargar.Roh_mainResearchers = new List<ProjectOntology.BFO_0000023>();
 
                     //Fechas.
                     foreach (FechaProyecto fechaProyecto in pFechaProyectos.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
@@ -682,7 +702,7 @@ namespace Hercules.MA.Load
                             proyectoCargar.Roh_durationYears = ((zeroTime + diferencia).Year - 1).ToString();
                             proyectoCargar.Roh_durationMonths = ((zeroTime + diferencia).Month - 1).ToString();
                             proyectoCargar.Roh_durationDays = ((zeroTime + diferencia).Day - 1).ToString();
-                        }
+                        }                        
                     }
 
                     //Auxiliar BFO_0000023.
@@ -694,7 +714,46 @@ namespace Hercules.MA.Load
                             persona.IdRdf_member = pDicPersonasCargadas[equipo.IDPERSONA];
                         }
                         persona.Rdf_comment = Int32.Parse(equipo.NUMEROCOLABORADOR);
-                        proyectoCargar.Vivo_relates.Add(persona);
+
+                        FechaEquipoProyecto equipoProyecto = pFechaEquipoProyectos.FirstOrDefault(x => x.IDPROYECTO == equipo.IDPROYECTO && x.NUMEROCOLABORADOR == equipo.NUMEROCOLABORADOR);
+                        if (equipoProyecto != null)
+                        {
+                            DateTime fechaInicio = new DateTime();
+                            DateTime fechaFin = new DateTime();
+
+                            if (!string.IsNullOrEmpty(equipoProyecto.FECHAINICIOPERIODO))
+                            {
+                                int anio = Int32.Parse(equipoProyecto.FECHAINICIOPERIODO.Substring(0, 4));
+                                int mes = Int32.Parse(equipoProyecto.FECHAINICIOPERIODO.Substring(5, 2));
+                                int dia = Int32.Parse(equipoProyecto.FECHAINICIOPERIODO.Substring(8, 2));
+                                int horas = Int32.Parse(equipoProyecto.FECHAINICIOPERIODO.Substring(11, 2));
+                                int minutos = Int32.Parse(equipoProyecto.FECHAINICIOPERIODO.Substring(14, 2));
+                                int segundos = Int32.Parse(equipoProyecto.FECHAINICIOPERIODO.Substring(17, 2));
+                                fechaInicio = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                                persona.Vivo_start = fechaInicio;
+                            }
+
+                            if (!string.IsNullOrEmpty(equipoProyecto.FECHAFINPERIODO))
+                            {
+                                int anio = Int32.Parse(equipoProyecto.FECHAFINPERIODO.Substring(0, 4));
+                                int mes = Int32.Parse(equipoProyecto.FECHAFINPERIODO.Substring(5, 2));
+                                int dia = Int32.Parse(equipoProyecto.FECHAFINPERIODO.Substring(8, 2));
+                                int horas = Int32.Parse(equipoProyecto.FECHAFINPERIODO.Substring(11, 2));
+                                int minutos = Int32.Parse(equipoProyecto.FECHAFINPERIODO.Substring(14, 2));
+                                int segundos = Int32.Parse(equipoProyecto.FECHAFINPERIODO.Substring(17, 2));
+                                fechaFin = new DateTime(anio, mes, dia, horas, minutos, segundos);
+                                proyectoCargar.Vivo_end = fechaFin;
+                            }
+
+                            if (equipoProyecto.CODTIPOPARTICIPACION == "IP")
+                            {
+                                proyectoCargar.Roh_mainResearchers.Add(persona);
+                            }
+                            else
+                            {
+                                proyectoCargar.Vivo_relates.Add(persona);
+                            }                            
+                        }                       
                     }
 
                     //Principal Organization.
@@ -763,7 +822,7 @@ namespace Hercules.MA.Load
                     proyectoCargar.Roh_isSynchronized = false;
 
                     //ScientificExperienceProject
-                    if(proyecto.IDPROYECTO.Contains("RRHH"))
+                    if (proyecto.IDPROYECTO.Contains("RRHH"))
                     {
                         proyectoCargar.IdRoh_scientificExperienceProject = "http://gnoss.com/items/scientificexperienceproject_SEP2";
                     }
@@ -771,7 +830,7 @@ namespace Hercules.MA.Load
                     {
                         proyectoCargar.IdRoh_scientificExperienceProject = "http://gnoss.com/items/scientificexperienceproject_SEP1";
                     }
-                    
+
                     // ---------- ÑAPA
                     if (proyectoID == "SOLAYUDAS|13334")
                     {
@@ -781,7 +840,7 @@ namespace Hercules.MA.Load
                         proyectoCargar.Roh_isSupportedBy.Roh_fundedBy.Add(new ProjectOntology.FundingProgram { Roh_title = "Programa Estatal de I+D+i Orientada a los Retos de la Sociedad" });
                         proyectoCargar.Vivo_relates = new List<ProjectOntology.BFO_0000023>();
                         ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
-                        persona.IdRdf_member = pDicPersonasCargadas["79"];
+                        persona.IdRdf_member = pDicPersonasCargadas["7747"];
                         persona.Rdf_comment = 1;
                         proyectoCargar.Vivo_relates.Add(persona);
                     }
@@ -867,7 +926,15 @@ namespace Hercules.MA.Load
                             DocumentOntology.BFO_0000023 persona = new DocumentOntology.BFO_0000023();
                             persona.IdRdf_member = pDicPersonasCargadas[autor.IDPERSONA];
                             persona.Rdf_comment = Int32.Parse(autor.ORDEN);
-                            persona.Foaf_nick = autor.FIRMANTE;
+                            if (autor.FIRMANTE.Any(char.IsDigit))
+                            {
+                                Persona personaAutor = pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA);
+                                persona.Foaf_nick = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(personaAutor.NOMBRE);
+                            }
+                            else
+                            {
+                                persona.Foaf_nick = autor.FIRMANTE;
+                            }
                             documentoACargar.Bibo_authorList.Add(persona);
 
                             numAutores++;
@@ -905,10 +972,10 @@ namespace Hercules.MA.Load
                     documentoACargar.IdVcard_hasCountryName = "http://gnoss.com/items/feature_PCLD_724";
 
                     //FreeTextKeyword
-                    documentoACargar.Vivo_freeTextKeyword = pListaPalabrasClave.Where(x => x.PC_ARTI_CODIGO == articulo.CODIGO).Select(x => x.PC_PALABRA).ToList();
+                    documentoACargar.Roh_userKeywords = pListaPalabrasClave.Where(x => x.PC_ARTI_CODIGO == articulo.CODIGO).Select(x => x.PC_PALABRA).ToList();
 
                     //KnowledgeArea (Tesauro)
-                    documentoACargar.Roh_hasKnowledgeArea = new List<DocumentOntology.CategoryPath>();
+                    documentoACargar.Roh_userKnowledgeArea = new List<DocumentOntology.CategoryPath>();
                     DocumentOntology.CategoryPath categoria = new DocumentOntology.CategoryPath();
                     categoria.IdsRoh_categoryNode = new List<string>();
 
@@ -929,34 +996,30 @@ namespace Hercules.MA.Load
 
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item1))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower()).Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower() && x.Skos_symbol=="1").Dc_identifier);
                         }
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item2))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item2.ToLower()).Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item2.ToLower() && x.Skos_symbol == "2").Dc_identifier);
                         }
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item3))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item3.ToLower()).Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item3.ToLower() && x.Skos_symbol == "3").Dc_identifier);
                         }
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item4))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item4.ToLower()).Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item4.ToLower() && x.Skos_symbol == "4").Dc_identifier);
                         }
                         if (categoria.IdsRoh_categoryNode.Count > 0)
                         {
-                            documentoACargar.Roh_hasKnowledgeArea.Add(categoria);
+                            documentoACargar.Roh_userKnowledgeArea.Add(categoria);
                         }
                     }
 
                     //DOI
                     if (!string.IsNullOrEmpty(articulo.ARTI_DOI))
                     {
-                        documentoACargar.Bibo_identifier = new List<DocumentOntology.fDocument>();
-                        DocumentOntology.fDocument docu = new DocumentOntology.fDocument();
-                        docu.IdFoaf_primaryTopic = "http://gnoss.com/items/publicationidentifiertype_040";
-                        docu.Dc_title = LimpiarDoi(articulo.ARTI_DOI);
-                        documentoACargar.Bibo_identifier.Add(docu);
+                        documentoACargar.Bibo_doi = LimpiarDoi(articulo.ARTI_DOI);
                     }
 
                     //Validación.
@@ -974,6 +1037,19 @@ namespace Hercules.MA.Load
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de los datos de documentos. (Congresos)
+        /// </summary>
+        /// <param name="pDicProyectosACargar"></param>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pDicPersonasCargadas"></param>
+        /// <param name="pDicRevistasCargadas"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaCongresos"></param>
+        /// <param name="pListaAutoresCongreso"></param>
+        /// <param name="pListaPersonas"></param>
+        /// <param name="pListaEquipoProyectos"></param>
+        /// <returns></returns>
         private static Dictionary<string, string> ObtenerCongresos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicRevistasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Congreso> pListaCongresos, List<AutorCongreso> pListaAutoresCongreso, List<Persona> pListaPersonas, List<EquipoProyecto> pListaEquipoProyectos)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
@@ -1031,7 +1107,15 @@ namespace Hercules.MA.Load
                             DocumentOntology.BFO_0000023 persona = new DocumentOntology.BFO_0000023();
                             persona.IdRdf_member = pDicPersonasCargadas[autor.IDPERSONA];
                             persona.Rdf_comment = Int32.Parse(autor.ORDEN);
-                            persona.Foaf_nick = autor.FIRMANTE;
+                            if (autor.FIRMANTE.Any(char.IsDigit))
+                            {
+                                Persona personaAutor = pListaPersonas.FirstOrDefault(x => x.IDPERSONA == autor.IDPERSONA);
+                                persona.Foaf_nick = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(personaAutor.NOMBRE);
+                            }
+                            else
+                            {
+                                persona.Foaf_nick = autor.FIRMANTE;
+                            }
                             documentoACargar.Bibo_authorList.Add(persona);
                             numAutores++;
 
@@ -1078,6 +1162,19 @@ namespace Hercules.MA.Load
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de los datos de grupos.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pDicPersonasCargadas"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaPersonas"></param>
+        /// <param name="pListaGrupoInvestigacion"></param>
+        /// <param name="pListaDatoEquipoInvestigacion"></param>
+        /// <param name="pOrganizacionesCargar"></param>
+        /// <param name="pListaLineasDeInvestigacion"></param>
+        /// <param name="pListaLineasInvestigador"></param>
+        /// <returns></returns>
         private static Dictionary<string, string> ObtenerGrupos(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Persona> pListaPersonas, List<GrupoInvestigacion> pListaGrupoInvestigacion, List<DatoEquipoInvestigacion> pListaDatoEquipoInvestigacion, Dictionary<string, string> pOrganizacionesCargar, List<LineasDeInvestigacion> pListaLineasDeInvestigacion, List<LineasInvestigador> pListaLineasInvestigador)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
@@ -1127,7 +1224,7 @@ namespace Hercules.MA.Load
                     grupoCargar.Roh_foundationDate = fechaCreacion;
 
                     //MainResearcher y Member
-                    grupoCargar.Roh_mainResearcher = new List<GroupOntology.BFO_0000023>();
+                    grupoCargar.Roh_mainResearchers = new List<GroupOntology.BFO_0000023>();
                     grupoCargar.Foaf_member = new List<GroupOntology.BFO_0000023>();
 
                     List<DatoEquipoInvestigacion> equipoInvestigacion = pListaDatoEquipoInvestigacion.Where(x => x.IDGRUPOINVESTIGACION == grupo.IDGRUPOINVESTIGACION).ToList();
@@ -1197,7 +1294,7 @@ namespace Hercules.MA.Load
 
                             if (equipo.CODTIPOPARTICIPACION == "IP")
                             {
-                                grupoCargar.Roh_mainResearcher.Add(persona);
+                                grupoCargar.Roh_mainResearchers.Add(persona);
                             }
                             else
                             {
@@ -1208,7 +1305,7 @@ namespace Hercules.MA.Load
                     }
 
                     //ResearchersNumber
-                    grupoCargar.Roh_researchersNumber = grupoCargar.Roh_mainResearcher.Select(x => x.IdRoh_roleOf).Union(grupoCargar.Foaf_member.Select(x => x.IdRoh_roleOf)).Distinct().Count();
+                    grupoCargar.Roh_researchersNumber = grupoCargar.Roh_mainResearchers.Select(x => x.IdRoh_roleOf).Union(grupoCargar.Foaf_member.Select(x => x.IdRoh_roleOf)).Distinct().Count();
 
                     // ---------- ÑAPA
                     if (grupo.IDGRUPOINVESTIGACION == "E096-02")
@@ -1229,6 +1326,17 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de datos de los CV.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pDicPersonasCargadas"></param>
+        /// <param name="pDicDocumentosCargados"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaArticulos"></param>
+        /// <param name="pListaAutoresArticulos"></param>
+        /// <param name="pListaPersonas"></param>
+        /// <returns></returns>
         private static Dictionary<string, string> ObtenerCVs(HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicDocumentosCargados, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
@@ -1295,6 +1403,14 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             return dicIDs;
         }
 
+        /// <summary>
+        /// Proceso de obtención de datos de los MainDocument.
+        /// </summary>
+        /// <param name="pPersonasACargar"></param>
+        /// <param name="pListaRecursosCargar"></param>
+        /// <param name="pListaArticulos"></param>
+        /// <param name="pListaAutorArticulos"></param>
+        /// <returns></returns>
         private static Dictionary<string, string> ObtenerMainDocuments(HashSet<string> pPersonasACargar, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutorArticulos)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
@@ -1473,7 +1589,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             //Carga.
             foreach (SecondaryResource recursoCargar in pListaRecursosCargar)
             {
-                var x = mResourceApi.LoadSecondaryResource(recursoCargar);
+                mResourceApi.LoadSecondaryResource(recursoCargar);
             }
         }
 

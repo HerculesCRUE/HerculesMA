@@ -58,6 +58,7 @@ namespace SupervisedartisticprojectOntology
 			this.Roh_award= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/award"));
 			this.Roh_catalogue= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/catalogue"));
 			this.Vcard_locality = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#locality"));
+			this.Roh_collective= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/collective"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 		}
 
@@ -97,6 +98,7 @@ namespace SupervisedartisticprojectOntology
 			this.Roh_award= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/award"));
 			this.Roh_catalogue= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/catalogue"));
 			this.Vcard_locality = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("https://www.w3.org/2006/vcard/ns#locality"));
+			this.Roh_collective= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/collective"));
 			this.Roh_title = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/title"));
 		}
 
@@ -156,6 +158,10 @@ namespace SupervisedartisticprojectOntology
 		[RDFProperty("https://www.w3.org/2006/vcard/ns#locality")]
 		public  string Vcard_locality { get; set;}
 
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/collective")]
+		[RDFProperty("http://w3id.org/roh/collective")]
+		public  bool Roh_collective { get; set;}
+
 		[LABEL(LanguageEnum.es,"http://w3id.org/roh/title")]
 		[RDFProperty("http://w3id.org/roh/title")]
 		public  string Roh_title { get; set;}
@@ -178,6 +184,7 @@ namespace SupervisedartisticprojectOntology
 			propList.Add(new BoolOntologyProperty("roh:award", this.Roh_award));
 			propList.Add(new BoolOntologyProperty("roh:catalogue", this.Roh_catalogue));
 			propList.Add(new StringOntologyProperty("vcard:locality", this.Vcard_locality));
+			propList.Add(new BoolOntologyProperty("roh:collective", this.Roh_collective));
 			propList.Add(new StringOntologyProperty("roh:title", this.Roh_title));
 		}
 
@@ -298,6 +305,10 @@ namespace SupervisedartisticprojectOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/SupervisedArtisticProject_{ResourceID}_{ArticleID}",  "https://www.w3.org/2006/vcard/ns#locality", $"\"{GenerarTextoSinSaltoDeLinea(this.Vcard_locality)}\"", list, " . ");
 				}
+				if(this.Roh_collective != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/SupervisedArtisticProject_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/collective", $"\"{this.Roh_collective.ToString()}\"", list, " . ");
+				}
 				if(this.Roh_title != null)
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/SupervisedArtisticProject_{ResourceID}_{ArticleID}",  "http://w3id.org/roh/title", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_title)}\"", list, " . ");
@@ -416,6 +427,10 @@ namespace SupervisedartisticprojectOntology
 				if(this.Vcard_locality != null)
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "https://www.w3.org/2006/vcard/ns#locality", $"\"{GenerarTextoSinSaltoDeLinea(this.Vcard_locality).ToLower()}\"", list, " . ");
+				}
+				if(this.Roh_collective != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://w3id.org/roh/collective", $"\"{this.Roh_collective.ToString().ToLower()}\"", list, " . ");
 				}
 				if(this.Roh_title != null)
 				{
