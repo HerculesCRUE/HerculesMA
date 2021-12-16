@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Hercules.MA.ServicioExterno.Models.DataGraficaProyectosGroupBars
+namespace Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaProyectos
 {
     public class ObjGrafica
     {
         public string type { get; set; }
-        public DataGraficaProyectosGroupBars data { get; set; }
+        public DataGraficaProyectos data { get; set; }
         public Options options { get; set; }
-        public ObjGrafica (string pType, DataGraficaProyectosGroupBars pData, Options pOptions)
+        public ObjGrafica (string pType, DataGraficaProyectos pData, Options pOptions)
         {
             this.type = pType;
             this.data = pData;
@@ -56,11 +56,11 @@ namespace Hercules.MA.ServicioExterno.Models.DataGraficaProyectosGroupBars
         }
     }
 
-    public class DataGraficaProyectosGroupBars
+    public class DataGraficaProyectos
     {
         public List<string> labels { get; set; }
         public List<DatosAnyo> datasets { get; set; }
-        public DataGraficaProyectosGroupBars (List<string> pLabels, List<DatosAnyo> pDatasets)
+        public DataGraficaProyectos (List<string> pLabels, List<DatosAnyo> pDatasets)
         {
             this.labels = pLabels;
             this.datasets = pDatasets;

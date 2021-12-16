@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Hercules.MA.ServicioExterno.Models.DataFechas
+namespace Hercules.MA.ServicioExterno.Models
 {
     public class DataFechas
     {

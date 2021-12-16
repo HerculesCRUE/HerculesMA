@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal
+namespace Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags
 {
-    public class DataGraficaPublicacionesHorizontal
+    public class DataGraficaAreasTags
     {
         public string type { get; set; }
         public Data data { get; set; }
         public Options options { get; set; }
-        public DataGraficaPublicacionesHorizontal(string pType, Data pData, Options pOptions)
+        public DataGraficaAreasTags(string pType, Data pData, Options pOptions)
         {
             this.type = pType;
             this.data = pData;

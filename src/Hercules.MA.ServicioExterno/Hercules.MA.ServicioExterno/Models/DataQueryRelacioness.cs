@@ -3,24 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Hercules.MA.ServicioExterno.Models.DataQueryRelaciones
+namespace Hercules.MA.ServicioExterno.Models
 {
     public class DataQueryRelaciones
     {
+        public string nombreRelacion { get; set; }
         public List<Datos> idRelacionados { get; set; }
-        public DataQueryRelaciones(List<Datos> pidRelacionados)
+        public DataQueryRelaciones()
+        { }
+        public DataQueryRelaciones(string pNombreRelacion, List<Datos> pIdRelacionados)
         {
-            this.idRelacionados = pidRelacionados;
+            nombreRelacion = pNombreRelacion;
+            idRelacionados = pIdRelacionados;
         }
     }
     public class Datos
     {
         public string idRelacionado { get; set; }
         public int numVeces { get; set; }
+        public Datos()
+        { }
         public Datos(string pIdRelacionado, int pNumVeces)
         {
-            this.idRelacionado = pIdRelacionado;
-            this.numVeces = pNumVeces;
+            idRelacionado = pIdRelacionado;
+            numVeces = pNumVeces;
         }
     }
 }

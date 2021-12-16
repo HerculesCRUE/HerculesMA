@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Gnoss.ApiWrapper;
 using System.Text;
 using System.Web;
-using Hercules.MA.ServicioExterno.Models.DataFechas;
+using Hercules.MA.ServicioExterno.Models;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 {
@@ -69,8 +69,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         /// <param name="pDicFiltros">Diccionario con los filtros.</param>
         /// <param name="pVarAnterior">Variable anterior para no repetir nombre.</param>
         /// <param name="pAux">Variable auxiliar para que no se repitan los nombres.</param>
-        /// <param name="pVarFechaInicio">Variable auxiliar para la fecha inicio.</param>
-        /// <param name="pVarFechaFin">Variable auxiliar para la fecha fin.</param>
         /// <returns>String con los filtros creados.</returns>
         public static string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux)
         {
@@ -90,6 +88,47 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             Dictionary<string, int> filtrosReciprocos = new Dictionary<string, int>();
             filtrosReciprocos.Add("foaf:member@@@roh:roleOf@@@roh:title", 2);
 
+            //Filtros personalizados
+            Dictionary<string, string> filtrosPersonalizados = new Dictionary<string, string>();
+            filtrosPersonalizados.Add("searchColaboradoresPorGrupo",
+                        @$"
+                            {{
+                                SELECT DISTINCT {pVarAnterior}
+	                            WHERE 
+	                            {{	
+                                    {pVarAnterior} a 'person'	
+		                            {{
+			                            {{
+				                            #Documentos
+				                            SELECT *
+				                            WHERE {{
+					                            ?documento <http://w3id.org/roh/isProducedBy> <http://gnoss/[PARAMETRO]>.
+					                            ?documento a 'document'.
+					                            ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
+					                            ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                            }}
+			                            }} 
+			                            UNION 
+			                            {{
+				                            #Proyectos
+				                            SELECT *
+				                            WHERE {{
+					                            ?proy <http://w3id.org/roh/publicGroupList> <http://gnoss/[PARAMETRO]>.
+					                            ?proy a 'project'.
+					                            ?proy ?propRol ?role.
+					                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://w3id.org/roh/mainResearchers>))
+					                            ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                            }}
+			                            }}
+		                            }}		
+		                            MINUS
+		                            {{
+			                            {pVarAnterior} <http://vivoweb.org/ontology/core#relates> <http://gnoss/[PARAMETRO]>
+		                            }}
+	                            }}
+                            }}
+                        ");
+
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;
 
@@ -99,29 +138,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                 foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
                 {
-                    foreach (string valorFiltroIn in item.Value)
+                    if (filtrosPersonalizados.ContainsKey(item.Key))
+                    {
+                        filtro.Append(filtrosPersonalizados[item.Key].Replace("[PARAMETRO]", item.Value.First()));
+                    }
+                    else
                     {
 
-                        if (!filtrosReciprocos.ContainsKey(item.Key))
+                        foreach (string valorFiltroIn in item.Value)
                         {
-                            foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
+                            if (!filtrosReciprocos.ContainsKey(item.Key))
                             {
-                                string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                                filtro.Append($@"{pVarAnterior} ");
-                                filtro.Append($@"{parteFiltro} ");
-                                filtro.Append($@"{varActual}. ");
-                                pVarAnterior = varActual;
-                                pAux++;
-                            }
-                        }
-                        else
-                        {
-                            int index = filtrosReciprocos[item.Key];
-                            pVarAnterior = "?varAuxiliar";
-                            pVarAnteriorAux = pVarAnterior;
-                            foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if ((pAux + 1) < index)
+                                foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
                                 {
                                     string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                                     filtro.Append($@"{pVarAnterior} ");
@@ -130,61 +158,78 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                     pVarAnterior = varActual;
                                     pAux++;
                                 }
-                                else if ((pAux + 1) == index)
-                                {
-                                    string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                                    filtro.Append($@"{pVarAnterior} ");
-                                    filtro.Append($@"{parteFiltro} ");
-                                    filtro.Append($@"{varInicial}. ");
-                                    pAux++;
-                                }
-                                else
-                                {
-                                    filtro.Append($@"{pVarAnteriorAux} ");
-                                    filtro.Append($@"{parteFiltro} ");
-                                    //filtro.Append($@"'{HttpUtility.UrlDecode(item.Value[0])}'. ");
-                                    filtro.Append($@"'{HttpUtility.UrlDecode(valorFiltroIn)}'. ");
-                                }
                             }
-                        }
-
-                        // Filtro de fechas.
-                        if (filtrosFecha.Contains(item.Key))
-                        {
-                            //foreach (string fecha in item.Value)
-                            //{
-                            //    filtro.Append($@"FILTER({pVarAnterior} >= {fecha.Split('-')[0]}000000) ");
-                            //    filtro.Append($@"FILTER({pVarAnterior} <= {fecha.Split('-')[1]}000000) ");
-                            //}
-                            filtro.Append($@"FILTER({pVarAnterior} >= {valorFiltroIn.Split('-')[0]}000000) ");
-                            filtro.Append($@"FILTER({pVarAnterior} <= {valorFiltroIn.Split('-')[1]}000000) ");
-                        }
-                        else if (filtrosEnteros.Contains(item.Key))
-                        {
-                            string valorFiltro = string.Empty;
-
-                            //foreach (string valor in item.Value)
-                            //{
-                            //    valorFiltro += $@",{valor}";
-                            //}
-
-                            valorFiltro += $@",{valorFiltroIn}";
-
-                            if (valorFiltro.Length > 0)
+                            else
                             {
-                                valorFiltro = valorFiltro.Substring(1);
+                                int index = filtrosReciprocos[item.Key];
+                                pVarAnterior = "?varAuxiliar";
+                                pVarAnteriorAux = pVarAnterior;
+                                foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if ((pAux + 1) < index)
+                                    {
+                                        string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
+                                        filtro.Append($@"{pVarAnterior} ");
+                                        filtro.Append($@"{parteFiltro} ");
+                                        filtro.Append($@"{varActual}. ");
+                                        pVarAnterior = varActual;
+                                        pAux++;
+                                    }
+                                    else if ((pAux + 1) == index)
+                                    {
+                                        string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
+                                        filtro.Append($@"{pVarAnterior} ");
+                                        filtro.Append($@"{parteFiltro} ");
+                                        filtro.Append($@"{varInicial}. ");
+                                        pAux++;
+                                    }
+                                    else
+                                    {
+                                        filtro.Append($@"{pVarAnteriorAux} ");
+                                        filtro.Append($@"{parteFiltro} ");
+                                        //filtro.Append($@"'{HttpUtility.UrlDecode(item.Value[0])}'. ");
+                                        filtro.Append($@"'{HttpUtility.UrlDecode(valorFiltroIn)}'. ");
+                                    }
+                                }
                             }
 
-                            if (!filtrosReciprocos.ContainsKey(item.Key))
+                            // Filtro de fechas.
+                            if (filtrosFecha.Contains(item.Key))
                             {
-                                filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                                //foreach (string fecha in item.Value)
+                                //{
+                                //    filtro.Append($@"FILTER({pVarAnterior} >= {fecha.Split('-')[0]}000000) ");
+                                //    filtro.Append($@"FILTER({pVarAnterior} <= {fecha.Split('-')[1]}000000) ");
+                                //}
+                                filtro.Append($@"FILTER({pVarAnterior} >= {valorFiltroIn.Split('-')[0]}000000) ");
+                                filtro.Append($@"FILTER({pVarAnterior} <= {valorFiltroIn.Split('-')[1]}000000) ");
                             }
-                        }
-                        else
-                        {
-                            string valorFiltro = string.Empty;
-                            //foreach (string valor in item.Value)
-                            //{
+                            else if (filtrosEnteros.Contains(item.Key))
+                            {
+                                string valorFiltro = string.Empty;
+
+                                //foreach (string valor in item.Value)
+                                //{
+                                //    valorFiltro += $@",{valor}";
+                                //}
+
+                                valorFiltro += $@",{valorFiltroIn}";
+
+                                if (valorFiltro.Length > 0)
+                                {
+                                    valorFiltro = valorFiltro.Substring(1);
+                                }
+
+                                if (!filtrosReciprocos.ContainsKey(item.Key))
+                                {
+                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                                }
+                            }
+                            else
+                            {
+                                string valorFiltro = string.Empty;
+                                //foreach (string valor in item.Value)
+                                //{
                                 Uri uriAux = null;
                                 bool esUri = Uri.TryCreate(valorFiltroIn, UriKind.Absolute, out uriAux);
                                 if (esUri)
@@ -196,26 +241,27 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                     //MultiIdioma.
                                     if (valorFiltroIn.Length > 3 && valorFiltroIn[valorFiltroIn.Length - 3] == '@')
                                     {
-                                        valorFiltro += $@",'{valorFiltroIn.Substring(0, valorFiltroIn.Length-3)}'{valorFiltroIn.Substring(valorFiltroIn.Length - 3)}";
+                                        valorFiltro += $@",'{valorFiltroIn.Substring(0, valorFiltroIn.Length - 3)}'{valorFiltroIn.Substring(valorFiltroIn.Length - 3)}";
                                     }
                                     else
                                     {
                                         valorFiltro += $@",'{valorFiltroIn}'";
                                     }
                                 }
-                            //}
+                                //}
 
-                            if (valorFiltro.Length > 0)
-                            {
-                                valorFiltro = valorFiltro.Substring(1);
-                            }
+                                if (valorFiltro.Length > 0)
+                                {
+                                    valorFiltro = valorFiltro.Substring(1);
+                                }
 
-                            if (!filtrosReciprocos.ContainsKey(item.Key))
-                            {
-                                filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                                if (!filtrosReciprocos.ContainsKey(item.Key))
+                                {
+                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                                }
                             }
+                            pVarAnterior = varInicial;
                         }
-                        pVarAnterior = varInicial;
                     }
                 }
                 return filtro.ToString();
@@ -224,72 +270,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         }
 
 
-        /// <summary>
-        /// Rellenar los años faltantes del diccionario.
-        /// </summary>
-        /// <param name="pDicResultados">Diccionario a rellenar.</param>
-        /// <param name="pFechaInicial">Primer año.</param>
-        /// <param name="pFechaFinal">Último año.</param>
-        public static void RellenarAnys(Dictionary<string, int> pDicResultados, string pFechaInicial, string pFechaFinal)
-        {
-            // Fecha inicial.
-            int dia1 = int.Parse(pFechaInicial.Substring(6, 2));
-            int mes1 = int.Parse(pFechaInicial.Substring(4, 2));
-            int anio1 = int.Parse(pFechaInicial.Substring(0, 4));
-            DateTime fecha1 = new DateTime(anio1, mes1, dia1);
 
-            // Fecha final.
-            int dia2 = int.Parse(pFechaFinal.Substring(6, 2));
-            int mes2 = int.Parse(pFechaFinal.Substring(4, 2));
-            int anio2 = int.Parse(pFechaFinal.Substring(0, 4));
-            DateTime fecha2 = new DateTime(anio2, mes2, dia2);
-
-            while (fecha1 <= fecha2)
-            {
-                // Hay que rellenar con los años intermedios.
-                string fechaString = $@"{fecha1.ToString("yyyyMMdd")}010000";
-                if (!pDicResultados.ContainsKey(fechaString))
-                {
-                    pDicResultados.Add(fechaString, 0);
-                }
-                fecha1 = fecha1.AddYears(1);
-            }
-        }
-
-        /// <summary>
-        /// Rellenar los años faltantes del diccionario.
-        /// </summary>
-        /// <param name="pDicResultados">Diccionario a rellenar.</param>
-        /// <param name="pFechaInicial">Primer año.</param>
-        /// <param name="pFechaFinal">Último año.</param>
-        public static void RellenarAnys(Dictionary<string, DataFechas> pDicResultados, string pFechaInicial, string pFechaFinal)
-        {
-            // Fecha inicial.
-            int dia1 = 01;
-            int mes1 = 01;
-            int anio1 = int.Parse(pFechaInicial);
-            DateTime fecha1 = new DateTime(anio1, mes1, dia1);
-
-            // Fecha final.
-            int dia2 = 01;
-            int mes2 = 01;
-            int anio2 = int.Parse(pFechaFinal);
-            DateTime fecha2 = new DateTime(anio2, mes2, dia2);
-
-            while (fecha1 <= fecha2)
-            {
-                // Hay que rellenar con los años intermedios.
-                string fechaString = $@"{fecha1.ToString("yyyy")}";
-                if (!pDicResultados.ContainsKey(fechaString))
-                {
-                    DataFechas data = new();
-                    data.numProyectosInicio = 0;
-                    data.numProyectosFin = 0;
-                    pDicResultados.Add(fechaString, data);
-                }
-                fecha1 = fecha1.AddYears(1);
-            }
-        }
 
         /// <summary>
         /// Obtiene los filtros por los parámetros de la URL.
@@ -298,6 +279,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         /// <returns>Diccionario de filtros.</returns>
         public static Dictionary<string, List<string>> ObtenerParametros(string pParametros)
         {
+            pParametros = pParametros.Trim().Trim('#');
             if (!string.IsNullOrEmpty(pParametros))
             {
                 Dictionary<string, List<string>> dicFiltros = new Dictionary<string, List<string>>();
@@ -321,33 +303,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             }
 
             return null;
-        }
-
-
-
-        /// <summary>
-        /// Agrupa el número de publicaciones por año.
-        /// </summary>
-        /// <param name="pDicResultados">Diccionario a agrupar.</param>
-        /// <returns>Diccionario con los datos agrupados por año.</returns>
-        public static Dictionary<string, int> AgruparAnys(Dictionary<string, int> pDicResultados)
-        {
-            Dictionary<string, int> pDicAgrupado = new Dictionary<string, int>();
-            foreach (KeyValuePair<string, int> item in pDicResultados)
-            {
-                string anio = ExtraerAny(item.Key);
-                int numPublicaciones = item.Value;
-
-                if (!pDicAgrupado.ContainsKey(anio))
-                {
-                    pDicAgrupado.Add(anio, numPublicaciones);
-                }
-                else
-                {
-                    pDicAgrupado[anio] += numPublicaciones;
-                }
-            }
-            return pDicAgrupado;
         }
 
 
@@ -407,6 +362,62 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                 listaColores.Add(pColorHex);
             }
             return listaColores;
+        }
+
+        /// <summary>
+        /// Mediante el ID del recurso en el grafo de búsqueda a través de su ID en el grafo de la ontología
+        /// </summary>
+        /// <param name="pRsourceApi">API</param>
+        /// <param name="pIdOntologia">ID del grafo de la ontología.</param>
+        /// <returns>ID del grafo de búsqueda.</returns>
+        public static string ObtenerIdBusqueda(ResourceApi pRsourceApi, string pIdOntologia)
+        {
+            Guid idCorto = pRsourceApi.GetShortGuid(pIdOntologia);
+            return $@"http://gnoss/{idCorto.ToString().ToUpper()}";
+        }
+
+
+        public static void ProcessRelations(string pNombreRelacion, Dictionary<string, HashSet<string>> pItems, ref Dictionary<string, List<DataQueryRelaciones>> pDicRelaciones)
+        {
+            foreach (string itemA in pItems.Keys)
+            {
+                if (!pDicRelaciones.ContainsKey(itemA))
+                {
+                    pDicRelaciones.Add(itemA, new List<DataQueryRelaciones>());
+                }
+                DataQueryRelaciones dataQueryRelaciones = (pDicRelaciones[itemA].FirstOrDefault(x => x.nombreRelacion == pNombreRelacion));
+                if (dataQueryRelaciones == null)
+                {
+                    dataQueryRelaciones = new DataQueryRelaciones()
+                    {
+                        nombreRelacion = pNombreRelacion,
+                        idRelacionados = new List<Datos>()
+                    };
+                    pDicRelaciones[itemA].Add(dataQueryRelaciones);
+                }
+                foreach (string itemB in pItems.Keys)
+                {
+                    if (itemA != itemB)
+                    {
+                        if (string.Compare(itemA, itemB, StringComparison.OrdinalIgnoreCase) > 0)
+                        {
+                            int num = pItems[itemA].Intersect(pItems[itemB]).Count();
+                            if (num > 0)
+                            {
+                                dataQueryRelaciones.idRelacionados.Add(new Datos()
+                                {
+                                    idRelacionado = itemB,
+                                    numVeces = num
+                                });
+                            }
+                        }
+                    }
+                }
+                if (dataQueryRelaciones.idRelacionados.Count == 0)
+                {
+                    pDicRelaciones[itemA].Remove(dataQueryRelaciones);
+                }
+            }
         }
     }
 }
