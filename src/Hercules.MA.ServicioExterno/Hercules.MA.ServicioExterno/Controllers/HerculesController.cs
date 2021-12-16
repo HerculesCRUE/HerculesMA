@@ -94,7 +94,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para obtener las áreas temáticas de las publicaciones de un grupo.
+        /// Obtiene los datos para crear la gráfica de áreas temáticas de un grupo
         /// </summary>
         /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
@@ -118,7 +118,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para obtener los datos del grupo en la cabecera de la ficha.
+        /// Obtiene los datos para crear la gráfica de colaboradores de un grupo
         /// </summary>
         /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
         /// <param name="pParametros">Filtros de la búsqueda.</param>
@@ -153,44 +153,6 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
 
-
-
-        #region --- Grupo        
-
-
-
-
-
-
-        ///// <summary>
-        ///// Controlador para obtener los datos del grupo en la cabecera de la ficha.
-        ///// </summary>
-        ///// <param name="pIdGrupo">ID del grupo en cuestión.</param>
-        ///// <param name="pParametros">Filtros de las facetas.</param>
-        ///// <returns>JSON con los datos necesarios para el JS.</returns>
-        //[HttpGet("DatosGraficaProyectosGrupo")]
-        //public IActionResult DatosGraficaProyectosGrupo(string pIdGrupo, string pParametros)
-        //{
-        //    ObjGrafica datos = null;
-
-        //    try
-        //    {
-        //        AccionesGroup accionGrupo = new AccionesGroup();
-        //        datos = accionGrupo.GetDatosGraficaProyectos(pIdGrupo, pParametros);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-
-        //    return Ok(datos);
-        //}
-
-
-
-
-
-        #endregion
 
         /// <summary>
         /// Controlador para obtener los datos del proyecto en la cabecera de la ficha.
@@ -240,30 +202,6 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok(datosRedColaboradores);
         }
 
-        ///// <summary>
-        ///// Controlador para obtener los datos de la gráfica de publicaciones.
-        ///// </summary>
-        ///// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
-        ///// <param name="pParametros">Filtros de las facetas.</param>
-        ///// <returns>JSON con los datos necesarios para el JS.</returns>
-        //[HttpGet("DatosGraficaPublicaciones")]
-        //public IActionResult DatosGraficaPublicaciones(string pIdProyecto, string pParametros)
-        //{
-        //    DataGraficaPublicaciones datosPublicaciones = null;
-
-        //    try
-        //    {
-        //        AccionesProyecto accionProyecto = new AccionesProyecto();
-        //        datosPublicaciones = accionProyecto.GetDatosGraficaPublicaciones(pIdProyecto, pParametros);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-
-        //    return Ok(datosPublicaciones);
-        //}
-
         /// <summary>
         /// Controlador para obtener los datos de la gráfica de publicaciones (horizontal).
         /// </summary>
@@ -310,29 +248,6 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(datosCabeceraFichas);
         }
-
-        ///// <summary>
-        ///// Controlador para obtener los datos de la gráfica de publicaciones en persona.
-        ///// </summary>
-        ///// <param name="pIdPersona">ID de la persona en cuestión.</param>
-        ///// <returns>JSON con los datos necesarios para el JS.</returns>
-        //[HttpGet("DatosGraficaPublicacionesPersona")]
-        //public IActionResult DatosGraficaPublicacionesPersona(string pIdPersona, string pParametros)
-        //{
-        //    DataGraficaPublicaciones datosPublicacionesPersona = null;
-
-        //    try
-        //    {
-        //        AccionesPersona accionPersona = new AccionesPersona();
-        //        datosPublicacionesPersona = accionPersona.GetDatosGraficaPublicaciones(pIdPersona, pParametros);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-
-        //    return Ok(datosPublicacionesPersona);
-        //}
 
         /// <summary>
         /// Controlador para obtener los datos de los grupos.
@@ -425,81 +340,6 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(datosPublicacionesPersona);
         }
-
-        ///// <summary>
-        ///// Controlador para obtener los datos de los proyectos por año.
-        ///// </summary>
-        ///// <param name="pIdPersona">ID de la persona en cuestión.</param>
-        ///// <returns>JSON con los datos necesarios para el JS.</returns>
-        //[HttpGet("DatosGraficaProyectosPersona")]
-        //public IActionResult DatosGraficaProyectosPersona(string pIdPersona, string pParametros)
-        //{
-        //    ObjGrafica datosPublicacionesPersona = null;
-
-        //    try
-        //    {
-        //        AccionesPersona accionPersona = new AccionesPersona();
-        //        datosPublicacionesPersona = accionPersona.GetDatosGraficaProyectos(pIdPersona, pParametros);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-
-        //    return Ok(datosPublicacionesPersona);
-        //}
-
-
-        /// <summary>
-        /// Controlador para obtener las citas a un documento.
-        /// </summary>
-        /// <param name="pIdDocumento">ID del documento en cuestión.</param>
-        /// <param name="pParametros">Filtros de las facetas.</param>
-        /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet("DatosGraficaCitas")]
-        public IActionResult DatosGraficaCitas(string pIdDocumento, string pParametros)
-        {
-            List<DataItemRelacion> datosGrupo = null;
-
-            try
-            {
-                AccionesPublicaciones accionGrupo = new AccionesPublicaciones();
-                datosGrupo = accionGrupo.GetDatosGraficaCitas(pIdDocumento, pParametros);
-                // GetDatosGraficaReferencias
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return Ok(datosGrupo);
-        }
-
-
-        /// <summary>
-        /// Controlador para obtener las referencias de un documento.
-        /// </summary>
-        /// <param name="pIdDocumento">ID del documento en cuestión.</param>
-        /// <param name="pParametros">Filtros de las facetas.</param>
-        /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet("DatosGraficaReferencias")]
-        public IActionResult DatosGraficaReferencias(string pIdDocumento, string pParametros)
-        {
-            List<DataItemRelacion> datosGrupo = null;
-
-            try
-            {
-                AccionesPublicaciones accionGrupo = new AccionesPublicaciones();
-                datosGrupo = accionGrupo.GetDatosGraficaReferencias(pIdDocumento, pParametros);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return Ok(datosGrupo);
-        }
-
 
 
         /// <summary>
