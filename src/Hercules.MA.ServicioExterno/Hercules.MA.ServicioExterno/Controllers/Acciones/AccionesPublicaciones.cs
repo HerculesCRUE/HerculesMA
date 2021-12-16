@@ -1,10 +1,9 @@
 ﻿using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
-using Hercules.MA.ServicioExterno.Models.DataGraficaColaboradores;
-using Hercules.MA.ServicioExterno.Models.DataGraficaPublicaciones;
-using Hercules.MA.ServicioExterno.Models.DataGraficaPublicacionesHorizontal;
-using Hercules.MA.ServicioExterno.Models.DataQueryRelaciones;
+using Hercules.MA.ServicioExterno.Models;
+using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaPublicaciones;
+using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -32,13 +31,91 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         /// <summary>
+        /// Obtiene los datos para crear la gráfica de las publicaciones.
+        /// </summary>
+        /// <param name="pParametros">Filtros aplicados</param>
+        /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
+        public DataGraficaPublicaciones GetDatosGraficaPublicaciones(string pParametros)
+        {
+            Dictionary<string, int> dicResultados = new Dictionary<string, int>();
+            SparqlObject resultadoQuery = null;
+            string select = $@"  {mPrefijos}
+                                SELECT ?fecha COUNT(DISTINCT(?documento)) AS ?NumPublicaciones ";
+            int aux = 0;
+            string where = $@"  WHERE {{
+                                    ?documento dct:issued ?fechaAux.
+                                    {UtilidadesAPI.CrearFiltros(UtilidadesAPI.ObtenerParametros(pParametros), "?documento", ref aux)}
+                                    BIND((?fechaAux/10000000000) as ?fecha)
+                                }}ORDER BY ?fecha";
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string fechaPublicacion = UtilidadesAPI.GetValorFilaSparqlObject(fila, "fecha");
+                    int numPublicaciones = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumPublicaciones"));
+                    dicResultados.Add(fechaPublicacion, numPublicaciones);
+                }
+            }
+
+            // Rellenar, agrupar y ordenar los años.
+            if (dicResultados != null && dicResultados.Count > 0)
+            {
+                int anioIni = int.Parse(dicResultados.First().Key);
+                int anioFin = int.Parse(dicResultados.Last().Key);
+                for (int i = anioFin; i < anioFin; i++)
+                {
+                    if (!dicResultados.ContainsKey(i.ToString()))
+                    {
+                        dicResultados.Add(i.ToString(), 0);
+                    }
+                }
+                dicResultados = dicResultados.OrderBy(item => item.Key).ToDictionary((keyItem) => keyItem.Key, (valueItem) => valueItem.Value);
+            }
+
+            // Contruir el objeto de la gráfica.
+            List<string> listaColores = UtilidadesAPI.CrearListaColores(dicResultados.Count, COLOR_GRAFICAS);
+            Datasets datasets = new Datasets("Publicaciones", UtilidadesAPI.GetValuesList(dicResultados), listaColores, listaColores, 1);
+            Models.Graficas.DataGraficaPublicaciones.Data data = new Models.Graficas.DataGraficaPublicaciones.Data(UtilidadesAPI.GetKeysList(dicResultados), new List<Datasets> { datasets });
+            Options options = new Options(new Scales(new Y(true)), new Plugins(new Title(true, "Evolución temporal publicaciones"), new Legend(new Labels(true), "top", "end")));
+            DataGraficaPublicaciones dataGrafica = new DataGraficaPublicaciones("bar", data, options);
+
+            return dataGrafica;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /// <summary>
         /// Obtienes los datos de las pestañas de cada sección de la ficha.
         /// </summary>
         /// <param name="pPersona">Nombre de la persona.</param>
         /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
         public Dictionary<string, int> GetDatosCabeceraDocumento(string pDocumento)
         {
-            string idGrafoBusqueda = ObtenerIdBusqueda(pDocumento);
+            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceApi, pDocumento);
             Dictionary<string, int> dicResultados = new Dictionary<string, int>();
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder();
@@ -88,105 +165,106 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pIdDocumento">ID del recurso del Documento.</param>
         /// <param name="pParametros">En este caso, el nombre completo de la persona.</param>
         /// <returns>Listado de objetos de la gráfica.</returns>
-        public List<DataGraficaColaboradores> GetDatosGraficaReferencias(string pIdDocumento, string pParametros)
+        public List<DataItemRelacion> GetDatosGraficaReferencias(string pIdDocumento, string pParametros)
         {
-            string idGrafoBusqueda = ObtenerIdBusqueda(pIdDocumento);
-            Dictionary<string, string> dicNodos = new Dictionary<string, string>();
-            Dictionary<string, DataQueryRelaciones> dicRelaciones = new Dictionary<string, DataQueryRelaciones>();
-            Dictionary<string, int> dicPersonasColabo = new();
-            SparqlObject resultadoQuery = null;
-            List<DataGraficaColaboradores> colaboradores = new List<DataGraficaColaboradores>();
+            //string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceApi, pIdDocumento);
+            //Dictionary<string, string> dicNodos = new Dictionary<string, string>();
+            //Dictionary<string, DataQueryRelaciones> dicRelaciones = new Dictionary<string, DataQueryRelaciones>();
+            //Dictionary<string, int> dicPersonasColabo = new();
+            //SparqlObject resultadoQuery = null;
+            //List<DataGraficaColaboradores> colaboradores = new List<DataGraficaColaboradores>();
 
-            string personas = $@"<{idGrafoBusqueda}>";
+            //string personas = $@"<{idGrafoBusqueda}>";
 
-            if (!string.IsNullOrEmpty(pParametros))
-            {
-                dicNodos.Add(idGrafoBusqueda, pParametros.ToLower().Trim());
-            }
-
-
-            // Consulta sparql.
-            string select = mPrefijos;
-            select += "SELECT ?cite ?nombre COUNT(*) AS ?numRelaciones";
-            string where = $@"
-                        WHERE {{
-                        <{idGrafoBusqueda}> bibo:cites ?cite.
-                        ?cite roh:title ?nombre.
-                ";
-
-            // Parameters
-            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
-            {
-                // Creación de los filtros obtenidos por parámetros.
-                int aux = 0;
-                Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
-                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?cite", ref aux);
-                where += filtros;
-            }
-
-            where += $@"
-                    }} LIMIT 25
-                ";
-
-            resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+            //if (!string.IsNullOrEmpty(pParametros))
+            //{
+            //    dicNodos.Add(idGrafoBusqueda, pParametros.ToLower().Trim());
+            //}
 
 
-            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
-            {
-                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                {
-                    string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "cite");
-                    int proyectosComun = Int32.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelaciones"));
-                    string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
+            //// Consulta sparql.
+            //string select = mPrefijos;
+            //select += "SELECT ?cite ?nombre COUNT(*) AS ?numRelaciones";
+            //string where = $@"
+            //            WHERE {{
+            //            <{idGrafoBusqueda}> bibo:cites ?cite.
+            //            ?cite roh:title ?nombre.
+            //    ";
 
-                    dicPersonasColabo.Add(id, proyectosComun);
-                    dicNodos.Add(id, nombreColaborador.ToLower().Trim());
-                    personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "cite") + ">";
-                }
-            }
+            //// Parameters
+            //if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            //{
+            //    // Creación de los filtros obtenidos por parámetros.
+            //    int aux = 0;
+            //    Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+            //    string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?cite", ref aux);
+            //    where += filtros;
+            //}
 
-            if (dicNodos.Count > 0)
-            {
-                KeyValuePair<string, string> proyecto = dicNodos.First();
-                foreach (KeyValuePair<string, string> item in dicNodos)
-                {
-                    if (item.Key != proyecto.Key)
-                    {
-                        dicRelaciones.Add(item.Key, new DataQueryRelaciones(new List<Datos> { new Datos(proyecto.Key, dicPersonasColabo[item.Key]) }));
-                    }
-                }
+            //where += $@"
+            //        }} LIMIT 25
+            //    ";
 
-                // Nodos. 
-                if (dicNodos != null && dicNodos.Count > 0)
-                {
-                    foreach (KeyValuePair<string, string> nodo in dicNodos)
-                    {
-                        string clave = nodo.Key;
-                        string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
-                        Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(clave, valor, null, null, null, "nodes");
-                        DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, true, true);
-                        colaboradores.Add(dataColabo);
-                    }
-                }
-
-                // Relaciones.
-                if (dicRelaciones != null && dicRelaciones.Count > 0)
-                {
-                    foreach (KeyValuePair<string, DataQueryRelaciones> sujeto in dicRelaciones)
-                    {
-                        foreach (Datos relaciones in sujeto.Value.idRelacionados)
-                        {
-                            string id = $@"{sujeto.Key}~{relaciones.idRelacionado}~{relaciones.numVeces}";
-                            Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(id, null, sujeto.Key, relaciones.idRelacionado, UtilidadesAPI.CalcularGrosor(4, relaciones.numVeces), "edges");
-                            DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, null, null);
-                            colaboradores.Add(dataColabo);
-                        }
-                    }
-                }
-            }
+            //resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
 
-            return colaboradores;
+            //if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            //{
+            //    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+            //    {
+            //        string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "cite");
+            //        int proyectosComun = Int32.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelaciones"));
+            //        string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
+
+            //        dicPersonasColabo.Add(id, proyectosComun);
+            //        dicNodos.Add(id, nombreColaborador.ToLower().Trim());
+            //        personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "cite") + ">";
+            //    }
+            //}
+
+            //if (dicNodos.Count > 0)
+            //{
+            //    KeyValuePair<string, string> proyecto = dicNodos.First();
+            //    foreach (KeyValuePair<string, string> item in dicNodos)
+            //    {
+            //        if (item.Key != proyecto.Key)
+            //        {
+            //            dicRelaciones.Add(item.Key, new DataQueryRelaciones(new List<Datos> { new Datos(proyecto.Key, dicPersonasColabo[item.Key]) }));
+            //        }
+            //    }
+
+            //    // Nodos. 
+            //    if (dicNodos != null && dicNodos.Count > 0)
+            //    {
+            //        foreach (KeyValuePair<string, string> nodo in dicNodos)
+            //        {
+            //            string clave = nodo.Key;
+            //            string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
+            //            Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(clave, valor, null, null, null, "nodes");
+            //            DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, true, true);
+            //            colaboradores.Add(dataColabo);
+            //        }
+            //    }
+
+            //    // Relaciones.
+            //    if (dicRelaciones != null && dicRelaciones.Count > 0)
+            //    {
+            //        foreach (KeyValuePair<string, DataQueryRelaciones> sujeto in dicRelaciones)
+            //        {
+            //            foreach (Datos relaciones in sujeto.Value.idRelacionados)
+            //            {
+            //                string id = $@"{sujeto.Key}~{relaciones.idRelacionado}~{relaciones.numVeces}";
+            //                Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(id, null, sujeto.Key, relaciones.idRelacionado, UtilidadesAPI.CalcularGrosor(4, relaciones.numVeces), "edges");
+            //                DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, null, null);
+            //                colaboradores.Add(dataColabo);
+            //            }
+            //        }
+            //    }
+            //}
+
+
+            //return colaboradores;
+            return null;
         }
 
         /// <summary>
@@ -195,119 +273,113 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pIdDocumento">ID del recurso del Documento.</param>
         /// <param name="pParametros">En este caso, el nombre completo de la persona.</param>
         /// <returns>Listado de objetos de la gráfica.</returns>
-        public List<DataGraficaColaboradores> GetDatosGraficaCitas(string pIdDocumento, string pParametros)
+        public List<DataItemRelacion> GetDatosGraficaCitas(string pIdDocumento, string pParametros)
         {
-            string idGrafoBusqueda = ObtenerIdBusqueda(pIdDocumento);
-            Dictionary<string, string> dicNodos = new Dictionary<string, string>();
-            Dictionary<string, DataQueryRelaciones> dicRelaciones = new Dictionary<string, DataQueryRelaciones>();
-            Dictionary<string, int> dicPersonasColabo = new();
-            SparqlObject resultadoQuery = null;
-            List<DataGraficaColaboradores> colaboradores = new List<DataGraficaColaboradores>();
+            //string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceApi, pIdDocumento);
+            //Dictionary<string, string> dicNodos = new Dictionary<string, string>();
+            //Dictionary<string, DataQueryRelaciones> dicRelaciones = new Dictionary<string, DataQueryRelaciones>();
+            //Dictionary<string, int> dicPersonasColabo = new();
+            //SparqlObject resultadoQuery = null;
+            //List<DataGraficaColaboradores> colaboradores = new List<DataGraficaColaboradores>();
 
-            string personas = $@"<{idGrafoBusqueda}>";
+            //string personas = $@"<{idGrafoBusqueda}>";
 
-            if (!string.IsNullOrEmpty(pParametros))
-            {
-                dicNodos.Add(idGrafoBusqueda, pParametros.ToLower().Trim());
-            }
-
-
-            // Consulta sparql.
-            string select = mPrefijos;
-            select += "SELECT ?references ?nombre COUNT(*) AS ?numRelaciones";
-            string where = $@"
-                        WHERE {{
-                        ?references bibo:cites <{idGrafoBusqueda}>.
-                        ?references roh:title ?nombre.
-                ";
-
-            // Parameters
-            if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
-            {
-                // Creación de los filtros obtenidos por parámetros.
-                int aux = 0;
-                Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
-                string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?references", ref aux);
-                where += filtros;
-            }
-
-            where += $@"
-                    }} LIMIT 25
-                ";
-
-            resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+            //if (!string.IsNullOrEmpty(pParametros))
+            //{
+            //    dicNodos.Add(idGrafoBusqueda, pParametros.ToLower().Trim());
+            //}
 
 
-            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
-            {
-                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                {
-                    string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "references");
-                    int proyectosComun = Int32.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelaciones"));
-                    string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
+            //// Consulta sparql.
+            //string select = mPrefijos;
+            //select += "SELECT ?references ?nombre COUNT(*) AS ?numRelaciones";
+            //string where = $@"
+            //            WHERE {{
+            //            ?references bibo:cites <{idGrafoBusqueda}>.
+            //            ?references roh:title ?nombre.
+            //    ";
 
-                    if (!dicPersonasColabo.ContainsKey(id))
-                    {
-                        dicPersonasColabo.Add(id, proyectosComun);
-                        dicNodos.Add(id, nombreColaborador.ToLower().Trim());
-                        personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "references") + ">";
-                    } else
-                    {
-                        dicPersonasColabo[id]++;
-                    }
-                    
-                }
-            }
+            //// Parameters
+            //if (!string.IsNullOrEmpty(pParametros) || pParametros != "#")
+            //{
+            //    // Creación de los filtros obtenidos por parámetros.
+            //    int aux = 0;
+            //    Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+            //    string filtros = UtilidadesAPI.CrearFiltros(dicParametros, "?references", ref aux);
+            //    where += filtros;
+            //}
 
-            if (dicNodos.Count > 0)
-            {
-                KeyValuePair<string, string> proyecto = dicNodos.First();
-                foreach (KeyValuePair<string, string> item in dicNodos)
-                {
-                    if (item.Key != proyecto.Key)
-                    {
-                        dicRelaciones.Add(item.Key, new DataQueryRelaciones(new List<Datos> { new Datos(proyecto.Key, dicPersonasColabo[item.Key]) }));
-                    }
-                }
+            //where += $@"
+            //        }} LIMIT 25
+            //    ";
 
-                // Nodos. 
-                if (dicNodos != null && dicNodos.Count > 0)
-                {
-                    foreach (KeyValuePair<string, string> nodo in dicNodos)
-                    {
-                        string clave = nodo.Key;
-                        string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
-                        Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(clave, valor, null, null, null, "nodes");
-                        DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, true, true);
-                        colaboradores.Add(dataColabo);
-                    }
-                }
-
-                // Relaciones.
-                if (dicRelaciones != null && dicRelaciones.Count > 0)
-                {
-                    foreach (KeyValuePair<string, DataQueryRelaciones> sujeto in dicRelaciones)
-                    {
-                        foreach (Datos relaciones in sujeto.Value.idRelacionados)
-                        {
-                            string id = $@"{sujeto.Key}~{relaciones.idRelacionado}~{relaciones.numVeces}";
-                            Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(id, null, sujeto.Key, relaciones.idRelacionado, UtilidadesAPI.CalcularGrosor(4, relaciones.numVeces), "edges");
-                            DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, null, null);
-                            colaboradores.Add(dataColabo);
-                        }
-                    }
-                }
-            }
+            //resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
 
-            return colaboradores;
-        }
+            //if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            //{
+            //    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+            //    {
+            //        string id = UtilidadesAPI.GetValorFilaSparqlObject(fila, "references");
+            //        int proyectosComun = Int32.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numRelaciones"));
+            //        string nombreColaborador = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombre");
+
+            //        if (!dicPersonasColabo.ContainsKey(id))
+            //        {
+            //            dicPersonasColabo.Add(id, proyectosComun);
+            //            dicNodos.Add(id, nombreColaborador.ToLower().Trim());
+            //            personas += ",<" + UtilidadesAPI.GetValorFilaSparqlObject(fila, "references") + ">";
+            //        } else
+            //        {
+            //            dicPersonasColabo[id]++;
+            //        }
+
+            //    }
+            //}
+
+            //if (dicNodos.Count > 0)
+            //{
+            //    KeyValuePair<string, string> proyecto = dicNodos.First();
+            //    foreach (KeyValuePair<string, string> item in dicNodos)
+            //    {
+            //        if (item.Key != proyecto.Key)
+            //        {
+            //            dicRelaciones.Add(item.Key, new DataQueryRelaciones(new List<Datos> { new Datos(proyecto.Key, dicPersonasColabo[item.Key]) }));
+            //        }
+            //    }
+
+            //    // Nodos. 
+            //    if (dicNodos != null && dicNodos.Count > 0)
+            //    {
+            //        foreach (KeyValuePair<string, string> nodo in dicNodos)
+            //        {
+            //            string clave = nodo.Key;
+            //            string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
+            //            Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(clave, valor, null, null, null, "nodes");
+            //            DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, true, true);
+            //            colaboradores.Add(dataColabo);
+            //        }
+            //    }
+
+            //    // Relaciones.
+            //    if (dicRelaciones != null && dicRelaciones.Count > 0)
+            //    {
+            //        foreach (KeyValuePair<string, DataQueryRelaciones> sujeto in dicRelaciones)
+            //        {
+            //            foreach (Datos relaciones in sujeto.Value.idRelacionados)
+            //            {
+            //                string id = $@"{sujeto.Key}~{relaciones.idRelacionado}~{relaciones.numVeces}";
+            //                Models.DataGraficaColaboradores.Data data = new Models.DataGraficaColaboradores.Data(id, null, sujeto.Key, relaciones.idRelacionado, UtilidadesAPI.CalcularGrosor(4, relaciones.numVeces), "edges");
+            //                DataGraficaColaboradores dataColabo = new DataGraficaColaboradores(data, null, null);
+            //                colaboradores.Add(dataColabo);
+            //            }
+            //        }
+            //    }
+            //}
 
 
-        private string ObtenerIdBusqueda(string pIdOntologia)
-        {
-            Guid idCorto = mResourceApi.GetShortGuid(pIdOntologia);
-            return $@"http://gnoss/{idCorto.ToString().ToUpper()}";
+            //return colaboradores;
+            return null;
         }
 
     }
