@@ -102,37 +102,37 @@ namespace Hercules.MA.Load
             ReferenceTables tablas = (ReferenceTables)serializer.Deserialize(new StringReader(documento.InnerXml));
 
             //Carga de entidades secundarias.
-            //CargarFeatures(tablas, "feature");
-            //CargarProjectModality(tablas, "projectmodality");
-            //CargarContributionGradeProject(tablas, "contributiongradeproject");
-            //CargarParticipationTypeProject(tablas, "participationtypeproject");
-            //CargarDedicationRegime(tablas, "dedicationregime");
-            //CargarEventInscriptionType(tablas, "eventinscriptiontype");
-            //CargarContributionGradeDocument(tablas, "contributiongradedocument");
-            //CargarReferenceSource(tablas, "referencesource");
-            //CargarImpactIndexCategory(tablas, "impactindexcategory");
-            //CargarLanguage(tablas, "language");
-            //CargarPublicationType(tablas, "publicationtype");
-            //CargarEventType(tablas, "eventtype");
-            //CargarGeographicRegion(tablas, "geographicregion");
-            //CargarOrganizationType(tablas, "organizationtype");
-            //CargarDocumentFormat(tablas, "documentformat");
-            //CargarGender(tablas, "gender");
-            //CargarProjectType(tablas, "projecttype");
-            //CargarParticipationTypeDocument(tablas, "participationtypedocument");
-            //CargarIndustrialPropertyType(tablas, "industrialpropertytype");
-            //CargarColaborationTypeGroup(tablas, "colaborationtypegroup");
-            //CargarManagementTypeActivity(tablas, "managementtypeactivity");
-            //CargarTargetGroupProfile(tablas, "targetgroupprofile");
-            //CargarAccessSystemActivity(tablas, "accesssystemactivity");
-            //CargarParticipationTypeActivity(tablas, "participationtypeactivity");
-            //CargarStayGoal(tablas, "staygoal");
-            //CargarGrantAim(tablas, "grantaim");
-            //CargarRelationshipType(tablas, "relationshiptype");
-            //CargarScientificActivityDocument("scientificactivitydocument");
-            //CargarScientificExperienceProject("scientificexperienceproject");
-            //CargarDepartment("department");
-            //CargarActivityModality(tablas, "activitymodality");
+            CargarFeatures(tablas, "feature");
+            CargarProjectModality(tablas, "projectmodality");
+            CargarContributionGradeProject(tablas, "contributiongradeproject");
+            CargarParticipationTypeProject(tablas, "participationtypeproject");
+            CargarDedicationRegime(tablas, "dedicationregime");
+            CargarEventInscriptionType(tablas, "eventinscriptiontype");
+            CargarContributionGradeDocument(tablas, "contributiongradedocument");
+            CargarReferenceSource(tablas, "referencesource");
+            CargarImpactIndexCategory(tablas, "impactindexcategory");
+            CargarLanguage(tablas, "language");
+            CargarPublicationType(tablas, "publicationtype");
+            CargarEventType(tablas, "eventtype");
+            CargarGeographicRegion(tablas, "geographicregion");
+            CargarOrganizationType(tablas, "organizationtype");
+            CargarDocumentFormat(tablas, "documentformat");
+            CargarGender(tablas, "gender");
+            CargarProjectType(tablas, "projecttype");
+            CargarParticipationTypeDocument(tablas, "participationtypedocument");
+            CargarIndustrialPropertyType(tablas, "industrialpropertytype");
+            CargarColaborationTypeGroup(tablas, "colaborationtypegroup");
+            CargarManagementTypeActivity(tablas, "managementtypeactivity");
+            CargarTargetGroupProfile(tablas, "targetgroupprofile");
+            CargarAccessSystemActivity(tablas, "accesssystemactivity");
+            CargarParticipationTypeActivity(tablas, "participationtypeactivity");
+            CargarStayGoal(tablas, "staygoal");
+            CargarGrantAim(tablas, "grantaim");
+            CargarRelationshipType(tablas, "relationshiptype");
+            CargarScientificActivityDocument("scientificactivitydocument");
+            CargarScientificExperienceProject("scientificexperienceproject");
+            CargarDepartment("department");
+            CargarActivityModality(tablas, "activitymodality");
         }
 
         /// <summary>

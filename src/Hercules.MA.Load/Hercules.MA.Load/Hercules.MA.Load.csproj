@@ -29,6 +29,12 @@
     <None Update="Dataset\personas_hercules.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Dataset\REVISTAS\Revistas-Scopus-Ciencias.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\REVISTAS\Revistas-Scopus-CienciasSociales.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Dataset\UMU\Areas UNESCO Proyectos.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

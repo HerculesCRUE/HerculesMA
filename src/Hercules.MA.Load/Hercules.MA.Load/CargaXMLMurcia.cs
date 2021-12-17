@@ -14,8 +14,10 @@ using ExcelDataReader;
 using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
+using Hercules.MA.Load.Models;
 using Hercules.MA.Load.Models.TaxonomyOntology;
 using Hercules.MA.Load.Models.UMU;
+using MaindocumentOntology;
 using TaxonomyOntology;
 
 namespace Hercules.MA.Load
@@ -98,59 +100,59 @@ namespace Hercules.MA.Load
             //Lista de recursos a cargar.
             List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
 
+            //Cargar revistas.
+            CambiarOntologia("maindocument");
+            EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
+            Dictionary<string, string> revistasCargar = ObtenerRevistas(ref listaRecursosCargar, dicAreasCategoria);
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
+
             //Cargar organizaciones.
             CambiarOntologia("organization");
-            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Organization", "organization", listaNoBorrar);
             Dictionary<string, string> organizacionesCargar = ObtenerOrganizaciones(personasACargar, ref listaRecursosCargar, equiposProyectos, organizacionesExternas, fuentesFinanciacionProyectos);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar personas.
             CambiarOntologia("person");
-            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Person", "person", listaNoBorrar);
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar, datoEquiposInvestigacion);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar grupos de investigación.
             CambiarOntologia("group");
-            //EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
+            EliminarDatosCargados("http://xmlns.com/foaf/0.1/Group", "group", listaNoBorrar);
             Dictionary<string, string> gruposCargar = ObtenerGrupos(personasACargar, personasCargar, ref listaRecursosCargar, personas, gruposInvestigacion, datoEquiposInvestigacion, organizacionesCargar, lineasDeInvestigacion, lineasInvestigador);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar proyectos.
             CambiarOntologia("project");
-            //EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
+            EliminarDatosCargados("http://vivoweb.org/ontology/core#Project", "project", listaNoBorrar);
             Dictionary<string, string> proyectosCargar = ObtenerProyectos(personasACargar, personasCargar, organizacionesCargar, ref listaRecursosCargar, equiposProyectos, proyectos, organizacionesExternas, fechasProyectos, fechasEquiposProyectos, areasUnescoProyectos, codigosUnesco, fuentesFinanciacionProyectos);
-            //CargarDatos(listaRecursosCargar);
-            listaRecursosCargar.Clear();
-
-            //Cargar revistas.
-            CambiarOntologia("maindocument");
-            //EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
-            Dictionary<string, string> revistarCargar = ObtenerMainDocuments(personasACargar, ref listaRecursosCargar, articulos, autoresArticulos);
-            //CargarDatos(listaRecursosCargar);
-            listaRecursosCargar.Clear();
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();          
 
             //Cargar documentos. (Publicaciones)
             CambiarOntologia("document");
-            //EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
-            Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos, listaTuplas, listaConcepts);
-            //CargarDatos(listaRecursosCargar);
+            EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
+            Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, revistasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos, listaTuplas, listaConcepts, ref revistasCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar documentos. (Congresos)
             CambiarOntologia("document");
-            Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, revistarCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
-            //CargarDatos(listaRecursosCargar);
+            Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, revistasCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar curriculums
             CambiarOntologia("curriculumvitae");
-            //EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
+            EliminarDatosCargados("http://w3id.org/roh/CV", "curriculumvitae", listaNoBorrar);
             Dictionary<string, string> cvCargar = ObtenerCVs(personasACargar, personasCargar, documentosCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas);
-            //CargarDatos(listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Categorización UM
@@ -444,7 +446,7 @@ namespace Hercules.MA.Load
                     personaCarga.Foaf_firstName = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(partesNombre[0]);
                     personaCarga.Foaf_lastName = ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(apellidos.Trim());
                     personaCarga.Roh_crisIdentifier = persona.NUMERODOCUMENTO;
-                    if(persona.PERSONAL_ACTIVO == "S")
+                    if (persona.PERSONAL_ACTIVO == "S")
                     {
                         personaCarga.Roh_isActive = true;
                     }
@@ -454,7 +456,10 @@ namespace Hercules.MA.Load
                     }
                     personaCarga.Vcard_email = new List<string>() { persona.EMAIL };
                     personaCarga.Roh_isSynchronized = false;
-                    personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
+                    if (!string.IsNullOrEmpty(persona.PERS_DEPT_CODIGO))
+                    {
+                        personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
+                    }
 
                     // ORCID                    
                     List<Tuple<string, string, string>> listaDatos = new List<Tuple<string, string, string>>();
@@ -702,7 +707,7 @@ namespace Hercules.MA.Load
                             proyectoCargar.Roh_durationYears = ((zeroTime + diferencia).Year - 1).ToString();
                             proyectoCargar.Roh_durationMonths = ((zeroTime + diferencia).Month - 1).ToString();
                             proyectoCargar.Roh_durationDays = ((zeroTime + diferencia).Day - 1).ToString();
-                        }                        
+                        }
                     }
 
                     //Auxiliar BFO_0000023.
@@ -752,8 +757,8 @@ namespace Hercules.MA.Load
                             else
                             {
                                 proyectoCargar.Vivo_relates.Add(persona);
-                            }                            
-                        }                       
+                            }
+                        }
                     }
 
                     //Principal Organization.
@@ -867,7 +872,7 @@ namespace Hercules.MA.Load
         /// <param name="pListaPersonas"></param>
         /// <param name="pListaPalabrasClave"></param>
         /// <returns>Diccionario con el ID documento / ID recurso.</returns>
-        private static Dictionary<string, string> ObtenerDocumentos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicRevistasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave, List<Proyecto> pListaProyectos, List<EquipoProyecto> pEquipoProyectos, List<Tuple<string, string, string, string, string>> pListaTaxonomia, List<Concept> pListaConcepts)
+        private static Dictionary<string, string> ObtenerDocumentos(Dictionary<string, string> pDicProyectosACargar, HashSet<string> pPersonasACargar, Dictionary<string, string> pDicPersonasCargadas, Dictionary<string, string> pDicRevistasCargadas, ref List<ComplexOntologyResource> pListaRecursosCargar, List<Articulo> pListaArticulos, List<AutorArticulo> pListaAutoresArticulos, List<Persona> pListaPersonas, List<PalabrasClaveArticulos> pListaPalabrasClave, List<Proyecto> pListaProyectos, List<EquipoProyecto> pEquipoProyectos, List<Tuple<string, string, string, string, string>> pListaTaxonomia, List<Concept> pListaConcepts, ref Dictionary<string, string> pRevistasCargadas)
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
             HashSet<string> idsArticulosACargar = new HashSet<string>();
@@ -899,7 +904,46 @@ namespace Hercules.MA.Load
                     DocumentOntology.Document documentoACargar = new DocumentOntology.Document();
                     documentoACargar.IdRoh_scientificActivityDocument = "http://gnoss.com/items/scientificactivitydocument_SAD1";
                     documentoACargar.IdDc_type = "http://gnoss.com/items/publicationtype_020";
-                    documentoACargar.IdVivo_hasPublicationVenue = pDicRevistasCargadas[articulo.NOMBRE_REVISTA];
+
+                    // Revista
+                    if (pRevistasCargadas.ContainsKey(articulo.REIS_ISSN))
+                    {
+                        documentoACargar.IdVivo_hasPublicationVenue = pDicRevistasCargadas[articulo.REIS_ISSN];
+                    }
+                    else if (pRevistasCargadas.ContainsKey(articulo.NOMBRE_REVISTA))
+                    {
+                        documentoACargar.IdVivo_hasPublicationVenue = pDicRevistasCargadas[articulo.NOMBRE_REVISTA];
+                    }
+                    else
+                    {
+                        MainDocument revista = new MainDocument();
+                        revista.Roh_title = articulo.NOMBRE_REVISTA;
+
+                        CambiarOntologia("maindocument");
+                        ComplexOntologyResource resourceRevista = revista.ToGnossApiResource(mResourceApi, new List<string>());
+                        CargarDatos(new List<ComplexOntologyResource>() { resourceRevista }); // <--------------- CARGA
+                        CambiarOntologia("document");
+
+                        //Guardamos los IDs en la lista.
+                        if (!string.IsNullOrEmpty(articulo.REIS_ISSN))
+                        {
+                            pRevistasCargadas.Add(articulo.REIS_ISSN, resourceRevista.GnossId);
+                        }
+                        else if (!string.IsNullOrEmpty(articulo.NOMBRE_REVISTA))
+                        {
+                            pRevistasCargadas.Add(articulo.NOMBRE_REVISTA, resourceRevista.GnossId);
+                        }                        
+                    }
+
+                    if (!string.IsNullOrEmpty(articulo.IMPACTO_REVISTA) && float.TryParse(articulo.IMPACTO_REVISTA, out float numFloat1))
+                    {
+                        documentoACargar.Roh_impactIndexInYear = float.Parse(articulo.IMPACTO_REVISTA);
+                    }
+                    if (!string.IsNullOrEmpty(articulo.CUARTIL_REVISTA) && Int32.TryParse(articulo.CUARTIL_REVISTA, out int num1))
+                    {
+                        documentoACargar.Roh_quartile = Int32.Parse(articulo.CUARTIL_REVISTA);
+                    }
+
                     documentoACargar.Roh_title = articulo.TITULO;
                     documentoACargar.Roh_crisIdentifier = articulo.CODIGO;
 
@@ -996,7 +1040,7 @@ namespace Hercules.MA.Load
 
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item1))
                         {
-                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower() && x.Skos_symbol=="1").Dc_identifier);
+                            categoria.IdsRoh_categoryNode.Add("http://gnoss.com/items/researcharea_" + pListaConcepts.FirstOrDefault(x => x.Skos_prefLabel.ToLower() == dataCategorias.Item1.ToLower() && x.Skos_symbol == "1").Dc_identifier);
                         }
                         if (dataCategorias != null && !string.IsNullOrEmpty(dataCategorias.Item2))
                         {
@@ -1149,6 +1193,9 @@ namespace Hercules.MA.Load
                     //Evento
                     documentoACargar.Bibo_presentedAt = new DocumentOntology.Event();
                     documentoACargar.Bibo_presentedAt.Dc_title = congreso.TITULO_CONGRESO;
+
+                    //Validación
+                    documentoACargar.Roh_isValidated = true;
 
                     //Creamos el recurso.
                     ComplexOntologyResource resource = documentoACargar.ToGnossApiResource(mResourceApi, new List<string>());
@@ -1404,7 +1451,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
         }
 
         /// <summary>
-        /// Proceso de obtención de datos de los MainDocument.
+        /// Proceso de obtención de datos de los MainDocument. (Antiguo!)
         /// </summary>
         /// <param name="pPersonasACargar"></param>
         /// <param name="pListaRecursosCargar"></param>
@@ -1441,7 +1488,6 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                     if (!tituloRevistas.ContainsKey(articulo.NOMBRE_REVISTA))
                     {
                         MaindocumentOntology.MainDocument revista = new MaindocumentOntology.MainDocument();
-                        revista.Roh_crisIdentifier = articulo.NOMBRE_REVISTA;
                         revista.Roh_title = articulo.NOMBRE_REVISTA;
                         revista.Bibo_issn = articulo.REIS_ISSN;
                         revista.IdRoh_format = "http://gnoss.com/items/documentformat_057"; // De momento, todos son revistas.
@@ -1465,11 +1511,11 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
 
                         if (articulo.CUARTIL_REVISTA == "1")
                         {
-                            indice.Roh_journalTop25 = true;
+                            //indice.Roh_journalTop25 = true;
                         }
                         else
                         {
-                            indice.Roh_journalTop25 = false;
+                            //indice.Roh_journalTop25 = false;
                         }
 
                         DateTime fecha = new DateTime();
@@ -1517,11 +1563,11 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
 
                             if (articulo.CUARTIL_REVISTA == "1")
                             {
-                                indice.Roh_journalTop25 = true;
+                                //indice.Roh_journalTop25 = true;
                             }
                             else
                             {
-                                indice.Roh_journalTop25 = false;
+                                //indice.Roh_journalTop25 = false;
                             }
 
                             DateTime fecha = new DateTime();
@@ -1553,7 +1599,314 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                 pListaRecursosCargar.Add(resource);
 
                 //Guardamos los IDs en la lista.
-                dicIDs.Add(revista.Roh_crisIdentifier, resource.GnossId);
+                dicIDs.Add(revista.Roh_title, resource.GnossId);
+            }
+
+            return dicIDs;
+        }
+
+        /// <summary>
+        /// Proceso de obtención de datos de los MainDocument. (Revistas)
+        /// </summary>
+        /// <param name="pListaRecursosCargar">Lista de recursos para almacenar los datos de carga.</param>
+        /// <param name="pCategorias">Categorías de las revistas.</param>
+        /// <returns></returns>
+        private static Dictionary<string, string> ObtenerRevistas(ref List<ComplexOntologyResource> pListaRecursosCargar, Dictionary<string, string> pCategorias)
+        {
+            Dictionary<string, string> dicIDs = new Dictionary<string, string>();
+
+            // Rutas.
+            string rutaRevistasScopus = $@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\REVISTAS\Revistas-Scopus.xlsx";
+            string rutaRevistaWoSCiencias = $@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\REVISTAS\Revistas-WoS-Ciencias.xlsx";
+            string rutaRevistaWoSCienciasSociales = $@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\REVISTAS\Revistas-WoS-CienciasSociales.xlsx";
+
+            // Lista dónde se van a almacenar las revistas.
+            Dictionary<string, MainDocument> dicRevistas = new Dictionary<string, MainDocument>();
+
+            #region --- Revistas WoS Ciencias
+            // Conversión de los datos del excel.
+            DataSet ds = LeerDatosExcel(rutaRevistaWoSCiencias);
+
+            // Lectura de los datos.
+            foreach (DataRow fila in ds.Tables["JCR_SCIE_2020+"].Rows)
+            {
+                // Revista.
+                MainDocument revista = new MainDocument();
+                if (!string.IsNullOrEmpty(fila["TITLE"].ToString()))
+                {
+                    revista.Roh_title = fila["TITLE"].ToString();
+                }
+                if (!string.IsNullOrEmpty(fila["ISSN"].ToString()) && fila["ISSN"].ToString() != "****-****")
+                {
+                    revista.Bibo_issn = fila["ISSN"].ToString();
+                }
+                if (!string.IsNullOrEmpty(fila["EISSN"].ToString()) && fila["EISSN"].ToString() != "****-****")
+                {
+                    revista.Bibo_eissn = fila["EISSN"].ToString();
+                }
+                if (!string.IsNullOrEmpty(fila["PUBLISHER_NAME"].ToString()))
+                {
+                    revista.Bibo_editor = fila["PUBLISHER_NAME"].ToString();
+                }
+                revista.IdRoh_format = "http://gnoss.com/items/documentformat_057";
+                revista.Roh_impactIndex = new List<ImpactIndex>();
+
+                // Índice de impacto.
+                ImpactIndex indiceImpacto = new ImpactIndex();
+                indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_000";
+                if (!string.IsNullOrEmpty(fila["CATEGORY_DESCRIPTION"].ToString()))
+                {
+                    indiceImpacto.IdRoh_impactCategory = pCategorias.FirstOrDefault(x => x.Value == "Science Edition - " + fila["CATEGORY_DESCRIPTION"].ToString()).Key;
+                }
+                indiceImpacto.Roh_year = new DateTime(2020, 1, 1);
+                if (!string.IsNullOrEmpty(fila["CATEGORY_RANKING"].ToString()) && fila["CATEGORY_RANKING"].ToString().Contains("/"))
+                {
+                    indiceImpacto.Roh_publicationPosition = Int32.Parse(fila["CATEGORY_RANKING"].ToString().Split('/')[0]);
+                    indiceImpacto.Roh_journalNumberInCat = Int32.Parse(fila["CATEGORY_RANKING"].ToString().Split('/')[1]);
+                }
+                if (!string.IsNullOrEmpty(fila["QUARTILE_RANK"].ToString()))
+                {
+                    switch (fila["QUARTILE_RANK"].ToString())
+                    {
+                        case "Q1":
+                            indiceImpacto.Roh_quartile = 1;
+                            break;
+                        case "Q2":
+                            indiceImpacto.Roh_quartile = 2;
+                            break;
+                        case "Q3":
+                            indiceImpacto.Roh_quartile = 3;
+                            break;
+                        case "Q4":
+                            indiceImpacto.Roh_quartile = 4;
+                            break;
+                    }
+                }
+                if (!string.IsNullOrEmpty(fila["IMPACT_FACTOR"].ToString()) && float.TryParse(fila["IMPACT_FACTOR"].ToString(), out float n1))
+                {
+                    indiceImpacto.Roh_impactIndexInYear = float.Parse(fila["IMPACT_FACTOR"].ToString().Replace('.', ','));
+                }
+                revista.Roh_impactIndex.Add(indiceImpacto);
+
+                if (!string.IsNullOrEmpty(revista.Bibo_issn)) // Si tiene ISSN...
+                {
+                    if (!dicRevistas.ContainsKey(revista.Bibo_issn))
+                    {
+                        // Si no existe la revista, se agrega.
+                        dicRevistas.Add(revista.Bibo_issn, revista);
+                    }
+                    else
+                    {
+                        // Si existe, que agrege el índice de impacto.
+                        dicRevistas[revista.Bibo_issn].Roh_impactIndex.Add(indiceImpacto);
+                    }
+                }
+                else // Si el ISSN es ****-****...
+                {
+                    if (!dicRevistas.ContainsKey(revista.Roh_title))
+                    {
+                        // Si no existe la revista, se agrega.
+                        dicRevistas.Add(revista.Roh_title, revista);
+                    }
+                    else
+                    {
+                        // Si existe, que agrege el índice de impacto.
+                        dicRevistas[revista.Roh_title].Roh_impactIndex.Add(indiceImpacto);
+                    }
+                }
+            }
+            #endregion
+
+            #region --- Revistas WoS Ciencias Sociales
+            // Conversión de los datos del excel.
+            ds = LeerDatosExcel(rutaRevistaWoSCienciasSociales);
+
+            // Lectura de los datos.
+            foreach (DataRow fila in ds.Tables["JCR_SSCI_2020+"].Rows)
+            {
+                // Revista.
+                MainDocument revista = new MainDocument();
+                if (!string.IsNullOrEmpty(fila["TITLE"].ToString()))
+                {
+                    revista.Roh_title = fila["TITLE"].ToString();
+                }
+                if (!string.IsNullOrEmpty(fila["ISSN"].ToString()) && fila["ISSN"].ToString() != "****-****")
+                {
+                    revista.Bibo_issn = fila["ISSN"].ToString();
+                }
+                if (!string.IsNullOrEmpty(fila["EISSN"].ToString()) && fila["EISSN"].ToString() != "****-****")
+                {
+                    revista.Bibo_eissn = fila["EISSN"].ToString();
+                }
+                if (!string.IsNullOrEmpty(fila["PUBLISHER_NAME"].ToString()))
+                {
+                    revista.Bibo_editor = fila["PUBLISHER_NAME"].ToString();
+                }
+                revista.IdRoh_format = "http://gnoss.com/items/documentformat_057";
+                revista.Roh_impactIndex = new List<ImpactIndex>();
+
+                // Índice de impacto.
+                ImpactIndex indiceImpacto = new ImpactIndex();
+                indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_000";
+                if (!string.IsNullOrEmpty(fila["CATEGORY_DESCRIPTION"].ToString()))
+                {
+                    indiceImpacto.IdRoh_impactCategory = pCategorias.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + fila["CATEGORY_DESCRIPTION"].ToString()).Key;
+                }
+                indiceImpacto.Roh_year = new DateTime(2020, 1, 1);
+                if (!string.IsNullOrEmpty(fila["CATEGORY_RANKING"].ToString()) && fila["CATEGORY_RANKING"].ToString().Contains("/"))
+                {
+                    indiceImpacto.Roh_publicationPosition = Int32.Parse(fila["CATEGORY_RANKING"].ToString().Split('/')[0]);
+                    indiceImpacto.Roh_journalNumberInCat = Int32.Parse(fila["CATEGORY_RANKING"].ToString().Split('/')[1]);
+                }
+                if (!string.IsNullOrEmpty(fila["QUARTILE_RANK"].ToString()))
+                {
+                    switch (fila["QUARTILE_RANK"].ToString())
+                    {
+                        case "Q1":
+                            indiceImpacto.Roh_quartile = 1;
+                            break;
+                        case "Q2":
+                            indiceImpacto.Roh_quartile = 2;
+                            break;
+                        case "Q3":
+                            indiceImpacto.Roh_quartile = 3;
+                            break;
+                        case "Q4":
+                            indiceImpacto.Roh_quartile = 4;
+                            break;
+                    }
+                }
+                if (!string.IsNullOrEmpty(fila["IMPACT_FACTOR"].ToString()) && float.TryParse(fila["IMPACT_FACTOR"].ToString(), out float n1))
+                {
+                    indiceImpacto.Roh_impactIndexInYear = float.Parse(fila["IMPACT_FACTOR"].ToString().Replace('.', ','));
+                }
+                revista.Roh_impactIndex.Add(indiceImpacto);
+
+                if (!string.IsNullOrEmpty(revista.Bibo_issn)) // Si tiene ISSN...
+                {
+                    if (!dicRevistas.ContainsKey(revista.Bibo_issn))
+                    {
+                        // Si no existe la revista, se agrega.
+                        dicRevistas.Add(revista.Bibo_issn, revista);
+                    }
+                    else
+                    {
+                        // Si existe, que agrege el índice de impacto.
+                        dicRevistas[revista.Bibo_issn].Roh_impactIndex.Add(indiceImpacto);
+                    }
+                }
+                else // Si el ISSN es ****-****...
+                {
+                    if (!dicRevistas.ContainsKey(revista.Roh_title))
+                    {
+                        // Si no existe la revista, se agrega.
+                        dicRevistas.Add(revista.Roh_title, revista);
+                    }
+                    else
+                    {
+                        // Si existe, que agrege el índice de impacto.
+                        dicRevistas[revista.Roh_title].Roh_impactIndex.Add(indiceImpacto);
+                    }
+                }
+            }
+            #endregion
+
+            #region --- Revistas Scopus
+            // Nombre de las hojas
+            List<string> listaAnyos = new List<string>() { "CiteScore 2020", "CiteScore 2019", "CiteScore 2018", "CiteScore 2017", "CiteScore 2016", "CiteScore 2015", "CiteScore 2014", "CiteScore 2013", "CiteScore 2012", "CiteScore 2011" };
+
+            foreach (string nombreHoja in listaAnyos)
+            {
+                // Conversión de los datos del excel.
+                ds = LeerDatosExcel(rutaRevistasScopus);
+
+                // Lectura de los datos.
+                foreach (DataRow fila in ds.Tables[nombreHoja].Rows)
+                {
+                    // Revista.
+                    MainDocument revista = new MainDocument();
+                    if (!string.IsNullOrEmpty(fila["Title"].ToString()))
+                    {
+                        revista.Roh_title = fila["Title"].ToString();
+                    }
+                    if (!string.IsNullOrEmpty(fila["ISSN"].ToString()) && fila["ISSN"].ToString() != "0-0")
+                    {
+                        revista.Bibo_issn = fila["ISSN"].ToString();
+                    }
+                    if (!string.IsNullOrEmpty(fila["EISSN"].ToString()) && fila["EISSN"].ToString() != "0-0")
+                    {
+                        revista.Bibo_eissn = fila["EISSN"].ToString();
+                    }
+                    if (!string.IsNullOrEmpty(fila["Publisher"].ToString()))
+                    {
+                        revista.Bibo_editor = fila["Publisher"].ToString();
+                    }
+                    revista.IdRoh_format = "http://gnoss.com/items/documentformat_057";
+                    revista.Roh_impactIndex = new List<ImpactIndex>();
+
+                    // Índice de impacto.
+                    ImpactIndex indiceImpacto = new ImpactIndex();
+                    indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_010";
+                    if (!string.IsNullOrEmpty(fila["Scopus Sub-Subject Area"].ToString()))
+                    {
+                        indiceImpacto.IdRoh_impactCategory = pCategorias.FirstOrDefault(x => x.Value == fila["Scopus Sub-Subject Area"].ToString()).Key;
+                    }
+                    indiceImpacto.Roh_year = new DateTime(Int32.Parse(nombreHoja.Split(" ")[1]), 1, 1);
+                    if (!string.IsNullOrEmpty(fila["RANK"].ToString()))
+                    {
+                        indiceImpacto.Roh_publicationPosition = Int32.Parse(fila["RANK"].ToString());
+                    }
+                    if (!string.IsNullOrEmpty(fila["Rank Out Of"].ToString()))
+                    {
+                        indiceImpacto.Roh_publicationPosition = Int32.Parse(fila["Rank Out Of"].ToString());
+                    }
+                    if (!string.IsNullOrEmpty(fila["Quartile"].ToString()))
+                    {
+                        indiceImpacto.Roh_quartile = Int32.Parse(fila["Quartile"].ToString());
+                    }
+                    if (!string.IsNullOrEmpty(fila["SJR"].ToString()) && float.TryParse(fila["SJR"].ToString(), out float n1))
+                    {
+                        indiceImpacto.Roh_impactIndexInYear = float.Parse(fila["SJR"].ToString());
+                    }
+                    revista.Roh_impactIndex.Add(indiceImpacto);
+
+                    if (!string.IsNullOrEmpty(revista.Bibo_issn)) // Si tiene ISSN...
+                    {
+                        if (!dicRevistas.ContainsKey(revista.Bibo_issn))
+                        {
+                            // Si no existe la revista, se agrega.
+                            dicRevistas.Add(revista.Bibo_issn, revista);
+                        }
+                        else
+                        {
+                            // Si existe, que agrege el índice de impacto.
+                            dicRevistas[revista.Bibo_issn].Roh_impactIndex.Add(indiceImpacto);
+                        }
+                    }
+                    else // Si el ISSN es 0-0...
+                    {
+                        if (!dicRevistas.ContainsKey(revista.Roh_title))
+                        {
+                            // Si no existe la revista, se agrega.
+                            dicRevistas.Add(revista.Roh_title, revista);
+                        }
+                        else
+                        {
+                            // Si existe, que agrege el índice de impacto.
+                            dicRevistas[revista.Roh_title].Roh_impactIndex.Add(indiceImpacto);
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            foreach (KeyValuePair<string, MainDocument> item in dicRevistas)
+            {
+                ComplexOntologyResource resource = item.Value.ToGnossApiResource(mResourceApi, new List<string>());
+                pListaRecursosCargar.Add(resource);
+
+                //Guardamos los IDs en la lista.
+                dicIDs.Add(item.Key, resource.GnossId);
             }
 
             return dicIDs;
@@ -1563,7 +1916,6 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
         /// Permite cargar los recursos.
         /// </summary>
         /// <param name="pListaRecursosCargar">Lista de recursos a cargar.</param>
-        /// <param name="pOntology">Ontología.</param>
         private static void CargarDatos(List<ComplexOntologyResource> pListaRecursosCargar)
         {
             //Carga.
@@ -1583,7 +1935,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
         /// <summary>
         /// Permite cargar los recursos secundarios.
         /// </summary>
-        /// <param name="pListaRecursosSecundariosCargar">Lista de recursos secundarios a cargar.</param>
+        /// <param name="pListaRecursosCargar">Lista de recursos secundarios a cargar.</param>
         private static void CargarDatosSecundarios(List<SecondaryResource> pListaRecursosCargar)
         {
             //Carga.
@@ -1659,6 +2011,220 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                 return pFila[pParametro].value;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Convierte la 1º letra de cada palabra a mayúsculas.
+        /// </summary>
+        /// <param name="pTexto">Texto a convertir</param>
+        /// <returns>Texto con la 1º letra de cada palabra a mayúsculas</returns>
+        public static string ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(string pTexto)
+        {
+            pTexto = pTexto.ToLower();
+            string[] SEPARADORES = { ","/*, "."*/, "...", ":", ";", "(", ")", "<", ">", "/", "|", " y ", " o ", " u ", " e ", "·", " .", ". ", " -", "- ", "[", "]", "{", "}" };
+            Regex RegExSiglos = new Regex(@"\bx{0,3}(i{1,3}|i[vx]|vi{0,3})\b", RegexOptions.IgnoreCase);
+
+            string[] separadores = new string[SEPARADORES.Length + 3];
+            SEPARADORES.CopyTo(separadores, 0);
+            separadores[SEPARADORES.Length] = " ";
+            separadores[SEPARADORES.Length + 1] = ".";
+            separadores[SEPARADORES.Length + 2] = "-";
+
+            string[] palabras = pTexto.Split(separadores, StringSplitOptions.RemoveEmptyEntries);
+
+            string textoFinal = "";
+
+            string palabra2;
+
+            int contador = 0;
+
+            foreach (string palabra in palabras)
+            {
+                palabra2 = palabra;
+                if (palabra.Contains("+") && palabra.Length >= palabra.IndexOf("+") + 2)
+                {
+                    palabra2 = palabra.Substring(0, palabra.IndexOf("+") + 1) + palabra.Substring(palabra.IndexOf("+") + 1, 1).ToUpper() + palabra.Substring(palabra.IndexOf("+") + 2) + " ";
+                }
+
+                //Pongo los símbolos intermedios que hay entre palabra y palabra (espacios, comas...)
+                while (contador < pTexto.Length && !pTexto[contador].Equals(palabra[0]))
+                {
+                    textoFinal += pTexto[contador];
+                    contador++;
+                }
+
+                if (RegExSiglos.IsMatch(palabra2))
+                {
+                    textoFinal += palabra2.ToUpper();
+                }
+                else if (!EsArticuloOConjuncionOPreposicionesComunes(palabra2))
+                {
+                    if (palabra2.Length > 1)
+                    {
+                        textoFinal += palabra2.Substring(0, 1).ToUpper() + palabra2.Substring(1);
+                    }
+                    else if (palabra2.Length == 1)
+                    {
+                        textoFinal += palabra2.ToUpper();
+                    }
+                }
+                else
+                {
+                    textoFinal += palabra2;
+                }
+
+                contador += palabra.Length;
+            }
+
+            //Pongo los símbolos del final de la frase (puntos, cierre de paréntesis...)
+            while (contador < pTexto.Length)
+            {
+                textoFinal += pTexto[contador];
+                contador++;
+            }
+
+            return textoFinal;
+        }
+
+        /// <summary>
+        /// Comprueba si la palabra es un artículo o una conjunción.
+        /// </summary>
+        /// <param name="pPalabra">Palabra a comprobar</param>
+        /// <returns>TRUE si la palabra es un artículo o conjunción, FALSE en caso contrario</returns>
+        public static bool EsArticuloOConjuncionOPreposicionesComunes(string pPalabra)
+        {
+            string[] ARTICULOS = { "el", "la", "los", "las", "un", "una", "lo", "unos", "unas" };
+            string[] CONJUNCIONES = { "y", "o", "u", "e", "ni" };
+            string[] PREPOSICIONESMUYCOMUNES = { "a", "ante", "bajo", "con", "contra", "de", "del", "desde", "en", "entre", "hacia", "hasta", "para", "por", "segun", "sin", "so", "sobre", "tras", "durante", "mediante", "al", "excepto", "salvo" };
+            return (ARTICULOS.Contains(pPalabra) || CONJUNCIONES.Contains(pPalabra) || PREPOSICIONESMUYCOMUNES.Contains(pPalabra));
+        }
+
+        /// <summary>
+        /// Permite normalziar el código DOI de los datos.
+        /// </summary>
+        /// <param name="pDoi">DOI a normalizar.</param>
+        /// <returns>DOI normalizado.</returns>
+        public static string LimpiarDoi(string pDoi)
+        {
+            try
+            {
+                Uri uri = new Uri(pDoi);
+                return uri.AbsolutePath.Substring(1);
+            }
+            catch (Exception)
+            {
+                return pDoi;
+            }
+        }
+
+        /// <summary>
+        /// Consulta la BBDD para obtener un diccionario con el id de la secundaria y su nombre.
+        /// </summary>
+        /// <returns>Diccionario con ID y nombre de la secundaria.</returns>
+        private static Dictionary<string, string> CargaListadosAreasRevistas()
+        {
+            Dictionary<string, string> dicResultados = new Dictionary<string, string>();
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append("SELECT ?ID ?Nombre ");
+            where.Append("WHERE { ");
+            where.Append("?ID ?p ?o. ");
+            where.Append("?o <http://purl.org/dc/elements/1.1/title> ?Nombre. FILTER(lang(?Nombre)='es')");
+            where.Append("} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "impactindexcategory");
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    string id = fila["ID"].value;
+                    string nombre = fila["Nombre"].value;
+                    dicResultados.Add(id, nombre);
+                }
+            }
+
+            return dicResultados;
+        }
+
+        /// <summary>
+        /// Consulta la BBDD para obtener un diccionario con el ISSN/Titulo y el ID del recurso.
+        /// </summary>
+        /// <returns>Diccionario con ISSN/Titulo y el ID del recurso.</returns>
+        private static Dictionary<string, string> ObtenerRevistasCargadas()
+        {
+            Dictionary<string, string> dicResultados = new Dictionary<string, string>();
+            int limit = 1000;
+            int offset = 0;
+
+            bool salirBucle = false;
+
+            do
+            {
+                StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+                // Consulta sparql.
+                select.Append("SELECT ?id ?issn ?titulo ");
+                where.Append("WHERE { ");
+                where.Append("OPTIONAL{?id <http://w3id.org/roh/title> ?titulo. } ");
+                where.Append("OPTIONAL{?id <http://purl.org/ontology/bibo/issn> ?issn. } ");
+                where.Append($@"}} LIMIT {limit} OFFSET {offset} ");
+
+                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "maindocument");
+
+                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                {
+                    offset += limit;
+
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    {
+                        if (fila.ContainsKey("issn") && !dicResultados.ContainsKey(fila["issn"].value))
+                        {
+                            dicResultados.Add(fila["issn"].value, fila["id"].value);
+                        }
+                        else if (!dicResultados.ContainsKey(fila["titulo"].value))
+                        {
+                            dicResultados.Add(fila["titulo"].value, fila["id"].value);
+                        }
+                    }
+                }
+                else
+                {
+                    salirBucle = true;
+                }
+
+            } while (!salirBucle);
+
+            return dicResultados;
+        }
+
+        /// <summary>
+        /// Permite leer los datos de un excel.
+        /// </summary>
+        /// <param name="pRuta">Ruta del excel.</param>
+        /// <returns>Objeto con los datos leidos.</returns>
+        private static DataSet LeerDatosExcel(string pRuta)
+        {
+            // Lectura del Excel.
+            DataSet ds = new DataSet();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (var stream = File.Open(pRuta, FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    ds = reader.AsDataSet(new ExcelDataSetConfiguration()
+                    {
+                        ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
+                        {
+                            UseHeaderRow = true,
+                        }
+                    });
+                }
+            }
+
+            return ds;
         }
 
         #region Lectura de XMLs
@@ -2881,168 +3447,5 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             return listaPropiedades.Select(x => x.Name).ToList();
         }
         #endregion
-
-        /// <summary>
-        /// Convierte la 1º letra de cada palabra a mayúsculas.
-        /// </summary>
-        /// <param name="pTexto">Texto a convertir</param>
-        /// <returns>Texto con la 1º letra de cada palabra a mayúsculas</returns>
-        public static string ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(string pTexto)
-        {
-            pTexto = pTexto.ToLower();
-            string[] SEPARADORES = { ","/*, "."*/, "...", ":", ";", "(", ")", "<", ">", "/", "|", " y ", " o ", " u ", " e ", "·", " .", ". ", " -", "- ", "[", "]", "{", "}" };
-            Regex RegExSiglos = new Regex(@"\bx{0,3}(i{1,3}|i[vx]|vi{0,3})\b", RegexOptions.IgnoreCase);
-
-            string[] separadores = new string[SEPARADORES.Length + 3];
-            SEPARADORES.CopyTo(separadores, 0);
-            separadores[SEPARADORES.Length] = " ";
-            separadores[SEPARADORES.Length + 1] = ".";
-            separadores[SEPARADORES.Length + 2] = "-";
-
-            string[] palabras = pTexto.Split(separadores, StringSplitOptions.RemoveEmptyEntries);
-
-            string textoFinal = "";
-
-            string palabra2;
-
-            int contador = 0;
-
-            foreach (string palabra in palabras)
-            {
-                palabra2 = palabra;
-                if (palabra.Contains("+") && palabra.Length >= palabra.IndexOf("+") + 2)
-                {
-                    palabra2 = palabra.Substring(0, palabra.IndexOf("+") + 1) + palabra.Substring(palabra.IndexOf("+") + 1, 1).ToUpper() + palabra.Substring(palabra.IndexOf("+") + 2) + " ";
-                }
-
-                //Pongo los símbolos intermedios que hay entre palabra y palabra (espacios, comas...)
-                while (contador < pTexto.Length && !pTexto[contador].Equals(palabra[0]))
-                {
-                    textoFinal += pTexto[contador];
-                    contador++;
-                }
-
-                if (RegExSiglos.IsMatch(palabra2))
-                {
-                    textoFinal += palabra2.ToUpper();
-                }
-                else if (!EsArticuloOConjuncionOPreposicionesComunes(palabra2))
-                {
-                    if (palabra2.Length > 1)
-                    {
-                        textoFinal += palabra2.Substring(0, 1).ToUpper() + palabra2.Substring(1);
-                    }
-                    else if (palabra2.Length == 1)
-                    {
-                        textoFinal += palabra2.ToUpper();
-                    }
-                }
-                else
-                {
-                    textoFinal += palabra2;
-                }
-
-                contador += palabra.Length;
-            }
-
-            //Pongo los símbolos del final de la frase (puntos, cierre de paréntesis...)
-            while (contador < pTexto.Length)
-            {
-                textoFinal += pTexto[contador];
-                contador++;
-            }
-
-            return textoFinal;
-        }
-
-        /// <summary>
-        /// Comprueba si la palabra es un artículo o una conjunción.
-        /// </summary>
-        /// <param name="pPalabra">Palabra a comprobar</param>
-        /// <returns>TRUE si la palabra es un artículo o conjunción, FALSE en caso contrario</returns>
-        public static bool EsArticuloOConjuncionOPreposicionesComunes(string pPalabra)
-        {
-            string[] ARTICULOS = { "el", "la", "los", "las", "un", "una", "lo", "unos", "unas" };
-            string[] CONJUNCIONES = { "y", "o", "u", "e", "ni" };
-            string[] PREPOSICIONESMUYCOMUNES = { "a", "ante", "bajo", "con", "contra", "de", "del", "desde", "en", "entre", "hacia", "hasta", "para", "por", "segun", "sin", "so", "sobre", "tras", "durante", "mediante", "al", "excepto", "salvo" };
-            return (ARTICULOS.Contains(pPalabra) || CONJUNCIONES.Contains(pPalabra) || PREPOSICIONESMUYCOMUNES.Contains(pPalabra));
-        }
-
-        /// <summary>
-        /// Permite normalziar el código DOI de los datos.
-        /// </summary>
-        /// <param name="pDoi">DOI a normalizar.</param>
-        /// <returns>DOI normalizado.</returns>
-        public static string LimpiarDoi(string pDoi)
-        {
-            try
-            {
-                Uri uri = new Uri(pDoi);
-                return uri.AbsolutePath.Substring(1);
-            }
-            catch (Exception)
-            {
-                return pDoi;
-            }
-        }
-
-        /// <summary>
-        /// Consulta la BBDD para obtener un diccionario con el id de la secundaria y su nombre.
-        /// </summary>
-        /// <returns>Diccionario con ID y nombre de la secundaria.</returns>
-        private static Dictionary<string, string> CargaListadosAreasRevistas()
-        {
-            Dictionary<string, string> dicResultados = new Dictionary<string, string>();
-            SparqlObject resultadoQuery = null;
-            StringBuilder select = new StringBuilder(), where = new StringBuilder();
-
-            // Consulta sparql.
-            select.Append("SELECT ?ID ?Nombre ");
-            where.Append("WHERE { ");
-            where.Append("?ID ?p ?o. ");
-            where.Append("?o <http://purl.org/dc/elements/1.1/title> ?Nombre. FILTER(lang(?Nombre)='es')");
-            where.Append("} ");
-
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "impactindexcategory");
-
-            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
-            {
-                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                {
-                    string id = fila["ID"].value;
-                    string nombre = fila["Nombre"].value;
-                    dicResultados.Add(id, nombre);
-                }
-            }
-
-            return dicResultados;
-        }
-
-        /// <summary>
-        /// Permite leer los datos de un excel.
-        /// </summary>
-        /// <param name="pRuta">Ruta del excel.</param>
-        /// <returns>Objeto con los datos leidos.</returns>
-        private static DataSet LeerDatosExcel(string pRuta)
-        {
-            // Lectura del Excel.
-            DataSet ds = new DataSet();
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            using (var stream = File.Open(pRuta, FileMode.Open, FileAccess.Read))
-            {
-                using (var reader = ExcelReaderFactory.CreateReader(stream))
-                {
-                    ds = reader.AsDataSet(new ExcelDataSetConfiguration()
-                    {
-                        ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
-                        {
-                            UseHeaderRow = true,
-                        }
-                    });
-                }
-            }
-
-            return ds;
-        }
     }
 }
