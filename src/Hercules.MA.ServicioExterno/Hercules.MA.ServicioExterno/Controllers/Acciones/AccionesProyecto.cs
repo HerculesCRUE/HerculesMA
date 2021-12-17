@@ -138,13 +138,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Se construye el objeto con los datos.
             List<DatosAnyo> listaDatos = new List<DatosAnyo>();
-            listaDatos.Add(new DatosAnyo("Inicio", "#6cafe3", listaInicios));
-            listaDatos.Add(new DatosAnyo("Fin", "#BF4858", listaFines));
+            listaDatos.Add(new DatosAnyo("Inicio", "#6cafe3", listaInicios,1));
+            listaDatos.Add(new DatosAnyo("Fin", "#BF4858", listaFines,0.2f));
 
             // Se crea el objeto de la gráfica.
             DataGraficaProyectos dataObj = new DataGraficaProyectos(dicResultados.Keys.ToList(), listaDatos);
 
-            return new ObjGrafica("bar", dataObj, new Models.Graficas.DataGraficaProyectos.Options(20, new Models.Graficas.DataGraficaProyectos.Scales(new List<YAxes>() { new YAxes(new Models.Graficas.DataGraficaProyectos.Ticks(0)) })));
+            return new ObjGrafica("bar", dataObj);
         }
 
 
