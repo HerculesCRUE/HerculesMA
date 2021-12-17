@@ -194,7 +194,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }
 
                             // Filtro de fechas.
-                            if (filtrosFecha.Contains(item.Key))
+                            if (filtrosFecha.Contains(item.Key)) 
                             {
                                 //foreach (string fecha in item.Value)
                                 //{
@@ -257,7 +257,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                                 if (!filtrosReciprocos.ContainsKey(item.Key))
                                 {
-                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro.Replace("+", "%2B"))})) ");
                                 }
                             }
                             pVarAnterior = varInicial;

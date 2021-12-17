@@ -51,8 +51,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("DatosGraficaProyectos")]
         public IActionResult DatosGraficaProyectos(string pParametros)
         {
-            ObjGrafica datosProyectos = null;
-
+            GraficasProyectos datosProyectos = null;
             try
             {
                 AccionesProyecto accionesProyecto = new AccionesProyecto();
