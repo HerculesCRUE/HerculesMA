@@ -64,6 +64,31 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(datosProyectos);
         }
+
+        /// <summary>
+        /// Obtiene los datos para crear la gráfica de áreas temáticas
+        /// </summary>
+        /// <param name="pId">ID del elemento en cuestión.</param>
+        /// <param name="pType">Tipo del elemento.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaAreasTematicas")]
+        public IActionResult DatosGraficaAreasTematicas(string pId, string pType)
+        {
+            DataGraficaAreasTags datos = null;
+
+            try
+            {
+                AccionesAreasTematicas accionesAreasTematicas = new AccionesAreasTematicas();
+                datos = accionesAreasTematicas.DatosGraficaAreasTematicas(pId, pType);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datos);
+        }
+
         #endregion
 
         #region Grupo
@@ -92,28 +117,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
 
-        /// <summary>
-        /// Obtiene los datos para crear la gráfica de áreas temáticas de un grupo
-        /// </summary>
-        /// <param name="pIdGrupo">ID del grupo en cuestión.</param>
-        /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet("DatosGraficaAreasTematicasGrupo")]
-        public IActionResult DatosGraficaAreasTematicasGrupo(string pIdGrupo)
-        {
-            DataGraficaAreasTags datos = null;
-
-            try
-            {
-                AccionesGroup accionGrupo = new AccionesGroup();
-                datos = accionGrupo.DatosGraficaAreasTematicasGrupo(pIdGrupo);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return Ok(datos);
-        }
+        
 
 
         /// <summary>
