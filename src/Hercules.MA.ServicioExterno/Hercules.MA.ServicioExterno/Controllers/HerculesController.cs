@@ -70,16 +70,18 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="pId">ID del elemento en cuestión.</param>
         /// <param name="pType">Tipo del elemento.</param>
+        /// <param name="pAnioInicio">Año de inicio</param>
+        /// <param name="pAnioFin">Año de fin</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
         [HttpGet("DatosGraficaAreasTematicas")]
-        public IActionResult DatosGraficaAreasTematicas(string pId, string pType)
+        public IActionResult DatosGraficaAreasTematicas(string pId, string pType, string pAnioInicio, string pAnioFin)
         {
             DataGraficaAreasTags datos = null;
 
             try
             {
                 AccionesAreasTematicas accionesAreasTematicas = new AccionesAreasTematicas();
-                datos = accionesAreasTematicas.DatosGraficaAreasTematicas(pId, pType);
+                datos = accionesAreasTematicas.DatosGraficaAreasTematicas(pId, pType, pAnioInicio, pAnioFin);
             }
             catch (Exception)
             {
