@@ -28,12 +28,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pId">ID del elemento en cuestión.</param>
         /// <param name="pType">Tipo del elemento.</param>
+        /// <param name="pAnioInicio">Año de inicio</param>
+        /// <param name="pAnioFin">Año de fin</param>
         /// <returns>Objeto que se trata en JS para contruir la gráfica.</returns>
-        public DataGraficaAreasTags DatosGraficaAreasTematicas(string pId, string pType)
+        public DataGraficaAreasTags DatosGraficaAreasTematicas(string pId, string pType, string pAnioInicio, string pAnioFin)
         {
             string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceApi, pId);
             string filtroElemento = "";
-            switch(pType)
+            switch (pType)
             {
                 case "group":
                     filtroElemento = $@"?documento roh:isProducedBy <{idGrafoBusqueda}>.";
@@ -42,8 +44,20 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     filtroElemento = $@"?documento roh:publicAuthorList <{idGrafoBusqueda}>.";
                     break;
                 default:
-                    throw new Exception("No hay configuración para el tipo '"+ pType+"'");
+                    throw new Exception("No hay configuración para el tipo '" + pType + "'");
                     break;
+            }
+            if (!string.IsNullOrEmpty(pAnioInicio) || !string.IsNullOrEmpty(pAnioInicio))
+            {
+                filtroElemento += $@"?documento dct:issued ?fecha.";
+                if (!string.IsNullOrEmpty(pAnioInicio))
+                {
+                    filtroElemento += $@"FILTER(?fecha>={pAnioInicio}0000000000)";
+                }
+                if (!string.IsNullOrEmpty(pAnioFin))
+                {
+                    filtroElemento += $@"FILTER(?fecha<={int.Parse(pAnioFin) + 1}0000000000)";
+                }
             }
 
             Dictionary<string, int> dicResultados = new Dictionary<string, int>();
