@@ -41,6 +41,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 case "person":
                     filtroElemento = $@"?documento roh:publicAuthorList <{idGrafoBusqueda}>.";
                     break;
+                default:
+                    throw new Exception("No hay configuración para el tipo '"+ pType+"'");
+                    break;
             }
 
             Dictionary<string, int> dicResultados = new Dictionary<string, int>();
