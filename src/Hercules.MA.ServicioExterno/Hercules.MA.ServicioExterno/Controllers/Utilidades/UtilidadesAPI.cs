@@ -129,6 +129,20 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }}
                         ");
 
+            filtrosPersonalizados.Add("searchDocumentosRelacionadosConProyecto",
+                        @$"
+                            {{
+                                SELECT DISTINCT {pVarAnterior}
+	                            WHERE 
+	                            {{	
+                                    {pVarAnterior} a 'person'	
+		                            FILTER(?item=<http://gnoss/[PARAMETRO]>)
+                                    {pVarAnterior} <http://w3id.org/roh/project> ?item.
+	                            }}
+                            }}
+                        ");
+
+
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;
 
@@ -206,24 +220,31 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }
                             else if (filtrosEnteros.Contains(item.Key))
                             {
-                                string valorFiltro = string.Empty;
 
-                                //foreach (string valor in item.Value)
-                                //{
-                                //    valorFiltro += $@",{valor}";
-                                //}
-
-                                valorFiltro += $@",{valorFiltroIn}";
-
-                                if (valorFiltro.Length > 0)
+                                // Comprueba si es un rango
+                                if (valorFiltroIn.Contains('-'))
                                 {
-                                    valorFiltro = valorFiltro.Substring(1);
+                                    filtro.Append($@"FILTER({pVarAnterior} >= {valorFiltroIn.Split('-')[0]}) ");
+                                    filtro.Append($@"FILTER({pVarAnterior} <= {valorFiltroIn.Split('-')[1]}) ");
                                 }
-
-                                if (!filtrosReciprocos.ContainsKey(item.Key))
+                                else 
                                 {
-                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                                    // Si no es un rango...
+
+                                    string valorFiltro = string.Empty;
+                                    valorFiltro += $@",{valorFiltroIn}";
+
+                                    if (valorFiltro.Length > 0)
+                                    {
+                                        valorFiltro = valorFiltro.Substring(1);
+                                    }
+
+                                    if (!filtrosReciprocos.ContainsKey(item.Key))
+                                    {
+                                        filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro)})) ");
+                                    }
                                 }
+                                
                             }
                             else
                             {
@@ -279,28 +300,32 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         /// <returns>Diccionario de filtros.</returns>
         public static Dictionary<string, List<string>> ObtenerParametros(string pParametros)
         {
-            pParametros = pParametros.Trim().Trim('#');
             if (!string.IsNullOrEmpty(pParametros))
             {
-                Dictionary<string, List<string>> dicFiltros = new Dictionary<string, List<string>>();
-
-                // Agregamos al diccionario los filtros.
-                foreach (string filtro in pParametros.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries))
+                pParametros = pParametros.Trim().Trim('#');
+                if (!string.IsNullOrEmpty(pParametros))
                 {
-                    string keyFiltro = filtro.Split('=')[0];
-                    string valorFiltro = filtro.Split('=')[1];
-                    if (dicFiltros.ContainsKey(keyFiltro))
-                    {
-                        dicFiltros[keyFiltro].Add(valorFiltro);
-                    }
-                    else
-                    {
-                        dicFiltros.Add(keyFiltro, new List<string> { valorFiltro });
-                    }
-                }
+                    Dictionary<string, List<string>> dicFiltros = new Dictionary<string, List<string>>();
 
-                return dicFiltros;
+                    // Agregamos al diccionario los filtros.
+                    foreach (string filtro in pParametros.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        string keyFiltro = filtro.Split('=')[0];
+                        string valorFiltro = filtro.Split('=')[1];
+                        if (dicFiltros.ContainsKey(keyFiltro))
+                        {
+                            dicFiltros[keyFiltro].Add(valorFiltro);
+                        }
+                        else
+                        {
+                            dicFiltros.Add(keyFiltro, new List<string> { valorFiltro });
+                        }
+                    }
+
+                    return dicFiltros;
+                }
             }
+           
 
             return null;
         }
