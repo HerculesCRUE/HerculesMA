@@ -83,6 +83,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             filtrosEnteros.Add("roh:publicationsNumber");
             filtrosEnteros.Add("roh:projectsNumber");
             filtrosEnteros.Add("roh:publicationsNumber");
+            filtrosEnteros.Add("roh:citationCount");
 
             // Filtros de inversas.
             Dictionary<string, int> filtrosReciprocos = new Dictionary<string, int>();
