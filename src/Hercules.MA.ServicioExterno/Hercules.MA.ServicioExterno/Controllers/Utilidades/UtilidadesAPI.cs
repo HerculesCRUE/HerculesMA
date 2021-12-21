@@ -402,7 +402,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         }
 
 
-        public static void ProcessRelations(string pNombreRelacion, Dictionary<string, HashSet<string>> pItems, ref Dictionary<string, List<DataQueryRelaciones>> pDicRelaciones)
+        public static void ProcessRelations(string pNombreRelacion, Dictionary<string, List<string>> pItems, ref Dictionary<string, List<DataQueryRelaciones>> pDicRelaciones)
         {
             foreach (string itemA in pItems.Keys)
             {
