@@ -357,6 +357,237 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
         /// <summary>
+        /// Obtiene los datos para crear el grafo de miembros.
+        /// </summary>
+        /// <param name="pIdProyecto">ID del recurso del proyecto.</param>
+        /// <param name="pParametros">Filtros aplicados en las facetas.</param>
+        /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
+        public List<DataItemRelacion> DatosGraficaRedMiembros(string pIdProyecto, string pParametros)
+        {
+
+            HashSet<string> miembros = new HashSet<string>();
+            HashSet<string> ip = new HashSet<string>();
+
+            //Nodos            
+            Dictionary<string, string> dicNodos = new Dictionary<string, string>();
+            //Relaciones
+            Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new Dictionary<string, List<DataQueryRelaciones>>();
+            //Respuesta
+            List<DataItemRelacion> items = new List<DataItemRelacion>();
+
+            int aux = 0;
+            Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+            string filtrosPersonas = UtilidadesAPI.CrearFiltros(dicParametros, "?person", ref aux);
+
+
+            #region Cargamos nodos
+            {
+
+                //Miembros
+                string select = $@"{mPrefijos}
+                                select distinct ?person ?nombre ?ip";
+                string where = $@"
+                WHERE {{ 
+                        {filtrosPersonas}
+                        ?person a 'person'.
+                        ?person foaf:name ?nombre.
+                        {{
+                            <http://gnoss/{pIdProyecto}> <http://vivoweb.org/ontology/core#relates> ?main.
+                            ?main <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            BIND(false as ?ip)
+                        }}UNION
+                        {{
+                            <http://gnoss/{pIdProyecto}> <http://w3id.org/roh/mainReseachers> ?member.
+                            ?member <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            BIND(true as ?ip)
+                        }}
+                        
+                }}";
+
+                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                {
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    {
+                        if (!dicNodos.ContainsKey(fila["person"].value))
+                        {
+                            dicNodos.Add(fila["person"].value, fila["nombre"].value);
+                        }
+                        if (fila.ContainsKey("ip") && (fila["ip"].value == "1" || fila["ip"].value == "true"))
+                        {
+                            ip.Add(fila["person"].value);
+                        }
+                        else
+                        {
+                            miembros.Add(fila["person"].value);
+                        }
+                    }
+                }
+                miembros.ExceptWith(ip);
+            }
+            {
+                //Proyecto
+                string select = $@"{mPrefijos}
+                                select distinct ?nombre";
+                string where = $@"
+                WHERE {{ 
+                        <http://gnoss/{pIdProyecto}> roh:title ?nombre.                        
+                }}";
+
+                string nombreProyecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value;
+                dicNodos.Add("http://gnoss/" + pIdProyecto, nombreProyecto);
+            }
+            #endregion
+
+            if (miembros.Union(ip).Count() > 0)
+            {
+                #region Relaciones con el proyecto
+                {
+
+                    string nombreRelacion = "Proyectos";
+                    foreach (var fila in dicNodos)
+                    {
+                        string person = fila.Key;
+                        string project = "http://gnoss/" + pIdProyecto.ToUpper();
+                        int numRelaciones = 1;
+                        if (!dicRelaciones.ContainsKey(project))
+                        {
+                            dicRelaciones.Add(project, new List<DataQueryRelaciones>());
+                        }
+
+                        DataQueryRelaciones dataQueryRelaciones = (dicRelaciones[project].FirstOrDefault(x => x.nombreRelacion == nombreRelacion));
+                        if (dataQueryRelaciones == null)
+                        {
+                            dataQueryRelaciones = new DataQueryRelaciones()
+                            {
+                                nombreRelacion = nombreRelacion,
+                                idRelacionados = new List<Datos>()
+                            };
+                            dicRelaciones[project].Add(dataQueryRelaciones);
+                        }
+                        dataQueryRelaciones.idRelacionados.Add(new Datos()
+                        {
+                            idRelacionado = person,
+                            numVeces = numRelaciones
+                        });
+                    }
+                }
+                #endregion
+
+                #region Relaciones entre miembros
+                {
+                    //Proyectos
+                    {
+                        string select = "SELECT ?person group_concat(?project;separator=\",\") as ?projects";
+                        string where = $@"
+                    WHERE {{ 
+                            ?project a 'project'.
+                            ?project ?propRol ?rol
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
+                        }}";
+                        SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                        Dictionary<string, HashSet<string>> personaProy = new Dictionary<string, HashSet<string>>();
+                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                        {
+                            string projects = fila["projects"].value;
+                            string person = fila["person"].value;
+                            personaProy.Add(person, new HashSet<string>(projects.Split(',')));
+                        }
+                        UtilidadesAPI.ProcessRelations("Proyectos", personaProy, ref dicRelaciones);
+                    }
+                    //DOCUMENTOS
+                    {
+                        string select = "SELECT ?person group_concat(?document;separator=\",\") as ?documents";
+                        string where = $@"
+                    WHERE {{ 
+                            ?document a 'document'.
+                            ?document <http://purl.org/ontology/bibo/authorList> ?authorList.
+                            ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
+                        }}";
+                        SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                        Dictionary<string, HashSet<string>> personaDoc = new Dictionary<string, HashSet<string>>();
+                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                        {
+                            string documents = fila["documents"].value;
+                            string person = fila["person"].value;
+                            personaDoc.Add(person, new HashSet<string>(documents.Split(',')));
+                        }
+                        UtilidadesAPI.ProcessRelations("Documentos", personaDoc, ref dicRelaciones);
+                    }
+                }
+                #endregion
+
+                int maximasRelaciones = 0;
+                foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
+                {
+                    foreach (DataQueryRelaciones relaciones in sujeto.Value)
+                    {
+                        foreach (Datos relaciones2 in relaciones.idRelacionados)
+                        {
+                            maximasRelaciones = Math.Max(maximasRelaciones, relaciones2.numVeces);
+                        }
+                    }
+                }
+
+                // Nodos. 
+                if (dicNodos != null && dicNodos.Count > 0)
+                {
+                    foreach (KeyValuePair<string, string> nodo in dicNodos)
+                    {
+                        string clave = nodo.Key;
+                        string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
+                        Models.Graficas.DataItemRelacion.Data.Type type = Models.Graficas.DataItemRelacion.Data.Type.none;
+                        if (ip.Contains(nodo.Key))
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_ip;
+                        }
+                        else if (miembros.Contains(nodo.Key))
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
+                        }
+                        Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, valor, null, null, null, "nodes", type);
+                        DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
+                        items.Add(dataColabo);
+                    }
+                }
+
+                // Relaciones.
+                if (dicRelaciones != null && dicRelaciones.Count > 0)
+                {
+                    foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
+                    {
+                        foreach (DataQueryRelaciones relaciones in sujeto.Value)
+                        {
+                            foreach (Datos relaciones2 in relaciones.idRelacionados)
+                            {
+                                string id = $@"{sujeto.Key}~{relaciones.nombreRelacion}~{relaciones2.idRelacionado}~{relaciones2.numVeces}";
+                                Models.Graficas.DataItemRelacion.Data.Type type = Models.Graficas.DataItemRelacion.Data.Type.none;
+                                if (relaciones.nombreRelacion == "Proyectos")
+                                {
+                                    type = Models.Graficas.DataItemRelacion.Data.Type.relation_project;
+                                }
+                                else if (relaciones.nombreRelacion == "Documentos")
+                                {
+                                    type = Models.Graficas.DataItemRelacion.Data.Type.relation_document;
+                                }
+                                Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(id, relaciones.nombreRelacion, sujeto.Key, relaciones2.idRelacionado, UtilidadesAPI.CalcularGrosor(maximasRelaciones, relaciones2.numVeces), "edges", type);
+                                DataItemRelacion dataColabo = new DataItemRelacion(data, null, null);
+                                items.Add(dataColabo);
+                            }
+                        }
+                    }
+                }
+            }
+            return items;
+
+        }
+
+
+
+        /// <summary>
         /// Obtiene los datos para crear el grafo de relaciones con otros investigadores.
         /// </summary>
         /// <param name="pIdProyecto">ID del recurso del proyecto.</param>
@@ -480,7 +711,231 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             //}
 
             //return colaboradores;
-            return null;
+
+
+            HashSet<string> miembros = new HashSet<string>();
+            HashSet<string> ip = new HashSet<string>();
+
+            //Nodos            
+            Dictionary<string, string> dicNodos = new Dictionary<string, string>();
+            //Relaciones
+            Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new Dictionary<string, List<DataQueryRelaciones>>();
+            //Respuesta
+            List<DataItemRelacion> items = new List<DataItemRelacion>();
+
+            int aux = 0;
+            Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
+            string filtrosPersonas = UtilidadesAPI.CrearFiltros(dicParametros, "?person", ref aux);
+
+
+            #region Cargamos nodos
+            {
+
+
+                //where.Append($@"<{idGrafoBusqueda}> vivo:relates ?relacion. ");
+                //where.Append("?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?persona. ");
+                //where.Append("?persona foaf:name ?nombre. ");
+
+                //Miembros
+                string select = $@"{mPrefijos}
+                                select distinct ?person ?nombre ?ip";
+                string where = $@"
+                WHERE {{ 
+                        {filtrosPersonas}
+                        ?person a 'person'.
+                        ?person foaf:name ?nombre.
+                        {{
+                            <http://gnoss/{pIdProyecto}> <http://vivoweb.org/ontology/core#relates> ?main.
+                            ?main <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            BIND(false as ?ip)
+                        }}UNION
+                        {{
+                            <http://gnoss/{pIdProyecto}> <http://w3id.org/roh/mainReseachers> ?member.
+                            ?member <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            BIND(true as ?ip)
+                        }}
+                        
+                }}";
+
+                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                {
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    {
+                        if (!dicNodos.ContainsKey(fila["person"].value))
+                        {
+                            dicNodos.Add(fila["person"].value, fila["nombre"].value);
+                        }
+                        if (fila.ContainsKey("ip") && (fila["ip"].value == "1" || fila["ip"].value == "true"))
+                        {
+                            ip.Add(fila["person"].value);
+                        }
+                        else
+                        {
+                            miembros.Add(fila["person"].value);
+                        }
+                    }
+                }
+                miembros.ExceptWith(ip);
+            }
+            {
+                //Proyecto
+                string select = $@"{mPrefijos}
+                                select distinct ?nombre";
+                string where = $@"
+                WHERE {{ 
+                        <http://gnoss/{pIdProyecto}> roh:title ?nombre.                        
+                }}";
+
+                string nombreProyecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value;
+                dicNodos.Add("http://gnoss/" + pIdProyecto, nombreProyecto);
+            }
+            #endregion
+
+            if (miembros.Union(ip).Count() > 0)
+            {
+                #region Relaciones con el proyecto
+                {
+
+                    string nombreRelacion = "Proyectos";
+                    foreach (var fila in dicNodos)
+                    {
+                        string person = fila.Key;
+                        string project = "http://gnoss/" + pIdProyecto.ToUpper();
+                        int numRelaciones = 1;
+                        if (!dicRelaciones.ContainsKey(project))
+                        {
+                            dicRelaciones.Add(project, new List<DataQueryRelaciones>());
+                        }
+
+                        DataQueryRelaciones dataQueryRelaciones = (dicRelaciones[project].FirstOrDefault(x => x.nombreRelacion == nombreRelacion));
+                        if (dataQueryRelaciones == null)
+                        {
+                            dataQueryRelaciones = new DataQueryRelaciones()
+                            {
+                                nombreRelacion = nombreRelacion,
+                                idRelacionados = new List<Datos>()
+                            };
+                            dicRelaciones[project].Add(dataQueryRelaciones);
+                        }
+                        dataQueryRelaciones.idRelacionados.Add(new Datos()
+                        {
+                            idRelacionado = person,
+                            numVeces = numRelaciones
+                        });
+                    }
+                }
+                #endregion
+
+                #region Relaciones entre miembros
+                {
+                    //Proyectos
+                    {
+                        string select = "SELECT ?person group_concat(?project;separator=\",\") as ?projects";
+                        string where = $@"
+                    WHERE {{ 
+                            ?project a 'project'.
+                            ?project ?propRol ?rol
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
+                        }}";
+                        SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                        Dictionary<string, HashSet<string>> personaProy = new Dictionary<string, HashSet<string>>();
+                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                        {
+                            string projects = fila["projects"].value;
+                            string person = fila["person"].value;
+                            personaProy.Add(person, new HashSet<string>(projects.Split(',')));
+                        }
+                        UtilidadesAPI.ProcessRelations("Proyectos", personaProy, ref dicRelaciones);
+                    }
+                    //DOCUMENTOS
+                    {
+                        string select = "SELECT ?person group_concat(?document;separator=\",\") as ?documents";
+                        string where = $@"
+                    WHERE {{ 
+                            ?document a 'document'.
+                            ?document <http://purl.org/ontology/bibo/authorList> ?authorList.
+                            ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
+                        }}";
+                        SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                        Dictionary<string, HashSet<string>> personaDoc = new Dictionary<string, HashSet<string>>();
+                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                        {
+                            string documents = fila["documents"].value;
+                            string person = fila["person"].value;
+                            personaDoc.Add(person, new HashSet<string>(documents.Split(',')));
+                        }
+                        UtilidadesAPI.ProcessRelations("Documentos", personaDoc, ref dicRelaciones);
+                    }
+                }
+                #endregion
+
+                int maximasRelaciones = 0;
+                foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
+                {
+                    foreach (DataQueryRelaciones relaciones in sujeto.Value)
+                    {
+                        foreach (Datos relaciones2 in relaciones.idRelacionados)
+                        {
+                            maximasRelaciones = Math.Max(maximasRelaciones, relaciones2.numVeces);
+                        }
+                    }
+                }
+
+                // Nodos. 
+                if (dicNodos != null && dicNodos.Count > 0)
+                {
+                    foreach (KeyValuePair<string, string> nodo in dicNodos)
+                    {
+                        string clave = nodo.Key;
+                        string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
+                        Models.Graficas.DataItemRelacion.Data.Type type = Models.Graficas.DataItemRelacion.Data.Type.none;
+                        if (ip.Contains(nodo.Key))
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_ip;
+                        }
+                        else if (miembros.Contains(nodo.Key))
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
+                        }
+                        Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, valor, null, null, null, "nodes", type);
+                        DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
+                        items.Add(dataColabo);
+                    }
+                }
+
+                // Relaciones.
+                if (dicRelaciones != null && dicRelaciones.Count > 0)
+                {
+                    foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
+                    {
+                        foreach (DataQueryRelaciones relaciones in sujeto.Value)
+                        {
+                            foreach (Datos relaciones2 in relaciones.idRelacionados)
+                            {
+                                string id = $@"{sujeto.Key}~{relaciones.nombreRelacion}~{relaciones2.idRelacionado}~{relaciones2.numVeces}";
+                                Models.Graficas.DataItemRelacion.Data.Type type = Models.Graficas.DataItemRelacion.Data.Type.none;
+                                if (relaciones.nombreRelacion == "Proyectos")
+                                {
+                                    type = Models.Graficas.DataItemRelacion.Data.Type.relation_project;
+                                }
+                                else if (relaciones.nombreRelacion == "Documentos")
+                                {
+                                    type = Models.Graficas.DataItemRelacion.Data.Type.relation_document;
+                                }
+                                Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(id, relaciones.nombreRelacion, sujeto.Key, relaciones2.idRelacionado, UtilidadesAPI.CalcularGrosor(maximasRelaciones, relaciones2.numVeces), "edges", type);
+                                DataItemRelacion dataColabo = new DataItemRelacion(data, null, null);
+                                items.Add(dataColabo);
+                            }
+                        }
+                    }
+                }
+            }
+            return items;
+
         }
 
 

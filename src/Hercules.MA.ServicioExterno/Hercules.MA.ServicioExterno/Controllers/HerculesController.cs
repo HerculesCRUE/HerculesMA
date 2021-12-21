@@ -189,6 +189,32 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaRedMiembros")]
+        public IActionResult DatosGraficaRedMiembros(string pIdProyecto, string pParametros)
+        {
+            List<DataItemRelacion> datosRedColaboradores = null;
+
+            try
+            {
+                AccionesProyecto accionProyecto = new AccionesProyecto();
+                datosRedColaboradores = accionProyecto.DatosGraficaRedMiembros(pIdProyecto, pParametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosRedColaboradores);
+        }
+
+
+
+        /// <summary>
+        /// Controlador para obtener los datos de la gráfica de red de colaboradores.
+        /// </summary>
+        /// <param name="pIdProyecto">ID del proyecto en cuestión.</param>
+        /// <param name="pParametros">Filtros de las facetas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
         [HttpGet("DatosGraficaRedColaboradores")]
         public IActionResult DatosGraficaRedColaboradores(string pIdProyecto, string pParametros)
         {
