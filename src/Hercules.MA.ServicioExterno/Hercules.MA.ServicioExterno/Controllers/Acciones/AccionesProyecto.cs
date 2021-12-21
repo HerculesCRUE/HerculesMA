@@ -550,7 +550,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Máximo.
             x xAxes = new x(new Models.Graficas.DataGraficaAreasTags.Ticks(0, 100), new ScaleLabel(true, "Percentage"));
 
-            Models.Graficas.DataGraficaAreasTags.Options options = new Models.Graficas.DataGraficaAreasTags.Options("y", new Plugins(new Title(true, "Resultados de la investigación por fuente de datos"), new Legend(false)), new Models.Graficas.DataGraficaAreasTags.Scales(xAxes));
+            Models.Graficas.DataGraficaAreasTags.Options options = new Models.Graficas.DataGraficaAreasTags.Options("y", new Plugins(null, new Legend(false)), new Models.Graficas.DataGraficaAreasTags.Scales(xAxes));
             DataGraficaAreasTags dataGrafica = new DataGraficaAreasTags("bar", data, options);
 
             return dataGrafica;
