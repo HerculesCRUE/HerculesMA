@@ -354,25 +354,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             return pFecha.Substring(0, 4);
         }
 
-        /// <summary>
-        /// Obtiene las llaves de un diccionario.
-        /// </summary>
-        /// <param name="pDic"></param>
-        /// <returns>Lista de llaves.</returns>
-        public static List<string> GetKeysList(Dictionary<string, int> pDic)
-        {
-            return pDic.Keys.ToList();
-        }
-
-        /// <summary>
-        /// Obtiene los valores de un diccionario.
-        /// </summary>
-        /// <param name="pDic"></param>
-        /// <returns>Lista de valores.</returns>
-        public static List<int> GetValuesList(Dictionary<string, int> pDic)
-        {
-            return pDic.Values.ToList();
-        }
 
         /// <summary>
         /// Permite crear la lista con los colores.

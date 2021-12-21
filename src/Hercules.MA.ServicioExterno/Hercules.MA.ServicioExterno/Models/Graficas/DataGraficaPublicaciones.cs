@@ -30,17 +30,23 @@ namespace Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaPublicaciones
     public class Datasets
     {
         public string label { get; set; }
+        public string type { get; set; }
+        public string stack { get; set; }
         public List<int> data { get; set; }
         public List<string> backgroundColor { get; set; }
         public List<string> borderColor { get; set; }
         public int borderWidth { get; set; }
-        public Datasets(string pLabel, List<int> pData, List<string> pBackgroundColor, List<string> pBorderColor, int pBorderWidth)
+        public string yAxisID { get; set; }
+        public Datasets(string pLabel, List<int> pData, List<string> pBackgroundColor, List<string> pBorderColor, int pBorderWidth,string pStack=null,string pType="bar",string pYAxisID=null)
         {
             this.label = pLabel;
             this.data = pData;
             this.backgroundColor = pBackgroundColor;
             this.borderColor = pBorderColor;
             this.borderWidth = pBorderWidth;
+            this.stack = pStack;
+            this.type = pType;
+            this.yAxisID = pYAxisID;
         }
     }
     public class Options
