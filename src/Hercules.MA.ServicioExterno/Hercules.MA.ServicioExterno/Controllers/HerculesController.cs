@@ -91,6 +91,33 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok(datos);
         }
 
+        /// <summary>
+        /// Obtiene los datos para crear la gráfica de áreas temáticas
+        /// </summary>
+        /// <param name="pId">ID del elemento en cuestión.</param>
+        /// <param name="pType">Tipo del elemento.</param>
+        /// <param name="pAnioInicio">Año de inicio</param>
+        /// <param name="pAnioFin">Año de fin</param>
+        /// <param name="pNumAreas">Nº de areas</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DatosGraficaAreasTematicasArania")]
+        public IActionResult DatosGraficaAreasTematicasArania(string pId, string pType, string pAnioInicio, string pAnioFin,int pNumAreas)
+        {
+            List<DataItemRelacion> datos = null;
+
+            try
+            {
+                AccionesAreasTematicas accionesAreasTematicas = new AccionesAreasTematicas();
+                datos = accionesAreasTematicas.DatosGraficaAreasTematicasArania(pId, pType, pAnioInicio, pAnioFin, pNumAreas);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datos);
+        }
+
         #endregion
 
         #region Grupo

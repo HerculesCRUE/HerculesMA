@@ -199,7 +199,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     //Proyectos
                     {
-                        string select = "SELECT ?person group_concat(?project;separator=\",\") as ?projects";
+                        string select = "SELECT ?person group_concat(distinct ?project;separator=\",\") as ?projects";
                         string where = $@"
                     WHERE {{ 
                             ?project a 'project'.
@@ -209,18 +209,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
                         }}";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
-                        Dictionary<string, HashSet<string>> personaProy = new Dictionary<string, HashSet<string>>();
+                        Dictionary<string, List<string>> personaProy = new Dictionary<string, List<string>>();
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
                             string projects = fila["projects"].value;
                             string person = fila["person"].value;
-                            personaProy.Add(person, new HashSet<string>(projects.Split(',')));
+                            personaProy.Add(person, new List<string>(projects.Split(',')));
                         }
                         UtilidadesAPI.ProcessRelations("Proyectos", personaProy, ref dicRelaciones);
                     }
                     //DOCUMENTOS
                     {
-                        string select = "SELECT ?person group_concat(?document;separator=\",\") as ?documents";
+                        string select = "SELECT ?person group_concat(distinct ?document;separator=\",\") as ?documents";
                         string where = $@"
                     WHERE {{ 
                             ?document a 'document'.
@@ -229,12 +229,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
                         }}";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
-                        Dictionary<string, HashSet<string>> personaDoc = new Dictionary<string, HashSet<string>>();
+                        Dictionary<string, List<string>> personaDoc = new Dictionary<string, List<string>>();
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
                             string documents = fila["documents"].value;
                             string person = fila["person"].value;
-                            personaDoc.Add(person, new HashSet<string>(documents.Split(',')));
+                            personaDoc.Add(person, new List<string>(documents.Split(',')));
                         }
                         UtilidadesAPI.ProcessRelations("Documentos", personaDoc, ref dicRelaciones);
                     }
@@ -259,7 +259,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     foreach (KeyValuePair<string, string> nodo in dicNodos)
                     {
                         string clave = nodo.Key;
-                        string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
                         Models.Graficas.DataItemRelacion.Data.Type type = Models.Graficas.DataItemRelacion.Data.Type.none;
                         if (ip.Contains(nodo.Key))
                         {
@@ -269,7 +268,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
                         }
-                        Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, valor, null, null, null, "nodes", type);
+                        Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", type);
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
                         items.Add(dataColabo);
                     }
@@ -502,7 +501,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     //Proyectos
                     {
-                        string select = "SELECT ?person group_concat(?project;separator=\",\") as ?projects";
+                        string select = "SELECT ?person group_concat(distinct ?project;separator=\",\") as ?projects";
                         string where = $@"
                     WHERE {{ 
                             ?project a 'project'.
@@ -513,12 +512,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
-                        Dictionary<string, HashSet<string>> personaProy = new Dictionary<string, HashSet<string>>();
+                        Dictionary<string, List<string>> personaProy = new Dictionary<string, List<string>>();
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
                             string projects = fila["projects"].value;
                             string person = fila["person"].value;
-                            personaProy.Add(person, new HashSet<string>(projects.Split(',')));
+                            personaProy.Add(person, new List<string>(projects.Split(',')));
                         }
                         UtilidadesAPI.ProcessRelations("Proyectos", personaProy, ref dicRelaciones);
                     }
@@ -534,12 +533,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
-                        Dictionary<string, HashSet<string>> personaDoc = new Dictionary<string, HashSet<string>>();
+                        Dictionary<string, List<string>> personaDoc = new Dictionary<string, List<string>>();
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
                             string documents = fila["documents"].value;
                             string person = fila["person"].value;
-                            personaDoc.Add(person, new HashSet<string>(documents.Split(',')));
+                            personaDoc.Add(person, new List<string>(documents.Split(',')));
                         }
                         UtilidadesAPI.ProcessRelations("Documentos", personaDoc, ref dicRelaciones);
                     }
@@ -566,13 +565,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     foreach (KeyValuePair<string, string> nodo in dicNodos)
                     {
                         string clave = nodo.Key;
-                        string valor = UtilsCadenas.ConvertirPrimeraLetraPalabraAMayusculasExceptoArticulos(nodo.Value);
                         Models.Graficas.DataItemRelacion.Data.Type type = Models.Graficas.DataItemRelacion.Data.Type.none;
                         if (colaboradores.Contains(nodo.Key))
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
                         }
-                        Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, valor, null, null, null, "nodes", type);
+                        Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", type);
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
                         items.Add(dataColabo);
                     }
