@@ -145,15 +145,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Contruir el objeto de la gráfica.
             Models.Graficas.DataGraficaPublicaciones.Data data = new Models.Graficas.DataGraficaPublicaciones.Data(dicResultados.Keys.ToList(), new List<Datasets>());
+            //Construimos un dataset para las citas
+            Datasets datasetCitas = new Datasets("Citas", dicResultadosCitasAnio.Values.ToList(), UtilidadesAPI.CrearListaColores(dicResultados.Count, "#333333"), UtilidadesAPI.CrearListaColores(dicResultados.Count, "#000000"), 1, null, "line", "y2");
+            data.datasets.Add(datasetCitas);
             //Construimos un dataset por cada cuartil
             int num = 0;
             Dictionary<string, string> colores = new Dictionary<string, string>();
-            colores.Add("0", "#e4f5fd");
-            colores.Add("1", "#d4edfc");
-            colores.Add("2", "#94cdfc");
-            colores.Add("3", "#62beff");
-            colores.Add("4", "#499eef");
-            colores.Add("5", "#328cd1");
+            colores.Add("0", "#e4f5fd");//No debería existir
+            colores.Add("1", "#99ff99");
+            colores.Add("2", "#ffff99");
+            colores.Add("3", "#ffaa33");
+            colores.Add("4", "#ff9999");
+            colores.Add("5", "#328cd1");//No debería existir
             foreach (string cuartil in listacuartiles.OrderBy(x => x))
             {
                 string nombre = "Cuartil " + cuartil;
@@ -168,7 +171,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 else
                 {
-                    color = "#000000";
+                    color = "#e4f5fd";
                 }
                 List<string> listaColores = UtilidadesAPI.CrearListaColores(dicResultados.Count, color);
                 List<int> valores = new List<int>();
@@ -187,9 +190,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 data.datasets.Add(dataset);
                 num++;
             }
-            //Construimos un dataset para las citas
-            Datasets datasetCitas = new Datasets("Citas", dicResultadosCitasAnio.Values.ToList(), UtilidadesAPI.CrearListaColores(dicResultados.Count, "#000000"), UtilidadesAPI.CrearListaColores(dicResultados.Count, "#000000"), 1, null, "line", "y2");
-            data.datasets.Add(datasetCitas);
+            
 
             Options options = new Options(new Scales(new Y(true)), new Plugins(new Title(true, "Evolución temporal publicaciones"), new Legend(new Labels(true), "top", "end")));
             DataGraficaPublicaciones dataGrafica = new DataGraficaPublicaciones("bar", data, options);
