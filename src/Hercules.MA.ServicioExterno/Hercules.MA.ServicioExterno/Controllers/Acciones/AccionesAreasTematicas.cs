@@ -191,7 +191,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             List<DataItemRelacion> items = new List<DataItemRelacion>();
 
             Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new Dictionary<string, List<string>>();
-
+            Dictionary<string, int> scoreNodes = new Dictionary<string, int>();
             {
                 string select = $"{mPrefijos} Select ?documento group_concat(?categoria;separator=\",\") as ?idCategorias";
                 string where = $@"  where
@@ -217,6 +217,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         foreach (string categoria in categorias)
                         {
+                            if (!scoreNodes.ContainsKey(categoria))
+                            {
+                                scoreNodes.Add(categoria, 0);
+                            }
+                            scoreNodes[categoria]++;
                             if (!dicResultadosAreaRelacionAreas.ContainsKey(categoria))
                             {
                                 dicResultadosAreaRelacionAreas.Add(categoria, new List<string>());
@@ -300,6 +305,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         string clave = nodo.Key;
                         Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", Models.Graficas.DataItemRelacion.Data.Type.icon_area);
+                        if (scoreNodes.ContainsKey(clave))
+                        {
+                            data.score = scoreNodes[clave];
+                        }
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
                         items.Add(dataColabo);
                     }

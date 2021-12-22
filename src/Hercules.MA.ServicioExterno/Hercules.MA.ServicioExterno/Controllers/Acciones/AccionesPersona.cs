@@ -197,12 +197,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
         /// <summary>
-        /// Obtiene un listado con los objetos de la gráfica.
+        /// Controlador para obtener los datos de la gráfica de nodos de personas.
         /// </summary>
-        /// <param name="pIdPersona">ID del recurso de la persona.</param>
-        /// <param name="pNombrePersona">En este caso, el nombre completo de la persona.</param>
+        /// <param name="pIdPersona">ID de la persona en cuestión.</param>
+        /// <param name="pParametros">Filtros de la búsqueda.</param>
+        /// <param name="pMax">Nº máximo para pintar</param>
         /// <returns>Listado de objetos de la gráfica.</returns>
-        public List<DataItemRelacion> GetDatosGraficaRedColaboradoresPersonas(string pIdPersona, string pParametros, string pNombrePersona)
+        public List<DataItemRelacion> GetDatosGraficaRedColaboradoresPersonas(string pIdPersona, string pParametros, int pMax)
         {
             //string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceApi, pIdPersona);
             //Dictionary<string, string> dicNodos = new Dictionary<string, string>();

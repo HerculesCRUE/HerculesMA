@@ -38,6 +38,7 @@ namespace Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion
         public double? weight { get; set; }
         public string group { get; set; }
         public string type { get; set; }
+        public double? score { get; set; }
 
         public Data(string pId, string pName, string pSource, string pTarget, double? pWeight, string pGroup, Type pType)
         {
