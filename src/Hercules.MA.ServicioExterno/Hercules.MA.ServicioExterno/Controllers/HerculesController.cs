@@ -243,14 +243,14 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pParametros">Filtros de las facetas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
         [HttpGet("DatosGraficaRedColaboradores")]
-        public IActionResult DatosGraficaRedColaboradores(string pIdProyecto, string pParametros)
+        public IActionResult DatosGraficaRedColaboradores(string pIdProyecto, string pParametros, int pMax)
         {
             List<DataItemRelacion> datosRedColaboradores = null;
 
             try
             {
                 AccionesProyecto accionProyecto = new AccionesProyecto();
-                datosRedColaboradores = accionProyecto.GetDatosGraficaRedColaboradores(pIdProyecto, pParametros);
+                datosRedColaboradores = accionProyecto.GetDatosGraficaRedColaboradores(pIdProyecto, pParametros, pMax);
             }
             catch (Exception)
             {

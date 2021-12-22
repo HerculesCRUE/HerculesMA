@@ -156,6 +156,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         ");
 
 
+            filtrosPersonalizados.Add("searchPersonasColaboradoresConProyecto",
+                        @$"
+                            {{
+                                SELECT DISTINCT {pVarAnterior}
+                                WHERE
+                                {{
+                                  ?doc a 'document'.
+                                  ?doc <http://w3id.org/roh/project> <http://gnoss/[PARAMETRO]>.
+                                  ?doc <http://purl.org/ontology/bibo/authorList> ?relacion.
+                                  ?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+
+                                  <http://gnoss/[PARAMETRO]> <http://vivoweb.org/ontology/core#relates> ?relacionproj.
+                                  ?relacionproj <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?merbersproj.
+                                  FILTER ( {pVarAnterior} != ?merbersproj )
+                                }}
+                            }}
+                        ");
+
+
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;
 
