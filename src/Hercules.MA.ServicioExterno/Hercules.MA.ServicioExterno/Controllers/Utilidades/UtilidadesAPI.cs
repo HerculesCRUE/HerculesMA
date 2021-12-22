@@ -155,6 +155,42 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }}
                         ");
 
+            filtrosPersonalizados.Add("searchColaboradoresPorPersona",
+                        @$"
+                            {{
+	                            SELECT DISTINCT {pVarAnterior}
+	                            WHERE 
+	                            {{	
+                                    {pVarAnterior} a 'person'	
+		                            {{
+			                            {{
+				                            #Documentos
+				                            SELECT *
+				                            WHERE {{
+					                            ?documento <http://w3id.org/roh/publicAuthorList> <http://gnoss/[PARAMETRO]>.
+					                            ?documento a 'document'.
+					                            ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
+					                            ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                            }}
+			                            }}
+			                            UNION 
+			                            {{
+				                            #Proyectos
+				                            SELECT *
+				                            WHERE {{
+					                            ?proy <http://w3id.org/roh/publicAuthorList> <http://gnoss/[PARAMETRO]>.
+					                            ?proy a 'project'.
+					                            ?proy ?propRol ?role.
+					                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://w3id.org/roh/mainResearchers>))
+					                            ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                            }}
+			                            }}
+		                            }}		
+		                            FILTER({pVarAnterior}!=<http://gnoss/[PARAMETRO]>)
+	                            }}
+                            }}
+                        ");
+
 
             filtrosPersonalizados.Add("searchPersonasColaboradoresConProyecto",
                         @$"

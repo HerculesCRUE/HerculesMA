@@ -380,16 +380,18 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// Controlador para obtener los datos de la gráfica de nodos de personas.
         /// </summary>
         /// <param name="pIdPersona">ID de la persona en cuestión.</param>
+        /// <param name="pParametros">Filtros de la búsqueda.</param>
+        /// <param name="pMax">Nº máximo para pintar</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
         [HttpGet("DatosGraficaColaboradoresPersonas")]
-        public IActionResult DatosGraficaColaboradoresPersonas(string pIdPersona, string pParametros, string pNombrePersona)
+        public IActionResult DatosGraficaColaboradoresPersonas(string pIdPersona, string pParametros, int pMax)
         {
             List<DataItemRelacion> datosPublicacionesPersona = null;
 
             try
             {
                 AccionesPersona accionPersona = new AccionesPersona();
-                datosPublicacionesPersona = accionPersona.GetDatosGraficaRedColaboradoresPersonas(pIdPersona, pParametros, pNombrePersona);
+                datosPublicacionesPersona = accionPersona.GetDatosGraficaRedColaboradoresPersonas(pIdPersona, pParametros, pMax);
             }
             catch (Exception)
             {
