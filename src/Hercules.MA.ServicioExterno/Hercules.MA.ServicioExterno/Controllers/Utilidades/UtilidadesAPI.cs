@@ -138,8 +138,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                 SELECT DISTINCT {pVarAnterior}
 	                            WHERE 
 	                            {{	
-                                    <http://gnoss/[PARAMETRO]> <http://vivoweb.org/ontology/core#relates> ?relacion.
-                                    ?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+                                    <http://gnoss/[PARAMETRO]> <http://w3id.org/roh/publicAuthorList> {pVarAnterior}.
 	                            }}
                             }}
                         ");
