@@ -63,6 +63,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             cuartil = "";
                         }
+                        if(cuartil != "1" && cuartil != "2" && cuartil != "3" && cuartil != "4")
+                        {
+                            cuartil = "";
+                        }
                         listacuartiles.Add(cuartil);
                         int numPublicaciones = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "NumPublicaciones"));
                         if (!dicResultados.ContainsKey(fechaPublicacion))
@@ -151,12 +155,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             //Construimos un dataset por cada cuartil
             int num = 0;
             Dictionary<string, string> colores = new Dictionary<string, string>();
-            colores.Add("0", "#e4f5fd");//No debería existir
             colores.Add("1", "#99ff99");
             colores.Add("2", "#ffff99");
             colores.Add("3", "#ffaa33");
             colores.Add("4", "#ff9999");
-            colores.Add("5", "#328cd1");//No debería existir
             foreach (string cuartil in listacuartiles.OrderBy(x => x))
             {
                 string nombre = "Cuartil " + cuartil;
