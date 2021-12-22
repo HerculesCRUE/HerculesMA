@@ -39,6 +39,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             GraficasProyectos graficasProyectos = new GraficasProyectos();
 
+
             #region Gráfico de barras
             {
                 Dictionary<string, DataFechas> dicResultados = new();
