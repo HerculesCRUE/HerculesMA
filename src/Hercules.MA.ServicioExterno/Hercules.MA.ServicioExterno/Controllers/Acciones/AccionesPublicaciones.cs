@@ -157,7 +157,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             colores.Add("3", "#ffaa33");
             colores.Add("4", "#ff9999");
             colores.Add("5", "#328cd1");//No debería existir
-            foreach (string cuartil in listacuartiles.OrderByDescending(x => x))
+            foreach (string cuartil in listacuartiles.OrderBy(x => x))
             {
                 string nombre = "Cuartil " + cuartil;
                 if (string.IsNullOrEmpty(cuartil))
