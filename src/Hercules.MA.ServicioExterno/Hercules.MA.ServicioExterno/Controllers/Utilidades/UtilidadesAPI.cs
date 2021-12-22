@@ -130,17 +130,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }}
                         ");
 
-            filtrosPersonalizados.Add("searchDocumentosRelacionadosConProyecto",
-                        @$"
-                            {{
-                                SELECT DISTINCT {pVarAnterior}
-	                            WHERE 
-	                            {{	
-		                            FILTER(?item=<http://gnoss/[PARAMETRO]>)
-                                    {pVarAnterior} <http://w3id.org/roh/project> ?item.
-	                            }}
-                            }}
-                        ");
 
 
             filtrosPersonalizados.Add("searchPersonasRelacionadasConProyecto",
