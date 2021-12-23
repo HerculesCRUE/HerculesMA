@@ -73,7 +73,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             dicResultados.Add(fechaPublicacion, new Dictionary<string, int>());
                         }
-                        dicResultados[fechaPublicacion].Add(cuartil, numPublicaciones);
+                        if (dicResultados[fechaPublicacion].ContainsKey(cuartil))
+                        {
+                            dicResultados[fechaPublicacion][cuartil] += numPublicaciones;
+                        }
+                        else
+                        {
+                            dicResultados[fechaPublicacion].Add(cuartil, numPublicaciones);
+                        }
                     }
                 }
             }
