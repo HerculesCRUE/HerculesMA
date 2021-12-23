@@ -211,31 +211,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 #endregion
 
-                Dictionary<string, string> backGroundColor = new Dictionary<string, string>();
-                backGroundColor.Add("000", "rgba(255, 99, 132, 0.5)");//Autonómica
-                backGroundColor.Add("010", "rgba(54, 162, 235, 0.2)");//Nacional
-                backGroundColor.Add("020", "rgba(255, 206, 86, 0.2)");//Unión Europea
-                backGroundColor.Add("030", "rgba(75, 192, 192, 0.2)");//Internacional no UE
-                backGroundColor.Add("OTHERS", "rgba(175, 92, 92, 0.2)");//Otros
 
-                Dictionary<string, string> borderColor = new Dictionary<string, string>();
-                borderColor.Add("000", "rgba(255, 99, 132, 1)");//Autonómica
-                borderColor.Add("010", "rgba(54, 162, 235, 1)");//Nacional
-                borderColor.Add("020", "rgba(255, 206, 86, 1)");//Unión Europea
-                borderColor.Add("030", "rgba(75, 192, 192, 1)");//Internacional no UE
-                borderColor.Add("OTHERS", "rgba(175, 92, 92, 1)");//Otros
+                // Se construye el objeto con los datos.
+                List<DatosBarra> listaDatos = new List<DatosBarra>();
+                listaDatos.Add(new DatosBarra("Proyectos", "#6cafd3", dicAmbitos.Values.Select(x => x.Value).ToList(), 1, null));
+                // Se crea el objeto de la gráfica.
+                graficasProyectos.graficaSectoresAmbito = new GraficaBarras(new DataGraficaBarras(dicAmbitos.Values.Select(x => x.Key).ToList(), listaDatos));
 
-                Dictionary<string, string> backGroundColorAux = new Dictionary<string, string>();
-                Dictionary<string, string> borderColorAux = new Dictionary<string, string>();
-                foreach (string idAmbito in dicAmbitos.Keys)
-                {
-                    backGroundColorAux[idAmbito] = backGroundColor[idAmbito];
-                    borderColorAux[idAmbito] = borderColor[idAmbito];
-                }
-
-
-                DatosSector datosSector = new DatosSector(backGroundColorAux.Values.ToList(), borderColorAux.Values.ToList(), dicAmbitos.Values.Select(x => x.Value).ToList());
-                graficasProyectos.graficaSectoresAmbito = new GraficaSectores(new DataGraficaSectores(dicAmbitos.Values.Select(x => x.Key).ToList(), new List<DatosSector>() { datosSector }));
             }
             #endregion
 
