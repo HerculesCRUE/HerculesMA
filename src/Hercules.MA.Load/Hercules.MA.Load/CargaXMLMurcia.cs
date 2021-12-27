@@ -1858,7 +1858,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                     }
                     if (!string.IsNullOrEmpty(fila["Rank Out Of"].ToString()))
                     {
-                        indiceImpacto.Roh_publicationPosition = Int32.Parse(fila["Rank Out Of"].ToString());
+                        indiceImpacto.Roh_journalNumberInCat = Int32.Parse(fila["Rank Out Of"].ToString());
                     }
                     if (!string.IsNullOrEmpty(fila["Quartile"].ToString()))
                     {
