@@ -166,7 +166,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             colores.Add("2", "#ffff99");
             colores.Add("3", "#ffaa33");
             colores.Add("4", "#ff9999");
-            foreach (string cuartil in listacuartiles.OrderBy(x => x))
+            foreach (string cuartil in listacuartiles.OrderBy(CompareCuartil))
             {
                 string nombre = "Cuartil " + cuartil;
                 if (string.IsNullOrEmpty(cuartil))
@@ -207,6 +207,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return dataGrafica;
         }
 
+        public int CompareCuartil(string pCuartil)
+        {
+            int cuartil = 0;
+            if (pCuartil == "")
+            {
+                cuartil = 9999;
+            }
+            else
+            {
+                int.TryParse(pCuartil, out cuartil);
+            }
+            return cuartil;
+        }
 
         /// <summary>
         /// Obtienes los datos de las pestañas de cada sección de la ficha.
