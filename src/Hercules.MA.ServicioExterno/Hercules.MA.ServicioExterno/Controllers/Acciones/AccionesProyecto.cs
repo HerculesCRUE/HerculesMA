@@ -374,9 +374,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {filtrosPersonas}
                         ?person a 'person'.
                         ?person foaf:name ?nombre.
-                        
                         {{
-                            <http://gnoss/{pIdProyecto}> ?sasd ?member.
+                            <http://gnoss/{pIdProyecto}> <http://vivoweb.org/ontology/core#relates> ?main.
+                            ?main <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                            BIND(false as ?ip)
+                        }}UNION
+                        {{
+                            <http://gnoss/{pIdProyecto}> <http://w3id.org/roh/mainResearchers> ?member.
                             ?member <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             BIND(true as ?ip)
                         }}
