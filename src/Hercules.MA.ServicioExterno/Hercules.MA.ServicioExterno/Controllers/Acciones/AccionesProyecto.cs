@@ -40,10 +40,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         public GraficasProyectos GetDatosGraficaProyectos(string pParametros)
         {
             List<Thread> threades = new List<Thread>();
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 500; i++)
             {
                 Thread th = new Thread(delegate (object pI) {
-                    mResourceApi.Log.Error("inicio " + pI + ":" + DateTime.Now.ToString("s-fff"));
+                    //mResourceApi.Log.Error("inicio " + pI + ":" + DateTime.Now.ToString("s-fff"));
                     DateTime inicio = DateTime.Now;
                     WebClient w = new WebClient();
                     w.DownloadString("https://www.google.com/?" + pI);
