@@ -39,25 +39,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pParametros">Filtros aplicados en las facetas.</param>
         public GraficasProyectos GetDatosGraficaProyectos(string pParametros)
         {
-            List<Thread> threades = new List<Thread>();
-            for (int i = 0; i < 500; i++)
-            {
-                Thread th = new Thread(delegate (object pI) {
-                    //mResourceApi.Log.Error("inicio " + pI + ":" + DateTime.Now.ToString("s-fff"));
-                    DateTime inicio = DateTime.Now;
-                    WebClient w = new WebClient();
-                    w.DownloadString("https://www.google.com/?" + pI);
-                    DateTime fin = DateTime.Now;
-                    mResourceApi.Log.Error("tiempo " + pI + ":" + (int)(fin - inicio).TotalMilliseconds);
-                });
-                threades.Add(th);
-                th.Start(i);
-            }
-            foreach (Thread th in threades)
-            {
-                th.Join();
-            }
-
             GraficasProyectos graficasProyectos = new GraficasProyectos();
 
 
