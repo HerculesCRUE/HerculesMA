@@ -228,7 +228,7 @@ namespace Hercules.MA.Load
         /// <param name="pSource">Nombre del tesáuro.</param>
         private static void ObtenerTesauroExcel(ref List<SecondaryResource> pListaRecursosCargar, ref List<Tuple<string, string, string, string, string>> pListaTuplas, ref List<Concept> pListaConcepts, string pSource)
         {
-            DataSet ds = LeerDatosExcel($@"C:\GNOSS\Proyectos\HerculesMA\src\Hercules.MA.Load\Hercules.MA.Load\Dataset\Hércules-ED_Taxonomías_v1.1.xlsx");
+            DataSet ds = LeerDatosExcel(@"Dataset\Hércules-ED_Taxonomías_v1.1.xlsx");
 
             List<Tuple<string, string, string, string, string>> listaDatos = new List<Tuple<string, string, string, string, string>>();
             foreach (DataRow fila in ds.Tables["Hércules-KA-taxonomy (clean)"].Rows)
@@ -747,7 +747,7 @@ namespace Hercules.MA.Load
                                 int minutos = Int32.Parse(equipoProyecto.FECHAFINPERIODO.Substring(14, 2));
                                 int segundos = Int32.Parse(equipoProyecto.FECHAFINPERIODO.Substring(17, 2));
                                 fechaFin = new DateTime(anio, mes, dia, horas, minutos, segundos);
-                                proyectoCargar.Vivo_end = fechaFin;
+                                persona.Vivo_end = fechaFin;
                             }
 
                             if (equipoProyecto.CODTIPOPARTICIPACION == "IP")
