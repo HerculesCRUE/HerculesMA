@@ -93,7 +93,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         string nombreCategoria = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombreCategoria");
                         int numCategoria = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numCategorias"));
-                        dicResultados.Add(nombreCategoria, numCategoria);
+                        dicResultados.Add(nombreCategoria + " (" + numCategoria +")", numCategoria);
                     }
                 }
             }
