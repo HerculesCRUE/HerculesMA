@@ -35,6 +35,96 @@
     <None Update="Dataset\REVISTAS\Revistas-Scopus-CienciasSociales.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2011.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2012.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2013.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2014.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2015.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2016.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2017.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2018.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2019.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\scopus\revistas-scopus-2020.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2011.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2012.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2013.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2014.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2015.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2016.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2017.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2018.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2019.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-scie\revistas-wos-scie-2020.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2011.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2012.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2013.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2014.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2015.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2016.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2017.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2018.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2019.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Dataset\Revistas\wos-ssci\revistas-wos-ssci-2020.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Dataset\UMU\Areas UNESCO Proyectos.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -140,6 +230,11 @@
     <None Update="Dataset\UMU\Trabajos presentados en congresos nacionales o internacionales.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Dataset\Revistas\" />
+    <Folder Include="Dataset\UMU\" />
   </ItemGroup>
 
 </Project>
