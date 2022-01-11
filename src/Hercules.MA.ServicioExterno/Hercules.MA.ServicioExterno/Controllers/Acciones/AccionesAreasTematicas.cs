@@ -308,6 +308,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         if (scoreNodes.ContainsKey(clave))
                         {
                             data.score = scoreNodes[clave];
+                            data.name = data.name + " (" + data.score + ")";
                         }
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
                         items.Add(dataColabo);
