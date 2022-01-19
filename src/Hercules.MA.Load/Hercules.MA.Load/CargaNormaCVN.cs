@@ -43,6 +43,7 @@ using DepartmentOntology;
 using Hercules.MA.Load.Models.UMU;
 using ScientificexperienceprojectOntology;
 using ActivitymodalityOntology;
+using ResearchObjectTypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -133,6 +134,10 @@ namespace Hercules.MA.Load
             CargarScientificExperienceProject("scientificexperienceproject");
             CargarDepartment("department");
             CargarActivityModality(tablas, "activitymodality");
+
+
+            //Cargamos los subtipos de los RO
+            CargarResearhObjectType();
         }
 
         /// <summary>
@@ -848,6 +853,108 @@ namespace Hercules.MA.Load
             foreach (PublicationType publication in publicaciones)
             {
                 mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, pOntology + "_" + publication.Dc_identifier));
+            }
+        }
+
+
+        /// <summary>
+        /// Carga la entidad secundaria ResearchObjcetType.
+        /// </summary>
+        private static void CargarResearhObjectType()
+        {
+            string ontology = "researchobjecttype";
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(ontology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ResearchObjectType", ontology);
+
+            //Obtención de los objetos a cargar.
+            List<ResearchObjectType> publicaciones = new List<ResearchObjectType>();
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "1",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Dataset" } },
+                    Roh_researchObjectCode="Genérico"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "2",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Presentación" } },
+                    Roh_researchObjectCode = "Genérico"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "3",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Gráfico" } },
+                    Roh_researchObjectCode = "Genérico"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "4",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Documento" } },
+                    Roh_researchObjectCode = "Genérico"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "5",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Enlace" } },
+                    Roh_researchObjectCode = "Genérico"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "6",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Video" } },
+                    Roh_researchObjectCode = "Genérico"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "7",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Poster" } },
+                    Roh_researchObjectCode = "Genérico"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "8",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Lección" } },
+                    Roh_researchObjectCode = "Genérico"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "9",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Código" } },
+                    Roh_researchObjectCode = "Código"
+                }
+            );
+            publicaciones.Add(
+                new ResearchObjectType()
+                {
+                    Dc_identifier = "10",
+                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Protocolo" } },
+                    Roh_researchObjectCode = "Protocolo"
+                }
+            );
+            //Carga.
+            foreach (ResearchObjectType publication in publicaciones)
+            {
+                mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, ontology + "_" + publication.Dc_identifier));
             }
         }
 
@@ -2089,7 +2196,7 @@ namespace Hercules.MA.Load
             //Carga.
             foreach (Department department in departamentos)
             {
-                var x=mResourceApi.LoadSecondaryResource(department.ToGnossApiResource(mResourceApi, pOntology + "_" + department.Dc_identifier));
+                var x = mResourceApi.LoadSecondaryResource(department.ToGnossApiResource(mResourceApi, pOntology + "_" + department.Dc_identifier));
             }
         }
 
@@ -2106,7 +2213,7 @@ namespace Hercules.MA.Load
             //Lista con datos.
             List<Departamento> departamentos = LeerDepartamentos("Dataset/UMU" + "/Departamentos.xml");
 
-            foreach(Departamento dept in departamentos)
+            foreach (Departamento dept in departamentos)
             {
                 Department department = new Department();
 
@@ -2116,7 +2223,7 @@ namespace Hercules.MA.Load
 
                 //Se guarda el objeto a la lista.
                 pListaDatosDepartment.Add(department);
-            }            
+            }
 
             return pListaDatosDepartment;
         }
