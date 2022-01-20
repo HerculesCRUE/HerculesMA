@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -2013,7 +2014,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                         {
                             dicIDs.Add("eissn_" + fila["eissn"].value, fila["revista"].value);
                         }
-                    };
+                    }
                 }
                 else
                 {
@@ -2294,7 +2295,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                     string id = fila["ID"].value;
                     string nombre = fila["Nombre"].value;
                     dicResultados.Add(id, nombre);
-                };
+                }
             }
 
             return dicResultados;
