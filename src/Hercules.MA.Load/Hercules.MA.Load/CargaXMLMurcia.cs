@@ -1465,173 +1465,8 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             // Guardado de datos.
             Dictionary<string, MainDocument> dicRevistas = new Dictionary<string, MainDocument>();
 
-            # region --- Scopus
-            DirectoryInfo directorio = new DirectoryInfo($@"Dataset/Revistas/scopus");
-            foreach (var fichero in directorio.GetFiles("*.json").Reverse())
-            {
-                List<Revista> listaRevistas = new List<Revista>();
-                string jsonString = File.ReadAllText(fichero.FullName);
-                listaRevistas.AddRange(JsonConvert.DeserializeObject<List<Revista>>(jsonString));
-
-                foreach (Revista revista in listaRevistas)
-                {
-                    if (!string.IsNullOrEmpty(revista.categoria) && revista.cuartil != 0)
-                    {
-                        // Documento principal.
-                        MainDocument doc = new MainDocument();
-                        doc.Roh_title = revista.titulo;
-                        doc.Bibo_issn = revista.issn;
-                        doc.Bibo_eissn = revista.eissn;
-                        doc.Bibo_editor = revista.publicador;
-                        doc.IdRoh_format = "http://gnoss.com/items/documentformat_057";
-
-                        // Índice de impacto.
-                        doc.Roh_impactIndex = new List<ImpactIndex>();
-                        ImpactIndex indiceImpacto = new ImpactIndex();
-                        switch (revista.fuente)
-                        {
-                            case "scopus":
-                                indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_000";
-                                break;
-                            case "wos_scie":
-                                indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_010";
-                                break;
-                            case "wos_ssci":
-                                indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_010";
-                                break;
-                        }
-
-                        indiceImpacto.Roh_year = revista.anyo.Year;
-                        indiceImpacto.Roh_impactIndexInYear = revista.indiceImpacto;
-
-                        // Impacto de la categoría.
-                        ImpactCategory category = new ImpactCategory();
-                        if (!string.IsNullOrEmpty(revista.categoria) && revista.posicionPublicacion != 0 && revista.numCategoria != 0 && revista.cuartil != 0)
-                        {
-                            switch (revista.fuente)
-                            {
-                                case "scopus":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == revista.categoria).Key;
-                                    break;
-                                case "wos_scie":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Science Edition - " + revista.categoria).Key;
-                                    break;
-                                case "wos_ssci":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
-                                    break;
-                            }
-                            category.Roh_publicationPosition = revista.posicionPublicacion;
-                            category.Roh_journalNumberInCat = revista.numCategoria;
-                            category.Roh_quartile = revista.cuartil;
-                        }
-
-                        doc.Roh_impactIndex.Add(indiceImpacto);
-
-                        // Inserción en el diccionario.
-                        if (!string.IsNullOrEmpty(category.IdRoh_impactIndexCategory))
-                        {
-                            if (!string.IsNullOrEmpty(doc.Bibo_issn))
-                            {
-                                if (!dicRevistas.ContainsKey("issn_" + doc.Bibo_issn))
-                                {
-                                    // Si no existe la revista, se agrega.
-                                    dicRevistas.Add("issn_" + doc.Bibo_issn, doc);
-                                }
-                                else
-                                {
-                                    // Si existe, que agrege el índice de impacto.
-                                    bool encontrado = false;
-                                    foreach (ImpactIndex impato in dicRevistas["issn_" + doc.Bibo_issn].Roh_impactIndex)
-                                    {
-                                        if (impato.Roh_year == indiceImpacto.Roh_year)
-                                        {
-                                            encontrado = true;
-
-                                            if (impato.Roh_impactCategory == null)
-                                            {
-                                                impato.Roh_impactCategory = new List<ImpactCategory>();
-                                            }
-
-                                            bool encontradoCat = false;
-                                            foreach (ImpactCategory impactoCategoria in impato.Roh_impactCategory)
-                                            {
-                                                if (impactoCategoria.IdRoh_impactIndexCategory == category.IdRoh_impactIndexCategory)
-                                                {
-                                                    encontradoCat = true;
-                                                    break;
-                                                }
-                                            }
-
-                                            if (encontradoCat == false)
-                                            {
-                                                impato.Roh_impactCategory.Add(category);
-                                            }
-
-                                            break;
-                                        }
-                                    }
-
-                                    if (encontrado == false)
-                                    {
-                                        dicRevistas["issn_" + doc.Bibo_issn].Roh_impactIndex.Add(indiceImpacto);
-                                    }
-                                }
-                            }
-                            else if (!string.IsNullOrEmpty(doc.Bibo_eissn))
-                            {
-                                if (!dicRevistas.ContainsKey("eissn_" + doc.Bibo_eissn))
-                                {
-                                    // Si no existe la revista, se agrega.
-                                    dicRevistas.Add("eissn_" + doc.Bibo_eissn, doc);
-                                }
-                                else
-                                {
-                                    // Si existe, que agrege el índice de impacto.
-                                    bool encontrado = false;
-                                    foreach (ImpactIndex impato in dicRevistas["eissn_" + doc.Bibo_eissn].Roh_impactIndex)
-                                    {
-                                        if (impato.Roh_year == indiceImpacto.Roh_year)
-                                        {
-                                            encontrado = true;
-
-                                            if (impato.Roh_impactCategory == null)
-                                            {
-                                                impato.Roh_impactCategory = new List<ImpactCategory>();
-                                            }
-
-                                            bool encontradoCat = false;
-                                            foreach (ImpactCategory impactoCategoria in impato.Roh_impactCategory)
-                                            {
-                                                if (impactoCategoria.IdRoh_impactIndexCategory == category.IdRoh_impactIndexCategory)
-                                                {
-                                                    encontradoCat = true;
-                                                    break;
-                                                }
-                                            }
-
-                                            if (encontradoCat == true)
-                                            {
-                                                impato.Roh_impactCategory.Add(category);
-                                            }
-
-                                            break;
-                                        }
-                                    }
-
-                                    if (encontrado == false)
-                                    {
-                                        dicRevistas["eissn_" + doc.Bibo_eissn].Roh_impactIndex.Add(indiceImpacto);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            #endregion
-
             #region --- WoS (Ciencia)
-            directorio = new DirectoryInfo($@"Dataset/Revistas/wos-scie");
+            DirectoryInfo directorio = new DirectoryInfo($@"Dataset/Revistas/wos-scie");
             foreach (var fichero in directorio.GetFiles("*.json").Reverse())
             {
                 List<Revista> listaRevistas = new List<Revista>();
@@ -1859,6 +1694,171 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                             category.Roh_journalNumberInCat = revista.numCategoria;
                             category.Roh_quartile = revista.cuartil;
                             indiceImpacto.Roh_impactCategory.Add(category);
+                        }
+
+                        doc.Roh_impactIndex.Add(indiceImpacto);
+
+                        // Inserción en el diccionario.
+                        if (!string.IsNullOrEmpty(category.IdRoh_impactIndexCategory))
+                        {
+                            if (!string.IsNullOrEmpty(doc.Bibo_issn))
+                            {
+                                if (!dicRevistas.ContainsKey("issn_" + doc.Bibo_issn))
+                                {
+                                    // Si no existe la revista, se agrega.
+                                    dicRevistas.Add("issn_" + doc.Bibo_issn, doc);
+                                }
+                                else
+                                {
+                                    // Si existe, que agrege el índice de impacto.
+                                    bool encontrado = false;
+                                    foreach (ImpactIndex impato in dicRevistas["issn_" + doc.Bibo_issn].Roh_impactIndex)
+                                    {
+                                        if (impato.Roh_year == indiceImpacto.Roh_year)
+                                        {
+                                            encontrado = true;
+
+                                            if (impato.Roh_impactCategory == null)
+                                            {
+                                                impato.Roh_impactCategory = new List<ImpactCategory>();
+                                            }
+
+                                            bool encontradoCat = false;
+                                            foreach (ImpactCategory impactoCategoria in impato.Roh_impactCategory)
+                                            {
+                                                if (impactoCategoria.IdRoh_impactIndexCategory == category.IdRoh_impactIndexCategory)
+                                                {
+                                                    encontradoCat = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (encontradoCat == false)
+                                            {
+                                                impato.Roh_impactCategory.Add(category);
+                                            }
+
+                                            break;
+                                        }
+                                    }
+
+                                    if (encontrado == false)
+                                    {
+                                        dicRevistas["issn_" + doc.Bibo_issn].Roh_impactIndex.Add(indiceImpacto);
+                                    }
+                                }
+                            }
+                            else if (!string.IsNullOrEmpty(doc.Bibo_eissn))
+                            {
+                                if (!dicRevistas.ContainsKey("eissn_" + doc.Bibo_eissn))
+                                {
+                                    // Si no existe la revista, se agrega.
+                                    dicRevistas.Add("eissn_" + doc.Bibo_eissn, doc);
+                                }
+                                else
+                                {
+                                    // Si existe, que agrege el índice de impacto.
+                                    bool encontrado = false;
+                                    foreach (ImpactIndex impato in dicRevistas["eissn_" + doc.Bibo_eissn].Roh_impactIndex)
+                                    {
+                                        if (impato.Roh_year == indiceImpacto.Roh_year)
+                                        {
+                                            encontrado = true;
+
+                                            if (impato.Roh_impactCategory == null)
+                                            {
+                                                impato.Roh_impactCategory = new List<ImpactCategory>();
+                                            }
+
+                                            bool encontradoCat = false;
+                                            foreach (ImpactCategory impactoCategoria in impato.Roh_impactCategory)
+                                            {
+                                                if (impactoCategoria.IdRoh_impactIndexCategory == category.IdRoh_impactIndexCategory)
+                                                {
+                                                    encontradoCat = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (encontradoCat == true)
+                                            {
+                                                impato.Roh_impactCategory.Add(category);
+                                            }
+
+                                            break;
+                                        }
+                                    }
+
+                                    if (encontrado == false)
+                                    {
+                                        dicRevistas["eissn_" + doc.Bibo_eissn].Roh_impactIndex.Add(indiceImpacto);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            # region --- Scopus
+            directorio = new DirectoryInfo($@"Dataset/Revistas/scopus");
+            foreach (var fichero in directorio.GetFiles("*.json").Reverse())
+            {
+                List<Revista> listaRevistas = new List<Revista>();
+                string jsonString = File.ReadAllText(fichero.FullName);
+                listaRevistas.AddRange(JsonConvert.DeserializeObject<List<Revista>>(jsonString));
+
+                foreach (Revista revista in listaRevistas)
+                {
+                    if (!string.IsNullOrEmpty(revista.categoria) && revista.cuartil != 0)
+                    {
+                        // Documento principal.
+                        MainDocument doc = new MainDocument();
+                        doc.Roh_title = revista.titulo;
+                        doc.Bibo_issn = revista.issn;
+                        doc.Bibo_eissn = revista.eissn;
+                        doc.Bibo_editor = revista.publicador;
+                        doc.IdRoh_format = "http://gnoss.com/items/documentformat_057";
+
+                        // Índice de impacto.
+                        doc.Roh_impactIndex = new List<ImpactIndex>();
+                        ImpactIndex indiceImpacto = new ImpactIndex();
+                        switch (revista.fuente)
+                        {
+                            case "scopus":
+                                indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_000";
+                                break;
+                            case "wos_scie":
+                                indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_010";
+                                break;
+                            case "wos_ssci":
+                                indiceImpacto.IdRoh_impactSource = "http://gnoss.com/items/referencesource_010";
+                                break;
+                        }
+
+                        indiceImpacto.Roh_year = revista.anyo.Year;
+                        indiceImpacto.Roh_impactIndexInYear = revista.indiceImpacto;
+
+                        // Impacto de la categoría.
+                        ImpactCategory category = new ImpactCategory();
+                        if (!string.IsNullOrEmpty(revista.categoria) && revista.posicionPublicacion != 0 && revista.numCategoria != 0 && revista.cuartil != 0)
+                        {
+                            switch (revista.fuente)
+                            {
+                                case "scopus":
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == revista.categoria).Key;
+                                    break;
+                                case "wos_scie":
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Science Edition - " + revista.categoria).Key;
+                                    break;
+                                case "wos_ssci":
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
+                                    break;
+                            }
+                            category.Roh_publicationPosition = revista.posicionPublicacion;
+                            category.Roh_journalNumberInCat = revista.numCategoria;
+                            category.Roh_quartile = revista.cuartil;
                         }
 
                         doc.Roh_impactIndex.Add(indiceImpacto);
