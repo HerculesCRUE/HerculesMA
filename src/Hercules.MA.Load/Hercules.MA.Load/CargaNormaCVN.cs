@@ -91,6 +91,9 @@ namespace Hercules.MA.Load
         private static readonly string idRelationshipType = "CVN_COLLABORATION_A";
         private static readonly string idActivityModality = "CVN_ACTIVITY_A";
 
+        //Número de hilos para el paralelismo.
+        public static int NUM_HILOS = 6;
+
         /// <summary>
         /// Método para cargar las entidades secundarias.
         /// </summary>
@@ -160,10 +163,10 @@ namespace Hercules.MA.Load
             features = ObtenerDatosFeature(pTablas, idProvincias, "ADM2", features, pOntology);
 
             //Carga.
-            foreach (FeatureOntology.Feature feature in features)
+            Parallel.ForEach(features, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, feature =>
             {
                 mResourceApi.LoadSecondaryResource(feature.ToGnossApiResource(mResourceApi, pOntology + "_" + feature.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -265,10 +268,10 @@ namespace Hercules.MA.Load
             modalities = ObtenerDatosProjectModality(pTablas, idProjectModality, modalities);
 
             //Carga.
-            foreach (ProjectModality modality in modalities)
+            Parallel.ForEach(modalities, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, modality =>
             {
                 mResourceApi.LoadSecondaryResource(modality.ToGnossApiResource(mResourceApi, pOntology + "_" + modality.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -330,10 +333,10 @@ namespace Hercules.MA.Load
             contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
 
             //Carga.
-            foreach (ContributionGradeProject contribution in contributions)
+            Parallel.ForEach(contributions, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, contribution =>
             {
                 mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, pOntology + "_" + contribution.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -395,10 +398,10 @@ namespace Hercules.MA.Load
             participations = ObtenerDatosParticipationTypeProject(pTablas, idParticipationTypeProject, participations);
 
             //Carga.
-            foreach (ParticipationTypeProject participation in participations)
+            Parallel.ForEach(participations, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, participation =>
             {
                 mResourceApi.LoadSecondaryResource(participation.ToGnossApiResource(mResourceApi, pOntology + "_" + participation.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -460,10 +463,10 @@ namespace Hercules.MA.Load
             dedications = ObtenerDatosDedicationRegime(pTablas, idDedicationRegime, dedications);
 
             //Carga.
-            foreach (DedicationRegime dedication in dedications)
+            Parallel.ForEach(dedications, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, dedication =>
             {
                 mResourceApi.LoadSecondaryResource(dedication.ToGnossApiResource(mResourceApi, pOntology + "_" + dedication.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -525,10 +528,10 @@ namespace Hercules.MA.Load
             motivations = ObtenerDatosEventInscriptionType(pTablas, idEventInscriptionType, motivations);
 
             //Carga.
-            foreach (EventInscriptionType motivation in motivations)
+            Parallel.ForEach(motivations, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, motivation =>
             {
                 mResourceApi.LoadSecondaryResource(motivation.ToGnossApiResource(mResourceApi, pOntology + "_" + motivation.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -590,10 +593,10 @@ namespace Hercules.MA.Load
             contributions = ObtenerDatosContributionGradeDocument(pTablas, idContributionGradeDocument, contributions);
 
             //Carga.
-            foreach (ContributionGradeDocument contribution in contributions)
+            Parallel.ForEach(contributions, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, contribution =>
             {
                 mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, pOntology + "_" + contribution.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -655,10 +658,10 @@ namespace Hercules.MA.Load
             references = ObtenerDatosReferenceSource(pTablas, idReferenceSource, references);
 
             //Carga.
-            foreach (ReferenceSource reference in references)
+            Parallel.ForEach(references, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, reference =>
             {
                 mResourceApi.LoadSecondaryResource(reference.ToGnossApiResource(mResourceApi, pOntology + "_" + reference.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -720,10 +723,10 @@ namespace Hercules.MA.Load
             categorias = ObtenerDatosImpactIndexCategory(pTablas, idImpactIndexCategory, categorias);
 
             //Carga.
-            foreach (ImpactIndexCategory category in categorias)
+            Parallel.ForEach(categorias, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, category =>
             {
                 mResourceApi.LoadSecondaryResource(category.ToGnossApiResource(mResourceApi, pOntology + "_" + category.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -785,10 +788,10 @@ namespace Hercules.MA.Load
             lenguajes = ObtenerDatosLanguage(pTablas, idLanguage, lenguajes);
 
             //Carga.
-            foreach (Language language in lenguajes)
+            Parallel.ForEach(lenguajes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, language =>
             {
                 mResourceApi.LoadSecondaryResource(language.ToGnossApiResource(mResourceApi, pOntology + "_" + language.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -850,10 +853,10 @@ namespace Hercules.MA.Load
             publicaciones = ObtenerDatosPublicationType(pTablas, idPublicationType, publicaciones);
 
             //Carga.
-            foreach (PublicationType publication in publicaciones)
+            Parallel.ForEach(publicaciones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, publication =>
             {
                 mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, pOntology + "_" + publication.Dc_identifier));
-            }
+            });
         }
 
 
@@ -870,16 +873,16 @@ namespace Hercules.MA.Load
             EliminarDatosCargados("http://w3id.org/roh/ResearchObjectType", ontology);
 
             //Obtención de los objetos a cargar.
-            List<ResearchObjectType> publicaciones = new List<ResearchObjectType>();
-            publicaciones.Add(
+            List<ResearchObjectType> researchObjects = new List<ResearchObjectType>();
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "1",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Dataset" } },
-                    Roh_researchObjectCode="Genérico"
+                    Roh_researchObjectCode = "Genérico"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "2",
@@ -887,7 +890,7 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Genérico"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "3",
@@ -895,7 +898,7 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Genérico"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "4",
@@ -903,7 +906,7 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Genérico"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "5",
@@ -911,7 +914,7 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Genérico"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "6",
@@ -919,7 +922,7 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Genérico"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "7",
@@ -927,7 +930,7 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Genérico"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "8",
@@ -935,7 +938,7 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Genérico"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "9",
@@ -943,7 +946,7 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Código"
                 }
             );
-            publicaciones.Add(
+            researchObjects.Add(
                 new ResearchObjectType()
                 {
                     Dc_identifier = "10",
@@ -951,11 +954,12 @@ namespace Hercules.MA.Load
                     Roh_researchObjectCode = "Protocolo"
                 }
             );
+
             //Carga.
-            foreach (ResearchObjectType publication in publicaciones)
+            Parallel.ForEach(researchObjects, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, ro =>
             {
-                mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, ontology + "_" + publication.Dc_identifier));
-            }
+                mResourceApi.LoadSecondaryResource(ro.ToGnossApiResource(mResourceApi, ontology + "_" + ro.Dc_identifier));
+            });
         }
 
         /// <summary>
@@ -1017,10 +1021,10 @@ namespace Hercules.MA.Load
             eventos = ObtenerDatosEventType(pTablas, idEventType, eventos);
 
             //Carga.
-            foreach (EventType eventType in eventos)
+            Parallel.ForEach(eventos, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, eventType =>
             {
                 mResourceApi.LoadSecondaryResource(eventType.ToGnossApiResource(mResourceApi, pOntology + "_" + eventType.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1082,10 +1086,10 @@ namespace Hercules.MA.Load
             regiones = ObtenerDatosGeographicRegion(pTablas, idGeographicRegion, regiones);
 
             //Carga.
-            foreach (GeographicRegion region in regiones)
+            Parallel.ForEach(regiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, region =>
             {
                 mResourceApi.LoadSecondaryResource(region.ToGnossApiResource(mResourceApi, pOntology + "_" + region.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1147,10 +1151,10 @@ namespace Hercules.MA.Load
             organizaciones = ObtenerDatosOrganizationType(pTablas, idOrganizationType, organizaciones);
 
             //Carga.
-            foreach (OrganizationType organization in organizaciones)
+            Parallel.ForEach(organizaciones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, organization =>
             {
                 mResourceApi.LoadSecondaryResource(organization.ToGnossApiResource(mResourceApi, pOntology + "_" + organization.Dc_identifier));
-            }
+            });
         }
 
 
@@ -1213,10 +1217,10 @@ namespace Hercules.MA.Load
             publicaciones = ObtenerDatosDocumentFormat(pTablas, idDocumentFormat, publicaciones);
 
             //Carga.
-            foreach (DocumentFormat publication in publicaciones)
+            Parallel.ForEach(publicaciones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, publication =>
             {
                 mResourceApi.LoadSecondaryResource(publication.ToGnossApiResource(mResourceApi, pOntology + "_" + publication.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1278,10 +1282,10 @@ namespace Hercules.MA.Load
             generos = ObtenerDatosGender(pTablas, idGender, generos);
 
             //Carga.
-            foreach (Gender genre in generos)
+            Parallel.ForEach(generos, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, genre =>
             {
                 mResourceApi.LoadSecondaryResource(genre.ToGnossApiResource(mResourceApi, pOntology + "_" + genre.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1343,10 +1347,10 @@ namespace Hercules.MA.Load
             tipoProyectos = ObtenerDatosProjectType(pTablas, idProjectType, tipoProyectos);
 
             //Carga.
-            foreach (ProjectType project in tipoProyectos)
+            Parallel.ForEach(tipoProyectos, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, project =>
             {
                 mResourceApi.LoadSecondaryResource(project.ToGnossApiResource(mResourceApi, pOntology + "_" + project.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1408,10 +1412,10 @@ namespace Hercules.MA.Load
             tipoParticipacion = ObtenerDatosParticipationTypeDocument(pTablas, idParticipationTypeDocument, tipoParticipacion);
 
             //Carga.
-            foreach (ParticipationTypeDocument participacion in tipoParticipacion)
+            Parallel.ForEach(tipoParticipacion, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, participacion =>
             {
                 mResourceApi.LoadSecondaryResource(participacion.ToGnossApiResource(mResourceApi, pOntology + "_" + participacion.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1473,10 +1477,10 @@ namespace Hercules.MA.Load
             propiedadIndustrial = ObtenerDatosIndustrialPropertyType(pTablas, idIndustrialPropertyType, propiedadIndustrial);
 
             //Carga.
-            foreach (IndustrialPropertyType propiedad in propiedadIndustrial)
+            Parallel.ForEach(propiedadIndustrial, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, propiedad =>
             {
                 mResourceApi.LoadSecondaryResource(propiedad.ToGnossApiResource(mResourceApi, pOntology + "_" + propiedad.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1538,10 +1542,10 @@ namespace Hercules.MA.Load
             grupoColaborativo = ObtenerDatosColaborationTypeGroup(pTablas, idColaborationTypeGroup, grupoColaborativo);
 
             //Carga.
-            foreach (ColaborationTypeGroup grupo in grupoColaborativo)
+            Parallel.ForEach(grupoColaborativo, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, grupo =>
             {
                 mResourceApi.LoadSecondaryResource(grupo.ToGnossApiResource(mResourceApi, pOntology + "_" + grupo.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1603,10 +1607,10 @@ namespace Hercules.MA.Load
             tipoActividad = ObtenerDatosManagementTypeActivity(pTablas, idManagementTypeActivity, tipoActividad);
 
             //Carga.
-            foreach (ManagementTypeActivity typeActivity in tipoActividad)
+            Parallel.ForEach(tipoActividad, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, typeActivity =>
             {
                 mResourceApi.LoadSecondaryResource(typeActivity.ToGnossApiResource(mResourceApi, pOntology + "_" + typeActivity.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1668,10 +1672,10 @@ namespace Hercules.MA.Load
             perfilGrupo = ObtenerDatosTargetGroupProfile(pTablas, idTargetGroupProfile, perfilGrupo);
 
             //Carga.
-            foreach (TargetGroupProfile groupProfile in perfilGrupo)
+            Parallel.ForEach(perfilGrupo, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, groupProfile =>
             {
                 mResourceApi.LoadSecondaryResource(groupProfile.ToGnossApiResource(mResourceApi, pOntology + "_" + groupProfile.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1733,10 +1737,10 @@ namespace Hercules.MA.Load
             sistemaAcceso = ObtenerDatosAccessSystemActivity(pTablas, idAccessSystemActivity, sistemaAcceso);
 
             //Carga.
-            foreach (AccessSystemActivity accessSistem in sistemaAcceso)
+            Parallel.ForEach(sistemaAcceso, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, accessSistem =>
             {
                 mResourceApi.LoadSecondaryResource(accessSistem.ToGnossApiResource(mResourceApi, pOntology + "_" + accessSistem.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1798,10 +1802,10 @@ namespace Hercules.MA.Load
             tipoActividad = ObtenerDatosParticipationTypeActivity(pTablas, idParticipationTypeActivity, tipoActividad);
 
             //Carga.
-            foreach (ParticipationTypeActivity activityType in tipoActividad)
+            Parallel.ForEach(tipoActividad, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, activityType =>
             {
                 mResourceApi.LoadSecondaryResource(activityType.ToGnossApiResource(mResourceApi, pOntology + "_" + activityType.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1863,10 +1867,10 @@ namespace Hercules.MA.Load
             meta = ObtenerDatosStayGoal(pTablas, idStayGoal, meta);
 
             //Carga.
-            foreach (StayGoal stayGoal in meta)
+            Parallel.ForEach(meta, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, stayGoal =>
             {
                 mResourceApi.LoadSecondaryResource(stayGoal.ToGnossApiResource(mResourceApi, pOntology + "_" + stayGoal.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1928,10 +1932,10 @@ namespace Hercules.MA.Load
             objetivo = ObtenerDatosGrantAim(pTablas, idGrantAim, objetivo);
 
             //Carga.
-            foreach (GrantAim grantAim in objetivo)
+            Parallel.ForEach(objetivo, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, grantAim =>
             {
                 mResourceApi.LoadSecondaryResource(grantAim.ToGnossApiResource(mResourceApi, pOntology + "_" + grantAim.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -1993,10 +1997,10 @@ namespace Hercules.MA.Load
             tipoRelacion = ObtenerDatosRelationshipType(pTablas, idRelationshipType, tipoRelacion);
 
             //Carga.
-            foreach (RelationshipType relationType in tipoRelacion)
+            Parallel.ForEach(tipoRelacion, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, relationType =>
             {
                 mResourceApi.LoadSecondaryResource(relationType.ToGnossApiResource(mResourceApi, pOntology + "_" + relationType.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -2058,10 +2062,10 @@ namespace Hercules.MA.Load
             modalidad = ObtenerDatosActivityModality(pTablas, idActivityModality, modalidad);
 
             //Carga.
-            foreach (ActivityModality modality in modalidad)
+            Parallel.ForEach(modalidad, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, modality =>
             {
                 mResourceApi.LoadSecondaryResource(modality.ToGnossApiResource(mResourceApi, pOntology + "_" + modality.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -2122,10 +2126,10 @@ namespace Hercules.MA.Load
             documentoCientifico = ObtenerDatosScientificActivityDocument(documentoCientifico);
 
             //Carga.
-            foreach (ScientificActivityDocument scientificDocument in documentoCientifico)
+            Parallel.ForEach(documentoCientifico, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, scientificDocument =>
             {
                 mResourceApi.LoadSecondaryResource(scientificDocument.ToGnossApiResource(mResourceApi, pOntology + "_" + scientificDocument.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -2194,10 +2198,10 @@ namespace Hercules.MA.Load
             departamentos = ObtenerDatosDepartment(departamentos);
 
             //Carga.
-            foreach (Department department in departamentos)
+            Parallel.ForEach(departamentos, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, department =>
             {
                 var x = mResourceApi.LoadSecondaryResource(department.ToGnossApiResource(mResourceApi, pOntology + "_" + department.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -2245,10 +2249,10 @@ namespace Hercules.MA.Load
             proyectoCientifico = ObtenerDatosScientificExperienceProject(proyectoCientifico);
 
             //Carga.
-            foreach (ScientificExperienceProject scientificProject in proyectoCientifico)
+            Parallel.ForEach(proyectoCientifico, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, scientificProject =>
             {
                 mResourceApi.LoadSecondaryResource(scientificProject.ToGnossApiResource(mResourceApi, pOntology + "_" + scientificProject.Dc_identifier));
-            }
+            });
         }
 
         /// <summary>
@@ -2323,10 +2327,10 @@ namespace Hercules.MA.Load
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
-                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                Parallel.ForEach(resultadoQuery.results.bindings, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, fila =>
                 {
                     listaUrlSecundarias.Add(GetValorFilaSparqlObject(fila, "s"));
-                }
+                });
             }
 
             //Borra los recursos.
