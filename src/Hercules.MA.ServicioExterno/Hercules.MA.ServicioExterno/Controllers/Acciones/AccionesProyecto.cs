@@ -8,6 +8,7 @@ using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
 using Hercules.MA.ServicioExterno.Models.Graficas.GraficaBarras;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -185,7 +186,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             #region Gráfico de sectores
             {
                 Dictionary<string, KeyValuePair<string, int>> dicAmbitos = new Dictionary<string, KeyValuePair<string, int>>();
+                Dictionary<string, KeyValuePair<string, int>> dicAmbitosOrdered = new Dictionary<string, KeyValuePair<string, int>>();
+
                 SparqlObject resultadoQuery = null;
+                // Lista a ordenar: Internacional, Unión Europea, Nacional, Autonómica/Regional, Otros/Propio
+                ArrayList ambitosOrdenados = new ArrayList() { "Internacional", "Unión Europea", "Nacional", "Regional", "Autonómica", "Autonómica/Regional", "Otros/Propio", "Otros", "Propio" };
+
                 // Consultas sparql.
 
                 #region --- Obtención de ámbitos
@@ -211,14 +217,32 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
                     }
                 }
+
+
+
                 #endregion
 
+                // Se ordenan los datos
+                List<int> datosBarraItem3 = new List<int>();
+                List<string> datosBarraItem3Keys = new List<string>();
+
+                foreach (string ambito in ambitosOrdenados)
+                {
+                    foreach (var itemAmbito in dicAmbitos)
+                    {
+                        if (itemAmbito.Value.Key == ambito)
+                        {
+                            datosBarraItem3.Add(itemAmbito.Value.Value);
+                            datosBarraItem3Keys.Add(itemAmbito.Value.Key);
+                        }
+                    }
+                }
 
                 // Se construye el objeto con los datos.
                 List<DatosBarra> listaDatos = new List<DatosBarra>();
-                listaDatos.Add(new DatosBarra("Proyectos", "#6cafd3", dicAmbitos.Values.Select(x => x.Value).ToList(), 1, null));
+                listaDatos.Add(new DatosBarra("Proyectos", "#6cafd3", datosBarraItem3, 1, null));
                 // Se crea el objeto de la gráfica.
-                graficasProyectos.graficaSectoresAmbito = new GraficaBarras(new DataGraficaBarras(dicAmbitos.Values.Select(x => x.Key).ToList(), listaDatos));
+                graficasProyectos.graficaSectoresAmbito = new GraficaBarras(new DataGraficaBarras(datosBarraItem3Keys, listaDatos));
 
             }
             #endregion
