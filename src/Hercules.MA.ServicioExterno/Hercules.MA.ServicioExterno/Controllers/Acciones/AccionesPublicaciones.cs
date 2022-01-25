@@ -162,10 +162,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             //Construimos un dataset por cada cuartil
             int num = 0;
             Dictionary<string, string> colores = new Dictionary<string, string>();
-            colores.Add("1", "#99ff99");
-            colores.Add("2", "#ffff99");
-            colores.Add("3", "#ffaa33");
-            colores.Add("4", "#ff9999");
+            colores.Add("1", "#45DCB4");
+            colores.Add("2", "#EAF112");
+            colores.Add("3", "#DE921E");
+            colores.Add("4", "#DC4545");
             foreach (string cuartil in listacuartiles.OrderBy(CompareCuartil))
             {
                 string nombre = "Cuartil " + cuartil;
