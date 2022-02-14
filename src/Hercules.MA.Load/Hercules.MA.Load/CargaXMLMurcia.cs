@@ -956,11 +956,11 @@ namespace Hercules.MA.Load
                     }
                     if (!string.IsNullOrEmpty(articulo.PAGDESDE))
                     {
-                        documentoACargar.Bibo_pageStart = Int32.Parse(articulo.PAGDESDE);
+                        documentoACargar.Bibo_pageStart = articulo.PAGDESDE;
                     }
                     if (!string.IsNullOrEmpty(articulo.PAGHASTA))
                     {
-                        documentoACargar.Bibo_pageEnd = Int32.Parse(articulo.PAGHASTA);
+                        documentoACargar.Bibo_pageEnd = articulo.PAGHASTA;
                     }
                     documentoACargar.Bibo_authorList = new List<DocumentOntology.BFO_0000023>();
                     List<AutorArticulo> listaAutores = pListaAutoresArticulos.Where(x => x.ARTI_CODIGO == articulo.CODIGO).ToList();
@@ -1011,7 +1011,6 @@ namespace Hercules.MA.Load
                             }
                         }
                     }
-                    documentoACargar.Roh_authorsNumber = numAutores;
 
                     //Localidad
                     documentoACargar.Vcard_locality = "Murcia";
@@ -1190,7 +1189,6 @@ namespace Hercules.MA.Load
                             }
                         }
                     }
-                    documentoACargar.Roh_authorsNumber = numAutores;
 
                     //Evento
                     documentoACargar.Bibo_presentedAt = new DocumentOntology.Event();
