@@ -879,7 +879,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "1",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Dataset" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -887,7 +886,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "2",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Presentación" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -895,7 +893,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "3",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Gráfico" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -903,7 +900,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "4",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Documento" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -911,7 +907,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "5",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Enlace" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -919,7 +914,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "6",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Video" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -927,7 +921,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "7",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Poster" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -935,7 +928,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "8",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Lección" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -943,15 +935,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "9",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Código" } },
-                    Roh_researchObjectCode = "Código"
-                }
-            );
-            researchObjects.Add(
-                new ResearchObjectType()
-                {
-                    Dc_identifier = "10",
-                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Protocolo" } },
-                    Roh_researchObjectCode = "Protocolo"
                 }
             );
 
