@@ -1985,19 +1985,19 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
         private static Dictionary<string, string> ObtenerRevistasCargadasSPARQL()
         {
             Dictionary<string, string> dicIDs = new Dictionary<string, string>();
-            int limit = 1000;
+            int limit = 10000;
             int offset = 0;
             bool salirBucle = false;
 
             do
             {
                 // Consulta sparql.
-                string select = "SELECT ?revista ?issn ?eissn";
+                string select = "SELECT * WHERE { SELECT ?revista ?issn ?eissn ";
                 string where = $@"WHERE {{
                                 ?revista a <http://w3id.org/roh/MainDocument>. 
                                 OPTIONAL{{?revista <http://purl.org/ontology/bibo/issn> ?issn.}}
                                 OPTIONAL{{?revista <http://purl.org/ontology/bibo/eissn> ?eissn.}}
-                            }} LIMIT {limit} OFFSET {offset}";
+                            }} ORDER BY DESC(?revista) }} LIMIT {limit} OFFSET {offset}";
 
                 SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, "maindocument");
                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
@@ -2014,6 +2014,11 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                         {
                             dicIDs.Add("eissn_" + fila["eissn"].value, fila["revista"].value);
                         }
+                    }
+
+                    if (resultadoQuery.results.bindings.Count < limit)
+                    {
+                        salirBucle = true;
                     }
                 }
                 else
@@ -2308,7 +2313,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
         private static Dictionary<string, string> ObtenerRevistasCargadas()
         {
             Dictionary<string, string> dicResultados = new Dictionary<string, string>();
-            int limit = 1000;
+            int limit = 10000;
             int offset = 0;
 
             bool salirBucle = false;
@@ -2318,11 +2323,11 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                 StringBuilder select = new StringBuilder(), where = new StringBuilder();
 
                 // Consulta sparql.
-                select.Append("SELECT ?id ?issn ?titulo ");
+                select.Append("SELECT * WHERE { SELECT ?id ?issn ?titulo ");
                 where.Append("WHERE { ");
                 where.Append("OPTIONAL{?id <http://w3id.org/roh/title> ?titulo. } ");
                 where.Append("OPTIONAL{?id <http://purl.org/ontology/bibo/issn> ?issn. } ");
-                where.Append($@"}} LIMIT {limit} OFFSET {offset} ");
+                where.Append($@"}} ORDER BY DESC(?id) }} LIMIT {limit} OFFSET {offset} ");
 
                 SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "maindocument");
 
@@ -2340,6 +2345,11 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                         {
                             dicResultados.Add(fila["titulo"].value, fila["id"].value);
                         }
+                    }
+
+                    if (resultadoQuery.results.bindings.Count < limit)
+                    {
+                        salirBucle = true;
                     }
                 }
                 else
