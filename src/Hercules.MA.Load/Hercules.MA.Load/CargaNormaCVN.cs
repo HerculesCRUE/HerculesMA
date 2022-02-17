@@ -43,9 +43,9 @@ using DepartmentOntology;
 using Hercules.MA.Load.Models.UMU;
 using ScientificexperienceprojectOntology;
 using ActivitymodalityOntology;
-using ResearchObjectTypeOntology;
 using TaxonomyOntology;
 using Hercules.MA.Load.Models.TaxonomyOntology;
+using ResearchobjecttypeOntology;
 
 namespace Hercules.MA.Load
 {
