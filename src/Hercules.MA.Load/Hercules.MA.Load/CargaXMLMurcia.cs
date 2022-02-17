@@ -499,6 +499,8 @@ namespace Hercules.MA.Load
                     if (idPersona == "7747") // Skarmeta
                     {
                         personaCarga.Roh_crisIdentifier = "28710458";
+                        personaCarga.Roh_usuarioFigShare = "11111111";
+                        personaCarga.Roh_usuarioGitHub = "antonioSkarmeta-github";
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
                         personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E096";
                         personaCarga.Roh_h_index = 55;
@@ -512,6 +514,8 @@ namespace Hercules.MA.Load
                     else if (idPersona == "6811") // Francisco Esquembre
                     {
                         personaCarga.Roh_crisIdentifier = "27443184";
+                        personaCarga.Roh_usuarioFigShare = "33333333";
+                        personaCarga.Roh_usuarioGitHub = "franciscoEsquembre-github";
                         personaCarga.Roh_hasPosition = "Catedrático de universidad";
                         personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E036";
                         personaCarga.Roh_h_index = 51;
@@ -523,6 +527,8 @@ namespace Hercules.MA.Load
                     else if (idPersona == "9292") // Manuel Campos 
                     {
                         personaCarga.Roh_crisIdentifier = "34822542";
+                        personaCarga.Roh_usuarioFigShare = "22222222";
+                        personaCarga.Roh_usuarioGitHub = "manuelCampos-github";
                         personaCarga.Roh_hasPosition = "Profesor Titular de Universidad";
                         personaCarga.IdVivo_departmentOrSchool = "http://gnoss.com/items/department_E031";
                         personaCarga.Roh_h_index = 16;
