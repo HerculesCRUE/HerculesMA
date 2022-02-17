@@ -2108,7 +2108,7 @@ namespace Hercules.MA.Load
             EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "unesco");
 
             //Obtención de los objetos a cargar.
-            List<SecondaryResource> categorias = ObtenerDatosUnesco(pTablas,"unesco");           
+            List<SecondaryResource> categorias = ObtenerDatosUnesco(pTablas, "unesco");
 
             //Carga.
             Parallel.ForEach(categorias, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, categoria =>
@@ -2118,7 +2118,7 @@ namespace Hercules.MA.Load
         }
 
 
-        private static List<SecondaryResource> ObtenerDatosUnesco(ReferenceTables pTablas,string pSource)
+        private static List<SecondaryResource> ObtenerDatosUnesco(ReferenceTables pTablas, string pSource)
         {
             List<SecondaryResource> secondaryResources = new List<SecondaryResource>();
 
@@ -2131,12 +2131,12 @@ namespace Hercules.MA.Load
             {
                 foreach (TableItem item in tabla.Item)
                 {
-                    if(item.Code.Length!=6)
+                    if (item.Code.Length != 6)
                     {
                         throw new Exception();
                     }
                     int level = 3;
-                    if(item.Code.EndsWith("00"))
+                    if (item.Code.EndsWith("00"))
                     {
                         level = 2;
                     }
@@ -2148,9 +2148,9 @@ namespace Hercules.MA.Load
                     ConceptEDMA concept = new ConceptEDMA();
                     concept.Dc_identifier = item.Code;
                     concept.Dc_source = pSource;
-                    concept.Skos_prefLabel = item.Name.First(x=>x.lang=="spa").Name;
+                    concept.Skos_prefLabel = item.Name.First(x => x.lang == "spa").Name;
                     concept.Skos_symbol = level.ToString();
-                    listConcepts.Add(concept);                    
+                    listConcepts.Add(concept);
                 }
             }
 
@@ -2160,13 +2160,13 @@ namespace Hercules.MA.Load
                 concept.Skos_broader = new List<Concept>();
                 if (concept.Dc_identifier.EndsWith("0000"))
                 {
-                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0,2)) && x.Dc_identifier.EndsWith("00") && x.Dc_identifier != concept.Dc_identifier).ToList();
+                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0, 2)) && x.Dc_identifier.EndsWith("00") && x.Dc_identifier != concept.Dc_identifier).ToList();
                 }
                 else if (concept.Dc_identifier.EndsWith("00"))
                 {
                     concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0, 4)) && x.Dc_identifier != concept.Dc_identifier).ToList();
                     concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.EndsWith("0000") && x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0, 2))).ToList();
-                    if (concept.Skos_broader.Count !=1)
+                    if (concept.Skos_broader.Count != 1)
                     {
                         throw new Exception();
                     }
@@ -2174,7 +2174,7 @@ namespace Hercules.MA.Load
                 else
                 {
                     concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0, 4)) && x.Dc_identifier.EndsWith("00") && x.Dc_identifier != concept.Dc_identifier).ToList();
-                    if(concept.Skos_broader.Count!=1)
+                    if (concept.Skos_broader.Count != 1)
                     {
                         throw new Exception();
                     }
@@ -2416,7 +2416,7 @@ namespace Hercules.MA.Load
             }
             Parallel.ForEach(listaUrlSecundarias, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, url =>
             {
-                List<string> listaUrlSecundariasAux = new List<string>() { url};
+                List<string> listaUrlSecundariasAux = new List<string>() { url };
                 mResourceApi.DeleteSecondaryEntitiesList(ref listaUrlSecundariasAux);
             });
         }
