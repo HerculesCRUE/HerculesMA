@@ -15,48 +15,54 @@ using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
 using System.Diagnostics.CodeAnalysis;
-using Accreditation = AccreditationOntology.Accreditation;
+using Person = PersonOntology.Person;
 
-namespace CurriculumvitaeOntology
+namespace ResearchobjectOntology
 {
 	[ExcludeFromCodeCoverage]
-	public class RelatedObtainedRecognition : GnossOCBase
+	public class Annotation : GnossOCBase
 	{
 
-		public RelatedObtainedRecognition() : base() { } 
+		public Annotation() : base() { } 
 
-		public RelatedObtainedRecognition(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
+		public Annotation(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
-			SemanticPropertyModel propVivo_relatedBy = pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#relatedBy");
-			if(propVivo_relatedBy != null && propVivo_relatedBy.PropertyValues.Count > 0)
+			this.Dct_issued= GetDateValuePropertySemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/terms/issued"));
+			this.Roh_annotation = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/annotation"));
+			SemanticPropertyModel propRdf_member = pSemCmsModel.GetPropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#member");
+			if(propRdf_member != null && propRdf_member.PropertyValues.Count > 0)
 			{
-				this.Vivo_relatedBy = new Accreditation(propVivo_relatedBy.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				this.Rdf_member = new Person(propRdf_member.PropertyValues[0].RelatedEntity,idiomaUsuario);
 			}
-			this.Roh_isPublic= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/isPublic"));
 		}
 
-		public virtual string RdfType { get { return "http://w3id.org/roh/RelatedObtainedRecognition"; } }
-		public virtual string RdfsLabel { get { return "http://w3id.org/roh/RelatedObtainedRecognition"; } }
+		public virtual string RdfType { get { return "http://w3id.org/roh/Annotation"; } }
+		public virtual string RdfsLabel { get { return "http://w3id.org/roh/Annotation"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#relatedBy")]
-		[RDFProperty("http://vivoweb.org/ontology/core#relatedBy")]
-		[Required]
-		public  Accreditation Vivo_relatedBy  { get; set;} 
-		public string IdVivo_relatedBy  { get; set;} 
+		[RDFProperty("http://purl.org/dc/terms/issued")]
+		public  DateTime? Dct_issued { get; set;}
 
-		[LABEL(LanguageEnum.es,"http://w3id.org/roh/isPublic")]
-		[RDFProperty("http://w3id.org/roh/isPublic")]
-		public  bool Roh_isPublic { get; set;}
+		[RDFProperty("http://w3id.org/roh/annotation")]
+		public  string Roh_annotation { get; set;}
+
+		[LABEL(LanguageEnum.es,"http://www.w3.org/1999/02/22-rdf-syntax-ns#member")]
+		[RDFProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#member")]
+		[Required]
+		public  Person Rdf_member  { get; set;} 
+		public string IdRdf_member  { get; set;} 
 
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
-			propList.Add(new StringOntologyProperty("vivo:relatedBy", this.IdVivo_relatedBy));
-			propList.Add(new BoolOntologyProperty("roh:isPublic", this.Roh_isPublic));
+			if (this.Dct_issued.HasValue){
+				propList.Add(new DateOntologyProperty("dct:issued", this.Dct_issued.Value));
+				}
+			propList.Add(new StringOntologyProperty("roh:annotation", this.Roh_annotation));
+			propList.Add(new StringOntologyProperty("rdf:member", this.IdRdf_member));
 		}
 
 		internal override void GetEntities()
