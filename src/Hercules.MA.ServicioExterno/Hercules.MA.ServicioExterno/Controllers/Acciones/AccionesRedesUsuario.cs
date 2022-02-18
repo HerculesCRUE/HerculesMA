@@ -2,11 +2,14 @@
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
+using Hercules.MA.ServicioExterno.Models.RedesUsuario;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using User = Hercules.MA.ServicioExterno.Models.RedesUsuario.User;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
@@ -26,13 +29,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pIdGnossUser">ID del usuario gnoss.</param>
         /// <returns>Diccionario con los datos resultantes.</returns>
-        public Dictionary<string, string> GetDataRedesUsuario(string pIdGnossUser)
+        public List<DataUser> GetDataRedesUsuario(string pIdGnossUser)
         {
-            Dictionary<string, string> dicResultados = new Dictionary<string, string>();
-            dicResultados.Add("usuarioFigShare", string.Empty);
-            dicResultados.Add("tokenFigShare", string.Empty);
-            dicResultados.Add("usuarioGitHub", string.Empty);
-            dicResultados.Add("tokenGitHub", string.Empty);
+            List<DataUser> listaData = new List<DataUser>();
+            listaData.Add(new DataUser() { nombre = "Identificador de FigShare", id = "usuarioFigShare", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Token de FigShare", id = "tokenFigShare", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Usuario de GitHub", id = "usuarioGitHub", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Token de GitHub", id = "tokenGitHub", valor = string.Empty });
 
             string idGnossUser = $@"http://gnoss/{pIdGnossUser.ToUpper()}";
             SparqlObject resultadoQuery = null;
@@ -55,47 +58,77 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
+                    // Usuario FigShare
                     if (fila.ContainsKey("usuarioFigShare"))
                     {
-                        dicResultados["usuarioFigShare"] = fila["usuarioFigShare"].value;
+                        foreach(DataUser userData in listaData)
+                        {
+                            if(userData.id == "usuarioFigShare")
+                            {
+                                userData.valor = fila["usuarioFigShare"].value;
+                                break;
+                            }
+                        }                        
                     }
 
+                    // Token FigShare
                     if (fila.ContainsKey("tokenFigShare"))
                     {
-                        dicResultados["tokenFigShare"] = fila["tokenFigShare"].value;
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "tokenFigShare")
+                            {
+                                userData.valor = fila["tokenFigShare"].value;
+                                break;
+                            }
+                        }
                     }
 
+                    // Usuario GitHub
                     if (fila.ContainsKey("usuarioGitHub"))
                     {
-                        dicResultados["usuarioGitHub"] = fila["usuarioGitHub"].value;
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "usuarioGitHub")
+                            {
+                                userData.valor = fila["usuarioGitHub"].value;
+                                break;
+                            }
+                        }
                     }
 
+                    // Token GitHub
                     if (fila.ContainsKey("tokenGitHub"))
                     {
-                        dicResultados["tokenGitHub"] = fila["tokenGitHub"].value;
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "tokenGitHub")
+                            {
+                                userData.valor = fila["tokenGitHub"].value;
+                                break;
+                            }
+                        }
                     }
                 }
             }
 
-            return dicResultados;
+            return listaData;
         }
 
         /// <summary>
         /// Modifica los datos de la fuente de RO de una persona.
         /// </summary>
         /// <param name="pIdGnossUser">ID del usuario de gnoss.</param>
-        /// <param name="pDicDatosAntiguos">Diccionario con los datos antiguos. (JSON)</param>
-        /// <param name="pDicDatosNuevos">Diccionario con los datos nuevos. (JSON)</param>
-        public void SetDataRedesUsuario(string pIdGnossUser, string pDicDatosAntiguos, string pDicDatosNuevos)
+        /// <param name="pDataUser">Objeto con los datos nuevos.</param>
+        public void SetDataRedesUsuario(string pIdGnossUser, User pDataUser)
         {
+            // Obtención de datos antiguos.
+            List<DataUser> datosAntiguos = GetDataRedesUsuario(pIdGnossUser);
+
             string idRecurso = string.Empty;
             string idGnossUser = $@"http://gnoss/{pIdGnossUser.ToUpper()}";
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder(), where = new StringBuilder();
-
-            // Diccionarios.
-            Dictionary<string, string> dicDatosAntiguos = JsonConvert.DeserializeObject<Dictionary<string, string>>(pDicDatosAntiguos);
-            Dictionary<string, string> dicDatosNuevos = JsonConvert.DeserializeObject<Dictionary<string, string>>(pDicDatosNuevos);
 
             // Consulta sparql.
             select.Append(mPrefijos);
@@ -125,11 +158,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
             List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
 
-            foreach (KeyValuePair<string, string> item in dicDatosAntiguos)
+            foreach (DataUser item in datosAntiguos)
             {
-                string propiedad = item.Key;
-                string dataViejo = item.Value;
-                string dataNuevo = dicDatosNuevos[propiedad];
+                string propiedad = item.id;
+                string dataViejo = item.valor;
+                string dataNuevo = pDataUser.dataUser.FirstOrDefault(x => x.nombre == item.nombre).valor;
 
                 if (dataViejo != dataNuevo)
                 {
