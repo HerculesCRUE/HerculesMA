@@ -52,7 +52,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"OPTIONAL{{?s roh:tokenGitHub ?tokenGitHub. }} ");
             where.Append("} ");
 
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -61,14 +61,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     // Usuario FigShare
                     if (fila.ContainsKey("usuarioFigShare"))
                     {
-                        foreach(DataUser userData in listaData)
+                        foreach (DataUser userData in listaData)
                         {
-                            if(userData.id == "usuarioFigShare")
+                            if (userData.id == "usuarioFigShare")
                             {
                                 userData.valor = fila["usuarioFigShare"].value;
                                 break;
                             }
-                        }                        
+                        }
                     }
 
                     // Token FigShare
@@ -152,17 +152,27 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Inserción/Modificación de triples.
             mResourceApi.ChangeOntoly("person");
-            Guid guid = new Guid(idRecurso.Split("_")[1]);
+            Guid guid = mResourceApi.GetShortGuid(idRecurso);
             Dictionary<Guid, List<TriplesToInclude>> dicInsercion = new Dictionary<Guid, List<TriplesToInclude>>();
             List<TriplesToInclude> listaTriplesInsercion = new List<TriplesToInclude>();
             Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
             List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+            Dictionary<Guid, List<RemoveTriples>> dicBorrado = new Dictionary<Guid, List<RemoveTriples>>();
+            List<RemoveTriples> listaTriplesBorrado = new List<RemoveTriples>();
 
             foreach (DataUser item in datosAntiguos)
             {
                 string propiedad = item.id;
                 string dataViejo = item.valor;
                 string dataNuevo = pDataUser.dataUser.FirstOrDefault(x => x.nombre == item.nombre).valor;
+                if (dataNuevo == null)
+                {
+                    dataNuevo = string.Empty;
+                }
+                if (dataViejo == null)
+                {
+                    dataViejo = string.Empty;
+                }
 
                 if (dataViejo != dataNuevo)
                 {
@@ -173,6 +183,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         triple.Predicate = $@"http://w3id.org/roh/{propiedad}";
                         triple.NewValue = dataNuevo;
                         listaTriplesInsercion.Add(triple);
+                    }
+                    else if (string.IsNullOrEmpty(dataNuevo))
+                    {
+                        // Borrado (Triple).
+                        RemoveTriples triple = new RemoveTriples();
+                        triple.Predicate = $@"http://w3id.org/roh/{propiedad}";
+                        triple.Value = dataViejo;
+                        triple.Title = false;
+                        triple.Description = false;
+                        listaTriplesBorrado.Add(triple);
                     }
                     else
                     {
@@ -189,6 +209,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Inserción.
             dicInsercion.Add(guid, listaTriplesInsercion);
             mResourceApi.InsertPropertiesLoadedResources(dicInsercion);
+
+            // Borrado.
+            dicBorrado.Add(guid, listaTriplesBorrado);
+            mResourceApi.DeletePropertiesLoadedResources(dicBorrado);
 
             // Modificación.
             dicModificacion.Add(guid, listaTriplesModificacion);
