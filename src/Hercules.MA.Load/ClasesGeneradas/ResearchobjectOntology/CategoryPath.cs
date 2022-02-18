@@ -15,48 +15,48 @@ using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
 using System.Diagnostics.CodeAnalysis;
-using Accreditation = AccreditationOntology.Accreditation;
+using Concept = TaxonomyOntology.Concept;
 
-namespace CurriculumvitaeOntology
+namespace ResearchobjectOntology
 {
 	[ExcludeFromCodeCoverage]
-	public class RelatedObtainedRecognition : GnossOCBase
+	public class CategoryPath : GnossOCBase
 	{
 
-		public RelatedObtainedRecognition() : base() { } 
+		public CategoryPath() : base() { } 
 
-		public RelatedObtainedRecognition(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
+		public CategoryPath(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
-			SemanticPropertyModel propVivo_relatedBy = pSemCmsModel.GetPropertyByPath("http://vivoweb.org/ontology/core#relatedBy");
-			if(propVivo_relatedBy != null && propVivo_relatedBy.PropertyValues.Count > 0)
+			this.Roh_categoryNode = new List<Concept>();
+			SemanticPropertyModel propRoh_categoryNode = pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/categoryNode");
+			if(propRoh_categoryNode != null && propRoh_categoryNode.PropertyValues.Count > 0)
 			{
-				this.Vivo_relatedBy = new Accreditation(propVivo_relatedBy.PropertyValues[0].RelatedEntity,idiomaUsuario);
+				foreach (SemanticPropertyModel.PropertyValue propValue in propRoh_categoryNode.PropertyValues)
+				{
+					if(propValue.RelatedEntity!=null){
+						Concept roh_categoryNode = new Concept(propValue.RelatedEntity,idiomaUsuario);
+						this.Roh_categoryNode.Add(roh_categoryNode);
+					}
+				}
 			}
-			this.Roh_isPublic= GetBooleanPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/isPublic"));
 		}
 
-		public virtual string RdfType { get { return "http://w3id.org/roh/RelatedObtainedRecognition"; } }
-		public virtual string RdfsLabel { get { return "http://w3id.org/roh/RelatedObtainedRecognition"; } }
+		public virtual string RdfType { get { return "http://w3id.org/roh/CategoryPath"; } }
+		public virtual string RdfsLabel { get { return "http://w3id.org/roh/CategoryPath"; } }
 		public OntologyEntity Entity { get; set; }
 
-		[LABEL(LanguageEnum.es,"http://vivoweb.org/ontology/core#relatedBy")]
-		[RDFProperty("http://vivoweb.org/ontology/core#relatedBy")]
-		[Required]
-		public  Accreditation Vivo_relatedBy  { get; set;} 
-		public string IdVivo_relatedBy  { get; set;} 
-
-		[LABEL(LanguageEnum.es,"http://w3id.org/roh/isPublic")]
-		[RDFProperty("http://w3id.org/roh/isPublic")]
-		public  bool Roh_isPublic { get; set;}
+		[LABEL(LanguageEnum.es,"http://w3id.org/roh/categoryNode")]
+		[RDFProperty("http://w3id.org/roh/categoryNode")]
+		public  List<Concept> Roh_categoryNode { get; set;}
+		public List<string> IdsRoh_categoryNode { get; set;}
 
 
 		internal override void GetProperties()
 		{
 			base.GetProperties();
-			propList.Add(new StringOntologyProperty("vivo:relatedBy", this.IdVivo_relatedBy));
-			propList.Add(new BoolOntologyProperty("roh:isPublic", this.Roh_isPublic));
+			propList.Add(new ListStringOntologyProperty("roh:categoryNode", this.IdsRoh_categoryNode));
 		}
 
 		internal override void GetEntities()

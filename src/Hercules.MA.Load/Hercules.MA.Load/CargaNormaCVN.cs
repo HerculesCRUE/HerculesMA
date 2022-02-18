@@ -43,7 +43,9 @@ using DepartmentOntology;
 using Hercules.MA.Load.Models.UMU;
 using ScientificexperienceprojectOntology;
 using ActivitymodalityOntology;
-using ResearchObjectTypeOntology;
+using TaxonomyOntology;
+using Hercules.MA.Load.Models.TaxonomyOntology;
+using ResearchobjecttypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -137,7 +139,7 @@ namespace Hercules.MA.Load
             CargarScientificExperienceProject("scientificexperienceproject");
             CargarDepartment("department");
             CargarActivityModality(tablas, "activitymodality");
-
+            CargarTesauroUnesco(tablas, "taxonomy");
 
             //Cargamos los subtipos de los RO
             CargarResearhObjectType();
@@ -879,7 +881,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "1",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Dataset" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -887,7 +888,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "2",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Presentación" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -895,7 +895,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "3",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Gráfico" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -903,7 +902,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "4",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Documento" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -911,7 +909,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "5",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Enlace" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -919,7 +916,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "6",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Video" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -927,7 +923,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "7",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Poster" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -935,7 +930,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "8",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Lección" } },
-                    Roh_researchObjectCode = "Genérico"
                 }
             );
             researchObjects.Add(
@@ -943,15 +937,6 @@ namespace Hercules.MA.Load
                 {
                     Dc_identifier = "9",
                     Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Código" } },
-                    Roh_researchObjectCode = "Código"
-                }
-            );
-            researchObjects.Add(
-                new ResearchObjectType()
-                {
-                    Dc_identifier = "10",
-                    Dc_title = new Dictionary<LanguageEnum, string>() { { LanguageEnum.es, "Protocolo" } },
-                    Roh_researchObjectCode = "Protocolo"
                 }
             );
 
@@ -2068,6 +2053,7 @@ namespace Hercules.MA.Load
             });
         }
 
+
         /// <summary>
         /// Obtiene los objetos RelationshipType a cargar.
         /// </summary>
@@ -2108,6 +2094,105 @@ namespace Hercules.MA.Load
 
             return pListaDatosActivityModality;
         }
+
+        /// <summary>
+        /// Carga el tesauro de unesco
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarTesauroUnesco(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+            EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "unesco");
+            EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "unesco");
+
+            //Obtención de los objetos a cargar.
+            List<SecondaryResource> categorias = ObtenerDatosUnesco(pTablas, "unesco");
+
+            //Carga.
+            Parallel.ForEach(categorias, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, categoria =>
+            {
+                mResourceApi.LoadSecondaryResource(categoria);
+            });
+        }
+
+
+        private static List<SecondaryResource> ObtenerDatosUnesco(ReferenceTables pTablas, string pSource)
+        {
+            List<SecondaryResource> secondaryResources = new List<SecondaryResource>();
+
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            List<Concept> listConcepts = new List<Concept>();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == "UNESCO_CODES"))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (item.Code.Length != 6)
+                    {
+                        throw new Exception();
+                    }
+                    int level = 3;
+                    if (item.Code.EndsWith("00"))
+                    {
+                        level = 2;
+                    }
+                    if (item.Code.EndsWith("0000"))
+                    {
+                        level = 1;
+                    }
+
+                    ConceptEDMA concept = new ConceptEDMA();
+                    concept.Dc_identifier = item.Code;
+                    concept.Dc_source = pSource;
+                    concept.Skos_prefLabel = item.Name.First(x => x.lang == "spa").Name;
+                    concept.Skos_symbol = level.ToString();
+                    listConcepts.Add(concept);
+                }
+            }
+
+            foreach (Concept concept in listConcepts)
+            {
+                concept.Skos_narrower = new List<Concept>();
+                concept.Skos_broader = new List<Concept>();
+                if (concept.Dc_identifier.EndsWith("0000"))
+                {
+                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0, 2)) && x.Dc_identifier.EndsWith("00") && x.Dc_identifier != concept.Dc_identifier).ToList();
+                }
+                else if (concept.Dc_identifier.EndsWith("00"))
+                {
+                    concept.Skos_narrower = listConcepts.Where(x => x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0, 4)) && x.Dc_identifier != concept.Dc_identifier).ToList();
+                    concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.EndsWith("0000") && x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0, 2))).ToList();
+                    if (concept.Skos_broader.Count != 1)
+                    {
+                        throw new Exception();
+                    }
+                }
+                else
+                {
+                    concept.Skos_broader = listConcepts.Where(x => x.Dc_identifier.StartsWith(concept.Dc_identifier.Substring(0, 4)) && x.Dc_identifier.EndsWith("00") && x.Dc_identifier != concept.Dc_identifier).ToList();
+                    if (concept.Skos_broader.Count != 1)
+                    {
+                        throw new Exception();
+                    }
+                }
+                secondaryResources.Add(((ConceptEDMA)concept).ToGnossApiResource(mResourceApi, concept.Dc_identifier));
+            }
+
+
+            CollectionEDMA collection = new CollectionEDMA();
+            collection.Dc_source = pSource;
+            collection.Skos_member = listConcepts.Where(x => x.Dc_identifier.EndsWith("0000")).ToList();
+            collection.Skos_scopeNote = "Tesauro UNESCO";
+            secondaryResources.Add(collection.ToGnossApiResource(mResourceApi, "0"));
+
+            return secondaryResources;
+        }
+
+
 
         /// <summary>
         /// Carga la entidad secundaria ScientificActivityDocument.
@@ -2327,14 +2412,13 @@ namespace Hercules.MA.Load
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
-                Parallel.ForEach(resultadoQuery.results.bindings, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, fila =>
-                {
-                    listaUrlSecundarias.Add(GetValorFilaSparqlObject(fila, "s"));
-                });
+                listaUrlSecundarias = resultadoQuery.results.bindings.Select(x => GetValorFilaSparqlObject(x, "s")).ToList();
             }
-
-            //Borra los recursos.
-            mResourceApi.DeleteSecondaryEntitiesList(ref listaUrlSecundarias);
+            Parallel.ForEach(listaUrlSecundarias, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, url =>
+            {
+                List<string> listaUrlSecundariasAux = new List<string>() { url };
+                mResourceApi.DeleteSecondaryEntitiesList(ref listaUrlSecundariasAux);
+            });
         }
 
         /// <summary>

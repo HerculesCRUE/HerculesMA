@@ -16,7 +16,7 @@ using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ResearchObjectTypeOntology
+namespace ResearchobjecttypeOntology
 {
 	[ExcludeFromCodeCoverage]
 	public class ResearchObjectType : GnossOCBase
@@ -29,24 +29,26 @@ namespace ResearchObjectTypeOntology
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
 			this.Dc_title = new Dictionary<LanguageEnum,string>();
-			this.Dc_title.Add(idiomaUsuario , GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/title")));			
+			this.Dc_title.Add(idiomaUsuario , GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/title")));
+			
 			this.Dc_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/identifier"));
-			this.Roh_researchObjectCode = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/researchObjectCode"));
+			this.Dc_type = new Dictionary<LanguageEnum,string>();
+			this.Dc_type.Add(idiomaUsuario , GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/type")));
+			
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/ResearchObjectType"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/ResearchObjectType"; } }
-		[LABEL(LanguageEnum.es,"Tipo de researchobject")]
+		[LABEL(LanguageEnum.es,"Tipo de publicación")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/title")]
 		public  Dictionary<LanguageEnum,string> Dc_title { get; set;}
 
-		[LABEL(LanguageEnum.es, "Identificador del tipo de researchobject")]
+		[LABEL(LanguageEnum.es,"Identificador del tipo de publicación")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/identifier")]
 		public  string Dc_identifier { get; set;}
 
-		[LABEL(LanguageEnum.es, "Código de research object")]
-		[RDFProperty("http://w3id.org/roh/researchObjectCode")]
-		public string Roh_researchObjectCode { get; set; }
+		[RDFProperty("http://purl.org/dc/elements/1.1/type")]
+		public  Dictionary<LanguageEnum,string> Dc_type { get; set;}
 
 
 		internal override void GetProperties()
@@ -64,7 +66,17 @@ namespace ResearchObjectTypeOntology
 				throw new GnossAPIException($"La propiedad dc:title debe tener al menos un valor en el recurso: {resourceID}");
 			}
 			propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
-			propList.Add(new StringOntologyProperty("roh:researchObjectCode", this.Roh_researchObjectCode));
+			if(this.Dc_type != null)
+			{
+				foreach (LanguageEnum idioma in this.Dc_type.Keys)
+				{
+					propList.Add(new StringOntologyProperty("dc:type", this.Dc_type[idioma], idioma.ToString()));
+				}
+			}
+			else
+			{
+				throw new GnossAPIException($"La propiedad dc:type debe tener al menos un valor en el recurso: {resourceID}");
+			}
 		}
 
 		internal override void GetEntities()
@@ -100,10 +112,13 @@ namespace ResearchObjectTypeOntology
 				{
 					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ResearchObjectType_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
 				}
-			if (this.Roh_researchObjectCode != null)
-			{
-				AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ResearchObjectType_{ResourceID}_{ArticleID}", "http://w3id.org/roh/researchObjectCode", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_researchObjectCode)}\"", list, " . ");
-			}
+				if(this.Dc_type != null)
+				{
+							foreach (LanguageEnum idioma in this.Dc_type.Keys)
+							{
+								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ResearchObjectType_{ResourceID}_{ArticleID}", "http://purl.org/dc/elements/1.1/type",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_type[idioma])}\"", list,  $"{idioma} . ");
+							}
+				}
 			return list;
 		}
 
@@ -123,10 +138,13 @@ namespace ResearchObjectTypeOntology
 				{
 					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier).ToLower()}\"", list, " . ");
 				}
-			if (this.Roh_researchObjectCode != null)
-			{
-				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://w3id.org/roh/researchObjectCode", $"\"{GenerarTextoSinSaltoDeLinea(this.Roh_researchObjectCode).ToLower()}\"", list, " . ");
-			}
+				if(this.Dc_type != null)
+				{
+							foreach (LanguageEnum idioma in this.Dc_type.Keys)
+							{
+								AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://purl.org/dc/elements/1.1/type",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_type[idioma]).ToLower()}\"", list,  $"{idioma} . ");
+							}
+				}
 			if (listaSearch != null && listaSearch.Count > 0)
 			{
 				foreach(string valorSearch in listaSearch)
@@ -136,7 +154,7 @@ namespace ResearchObjectTypeOntology
 			}
 			if(!string.IsNullOrEmpty(search))
 			{
-				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/search", $"\"{search.ToLower()}\"", list, " . ");
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/search", $"\"{GenerarTextoSinSaltoDeLinea(search.ToLower())}\"", list, " . ");
 			}
 			return list;
 		}
@@ -200,7 +218,7 @@ namespace ResearchObjectTypeOntology
 		}
 		public override string GetURI(ResourceApi resourceAPI)
 		{
-			return $"{resourceAPI.GraphsUrl}items/ResearchObjectTypeOntology_{ResourceID}_{ArticleID}";
+			return $"{resourceAPI.GraphsUrl}items/ResearchobjecttypeOntology_{ResourceID}_{ArticleID}";
 		}
 
 		private string GenerarTextoSinSaltoDeLinea(string pTexto)
