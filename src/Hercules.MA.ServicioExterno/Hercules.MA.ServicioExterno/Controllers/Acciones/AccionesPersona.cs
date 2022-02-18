@@ -250,13 +250,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 //Persona
                 string select = $@"{mPrefijos}
-                                select distinct ?nombre";
+                                select distinct ?nombre ?firstName";
                 string where = $@"
                 WHERE {{ 
-                        <http://gnoss/{pIdPersona}> foaf:name ?nombre.                        
+                      OPTIONAL{{<http://gnoss/{pIdPersona}> foaf:firstName ?firstName.}}
+                      OPTIONAL{{<http://gnoss/{pIdPersona}> foaf:name ?nombre.}}
                 }}";
 
-                string nombreGrupo = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value;
+                string nombreGrupo = "";
+                try
+                {
+                    var bindingRes = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings;
+                    if (bindingRes.First().ContainsKey("nombre") && bindingRes.First()["nombre"].value != "")
+                    {
+                        nombreGrupo = bindingRes.First()["nombre"].value;
+                    } else if (bindingRes.First().ContainsKey("firstName"))
+                    {
+                        nombreGrupo = bindingRes.First()["firstName"].value;
+                    }
+                } catch(Exception e) { }
                 dicNodos.Add("http://gnoss/" + pIdPersona, nombreGrupo);
             }
             #endregion

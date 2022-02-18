@@ -352,13 +352,27 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 //Grupo
                 string select = $@"{mPrefijos}
-                                select distinct ?nombre";
+                                select distinct ?nombre ?firstName";
                 string where = $@"
                 WHERE {{ 
-                        <http://gnoss/{pIdGroup}> roh:title ?nombre.                        
+                      OPTIONAL{{<http://gnoss/{pIdGroup}> foaf:firstName ?firstName.}}
+                      OPTIONAL{{<http://gnoss/{pIdGroup}> roh:title ?nombre.}}
                 }}";
 
-                string nombreGrupo = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value;
+                string nombreGrupo = "";
+                try
+                {
+                    var bindingRes = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings;
+                    if (bindingRes.First().ContainsKey("nombre") && bindingRes.First()["nombre"].value != "")
+                    {
+                        nombreGrupo = bindingRes.First()["nombre"].value;
+                    }
+                    else if (bindingRes.First().ContainsKey("firstName"))
+                    {
+                        nombreGrupo = bindingRes.First()["firstName"].value;
+                    }
+                }
+                catch (Exception e) { }
                 dicNodos.Add("http://gnoss/" + pIdGroup, nombreGrupo);
             }
             #endregion
@@ -569,6 +583,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         if (colaboradores.Contains(nodo.Key))
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
+                        }
+                        else
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_ip;
                         }
                         Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", type);
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
