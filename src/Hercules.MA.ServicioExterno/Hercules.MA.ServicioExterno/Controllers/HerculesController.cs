@@ -425,5 +425,27 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok(datosCabeceraFichas);
         }
 
+        /// <summary>
+        /// Controlador para obtener los datos de las fuentes de RO.
+        /// </summary>
+        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
+        /// <returns>Diccionario con los datos.</returns>
+        [HttpGet("GetDatosRedesUsuario")]
+        public IActionResult GetDatosRedesUsuario(string pIdGnossUser)
+        {
+            Dictionary<string, string> datosRedesUsuario = null;
+
+            try
+            {
+                AccionesRedesUsuario accionDocumento = new AccionesRedesUsuario();
+                datosRedesUsuario = accionDocumento.GetDataRedesUsuario(pIdGnossUser);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosRedesUsuario);
+        }
     }
 }
