@@ -447,5 +447,28 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(datosRedesUsuario);
         }
+
+        /// <summary>
+        /// Controlador para modificar los datos de las fuentes de RO.
+        /// </summary>
+        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
+        /// <param name="pDicDatosAntiguos">Datos antiguos a modificar.</param>
+        /// <param name="pDicDatosNuevos">Datos nuevos a modificar.</param>
+        /// <returns>Diccionario con los datos.</returns>
+        [HttpGet("GetDatosRedesUsuario")]
+        public IActionResult SetDatosRedesUsuario(string pIdGnossUser, string pDicDatosAntiguos, string pDicDatosNuevos)
+        {
+            try
+            {
+                AccionesRedesUsuario accionDocumento = new AccionesRedesUsuario();
+                accionDocumento.SetDataRedesUsuario(pIdGnossUser, pDicDatosAntiguos, pDicDatosNuevos);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok();
+        }
     }
 }
