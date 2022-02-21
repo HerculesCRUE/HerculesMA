@@ -455,7 +455,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pDicDatosAntiguos">Datos antiguos a modificar.</param>
         /// <param name="pDicDatosNuevos">Datos nuevos a modificar.</param>
         /// <returns>Diccionario con los datos.</returns>
-        [HttpGet("GetDatosRedesUsuario")]
+        [HttpGet("SetDatosRedesUsuario")]
         public IActionResult SetDatosRedesUsuario(string pIdGnossUser, string pDicDatosAntiguos, string pDicDatosNuevos)
         {
             try
@@ -470,5 +470,32 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok();
         }
+
+
+
+        /// <summary>
+        /// Inicia una búsqueda en los elementos seleccionados
+        /// </summary>
+        /// <param name="stringSearch">string de bíusqueda.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("DoMetaSearch")]
+        public IActionResult DoMetaSearch(string stringSearch)
+        {
+            ObjectSearch resultBusqueda = null;
+
+            try
+            {
+                AccionesMetaBusqueda accionBusqueda = new AccionesMetaBusqueda();
+                resultBusqueda = accionBusqueda.Busqueda(stringSearch);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(resultBusqueda);
+        }
+
+
     }
 }

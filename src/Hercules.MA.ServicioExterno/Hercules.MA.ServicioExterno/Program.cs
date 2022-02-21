@@ -1,3 +1,4 @@
+using Hercules.MA.ServicioExterno.Controllers.Acciones;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +22,14 @@ namespace Hercules.MA.ServicioExterno
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    GenerateMetaSearch();
                 });
+            
+
+        public static void GenerateMetaSearch()
+        {
+            AccionesMetaBusqueda accmt = new AccionesMetaBusqueda();
+            accmt.GenertateMetaShearch();
+        }
     }
 }
