@@ -4,6 +4,7 @@ using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags;
 using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaProyectos;
 using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaPublicaciones;
 using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
+using Hercules.MA.ServicioExterno.Models.RedesUsuario;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -423,6 +424,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             }
 
             return Ok(datosCabeceraFichas);
+
         }
 
         /// <summary>
@@ -495,7 +497,5 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(resultBusqueda);
         }
-
-
     }
 }
