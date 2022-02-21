@@ -497,5 +497,30 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(resultBusqueda);
         }
+
+
+
+        /// <summary>
+        /// Inicia una búsqueda en los elementos seleccionados
+        /// </summary>
+        /// <param name="stringSearch">string de bíusqueda.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpGet("GetLastSearchs")]
+        public IActionResult GetLastSearchs()
+        {
+            List<string> lastSearchs = null;
+
+            try
+            {
+                AccionesMetaBusqueda accionBusqueda = new AccionesMetaBusqueda();
+                lastSearchs = accionBusqueda.GetLastSearchs();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(lastSearchs);
+        }
     }
 }

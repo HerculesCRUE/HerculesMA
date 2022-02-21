@@ -21,6 +21,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         public static ObjectSearch objSearch;
+        public static List<string> lastSearchs;
         #endregion
 
         /// <summary>
@@ -169,20 +170,97 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <summary>
         /// Busca los elementos necesarios y devuelve los resultados
         /// </summary>
+        /// <param name="stringBusqueda">string de búsqueda.</param>
+        /// <returns>Objeto con el resultado de la búsqueda.</returns>
         public ObjectSearch Busqueda(string stringBusqueda)
         {
+            // Añadir nuevo elemento a la lista de últimas búsquedas
+            if (lastSearchs == null)
+            {
+                lastSearchs = new List<string>();
+            }
+            try
+            {
+                stringBusqueda = stringBusqueda.Trim();
+                if (!lastSearchs.Contains(stringBusqueda))
+                {
+                    lastSearchs.Insert(0, stringBusqueda);
+                    lastSearchs = lastSearchs.GetRange(0, (lastSearchs.Count < 10 ? lastSearchs.Count : 10));
+                }
+            } catch (Exception e) { throw new Exception(e.Message); }
+
+
+            // Inicializar las variables
             ObjectSearch result = new ObjectSearch();
             StringComparison comp = StringComparison.OrdinalIgnoreCase;
 
+
             // Grupos
-            result.grupos = new List<string>();
-            foreach (string texto in objSearch.grupos)
+            result.grupos = localSearch(stringBusqueda, objSearch.grupos);
+
+            // Investigadores
+            result.investigadores = localSearch(stringBusqueda, objSearch.investigadores);
+
+
+            // Proyectos
+            result.proyectos = localSearch(stringBusqueda, objSearch.proyectos);
+
+
+            // Documentos
+            result.documents = localSearch(stringBusqueda, objSearch.documents);
+
+
+            // Research Objects
+            result.ros = localSearch(stringBusqueda, objSearch.ros);
+
+            List<string> localSearch(string searchT, List<string> searchList)
             {
-                if (texto.Contains(stringBusqueda, comp)) {
-                    result.grupos.Add(texto);
+                var res = new List<string>();
+                if (searchT.Trim().Contains(' '))
+                {
+                    string[] texts = searchT.Split(' ');
+                    foreach (string texto in searchList)
+                    {
+                        var found = true;
+                        int ind = 0;
+                        while (found && ind < texts.Length)
+                        {
+                            if (!texto.Contains(texts[ind], comp))
+                            {
+                                found = false;
+                            }
+                            ind++;
+                        }
+                        if (found)
+                        {
+                            res.Add(texto);
+                        }
+                        
+                    }
+                } else
+                {
+                    foreach (string texto in searchList)
+                    {
+                        if (texto.Contains(searchT, comp))
+                        {
+                            res.Add(texto);
+                        }
+                    }
                 }
+                
+                return res;
             }
+
+
             return result;
+        }
+
+        /// <summary>
+        /// Obtiene las últimas búsquedas
+        /// </summary>
+        public List<string> GetLastSearchs()
+        {
+            return lastSearchs;
         }
     }
 }
