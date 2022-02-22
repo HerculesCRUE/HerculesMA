@@ -29,7 +29,7 @@ namespace Hercules.MA.ServicioExterno
         public static void GenerateMetaSearch()
         {
             AccionesMetaBusqueda accmt = new AccionesMetaBusqueda();
-            accmt.GenertateMetaShearch();
+            accmt.GenerateMetaShearch();
         }
     }
 }

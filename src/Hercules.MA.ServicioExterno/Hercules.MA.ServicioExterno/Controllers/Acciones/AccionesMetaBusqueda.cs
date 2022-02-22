@@ -37,7 +37,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <summary>
         /// Busca los elementos necesarios y los guarda en una variable estática para realizar posteriormente la búsqueda en el metabuscador
         /// </summary>
-        public void GenertateMetaShearch()
+        public void GenerateMetaShearch()
         {
             new Thread(delegate ()
             {
@@ -170,116 +170,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
                         #endregion
 
-
-
-                        //objSearch = new ObjectSearch();
-
-                        //#region CargarGrupos
-                        //List<string> grupos = new List<string>();
-                        //SparqlObject resultadoQuery = null;
-                        //StringBuilder select = new StringBuilder(), where = new StringBuilder();
-
-                        //select.Append(mPrefijos);
-                        //select.Append("SELECT DISTINCT(?tituloGrupo) ");
-                        //where.Append("WHERE { ");
-                        //where.Append("?s a 'project'.");
-                        //where.Append("?s roh:title ?tituloGrupo. ");
-                        //where.Append("} ");
-
-                        //resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
-
-                        //if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
-                        //{
-                        //    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                        //    {
-                        //        grupos.Add(UtilidadesAPI.GetValorFilaSparqlObject(fila, "tituloGrupo"));
-                        //    }
-                        //}
-
-                        //objSearch.grupos = grupos;
-                        //#endregion
-
-                        //#region CargarProyectos
-                        //List<string> proyectos = new List<string>();
-                        //resultadoQuery = null;
-                        //select = new StringBuilder();
-                        //where = new StringBuilder();
-
-                        //select.Append(mPrefijos);
-                        //select.Append("SELECT DISTINCT(?name) ");
-                        //where.Append("WHERE { ");
-                        //where.Append("?s a 'project'.");
-                        //where.Append("?s roh:title ?name. ");
-                        //where.Append("} ");
-
-                        //resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
-
-                        //if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
-                        //{
-                        //    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                        //    {
-                        //        proyectos.Add(UtilidadesAPI.GetValorFilaSparqlObject(fila, "name"));
-                        //    }
-                        //}
-
-                        //objSearch.proyectos = proyectos;
-                        //#endregion
-
-                        //#region CargarDocumentos
-                        //List<string> documents = new List<string>();
-                        //resultadoQuery = null;
-                        //select = new StringBuilder();
-                        //where = new StringBuilder();
-
-                        //select.Append(mPrefijos);
-                        //select.Append("SELECT DISTINCT(?name) ");
-                        //where.Append("WHERE { ");
-                        //where.Append("?s a 'document'.");
-                        //where.Append("?s roh:title ?name. ");
-                        //where.Append("} ");
-
-                        //resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
-
-                        //if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
-                        //{
-                        //    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                        //    {
-                        //        documents.Add(UtilidadesAPI.GetValorFilaSparqlObject(fila, "name"));
-                        //    }
-                        //}
-
-                        //objSearch.documents = documents;
-                        //#endregion
-
-                        //#region CargarROs
-                        //List<string> ros = new List<string>();
-                        //resultadoQuery = null;
-                        //select = new StringBuilder();
-                        //where = new StringBuilder();
-
-                        //select.Append(mPrefijos);
-                        //select.Append("SELECT DISTINCT(?name) ");
-                        //where.Append("WHERE { ");
-                        //where.Append("?s a 'researchobject'.");
-                        //where.Append("?s roh:title ?name. ");
-                        //where.Append("} ");
-
-                        //resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
-
-                        //if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
-                        //{
-                        //    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                        //    {
-                        //        ros.Add(UtilidadesAPI.GetValorFilaSparqlObject(fila, "name"));
-                        //    }
-                        //}
-
-                        //objSearch.ros = ros;
-                        //#endregion
-
-
-
-
                         //TODO COnfigurable
                         Thread.Sleep(3600000);
                     }
@@ -328,6 +218,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     respuesta["publicacion"].Add(publicacion);
                 }
             }
+
+
             List<Guid> ids = new List<Guid>();
             foreach(string key in respuesta.Keys)
             {
@@ -361,7 +253,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     sb.Append(charin);
                 }
             }
-            return sb.ToString();
+            return sb.ToString().ToLower();
         }
     }
 }
