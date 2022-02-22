@@ -102,10 +102,10 @@ namespace Hercules.MA.ServicioExterno.Models
         {
             //Tiene 4 campos (1000,100,10,1)
             long respuesta = 0;
-            bool encontradoTitulo = true;
-            bool encontradoTags = true;
-            bool encontradoDescripcion = true;
-            bool encontradoAutores = true;
+            bool encontradoTitulo = false;
+            bool encontradoTags = false;
+            bool encontradoDescripcion = false;
+            bool encontradoAutores = false;
             foreach (string input in pInput)
             {
                 encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
@@ -113,10 +113,9 @@ namespace Hercules.MA.ServicioExterno.Models
 
             foreach (string tag in tagsAuxSearch)
             {
-                encontradoTags = true;
                 foreach (string input in pInput)
                 {
-                    encontradoTags = encontradoTags && tag.Contains(input);
+                    encontradoTags = tag.Contains(input);
                 }
                 if (encontradoTags)
                 {
@@ -124,7 +123,6 @@ namespace Hercules.MA.ServicioExterno.Models
                 }
             }
 
-            encontradoDescripcion = true;
             foreach (string input in pInput)
             {
                 encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
@@ -132,8 +130,7 @@ namespace Hercules.MA.ServicioExterno.Models
 
             foreach (Person person in persons)
             {
-                encontradoAutores = true;
-                encontradoAutores = encontradoAutores && person.Search(pInput) > 0;
+                encontradoAutores = person.Search(pInput) > 0;
                 if (encontradoAutores)
                 {
                     break;
@@ -165,9 +162,54 @@ namespace Hercules.MA.ServicioExterno.Models
         public string descriptionAuxSearch { get; set; }
         public HashSet<Person> persons { get; set; }
 
+
         public override long Search(string[] pInput)
         {
-            throw new NotImplementedException();
+            //Tiene 3 campos (100,10,1)
+            long respuesta = 0;
+            bool encontradoTitulo = false;
+            bool encontradoDescripcion = false;
+            bool encontradoAutores = false;
+            foreach (string input in pInput)
+            {
+                encontradoTitulo = titleAuxSearch.Contains(input);
+                if (!encontradoTitulo)
+                {
+                    break;
+                }
+            }
+
+            foreach (string input in pInput)
+            {
+                encontradoDescripcion = descriptionAuxSearch.Contains(input);
+                if (!encontradoDescripcion)
+                {
+                    break;
+                }
+            }
+
+            foreach (Person person in persons)
+            {
+                encontradoAutores = person.Search(pInput) > 0;
+                if (encontradoAutores)
+                {
+                    break;
+                }
+            }
+
+            if (encontradoTitulo)
+            {
+                respuesta += 100;
+            }
+            if (encontradoDescripcion)
+            {
+                respuesta += 10;
+            }
+            if (encontradoAutores)
+            {
+                respuesta += 1;
+            }
+            return respuesta;
         }
     }
 
@@ -176,9 +218,54 @@ namespace Hercules.MA.ServicioExterno.Models
         public string descriptionAuxSearch { get; set; }
         public HashSet<Person> persons { get; set; }
 
+
         public override long Search(string[] pInput)
         {
-            throw new NotImplementedException();
+            //Tiene 3 campos (100,10,1)
+            long respuesta = 0;
+            bool encontradoTitulo = false;
+            bool encontradoDescripcion = false;
+            bool encontradoAutores = false;
+            foreach (string input in pInput)
+            {
+                encontradoTitulo = titleAuxSearch.Contains(input);
+                if (!encontradoTitulo)
+                {
+                    break;
+                }
+            }
+
+            foreach (string input in pInput)
+            {
+                encontradoDescripcion = descriptionAuxSearch.Contains(input);
+                if (!encontradoDescripcion)
+                {
+                    break;
+                }
+            }
+
+            foreach (Person person in persons)
+            {
+                encontradoAutores = person.Search(pInput) > 0;
+                if (encontradoAutores)
+                {
+                    break;
+                }
+            }
+
+            if (encontradoTitulo)
+            {
+                respuesta += 100;
+            }
+            if (encontradoDescripcion)
+            {
+                respuesta += 10;
+            }
+            if (encontradoAutores)
+            {
+                respuesta += 1;
+            }
+            return respuesta;
         }
     }
 

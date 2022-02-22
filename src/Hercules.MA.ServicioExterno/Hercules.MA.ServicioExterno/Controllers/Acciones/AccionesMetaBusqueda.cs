@@ -170,6 +170,245 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
                         #endregion
 
+                        #region CargarResearchObjects
+                        {
+                            int limit = 10000;
+                            int offset = 0;
+                            while (true)
+                            {
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?description group_concat(?author;separator=\"|\") as ?authors group_concat(?tag;separator=\"|\") as ?tags";
+                                string where = $@"  where
+                                            {{
+                                                ?id a 'researchobject'.
+                                                ?id roh:title ?title.
+                                                ?id roh:isPublic 'true'.
+                                                OPTIONAL{{ ?id bibo:abstract ?description}}
+                                                OPTIONAL{{ ?id dct:issued ?fecha}}
+                                                OPTIONAL{{ ?id vivo:freeTextKeyword ?tag}}
+                                                OPTIONAL{{ ?id bibo:authorList ?lista. ?lista rdf:member ?author.}}
+                                            }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
+
+                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                                {
+                                    offset += limit;
+                                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                                    {
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+                                        string title = fila["title"].value;
+                                        string authors = fila["authors"].value;
+                                        string description = "";
+                                        if (fila.ContainsKey("description"))
+                                        {
+                                            description = fila["description"].value;
+                                        }
+                                        string tags = fila["tags"].value;
+
+                                        ResearchObject researchObject = new ResearchObject()
+                                        {
+                                            id = id,
+                                            title = title,
+                                            titleAuxSearch = ObtenerTextoNormalizado(title),
+                                            descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                            tagsAuxSearch = new HashSet<string>(tags.Split('|')),
+                                            persons = new HashSet<Person>()
+                                        };
+                                        if (authors.Length > 0)
+                                        {
+                                            foreach (string author in authors.Split('|'))
+                                            {
+                                                Guid authorAux = new Guid(author.Replace("http://gnoss/", ""));
+                                                if (personsAuxTemp.ContainsKey(authorAux))
+                                                {
+                                                    researchObject.persons.Add(personsAuxTemp[authorAux]);
+                                                }
+                                            }
+                                        }
+                                        researchObjectsTemp.Add(researchObject);
+                                    }
+                                    if (resultadoQuery.results.bindings.Count < limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                            researchObjects = researchObjectsTemp;
+                        }
+                        #endregion
+
+                        #region CargarGrupo
+                        {
+                            int limit = 10000;
+                            int offset = 0;
+                            while (true)
+                            {
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?description group_concat(?person;separator=\"|\") as ?members";
+                                string where = $@"  where
+                                            {{
+                                                ?id a 'group'.
+                                                ?id roh:title ?title.
+                                                OPTIONAL{{ ?id vivo:description ?description}}
+                                                ?person a 'person'.
+                                                ?person foaf:name ?nombre.
+                                                {{
+                                                    ?id <http://w3id.org/roh/mainResearchers> ?main.
+                                                    ?main <http://w3id.org/roh/roleOf> ?person.
+                                                    OPTIONAL{{?main <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.}}
+                                                    OPTIONAL{{?main <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.}}
+                                                    BIND(IF(bound(?fechaPersonaEnd), xsd:integer(?fechaPersonaEnd), 30000000000000) as ?fechaPersonaEndAux)
+                                                    BIND(IF(bound(?fechaPersonaInit), xsd:integer(?fechaPersonaInit), 10000000000000) as ?fechaPersonaInitAux)
+                                                    BIND(true as ?ip)
+                                                }}UNION
+                                                {{
+                                                    ?id <http://xmlns.com/foaf/0.1/member> ?member.
+                                                    ?member <http://w3id.org/roh/roleOf> ?person.
+                                                    OPTIONAL{{?person <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.}}
+                                                    OPTIONAL{{?person <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.}}
+                                                    BIND(IF(bound(?fechaPersonaEnd), xsd:integer(?fechaPersonaEnd), 30000000000000) as ?fechaPersonaEndAux)
+                                                    BIND(IF(bound(?fechaPersonaInit), xsd:integer(?fechaPersonaInit), 10000000000000) as ?fechaPersonaInitAux)
+                                                    BIND(false as ?ip)
+                                                }}
+                                                FILTER(?fechaPersonaInitAux<={DateTime.Now.ToString("yyyyMMddHHmmss")} AND ?fechaPersonaEndAux>={DateTime.Now.ToString("yyyyMMddHHmmss")} )
+
+
+                                            }}ORDER BY DESC(?fechaPersonaInitAux) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
+
+                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                                {
+                                    offset += limit;
+                                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                                    {
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+                                        string title = fila["title"].value;
+                                        string members = fila["members"].value;
+                                        string description = "";
+                                        if (fila.ContainsKey("description"))
+                                        {
+                                            description = fila["description"].value;
+                                        }
+
+                                        Group group = new Group()
+                                        {
+                                            id = id,
+                                            title = title,
+                                            titleAuxSearch = ObtenerTextoNormalizado(title),
+                                            descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                            persons = new HashSet<Person>()
+                                        };
+                                        if (members.Length > 0)
+                                        {
+                                            foreach (string member in members.Split('|'))
+                                            {
+                                                Guid memberAux = new Guid(member.Replace("http://gnoss/", ""));
+                                                if (personsAuxTemp.ContainsKey(memberAux))
+                                                {
+                                                    group.persons.Add(personsAuxTemp[memberAux]);
+                                                }
+                                            }
+                                        }
+                                        groupsTemp.Add(group);
+                                    }
+                                    if (resultadoQuery.results.bindings.Count < limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                            groups = groupsTemp;
+                        }
+                        #endregion
+
+                        #region CargarProyectos
+                        {
+                            int limit = 10000;
+                            int offset = 0;
+                            while (true)
+                            {
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?author #?description group_concat(?author;separator=\"|\") as ?authors";
+                                string where = $@"  where
+                                            {{
+                                                ?id a 'project'.
+                                                ?id roh:title ?title.
+                                                ?id roh:isPublic 'true'.
+                                                OPTIONAL{{ ?id vivo:description ?description}}
+                                                OPTIONAL{{ ?id vivo:start ?fecha}}
+                                                OPTIONAL{{ ?id vivo:relates ?lista. ?lista rdf:member ?author.}}
+                                            }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
+
+                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                                {
+                                    offset += limit;
+                                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                                    {
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+
+                                        string autorId = "";
+                                        Guid author = new Guid();
+                                        if (fila.ContainsKey("author"))
+                                        {
+                                            autorId = fila["author"].value;
+                                            if (autorId.Length > 0)
+                                            {
+                                                author = new Guid(autorId.Replace("http://gnoss/", ""));
+                                            }
+                                        }
+                                        
+
+                                        // var currentPersons = projectsTemp.Select(e => new { e.id, people = e.persons.Where(p => p.id == author) }).Where(el => el.people.ToArray().Length > 0).ToArray();
+                                        var currentPersons = projectsTemp.Where(e => e.id == id).ToArray();
+
+                                        if (currentPersons.Length == 0)
+                                        {
+                                            string title = fila["title"].value;
+                                            string description = "";
+                                            if (fila.ContainsKey("description"))
+                                            {
+                                                description = fila["description"].value;
+                                            }
+
+                                            Project project = new Project()
+                                            {
+                                                id = id,
+                                                title = title,
+                                                titleAuxSearch = ObtenerTextoNormalizado(title),
+                                                descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                                persons = new HashSet<Person>()
+                                            };
+
+                                            if (author != null)
+                                            {
+                                                if (personsAuxTemp.ContainsKey(author))
+                                                {
+                                                    project.persons.Add(personsAuxTemp[author]);
+                                                }
+                                            }
+                                            projectsTemp.Add(project);
+                                        } else
+                                        {
+                                            if (author != null)
+                                            {
+                                                if (personsAuxTemp.ContainsKey(author))
+                                                {
+                                                    currentPersons.First().persons.Add(personsAuxTemp[author]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (resultadoQuery.results.bindings.Count < limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                            projects = projectsTemp;
+                        }
+                        #endregion
+
                         //TODO COnfigurable
                         Thread.Sleep(3600000);
                     }
@@ -216,6 +455,42 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 foreach (Publication publicacion in publicaciones.GetRange(0, min))
                 {
                     respuesta["publicacion"].Add(publicacion);
+                }
+            }
+
+            //ResearchObjects
+            if (researchObjects != null)
+            {
+                respuesta["researchObject"] = new List<ObjectSearch>();
+                List<ResearchObject> researchObjectsFilter = researchObjects.Select(researchObject => new KeyValuePair<long, ResearchObject>(researchObject.Search(inputs), researchObject)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                int min = Math.Min(researchObjectsFilter.Count, maxItems);
+                foreach (ResearchObject researchObj in researchObjectsFilter.GetRange(0, min))
+                {
+                    respuesta["researchObject"].Add(researchObj);
+                }
+            }
+
+            //Grupos
+            if (groups != null)
+            {
+                respuesta["group"] = new List<ObjectSearch>();
+                List<Group> groupsFilter = groups.Select(group => new KeyValuePair<long, Group>(group.Search(inputs), group)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                int min = Math.Min(groupsFilter.Count, maxItems);
+                foreach (Group grp in groupsFilter.GetRange(0, min))
+                {
+                    respuesta["group"].Add(grp);
+                }
+            }
+
+            //Proyectos
+            if (projects != null)
+            {
+                respuesta["project"] = new List<ObjectSearch>();
+                List<Project> projectFilter = projects.Select(project => new KeyValuePair<long, Project>(project.Search(inputs), project)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                int min = Math.Min(projectFilter.Count, maxItems);
+                foreach (Project project in projectFilter.GetRange(0, min))
+                {
+                    respuesta["project"].Add(project);
                 }
             }
 
