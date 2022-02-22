@@ -31,6 +31,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         public static List<Person> persons = null;
 
         public static ObjectSearch objSearch;
+        public static List<string> lastSearchs;
         #endregion
 
         /// <summary>
@@ -360,8 +361,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     sb.Append(charin);
                 }
             }
-            normalizedString = sb.ToString().Normalize(NormalizationForm.FormD).ToLower();
-            return normalizedString;
+            return sb.ToString();
         }
     }
 }

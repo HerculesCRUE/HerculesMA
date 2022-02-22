@@ -472,6 +472,5 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok();
         }
-
     }
 }
