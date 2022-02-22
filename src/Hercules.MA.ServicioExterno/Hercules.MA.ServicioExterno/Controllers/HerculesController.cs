@@ -102,7 +102,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pNumAreas">Nº de areas</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
         [HttpGet("DatosGraficaAreasTematicasArania")]
-        public IActionResult DatosGraficaAreasTematicasArania(string pId, string pType, string pAnioInicio, string pAnioFin,int pNumAreas)
+        public IActionResult DatosGraficaAreasTematicasArania(string pId, string pType, string pAnioInicio, string pAnioFin, int pNumAreas)
         {
             List<DataItemRelacion> datos = null;
 
@@ -147,7 +147,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
 
-        
+
 
 
         /// <summary>
@@ -440,7 +440,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 AccionesRedesUsuario accionDocumento = new AccionesRedesUsuario();
-                datosRedesUsuario = accionDocumento.GetDataRedesUsuario(pIdGnossUser);
+                //datosRedesUsuario = accionDocumento.GetDataRedesUsuario(pIdGnossUser);
             }
             catch (Exception)
             {
@@ -463,7 +463,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 AccionesRedesUsuario accionDocumento = new AccionesRedesUsuario();
-                accionDocumento.SetDataRedesUsuario(pIdGnossUser, pDicDatosAntiguos, pDicDatosNuevos);
+                //accionDocumento.SetDataRedesUsuario(pIdGnossUser, pDicDatosAntiguos, pDicDatosNuevos);
             }
             catch (Exception)
             {
@@ -473,29 +473,5 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok();
         }
 
-
-
-        /// <summary>
-        /// Inicia una búsqueda en los elementos seleccionados
-        /// </summary>
-        /// <param name="stringSearch">string de bíusqueda.</param>
-        /// <returns>JSON con los datos necesarios para el JS.</returns>
-        [HttpGet("DoMetaSearch")]
-        public IActionResult DoMetaSearch(string stringSearch)
-        {
-            ObjectSearch resultBusqueda = null;
-
-            try
-            {
-                AccionesMetaBusqueda accionBusqueda = new AccionesMetaBusqueda();
-                resultBusqueda = accionBusqueda.Busqueda(stringSearch);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return Ok(resultBusqueda);
-        }
     }
 }
