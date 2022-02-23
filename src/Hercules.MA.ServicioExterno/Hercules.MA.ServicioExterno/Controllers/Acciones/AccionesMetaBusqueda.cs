@@ -100,6 +100,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                         break;
                                     }
                                 }
+                                else
+                                {
+                                    break;
+                                }
                             }
                             persons = personsTemp;
                             personsAux = personsAuxTemp;
@@ -112,7 +116,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             int offset = 0;
                             while (true)
                             {
-                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?description group_concat(?author;separator=\"|\") as ?authors group_concat(?tag;separator=\"|\") as ?tags";
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?author ?description group_concat(?tag;separator=\"|\") as ?tags #group_concat(?author;separator=\"|\") as ?authors";
                                 string where = $@"  where
                                             {{
                                                 ?id a 'document'.
@@ -131,39 +135,73 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     offset += limit;
                                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                                     {
-                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
-                                        string title = fila["title"].value;
-                                        string authors = fila["authors"].value;
-                                        string description = "";
-                                        if (fila.ContainsKey("description"))
-                                        {
-                                            description = fila["description"].value;
-                                        }
-                                        string tags = fila["tags"].value;
 
-                                        Publication publication = new Publication()
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+
+                                        string autorId = "";
+                                        Guid author = new Guid();
+                                        if (fila.ContainsKey("author"))
                                         {
-                                            id = id,
-                                            title = title,
-                                            titleAuxSearch = ObtenerTextoNormalizado(title),
-                                            descriptionAuxSearch = ObtenerTextoNormalizado(description),
-                                            tagsAuxSearch = new HashSet<string>(tags.Split('|')),
-                                            persons = new HashSet<Person>()
-                                        };
-                                        foreach (string author in authors.Split('|'))
-                                        {
-                                            Guid authorAux = new Guid(author.Replace("http://gnoss/", ""));
-                                            if (personsAuxTemp.ContainsKey(authorAux))
+                                            autorId = fila["author"].value;
+                                            if (autorId.Length > 0)
                                             {
-                                                publication.persons.Add(personsAuxTemp[authorAux]);
+                                                author = new Guid(autorId.Replace("http://gnoss/", ""));
                                             }
                                         }
-                                        publicationsTemp.Add(publication);
+
+
+                                        // var currentPersons = publicationsTemp.Select(e => new { e.id, people = e.persons.Where(p => p.id == author) }).Where(el => el.people.ToArray().Length > 0).ToArray();
+                                        var currentPersons = publicationsTemp.Where(e => e.id == id).ToArray();
+
+                                        if (currentPersons.Length == 0)
+                                        {
+                                            string title = fila["title"].value;
+                                            string description = "";
+                                            if (fila.ContainsKey("description"))
+                                            {
+                                                description = fila["description"].value;
+                                            }
+                                            string tags = fila["tags"].value;
+
+                                            Publication publication = new Publication()
+                                            {
+                                                id = id,
+                                                title = title,
+                                                titleAuxSearch = ObtenerTextoNormalizado(title),
+                                                descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                                tagsAuxSearch = new HashSet<string>(tags.Split('|')),
+                                                persons = new HashSet<Person>()
+                                            };
+
+                                            if (author != Guid.Empty)
+                                            {
+                                                if (personsAuxTemp.ContainsKey(author))
+                                                {
+                                                    publication.persons.Add(personsAuxTemp[author]);
+                                                }
+                                            }
+                                            publicationsTemp.Add(publication);
+                                        }
+                                        else
+                                        {
+                                            if (author != Guid.Empty)
+                                            {
+                                                if (personsAuxTemp.ContainsKey(author))
+                                                {
+                                                    currentPersons.First().persons.Add(personsAuxTemp[author]);
+                                                }
+                                            }
+                                        }
+
                                     }
                                     if (resultadoQuery.results.bindings.Count < limit)
                                     {
                                         break;
                                     }
+                                }
+                                else
+                                {
+                                    break;
                                 }
                             }
                             publications = publicationsTemp;
@@ -176,7 +214,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             int offset = 0;
                             while (true)
                             {
-                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?description group_concat(?author;separator=\"|\") as ?authors group_concat(?tag;separator=\"|\") as ?tags";
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?description group_concat(?tag;separator=\"|\") as ?tags ?author # group_concat(?author;separator=\"|\") as ?authors ";
                                 string where = $@"  where
                                             {{
                                                 ?id a 'researchobject'.
@@ -195,42 +233,74 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     offset += limit;
                                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                                     {
-                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
-                                        string title = fila["title"].value;
-                                        string authors = fila["authors"].value;
-                                        string description = "";
-                                        if (fila.ContainsKey("description"))
-                                        {
-                                            description = fila["description"].value;
-                                        }
-                                        string tags = fila["tags"].value;
 
-                                        ResearchObject researchObject = new ResearchObject()
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+
+                                        string autorId = "";
+                                        Guid author = new Guid();
+                                        if (fila.ContainsKey("author"))
                                         {
-                                            id = id,
-                                            title = title,
-                                            titleAuxSearch = ObtenerTextoNormalizado(title),
-                                            descriptionAuxSearch = ObtenerTextoNormalizado(description),
-                                            tagsAuxSearch = new HashSet<string>(tags.Split('|')),
-                                            persons = new HashSet<Person>()
-                                        };
-                                        if (authors.Length > 0)
-                                        {
-                                            foreach (string author in authors.Split('|'))
+                                            autorId = fila["author"].value;
+                                            if (autorId.Length > 0)
                                             {
-                                                Guid authorAux = new Guid(author.Replace("http://gnoss/", ""));
-                                                if (personsAuxTemp.ContainsKey(authorAux))
+                                                author = new Guid(autorId.Replace("http://gnoss/", ""));
+                                            }
+                                        }
+
+
+                                        // var currentPersons = researchObjectsTemp.Select(e => new { e.id, people = e.persons.Where(p => p.id == author) }).Where(el => el.people.ToArray().Length > 0).ToArray();
+                                        var currentPersons = researchObjectsTemp.Where(e => e.id == id).ToArray();
+
+                                        if (currentPersons.Length == 0)
+                                        {
+                                            string title = fila["title"].value;
+                                            string description = "";
+                                            if (fila.ContainsKey("description"))
+                                            {
+                                                description = fila["description"].value;
+                                            }
+                                            string tags = fila["tags"].value;
+
+                                            ResearchObject researchObject = new ResearchObject()
+                                            {
+                                                id = id,
+                                                title = title,
+                                                titleAuxSearch = ObtenerTextoNormalizado(title),
+                                                descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                                tagsAuxSearch = new HashSet<string>(tags.Split('|')),
+                                                persons = new HashSet<Person>()
+                                            };
+
+                                            if (author != Guid.Empty)
+                                            {
+                                                if (personsAuxTemp.ContainsKey(author))
                                                 {
-                                                    researchObject.persons.Add(personsAuxTemp[authorAux]);
+                                                    researchObject.persons.Add(personsAuxTemp[author]);
+                                                }
+                                            }
+                                            researchObjectsTemp.Add(researchObject);
+                                        }
+                                        else
+                                        {
+                                            if (author != Guid.Empty)
+                                            {
+                                                if (personsAuxTemp.ContainsKey(author))
+                                                {
+                                                    currentPersons.First().persons.Add(personsAuxTemp[author]);
                                                 }
                                             }
                                         }
-                                        researchObjectsTemp.Add(researchObject);
+
+
+
                                     }
                                     if (resultadoQuery.results.bindings.Count < limit)
                                     {
                                         break;
                                     }
+                                } else
+                                {
+                                    break;
                                 }
                             }
                             researchObjects = researchObjectsTemp;
@@ -243,17 +313,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             int offset = 0;
                             while (true)
                             {
-                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?description group_concat(?person;separator=\"|\") as ?members";
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?author ?description # group_concat(?author;separator=\"|\") as ?members";
                                 string where = $@"  where
                                             {{
                                                 ?id a 'group'.
                                                 ?id roh:title ?title.
                                                 OPTIONAL{{ ?id vivo:description ?description}}
-                                                ?person a 'person'.
-                                                ?person foaf:name ?nombre.
+                                                ?author a 'person'.
+                                                ?author foaf:name ?nombre.
                                                 {{
                                                     ?id <http://w3id.org/roh/mainResearchers> ?main.
-                                                    ?main <http://w3id.org/roh/roleOf> ?person.
+                                                    ?main <http://w3id.org/roh/roleOf> ?author.
                                                     OPTIONAL{{?main <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.}}
                                                     OPTIONAL{{?main <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.}}
                                                     BIND(IF(bound(?fechaPersonaEnd), xsd:integer(?fechaPersonaEnd), 30000000000000) as ?fechaPersonaEndAux)
@@ -262,9 +332,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 }}UNION
                                                 {{
                                                     ?id <http://xmlns.com/foaf/0.1/member> ?member.
-                                                    ?member <http://w3id.org/roh/roleOf> ?person.
-                                                    OPTIONAL{{?person <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.}}
-                                                    OPTIONAL{{?person <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.}}
+                                                    ?member <http://w3id.org/roh/roleOf> ?author.
+                                                    OPTIONAL{{?author <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.}}
+                                                    OPTIONAL{{?author <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.}}
                                                     BIND(IF(bound(?fechaPersonaEnd), xsd:integer(?fechaPersonaEnd), 30000000000000) as ?fechaPersonaEndAux)
                                                     BIND(IF(bound(?fechaPersonaInit), xsd:integer(?fechaPersonaInit), 10000000000000) as ?fechaPersonaInitAux)
                                                     BIND(false as ?ip)
@@ -281,40 +351,68 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     offset += limit;
                                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                                     {
+                                        
                                         Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
-                                        string title = fila["title"].value;
-                                        string members = fila["members"].value;
-                                        string description = "";
-                                        if (fila.ContainsKey("description"))
+
+                                        string autorId = "";
+                                        Guid author = new Guid();
+                                        if (fila.ContainsKey("author"))
                                         {
-                                            description = fila["description"].value;
+                                            autorId = fila["author"].value;
+                                            if (autorId.Length > 0)
+                                            {
+                                                author = new Guid(autorId.Replace("http://gnoss/", ""));
+                                            }
                                         }
 
-                                        Group group = new Group()
+                                        var currentPersons = groupsTemp.Where(e => e.id == id).ToArray();
+
+                                        if (currentPersons.Length == 0)
                                         {
-                                            id = id,
-                                            title = title,
-                                            titleAuxSearch = ObtenerTextoNormalizado(title),
-                                            descriptionAuxSearch = ObtenerTextoNormalizado(description),
-                                            persons = new HashSet<Person>()
-                                        };
-                                        if (members.Length > 0)
-                                        {
-                                            foreach (string member in members.Split('|'))
+                                            string title = fila["title"].value;
+                                            string description = "";
+                                            if (fila.ContainsKey("description"))
                                             {
-                                                Guid memberAux = new Guid(member.Replace("http://gnoss/", ""));
-                                                if (personsAuxTemp.ContainsKey(memberAux))
+                                                description = fila["description"].value;
+                                            }
+
+                                            Group group = new Group()
+                                            {
+                                                id = id,
+                                                title = title,
+                                                titleAuxSearch = ObtenerTextoNormalizado(title),
+                                                descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                                persons = new HashSet<Person>()
+                                            };
+
+                                            if (author != Guid.Empty)
+                                            {
+                                                if (personsAuxTemp.ContainsKey(author))
                                                 {
-                                                    group.persons.Add(personsAuxTemp[memberAux]);
+                                                    group.persons.Add(personsAuxTemp[author]);
+                                                }
+                                            }
+                                            groupsTemp.Add(group);
+                                        }
+                                        else
+                                        {
+                                            if (author != Guid.Empty)
+                                            {
+                                                if (personsAuxTemp.ContainsKey(author))
+                                                {
+                                                    currentPersons.First().persons.Add(personsAuxTemp[author]);
                                                 }
                                             }
                                         }
-                                        groupsTemp.Add(group);
                                     }
                                     if (resultadoQuery.results.bindings.Count < limit)
                                     {
                                         break;
                                     }
+                                }
+                                else
+                                {
+                                    break;
                                 }
                             }
                             groups = groupsTemp;
@@ -327,7 +425,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             int offset = 0;
                             while (true)
                             {
-                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?author #?description group_concat(?author;separator=\"|\") as ?authors";
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?author ?description # group_concat(?author;separator=\"|\") as ?authors";
                                 string where = $@"  where
                                             {{
                                                 ?id a 'project'.
@@ -380,7 +478,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 persons = new HashSet<Person>()
                                             };
 
-                                            if (author != null)
+                                            if (author != Guid.Empty)
                                             {
                                                 if (personsAuxTemp.ContainsKey(author))
                                                 {
@@ -390,7 +488,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             projectsTemp.Add(project);
                                         } else
                                         {
-                                            if (author != null)
+                                            if (author != Guid.Empty)
                                             {
                                                 if (personsAuxTemp.ContainsKey(author))
                                                 {
@@ -403,6 +501,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     {
                                         break;
                                     }
+                                }
+                                else
+                                {
+                                    break;
                                 }
                             }
                             projects = projectsTemp;
