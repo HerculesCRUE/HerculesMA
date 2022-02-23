@@ -30,13 +30,13 @@ namespace Hercules.MA.ServicioExterno.Models
         public HashSet<Person> persons { get; set; }
 
         public override long Search(string[] pInput)
-        {
+        {            
             //Tiene 4 campos (1000,100,10,1)
             long respuesta = 0;
             bool encontradoTitulo = true;
             bool encontradoTags = true;
             int numTags = 0;
-            bool encontradoDescripcion = true;            
+            bool encontradoDescripcion = true;
             bool encontradoAutores = true;
             int numAutores = 0;
             foreach (string input in pInput)
@@ -46,13 +46,14 @@ namespace Hercules.MA.ServicioExterno.Models
 
             foreach (string tag in tagsAuxSearch)
             {
-                encontradoTags = true;
+                bool encontradoTagAux = true;
                 foreach (string input in pInput)
                 {
-                    encontradoTags = encontradoTags && tag.Contains(input);
+                    encontradoTagAux = encontradoTagAux && tag.Contains(input);
                 }
-                if (encontradoTags)
+                if (encontradoTagAux)
                 {
+                    encontradoTags = true;
                     numTags++;
                 }
             }
@@ -66,10 +67,11 @@ namespace Hercules.MA.ServicioExterno.Models
 
             foreach (Person person in persons)
             {
-                encontradoAutores = true;
-                encontradoAutores = encontradoAutores && person.Search(pInput) > 0;
-                if (encontradoAutores)
+                bool encontradoAutorAux = true;
+                encontradoAutorAux = encontradoAutorAux && person.Search(pInput) > 0;
+                if (encontradoAutorAux)
                 {
+                    encontradoAutores = true;
                     numAutores++;
                 }
             }
@@ -80,7 +82,7 @@ namespace Hercules.MA.ServicioExterno.Models
             }
             if (encontradoTags)
             {
-                respuesta += 100*numTags;
+                respuesta += 100 * numTags;
             }
             if (encontradoDescripcion)
             {
@@ -88,7 +90,7 @@ namespace Hercules.MA.ServicioExterno.Models
             }
             if (encontradoAutores)
             {
-                respuesta += 1* numAutores;
+                respuesta += 1 * numAutores;
             }
             return respuesta;
         }
