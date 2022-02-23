@@ -25,7 +25,7 @@ namespace Hercules.MA.ServicioExterno.Models
 
     public class Publication : ObjectSearch
     {
-        public HashSet<string> tagsAuxSearch { get; set; }
+        public List<string> tagsAuxSearch { get; set; }
         public string descriptionAuxSearch { get; set; }
         public HashSet<Person> persons { get; set; }
 
@@ -98,7 +98,7 @@ namespace Hercules.MA.ServicioExterno.Models
 
     public class ResearchObject : ObjectSearch
     {
-        public HashSet<string> tagsAuxSearch { get; set; }
+        public List<string> tagsAuxSearch { get; set; }
         public string descriptionAuxSearch { get; set; }
         public HashSet<Person> persons { get; set; }
 
