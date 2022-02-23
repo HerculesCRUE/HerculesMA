@@ -7,7 +7,6 @@ namespace Hercules.MA.ServicioExterno.Models
     public class Person : ObjectSearch
     {
         public bool searchable { get; set; }
-
         public override long Search(string[] pInput)
         {
             long respuesta = 0;
@@ -32,57 +31,65 @@ namespace Hercules.MA.ServicioExterno.Models
 
         public override long Search(string[] pInput)
         {
+            //Tiene 4 campos (1000,100,10,1)
             long respuesta = 0;
-            int encontradoTituloEntero = 0;
-            int encontradoTitulo = 0;
-            int encontradoTags = 0;
-            int encontradoDescripcion = 0;
-            int encontradoAutores = 0;
-
-            // Busca la palabra exacta
-            if (Regex.IsMatch(titleAuxSearch, @"\b" + string.Join(" ", pInput).Trim() + @"\b", RegexOptions.IgnoreCase))
-            {
-                encontradoTituloEntero++;
-            }
-
-            encontradoTituloEntero = titleAuxSearch.Contains(string.Join(" ", pInput).Trim()) ? encontradoTituloEntero + 1 : encontradoTituloEntero;
-
-
+            bool encontradoTitulo = true;
+            bool encontradoTags = true;
+            int numTags = 0;
+            bool encontradoDescripcion = true;            
+            bool encontradoAutores = true;
+            int numAutores = 0;
             foreach (string input in pInput)
             {
-                encontradoTitulo = titleAuxSearch.Contains(input) ? encontradoTitulo + 1 : encontradoTitulo;
+                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
             }
 
             foreach (string tag in tagsAuxSearch)
             {
+                encontradoTags = true;
                 foreach (string input in pInput)
                 {
-                    encontradoTags = tag.Contains(input) ? encontradoTags + 1 : encontradoTags;
+                    encontradoTags = encontradoTags && tag.Contains(input);
+                }
+                if (encontradoTags)
+                {
+                    numTags++;
                 }
             }
 
+            encontradoDescripcion = true;
             foreach (string input in pInput)
             {
-                encontradoDescripcion = descriptionAuxSearch.Contains(input) ? encontradoDescripcion + 1 : encontradoDescripcion;
+                encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
             }
 
 
             foreach (Person person in persons)
             {
-                Int32.TryParse(person.Search(pInput).ToString(), out encontradoAutores);
+                encontradoAutores = true;
+                encontradoAutores = encontradoAutores && person.Search(pInput) > 0;
+                if (encontradoAutores)
+                {
+                    numAutores++;
+                }
             }
 
-            // Añade la suma con el peso del resultado
-            respuesta += encontradoTituloEntero * 5000;
-
-            respuesta += encontradoTitulo * 1000;
-
-            respuesta += encontradoTags * 100;
-
-            respuesta += encontradoDescripcion * 10;
-
-            respuesta += encontradoAutores;
-
+            if (encontradoTitulo)
+            {
+                respuesta += 1000;
+            }
+            if (encontradoTags)
+            {
+                respuesta += 100*numTags;
+            }
+            if (encontradoDescripcion)
+            {
+                respuesta += 10;
+            }
+            if (encontradoAutores)
+            {
+                respuesta += 1* numAutores;
+            }
             return respuesta;
         }
     }
@@ -95,57 +102,65 @@ namespace Hercules.MA.ServicioExterno.Models
 
         public override long Search(string[] pInput)
         {
+            //Tiene 4 campos (1000,100,10,1)
             long respuesta = 0;
-            int encontradoTituloEntero = 0;
-            int encontradoTitulo = 0;
-            int encontradoTags = 0;
-            int encontradoDescripcion = 0;
-            int encontradoAutores = 0;
-
-            // Busca la palabra exacta
-            if (Regex.IsMatch(titleAuxSearch, @"\b" + string.Join(" ", pInput).Trim() + @"\b", RegexOptions.IgnoreCase))
-            {
-                encontradoTituloEntero++;
-            }
-
-            encontradoTituloEntero = titleAuxSearch.Contains(string.Join(" ", pInput).Trim()) ? encontradoTituloEntero + 1 : encontradoTituloEntero;
-
-
+            bool encontradoTitulo = true;
+            bool encontradoTags = true;
+            int numTags = 0;
+            bool encontradoDescripcion = true;
+            bool encontradoAutores = true;
+            int numAutores = 0;
             foreach (string input in pInput)
             {
-                encontradoTitulo = titleAuxSearch.Contains(input) ? encontradoTitulo + 1 : encontradoTitulo;
+                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
             }
 
             foreach (string tag in tagsAuxSearch)
             {
+                encontradoTags = true;
                 foreach (string input in pInput)
                 {
-                    encontradoTags = tag.Contains(input) ? encontradoTags + 1 : encontradoTags;
+                    encontradoTags = encontradoTags && tag.Contains(input);
+                }
+                if (encontradoTags)
+                {
+                    numTags++;
                 }
             }
 
+            encontradoDescripcion = true;
             foreach (string input in pInput)
             {
-                encontradoDescripcion = descriptionAuxSearch.Contains(input) ? encontradoDescripcion + 1 : encontradoDescripcion;
+                encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
             }
 
 
             foreach (Person person in persons)
             {
-                Int32.TryParse(person.Search(pInput).ToString(), out encontradoAutores);
+                encontradoAutores = true;
+                encontradoAutores = encontradoAutores && person.Search(pInput) > 0;
+                if (encontradoAutores)
+                {
+                    numAutores++;
+                }
             }
 
-            // Añade la suma con el peso del resultado
-            respuesta += encontradoTituloEntero * 5000;
-
-            respuesta += encontradoTitulo * 1000;
-
-            respuesta += encontradoTags * 100;
-
-            respuesta += encontradoDescripcion * 10;
-
-            respuesta += encontradoAutores;
-
+            if (encontradoTitulo)
+            {
+                respuesta += 1000;
+            }
+            if (encontradoTags)
+            {
+                respuesta += 100 * numTags;
+            }
+            if (encontradoDescripcion)
+            {
+                respuesta += 10;
+            }
+            if (encontradoAutores)
+            {
+                respuesta += 1 * numAutores;
+            }
             return respuesta;
         }
     }
