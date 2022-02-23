@@ -35,8 +35,10 @@ namespace Hercules.MA.ServicioExterno.Models
             long respuesta = 0;
             bool encontradoTitulo = true;
             bool encontradoTags = true;
+            int numTags = 0;
             bool encontradoDescripcion = true;
             bool encontradoAutores = true;
+            int numAutores = 0;
             foreach (string input in pInput)
             {
                 encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
@@ -51,7 +53,7 @@ namespace Hercules.MA.ServicioExterno.Models
                 }
                 if (encontradoTags)
                 {
-                    break;
+                    numTags++;
                 }
             }
 
@@ -68,7 +70,7 @@ namespace Hercules.MA.ServicioExterno.Models
                 encontradoAutores = encontradoAutores && person.Search(pInput)>0;
                 if (encontradoAutores)
                 {
-                    break;
+                    numAutores++;
                 }
             }
 
@@ -78,7 +80,7 @@ namespace Hercules.MA.ServicioExterno.Models
             }
             if (encontradoTags)
             {
-                respuesta += 100;
+                respuesta += 100*numTags;
             }
             if (encontradoDescripcion)
             {
@@ -86,7 +88,7 @@ namespace Hercules.MA.ServicioExterno.Models
             }
             if (encontradoAutores)
             {
-                respuesta += 1;
+                respuesta += 1*numAutores;
             }
             return respuesta;
         }
@@ -104,8 +106,10 @@ namespace Hercules.MA.ServicioExterno.Models
             long respuesta = 0;
             bool encontradoTitulo = true;
             bool encontradoTags = true;
+            int numTags = 0;
             bool encontradoDescripcion = true;
             bool encontradoAutores = true;
+            int numAutores = 0;
             foreach (string input in pInput)
             {
                 encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
@@ -120,7 +124,7 @@ namespace Hercules.MA.ServicioExterno.Models
                 }
                 if (encontradoTags)
                 {
-                    break;
+                    numTags++;
                 }
             }
 
@@ -130,13 +134,14 @@ namespace Hercules.MA.ServicioExterno.Models
                 encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
             }
 
+
             foreach (Person person in persons)
             {
                 encontradoAutores = true;
                 encontradoAutores = encontradoAutores && person.Search(pInput) > 0;
                 if (encontradoAutores)
                 {
-                    break;
+                    numAutores++;
                 }
             }
 
@@ -146,7 +151,7 @@ namespace Hercules.MA.ServicioExterno.Models
             }
             if (encontradoTags)
             {
-                respuesta += 100;
+                respuesta += 100 * numTags;
             }
             if (encontradoDescripcion)
             {
@@ -154,7 +159,7 @@ namespace Hercules.MA.ServicioExterno.Models
             }
             if (encontradoAutores)
             {
-                respuesta += 1;
+                respuesta += 1 * numAutores;
             }
             return respuesta;
         }
