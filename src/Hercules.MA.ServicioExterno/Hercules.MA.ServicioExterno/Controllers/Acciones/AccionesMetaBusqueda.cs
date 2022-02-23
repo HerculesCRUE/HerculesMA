@@ -169,7 +169,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 title = title,
                                                 titleAuxSearch = ObtenerTextoNormalizado(title),
                                                 descriptionAuxSearch = ObtenerTextoNormalizado(description),
-                                                tagsAuxSearch = new HashSet<string>(tags.Split('|')),
+                                                tagsAuxSearch = tags.Split('|').Select(x => ObtenerTextoNormalizado(x)).ToList(),
                                                 persons = new HashSet<Person>()
                                             };
 
@@ -267,7 +267,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 title = title,
                                                 titleAuxSearch = ObtenerTextoNormalizado(title),
                                                 descriptionAuxSearch = ObtenerTextoNormalizado(description),
-                                                tagsAuxSearch = new HashSet<string>(tags.Split('|')),
+                                                tagsAuxSearch = tags.Split('|').Select(x => ObtenerTextoNormalizado(x)).ToList(),
                                                 persons = new HashSet<Person>()
                                             };
 
