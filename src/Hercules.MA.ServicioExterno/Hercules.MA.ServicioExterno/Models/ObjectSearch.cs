@@ -67,9 +67,11 @@ namespace Hercules.MA.ServicioExterno.Models
             }
 
 
+            var tmpEncAutores = 0;
             foreach (Person person in persons)
             {
-                Int32.TryParse(person.Search(pInput).ToString(), out encontradoAutores);
+                Int32.TryParse(person.Search(pInput).ToString(), out tmpEncAutores);
+                encontradoAutores += tmpEncAutores;
             }
 
             // Añade la suma con el peso del resultado
@@ -130,9 +132,11 @@ namespace Hercules.MA.ServicioExterno.Models
             }
 
 
+            var tmpEncAutores = 0;
             foreach (Person person in persons)
             {
-                Int32.TryParse(person.Search(pInput).ToString(), out encontradoAutores);
+                Int32.TryParse(person.Search(pInput).ToString(), out tmpEncAutores);
+                encontradoAutores += tmpEncAutores;
             }
 
             // Añade la suma con el peso del resultado
@@ -183,10 +187,11 @@ namespace Hercules.MA.ServicioExterno.Models
                 encontradoDescripcion = descriptionAuxSearch.Contains(input) ? encontradoDescripcion + 1 : encontradoDescripcion;
             }
 
-
+            var tmpEncAutores = 0;
             foreach (Person person in persons)
             {
-                Int32.TryParse(person.Search(pInput).ToString(), out encontradoAutores);
+                Int32.TryParse(person.Search(pInput).ToString(), out tmpEncAutores);
+                encontradoAutores += tmpEncAutores;
             }
 
             // Añade la suma con el peso del resultado
@@ -235,9 +240,11 @@ namespace Hercules.MA.ServicioExterno.Models
             }
 
 
+            var tmpEncAutores = 0;
             foreach (Person person in persons)
             {
-                Int32.TryParse(person.Search(pInput).ToString(), out encontradoAutores);
+                Int32.TryParse(person.Search(pInput).ToString(), out tmpEncAutores);
+                encontradoAutores += tmpEncAutores;
             }
 
             // Añade la suma con el peso del resultado
