@@ -59,11 +59,22 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             int offset = 0;
                             while (true)
                             {
-                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?name ?isPublic";
+
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?name ?isPublic ?description group_concat(?ra; separator=\"|\") as ?researchAreas";
                                 string where = $@"  where
                                             {{
                                                 ?id a 'person'.
                                                 ?id foaf:name ?name.
+                                                OPTIONAL{{ ?id vivo:description ?description}}
+                                                OPTIONAL{{ 
+                                                    ?id vivo:hasResearchArea ?researchArea.
+                                                    ?researchArea roh:categoryNode ?categoryNode.
+                                                    ?categoryNode skos:prefLabel ?ra. 
+                                                    MINUS
+                                                    {{
+                                                        ?categoryNode <http://www.w3.org/2008/05/skos#narrower> ?hijos
+                                                    }}
+                                                }}
                                                 OPTIONAL{{?id roh:isPublic ?isPublic.}}
                                             }}ORDER BY asc(?name) asc(?id) }} LIMIT {limit} OFFSET {offset}";
 
@@ -76,16 +87,28 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     {
                                         Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
                                         string nombre = fila["name"].value;
+                                        string description = "";
                                         bool isPublic = false;
                                         if (fila.ContainsKey("isPublic"))
                                         {
                                             isPublic = fila["isPublic"].value == "true";
                                         }
+
+                                        if (fila.ContainsKey("description"))
+                                        {
+                                            description = fila["description"].value;
+                                        }
+
+                                        string researchAreas = fila["researchAreas"].value;
+
+
                                         Person person = new Person()
                                         {
                                             id = id,
                                             title = nombre,
                                             titleAuxSearch = ObtenerTextoNormalizado(nombre),
+                                            descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                            researchAreasAuxSearch = researchAreas.Split('|').Select(x => ObtenerTextoNormalizado(x)).ToList(),
                                             searchable = isPublic
                                         };
                                         personsAuxTemp[id] = person;
