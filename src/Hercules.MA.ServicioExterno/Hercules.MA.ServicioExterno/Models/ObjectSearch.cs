@@ -7,7 +7,12 @@ namespace Hercules.MA.ServicioExterno.Models
     public class Person : ObjectSearch
     {
         public bool searchable { get; set; }
-        public override long Search(string[] pInput)
+        public string descriptionAuxSearch { get; set; }
+        public List<string> researchAreasAuxSearch { get; set; }
+        /**
+         * Método para buscar dentro de otros ObjectSearch
+         */
+        public long SearchOwn(string[] pInput)
         {
             long respuesta = 0;
             bool encontrado = true;
@@ -21,6 +26,74 @@ namespace Hercules.MA.ServicioExterno.Models
             }
             return respuesta;
         }
+        /**
+         * Método para buscar dentro de Person
+         */
+        public override long Search(string[] pInput)
+        {
+            long respuesta = 0;
+            int encontradoTituloEntero = 0;
+            bool encontradoTitulo = true;
+            bool encontradoDescripcion = true;
+            bool encontradoKnowledgeAreas = true;
+            int numKnowledgeAreas = 0;
+
+
+            // Busca la palabra exacta
+            if (Regex.IsMatch(titleAuxSearch, @"\b" + string.Join(" ", pInput).Trim() + @"\b", RegexOptions.IgnoreCase))
+            {
+                encontradoTituloEntero++;
+            }
+            // Busca que contenga esta palabra cadena exacta aunque esté precedido por caracteres que no sean espacios
+            encontradoTituloEntero = titleAuxSearch.Contains(string.Join(" ", pInput).Trim()) ? encontradoTituloEntero + 1 : encontradoTituloEntero;
+
+            // Busca si TODAS las palabas se encuentran en el título
+            foreach (string input in pInput)
+            {
+                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
+            }
+
+            foreach (string tag in researchAreasAuxSearch)
+            {
+                encontradoKnowledgeAreas = true;
+                foreach (string input in pInput)
+                {
+                    encontradoKnowledgeAreas = encontradoKnowledgeAreas && tag.Contains(input);
+                }
+                if (encontradoKnowledgeAreas)
+                {
+                    numKnowledgeAreas++;
+                }
+            }
+
+            // Buscar en las descripciones que aparezca TODAS las palabras de la cadena de texto
+            foreach (string input in pInput)
+            {
+                encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
+            }
+
+
+            // Resultados
+            respuesta += encontradoTituloEntero * 5000;
+
+            if (encontradoTitulo)
+            {
+                respuesta += 1000;
+            }
+
+            if (numKnowledgeAreas > 0)
+            {
+                respuesta += 100 * numKnowledgeAreas;
+            }
+
+            if (encontradoDescripcion)
+            {
+                respuesta += 10;
+            }
+
+
+            return respuesta;
+        }
     }
 
     public class Publication : ObjectSearch
@@ -30,88 +103,25 @@ namespace Hercules.MA.ServicioExterno.Models
         public HashSet<Person> persons { get; set; }
 
         public override long Search(string[] pInput)
-        {            
-            //Tiene 4 campos (1000,100,10,1)
-            long respuesta = 0;
-            bool encontradoTitulo = true;
-            bool encontradoTags = true;
-            int numTags = 0;
-            bool encontradoDescripcion = true;
-            bool encontradoAutores = true;
-            int numAutores = 0;
-            foreach (string input in pInput)
-            {
-                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
-            }
-
-            foreach (string tag in tagsAuxSearch)
-            {
-                bool encontradoTagAux = true;
-                foreach (string input in pInput)
-                {
-                    encontradoTagAux = encontradoTagAux && tag.Contains(input);
-                }
-                if (encontradoTagAux)
-                {
-                    encontradoTags = true;
-                    numTags++;
-                }
-            }
-
-            encontradoDescripcion = true;
-            foreach (string input in pInput)
-            {
-                encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
-            }
-
-
-            foreach (Person person in persons)
-            {
-                bool encontradoAutorAux = true;
-                encontradoAutorAux = encontradoAutorAux && person.Search(pInput) > 0;
-                if (encontradoAutorAux)
-                {
-                    encontradoAutores = true;
-                    numAutores++;
-                }
-            }
-
-            if (encontradoTitulo)
-            {
-                respuesta += 1000;
-            }
-            if (encontradoTags)
-            {
-                respuesta += 100 * numTags;
-            }
-            if (encontradoDescripcion)
-            {
-                respuesta += 10;
-            }
-            if (encontradoAutores)
-            {
-                respuesta += 1 * numAutores;
-            }
-            return respuesta;
-        }
-    }
-
-    public class ResearchObject : ObjectSearch
-    {
-        public List<string> tagsAuxSearch { get; set; }
-        public string descriptionAuxSearch { get; set; }
-        public HashSet<Person> persons { get; set; }
-
-        public override long Search(string[] pInput)
         {
-            //Tiene 4 campos (1000,100,10,1)
             long respuesta = 0;
+            int encontradoTituloEntero = 0;
             bool encontradoTitulo = true;
+            bool encontradoDescripcion = true;
+            int encontradoAutores = 0;
             bool encontradoTags = true;
             int numTags = 0;
-            bool encontradoDescripcion = true;
-            bool encontradoAutores = true;
-            int numAutores = 0;
+
+
+            // Busca la palabra exacta
+            if (Regex.IsMatch(titleAuxSearch, @"\b" + string.Join(" ", pInput).Trim() + @"\b", RegexOptions.IgnoreCase))
+            {
+                encontradoTituloEntero++;
+            }
+            // Busca que contenga esta palabra cadena exacta aunque esté precedido por caracteres que no sean espacios
+            encontradoTituloEntero = titleAuxSearch.Contains(string.Join(" ", pInput).Trim()) ? encontradoTituloEntero + 1 : encontradoTituloEntero;
+
+            // Busca si TODAS las palabas se encuentran en el título
             foreach (string input in pInput)
             {
                 encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
@@ -130,39 +140,124 @@ namespace Hercules.MA.ServicioExterno.Models
                 }
             }
 
-            encontradoDescripcion = true;
+            // Buscar en las descripciones que aparezca TODAS las palabras de la cadena de texto
             foreach (string input in pInput)
             {
                 encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
             }
 
 
+            var tmpEncAutores = 0;
             foreach (Person person in persons)
             {
-                encontradoAutores = true;
-                encontradoAutores = encontradoAutores && person.Search(pInput) > 0;
-                if (encontradoAutores)
-                {
-                    numAutores++;
-                }
+                Int32.TryParse(person.SearchOwn(pInput).ToString(), out tmpEncAutores);
+                encontradoAutores += tmpEncAutores;
             }
+
+
+            // Resultados
+            respuesta += encontradoTituloEntero * 5000;
 
             if (encontradoTitulo)
             {
                 respuesta += 1000;
             }
-            if (encontradoTags)
+
+            if (numTags > 0)
             {
                 respuesta += 100 * numTags;
             }
+
             if (encontradoDescripcion)
             {
                 respuesta += 10;
             }
-            if (encontradoAutores)
+
+            respuesta += encontradoAutores;
+
+            return respuesta;
+        }
+    }
+
+    public class ResearchObject : ObjectSearch
+    {
+        public List<string> tagsAuxSearch { get; set; }
+        public string descriptionAuxSearch { get; set; }
+        public HashSet<Person> persons { get; set; }
+
+        public override long Search(string[] pInput)
+        {
+            long respuesta = 0;
+            int encontradoTituloEntero = 0;
+            bool encontradoTitulo = true;
+            bool encontradoDescripcion = true;
+            int encontradoAutores = 0;
+            bool encontradoTags = true;
+            int numTags = 0;
+
+
+            // Busca la palabra exacta
+            if (Regex.IsMatch(titleAuxSearch, @"\b" + string.Join(" ", pInput).Trim() + @"\b", RegexOptions.IgnoreCase))
             {
-                respuesta += 1 * numAutores;
+                encontradoTituloEntero++;
             }
+            // Busca que contenga esta palabra cadena exacta aunque esté precedido por caracteres que no sean espacios
+            encontradoTituloEntero = titleAuxSearch.Contains(string.Join(" ", pInput).Trim()) ? encontradoTituloEntero + 1 : encontradoTituloEntero;
+
+            // Busca si TODAS las palabas se encuentran en el título
+            foreach (string input in pInput)
+            {
+                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
+            }
+
+            foreach (string tag in tagsAuxSearch)
+            {
+                encontradoTags = true;
+                foreach (string input in pInput)
+                {
+                    encontradoTags = encontradoTags && tag.Contains(input);
+                }
+                if (encontradoTags)
+                {
+                    numTags++;
+                }
+            }
+
+            // Buscar en las descripciones que aparezca TODAS las palabras de la cadena de texto
+            foreach (string input in pInput)
+            {
+                encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
+            }
+
+
+            var tmpEncAutores = 0;
+            foreach (Person person in persons)
+            {
+                Int32.TryParse(person.SearchOwn(pInput).ToString(), out tmpEncAutores);
+                encontradoAutores += tmpEncAutores;
+            }
+
+
+            // Resultados
+            respuesta += encontradoTituloEntero * 5000;
+
+            if (encontradoTitulo)
+            {
+                respuesta += 1000;
+            }
+
+            if (numTags > 0)
+            {
+                respuesta += 100 * numTags;
+            }
+
+            if (encontradoDescripcion)
+            {
+                respuesta += 10;
+            }
+
+            respuesta += encontradoAutores;
+
             return respuesta;
         }
     }
@@ -177,41 +272,52 @@ namespace Hercules.MA.ServicioExterno.Models
         {
             long respuesta = 0;
             int encontradoTituloEntero = 0;
-            int encontradoTitulo = 0;
-            int encontradoDescripcion = 0;
+            bool encontradoTitulo = true;
+            bool encontradoDescripcion = true;
             int encontradoAutores = 0;
+
 
             // Busca la palabra exacta
             if (Regex.IsMatch(titleAuxSearch, @"\b" + string.Join(" ", pInput).Trim() + @"\b", RegexOptions.IgnoreCase))
             {
                 encontradoTituloEntero++;
             }
-
+            // Busca que contenga esta palabra cadena exacta aunque esté precedido por caracteres que no sean espacios
             encontradoTituloEntero = titleAuxSearch.Contains(string.Join(" ", pInput).Trim()) ? encontradoTituloEntero + 1 : encontradoTituloEntero;
 
-
+            // Busca si TODAS las palabas se encuentran en el título
             foreach (string input in pInput)
             {
-                encontradoTitulo = titleAuxSearch.Contains(input) ? encontradoTitulo + 1 : encontradoTitulo;
+                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
             }
 
+            // Buscar en las descripciones que aparezca TODAS las palabras de la cadena de texto
             foreach (string input in pInput)
             {
-                encontradoDescripcion = descriptionAuxSearch.Contains(input) ? encontradoDescripcion + 1 : encontradoDescripcion;
+                encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
             }
 
 
+            var tmpEncAutores = 0;
             foreach (Person person in persons)
             {
-                Int32.TryParse(person.Search(pInput).ToString(), out encontradoAutores);
+                Int32.TryParse(person.SearchOwn(pInput).ToString(), out tmpEncAutores);
+                encontradoAutores += tmpEncAutores;
             }
 
-            // Añade la suma con el peso del resultado
+
+            // Resultados
             respuesta += encontradoTituloEntero * 5000;
 
-            respuesta += encontradoTitulo * 1000;
+            if (encontradoTitulo)
+            {
+                respuesta += 1000;
+            }
 
-            respuesta += encontradoDescripcion * 10;
+            if (encontradoDescripcion)
+            {
+                respuesta += 10;
+            }
 
             respuesta += encontradoAutores;
 
@@ -229,41 +335,52 @@ namespace Hercules.MA.ServicioExterno.Models
         {
             long respuesta = 0;
             int encontradoTituloEntero = 0;
-            int encontradoTitulo = 0;
-            int encontradoDescripcion = 0;
+            bool encontradoTitulo = true;
+            bool encontradoDescripcion = true;
             int encontradoAutores = 0;
+
 
             // Busca la palabra exacta
             if (Regex.IsMatch(titleAuxSearch, @"\b" + string.Join(" ", pInput).Trim() + @"\b", RegexOptions.IgnoreCase))
             {
                 encontradoTituloEntero++;
             }
-
+            // Busca que contenga esta palabra cadena exacta aunque esté precedido por caracteres que no sean espacios
             encontradoTituloEntero = titleAuxSearch.Contains(string.Join(" ", pInput).Trim()) ? encontradoTituloEntero + 1 : encontradoTituloEntero;
 
+            // Busca si TODAS las palabas se encuentran en el título
             foreach (string input in pInput)
             {
-                encontradoTitulo = titleAuxSearch.Contains(input) ? encontradoTitulo + 1 : encontradoTitulo;
+                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
             }
 
+            // Buscar en las descripciones que aparezca TODAS las palabras de la cadena de texto
             foreach (string input in pInput)
             {
-                encontradoDescripcion = descriptionAuxSearch.Contains(input) ? encontradoDescripcion + 1 : encontradoDescripcion;
+                encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
             }
 
 
+            var tmpEncAutores = 0;
             foreach (Person person in persons)
             {
-                Int32.TryParse(person.Search(pInput).ToString(), out encontradoAutores);
+                Int32.TryParse(person.SearchOwn(pInput).ToString(), out tmpEncAutores);
+                encontradoAutores += tmpEncAutores;
             }
 
-            // Añade la suma con el peso del resultado
+
+            // Resultados
             respuesta += encontradoTituloEntero * 5000;
 
-            respuesta += encontradoTitulo * 1000;
+            if (encontradoTitulo)
+            {
+                respuesta += 1000;
+            }
 
-
-            respuesta += encontradoDescripcion * 10;
+            if (encontradoDescripcion)
+            {
+                respuesta += 10;
+            }
 
             respuesta += encontradoAutores;
 
