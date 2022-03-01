@@ -47,6 +47,7 @@ using TaxonomyOntology;
 using Hercules.MA.Load.Models.TaxonomyOntology;
 using ResearchobjecttypeOntology;
 using ContractmodalityOntology;
+using ScopemanagementactivityOntology;
 
 namespace Hercules.MA.Load
 {
@@ -94,6 +95,8 @@ namespace Hercules.MA.Load
         private static readonly string idRelationshipType = "CVN_COLLABORATION_A";
         private static readonly string idActivityModality = "CVN_ACTIVITY_A";
         private static readonly string idContractModality = "CVN_SITUATION_A";
+        private static readonly string idScopeManagementActivity = "CVN_MANAGEMENT_TYPE_A";
+        
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -142,6 +145,7 @@ namespace Hercules.MA.Load
             CargarDepartment("department");
             CargarActivityModality(tablas, "activitymodality");
             CargarContractModality(tablas, "contractmodality");
+            CargarScopeManagementActivity(tablas, "scopemanagementactivity");
             CargarTesauroUnesco(tablas, "taxonomy");
 
             //Cargamos los subtipos de los RO
@@ -2080,6 +2084,30 @@ namespace Hercules.MA.Load
             });
         }
 
+        /// <summary>
+        /// Carga la entidad secundaria ScopeManagementActivity.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarScopeManagementActivity(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ScopeManagementActivity", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ScopeManagementActivity> modalidad = new List<ScopeManagementActivity>();
+            modalidad = ObtenerDatosScopeManagementActivity(pTablas, idScopeManagementActivity, modalidad);
+
+            //Carga.
+            Parallel.ForEach(modalidad, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, modality =>
+            {
+                mResourceApi.LoadSecondaryResource(modality.ToGnossApiResource(mResourceApi, pOntology + "_" + modality.Dc_identifier));
+            });
+        }
+
 
         /// <summary>
         /// Obtiene los objetos RelationshipType a cargar.
@@ -2162,6 +2190,49 @@ namespace Hercules.MA.Load
 
             return pListaDatosConstractModality;
         }
+
+        // <summary>
+        /// Obtiene los objetos RelationshipType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosActivityModality">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ScopeManagementActivity> ObtenerDatosScopeManagementActivity(ReferenceTables pTablas, string pCodigoTabla, List<ScopeManagementActivity> pListaDatosScopeManagementActivity)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        ScopeManagementActivity modality = new ScopeManagementActivity();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        modality.Dc_identifier = identificador;
+                        modality.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosScopeManagementActivity.Add(modality);
+                    }
+                }
+            }
+
+            return pListaDatosScopeManagementActivity;
+        }
+
+        
 
 
         /// <summary>
