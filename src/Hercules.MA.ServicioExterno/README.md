@@ -11,7 +11,7 @@
 
 # Servicio Externo
 
-Este servicio es un servicio web sobre el que se apoya la web de **Hércules Métodos de Análisis**, a la que realiza diferentes peticiones vía AJAX. El servicio a su vez dispone de una interfaz Swagger para la realización de las diferentes pruebas, para acceder a ella sería usando la url https://something.com/swagger/index.html.
+Este servicio es un servicio web sobre el que se apoya la web de **Hércules Métodos de Análisis**, a la que realiza diferentes peticiones vía AJAX. 
 
 El servicio externo se compone a su vez de 3 servicios o funcionalidades bien marcadas:
 
