@@ -96,7 +96,7 @@ namespace Hercules.MA.Load
         private static readonly string idActivityModality = "CVN_ACTIVITY_A";
         private static readonly string idContractModality = "CVN_SITUATION_A";
         private static readonly string idScopeManagementActivity = "CVN_MANAGEMENT_TYPE_A";
-        
+
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -147,6 +147,7 @@ namespace Hercules.MA.Load
             CargarContractModality(tablas, "contractmodality");
             CargarScopeManagementActivity(tablas, "scopemanagementactivity");
             CargarTesauroUnesco(tablas, "taxonomy");
+            CargarHIndexSource("hindexsource");
 
             //Cargamos los subtipos de los RO
             CargarResearhObjectType();
@@ -2232,7 +2233,7 @@ namespace Hercules.MA.Load
             return pListaDatosScopeManagementActivity;
         }
 
-        
+
 
 
         /// <summary>
@@ -2525,6 +2526,127 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosScientificExperienceProject;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria HIndexSource.
+        /// </summary>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarHIndexSource(string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/HIndexSource", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<HIndexSource> hindexsources =  ObtenerDatosHIndexSource();
+
+            //Carga.
+            Parallel.ForEach(hindexsources, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, hindexsource =>
+            {
+                var x = mResourceApi.LoadSecondaryResource(hindexsource.ToGnossApiResource(mResourceApi, pOntology + "_" + hindexsource.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos HIndexSource a cargar.
+        /// </summary>
+        /// <param name="pListaDatosHIndexSource">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<HIndexSource> ObtenerDatosHIndexSource()
+        {
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            //Lista con datos.
+            List<HIndexSource> hIndexSources = new List<HIndexSource>();
+
+            //Otros
+            {
+                HIndexSource hindexsource = new HIndexSource()
+                {
+                    Dc_identifier = "OTHERS",
+                    Dc_title = new Dictionary<LanguageEnum, string>()
+                };
+                foreach(LanguageEnum lang in dicIdiomasMapeados.Values)
+                {
+                    string texto = "";
+                    switch(lang)
+                    {
+                        case LanguageEnum.ca:
+                            texto = "Altres";
+                            break;
+                        case LanguageEnum.en:
+                            texto = "Others";
+                            break;
+                        case LanguageEnum.es:
+                            texto = "Otros";
+                            break;
+                        case LanguageEnum.eu:
+                            texto = "Beste batzuk";
+                            break;
+                        case LanguageEnum.fr:
+                            texto = "Autres";
+                            break;
+                        case LanguageEnum.gl:
+                            texto = "Outros";
+                            break;
+                        default:
+                            texto = "Otros";
+                            break;
+
+                    }
+                    hindexsource.Dc_title[lang] = texto;
+                }
+                hIndexSources.Add(hindexsource);
+            }
+
+            //GOOGLE SCHOLAR
+            {
+                HIndexSource hindexsource = new HIndexSource()
+                {
+                    Dc_identifier = "001",
+                    Dc_title = new Dictionary<LanguageEnum, string>()
+                };
+                foreach (LanguageEnum lang in dicIdiomasMapeados.Values)
+                {
+                    string texto = "GOOGLE SCHOLAR";
+                    hindexsource.Dc_title[lang] = texto;
+                }
+                hIndexSources.Add(hindexsource);
+            }
+
+            //SCOPUS
+            {
+                HIndexSource hindexsource = new HIndexSource()
+                {
+                    Dc_identifier = "010",
+                    Dc_title = new Dictionary<LanguageEnum, string>()
+                };
+                foreach (LanguageEnum lang in dicIdiomasMapeados.Values)
+                {
+                    string texto = "SCOPUS";
+                    hindexsource.Dc_title[lang] = texto;
+                }
+                hIndexSources.Add(hindexsource);
+            }
+
+            //WOS
+            {
+                HIndexSource hindexsource = new HIndexSource()
+                {
+                    Dc_identifier = "000",
+                    Dc_title = new Dictionary<LanguageEnum, string>()
+                };
+                foreach (LanguageEnum lang in dicIdiomasMapeados.Values)
+                {
+                    string texto = "WOS";
+                    hindexsource.Dc_title[lang] = texto;
+                }
+                hIndexSources.Add(hindexsource);
+            }
+            return hIndexSources;
         }
 
         /// <summary>
