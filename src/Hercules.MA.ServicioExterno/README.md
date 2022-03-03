@@ -23,6 +23,8 @@ Es el encargado principalmente de obtener los datos de las gráficas en las dife
 Controlador para obtener y modificar los datos de las fuentes de *ResearchObjects* (Otros objetos de investigación).
 
 ## SearchController
+La documentación funcional del metabuscador está en [Hércules MA - Metabuscador](https://confluence.um.es/confluence/display/HERCULES/MA.+Metabuscador).
+
 Este controlador se encarga de las peticiones para realizar una búsqueda de los datos almacenados en memoria de las entidades, o también llamado **metabuscador**:
  - Investigadores
  - Grupos de investigación
