@@ -3,7 +3,7 @@
 | Fecha         | 1/3/2022                                                   |
 | ------------- | ------------------------------------------------------------ |
 |Título|Hércules MA. Servicio externo| 
-|Descripción|Servicio Wweb con funciones propias de Hércules Métodos de Análisis|
+|Descripción|Servicio Web con funciones propias de Hércules Métodos de Análisis|
 |Versión|1|
 |Módulo|Documentación|
 |Tipo|Código|
