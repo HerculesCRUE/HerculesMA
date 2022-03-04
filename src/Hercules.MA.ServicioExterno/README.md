@@ -1,17 +1,30 @@
+![](../../Docs/media/CabeceraDocumentosMD.png)
+
+| Fecha         | 1/3/2022                                                   |
+| ------------- | ------------------------------------------------------------ |
+|Título|Hércules MA. Servicio externo| 
+|Descripción|Servicio Web con funciones propias de Hércules Métodos de Análisis|
+|Versión|1|
+|Módulo|Documentación|
+|Tipo|Código|
+|Cambios de la Versión|Versión inicial|
+
 # Servicio Externo
 
-Este servicio es un servicio web sobre el que se apoya la web de **Hércules**, a la que realiza diferentes peticiones vía AJAX. El servicio a su vez dispone de una interfaz Swagger para la realización de las diferentes pruebas, para acceder a ella sería usando la url https://something.com/swagger/index.html.
+Este servicio es un servicio web sobre el que se apoya la web de **Hércules Métodos de Análisis**, a la que realiza diferentes peticiones vía AJAX. 
 
 El servicio externo se compone a su vez de 3 servicios o funcionalidades bien marcadas:
 
 
-## HerculesCotroller
+## HerculesController
 Es el encargado principalmente de obtener los datos de las gráficas en las diferentes fichas, como puedan ser las fichas de los investigadores, los grupos de investigación, las publicaciones, etc...
 
 ## RedesUsuarioController
 Controlador para obtener y modificar los datos de las fuentes de *ResearchObjects* (Otros objetos de investigación).
 
 ## SearchController
+La documentación funcional del metabuscador está en [Hércules MA - Metabuscador](https://confluence.um.es/confluence/display/HERCULES/MA.+Metabuscador).
+
 Este controlador se encarga de las peticiones para realizar una búsqueda de los datos almacenados en memoria de las entidades, o también llamado **metabuscador**:
  - Investigadores
  - Grupos de investigación
