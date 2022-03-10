@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
@@ -35,6 +36,29 @@ namespace Hercules.MA.ServicioExterno.Controllers
             }
             return Ok(datosThesaurus);
         }
-        
+
+        /// <summary>
+        /// Controlador para guardar los datos del cluster.
+        /// </summary>
+        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
+        /// <param name="pDataCluster">Datos a añadir / modificar.</param>
+        /// <returns>Id del cluster creado o modificado.</returns>
+        [HttpPost("SetSection1")]
+        public IActionResult SetSection1([Required] string pIdGnossUser, [FromBody] Cluster pDataCluster)
+        {
+            string idClusterRes = string.Empty;
+            try
+            {
+                AccionesCluster accionCluster = new AccionesCluster();
+                idClusterRes = accionCluster.SaveStep1Cluster(pIdGnossUser, pDataCluster);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(idClusterRes);
+        }
+
     }
 }

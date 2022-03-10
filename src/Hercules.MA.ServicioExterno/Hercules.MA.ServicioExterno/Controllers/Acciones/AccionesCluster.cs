@@ -1,11 +1,14 @@
 ﻿using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
+using Gnoss.ApiWrapper.Model;
 using Hercules.MA.ServicioExterno.Models.Cluster;
+using ClusterOntology;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
@@ -21,7 +24,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         #endregion
 
-
+        /// <summary>
+        /// Método público que obtiene una lista de thesaurus.
+        /// </summary>
+        /// <param name="listadoCluster">Listado de thesaurus a obtener.</param>
+        /// <returns>Diccionario con las listas de thesaurus.</returns>
         public Dictionary<string, List<ThesaurusItem>> GetListThesaurus (string listadoCluster)
         {
 
@@ -40,8 +47,111 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return thesaurus;
         }
 
+
+        /// <summary>
+        /// Método público para guardar / editar la información básica (paso 1) de los cluster
+        /// </summary>
+        /// <param name="listadoCluster">Listado de thesaurus a obtener.</param>
+        /// <returns>Diccionario con las listas de thesaurus.</returns>
+        public string SaveStep1Cluster (string pIdGnossUser, Models.Cluster.Cluster cluster)
+        {
+            string idRecurso = cluster.entityID;
+            int MAX_INTENTOS = 10;
+            bool uploadedR = false;
+
+            // Obtener el id del usuario usando el id de la cuenta
+            string select = "select ?s ";
+            string where = @$"where {{
+                    ?s a 'person'.
+                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+            var userGnossId = string.Empty;
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                userGnossId = e["s"].value;
+            });
+
+            if (!string.IsNullOrEmpty(userGnossId))
+            {
+                // Creando el objeto del cluster
+                // Creando las categorías
+                List<CategoryPath> categorias = new List<CategoryPath>();
+                categorias.Add(new CategoryPath() { IdsRoh_categoryNode = cluster.terms });
+
+                // Creando los perfiles del cluster
+                if (cluster.profiles != null)
+                {
+                    IEnumerable<ClusterPerfil> listClusterPerfil = cluster.profiles.Select(e => new ClusterPerfil()
+                    {
+                        GNOSSID = e.entityID,
+                        Roh_title = e.name,
+                        Roh_hasKnowledgeArea = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } },
+                        IdsRdf_member = e.users,
+                        Vivo_freeTextKeyword = e.tags
+                    });
+                }
+                // creando los cluster
+                ClusterOntology.Cluster cRsource = new();
+                cRsource.IdRdf_member = userGnossId;
+                cRsource.Roh_title = cluster.name;
+                cRsource.Vivo_description = cluster.description;
+                cRsource.Roh_hasKnowledgeArea = categorias;
+                cRsource.Dct_issued = DateTime.Now;
+
+                mResourceApi.ChangeOntoly("cluster");
+
+                if (idRecurso != null && idRecurso != "")
+                {
+                    // Inserción/Modificación de triples.
+                    Guid guid = mResourceApi.GetShortGuid(idRecurso);
+                    Dictionary<Guid, List<TriplesToInclude>> dicInsercion = new Dictionary<Guid, List<TriplesToInclude>>();
+                    List<TriplesToInclude> listaTriplesInsercion = new List<TriplesToInclude>();
+                    Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
+                    List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+                    Dictionary<Guid, List<RemoveTriples>> dicBorrado = new Dictionary<Guid, List<RemoveTriples>>();
+                    List<RemoveTriples> listaTriplesBorrado = new List<RemoveTriples>();
+
+                    // Editar
+
+                }
+                else
+                {
+                    // Inserción.
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, new());
+                    int numIntentos = 0;
+                    while (!resource.Uploaded)
+                    {
+                        numIntentos++;
+                        if (numIntentos > MAX_INTENTOS)
+                        {
+                            break;
+                        }
+                        idRecurso = mResourceApi.LoadComplexSemanticResource(resource, true, true);
+                        uploadedR = resource.Uploaded;
+                    }
+                }
+            }
+
+            if (uploadedR)
+            {
+                return idRecurso;
+            } else
+            {
+                throw new Exception("Recurso no creado");
+            }
+            return idRecurso;
+        }
+
+
         #region Métodos de recolección de datos
 
+        /// <summary>
+        /// Método privado para obtener los tesauros.
+        /// </summary>
+        /// <param name="pListaTesauros">Listado de thesaurus a obtener.</param>
+        /// <returns>Diccionario con las listas de thesaurus.</returns>
         private Dictionary<string, List<ThesaurusItem>> GetTesauros(List<string> pListaTesauros)
         {
             Dictionary<string, List<ThesaurusItem>> elementosTesauros = new Dictionary<string, List<ThesaurusItem>>();
