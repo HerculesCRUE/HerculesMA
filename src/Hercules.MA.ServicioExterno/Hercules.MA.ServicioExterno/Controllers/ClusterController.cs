@@ -44,13 +44,38 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pDataCluster">Datos a añadir / modificar.</param>
         /// <returns>Id del cluster creado o modificado.</returns>
         [HttpPost("SetSection1")]
-        public IActionResult SetSection1([Required] string pIdGnossUser, [FromBody] Cluster pDataCluster)
+        public IActionResult SetSection1([Required] string pIdGnossUser, [FromForm] Cluster pDataCluster)
         {
             string idClusterRes = string.Empty;
             try
             {
                 AccionesCluster accionCluster = new AccionesCluster();
                 idClusterRes = accionCluster.SaveStep1Cluster(pIdGnossUser, pDataCluster);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(idClusterRes);
+        }
+
+
+
+
+        /// <summary>
+        /// Controlador que sugiere etiquetas con la búsqueda dada
+        /// </summary>
+        /// <param name="tagInput">Texto para la búsqueda de etiquetas.</param>
+        /// <returns>Listado de las etiquetas de resultado.</returns>
+        [HttpGet("searchTags")]
+        public IActionResult SearchTags([Required] string tagInput)
+        {
+            List<TagsItem> idClusterRes = new();
+            try
+            {
+                AccionesCluster accionCluster = new AccionesCluster();
+                idClusterRes = accionCluster.SearchTags(tagInput);
             }
             catch (Exception)
             {

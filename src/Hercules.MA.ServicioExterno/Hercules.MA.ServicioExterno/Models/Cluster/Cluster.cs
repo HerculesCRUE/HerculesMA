@@ -8,7 +8,7 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
         public string name { get; set; }
         public string description { get; set; }
         public List<string> terms { get; set; }
-        public IEnumerable<PerfilCluster> profiles { get; set; }
+        public List<PerfilCluster> profiles { get; set; }
     }
 
     public class PerfilCluster

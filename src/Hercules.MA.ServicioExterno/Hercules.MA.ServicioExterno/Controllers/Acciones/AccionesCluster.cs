@@ -105,22 +105,27 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 if (idRecurso != null && idRecurso != "")
                 {
-                    // Inserción/Modificación de triples.
-                    Guid guid = mResourceApi.GetShortGuid(idRecurso);
-                    Dictionary<Guid, List<TriplesToInclude>> dicInsercion = new Dictionary<Guid, List<TriplesToInclude>>();
-                    List<TriplesToInclude> listaTriplesInsercion = new List<TriplesToInclude>();
-                    Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-                    List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
-                    Dictionary<Guid, List<RemoveTriples>> dicBorrado = new Dictionary<Guid, List<RemoveTriples>>();
-                    List<RemoveTriples> listaTriplesBorrado = new List<RemoveTriples>();
+                    string[] recursoSplit = idRecurso.Split('_');
 
-                    // Editar
+                    // Modificación.
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null,new Guid(recursoSplit[recursoSplit.Length-2]), new Guid(recursoSplit[recursoSplit.Length-1]));
+                    int numIntentos = 0;
+                    while (!resource.Modified)
+                    {
+                        numIntentos++;
+                        if (numIntentos > MAX_INTENTOS)
+                        {
+                            break;
+                        }
+                        
+                        mResourceApi.ModifyComplexOntologyResource(resource,false,false);
+                    }
 
                 }
                 else
                 {
                     // Inserción.
-                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, new());
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null);
                     int numIntentos = 0;
                     while (!resource.Uploaded)
                     {
@@ -143,6 +148,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 throw new Exception("Recurso no creado");
             }
             return idRecurso;
+        }
+
+        internal List<TagsItem> SearchTags(string tagInput)
+        {
+
+            List<TagsItem> resultData = new();
+
+            return resultData;
         }
 
 
