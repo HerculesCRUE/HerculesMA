@@ -48,6 +48,12 @@ using Hercules.MA.Load.Models.TaxonomyOntology;
 using ResearchobjecttypeOntology;
 using ContractmodalityOntology;
 using ScopemanagementactivityOntology;
+using DoctoralprogramtypeOntology;
+using DegreetypeOntology;
+using QualificationtypeOntology;
+using PrizetypeOntology;
+using HindexsourceOntology;
+using UniversitydegreetypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -58,6 +64,7 @@ namespace Hercules.MA.Load
     {
         //Ruta con el XML de datos a leer.
         private static string RUTA_XML = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Dataset\CVN\ReferenceTables.xml";
+        private static string RUTA_XML_THESAURUS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Dataset\CVN\Thesaurus.xml";
 
         //Resource API.
         public static ResourceApi mResourceApi { get; set; }
@@ -96,6 +103,13 @@ namespace Hercules.MA.Load
         private static readonly string idActivityModality = "CVN_ACTIVITY_A";
         private static readonly string idContractModality = "CVN_SITUATION_A";
         private static readonly string idScopeManagementActivity = "CVN_MANAGEMENT_TYPE_A";
+        private static readonly string idQualificationType = "CVN_QUALIFICATION_B";
+        private static readonly string idUniversityDegreeType = "CVN_TITLE_A";
+        private static readonly string idDegreeType = "CVN_TITLE_B";
+        private static readonly string idDoctoralProgramType = "CVN_TITLE_C";
+        private static readonly string idPrizeType = "CVN_PRIZE_A";
+
+        
 
 
         //Número de hilos para el paralelismo.
@@ -107,10 +121,15 @@ namespace Hercules.MA.Load
         public static void CargarEntidadesSecundarias()
         {
             //Lectura del XML con los datos.
-            XmlDocument documento = new XmlDocument();
-            documento.Load(RUTA_XML);
-            XmlSerializer serializer = new XmlSerializer(typeof(ReferenceTables));
-            ReferenceTables tablas = (ReferenceTables)serializer.Deserialize(new StringReader(documento.InnerXml));
+            XmlDocument documento_XML = new XmlDocument();
+            documento_XML.Load(RUTA_XML);
+            XmlSerializer serializer_XML = new XmlSerializer(typeof(ReferenceTables));
+            ReferenceTables tablas = (ReferenceTables)serializer_XML.Deserialize(new StringReader(documento_XML.InnerXml));
+
+            XmlDocument documento_THESAURUS = new XmlDocument();
+            documento_THESAURUS.Load(RUTA_XML_THESAURUS);
+            XmlSerializer serializer_THESAURUS = new XmlSerializer(typeof(Thesaurus));
+            Thesaurus tablas_THESAURUS = (Thesaurus)serializer_THESAURUS.Deserialize(new StringReader(documento_THESAURUS.InnerXml));
 
             //Carga de entidades secundarias.
             CargarFeatures(tablas, "feature");
@@ -147,7 +166,13 @@ namespace Hercules.MA.Load
             CargarContractModality(tablas, "contractmodality");
             CargarScopeManagementActivity(tablas, "scopemanagementactivity");
             CargarTesauroUnesco(tablas, "taxonomy");
+            CargarTesauroCVN(tablas_THESAURUS, "taxonomy");
             CargarHIndexSource("hindexsource");
+            CargarQualificationType(tablas, "qualificationtype");
+            CargarUniversityDegreeType(tablas, "universitydegreetype");
+            CargarDegreeType(tablas, "degreetype");
+            CargarDoctoralProgramType(tablas, "doctoralprogramtype");
+            CargarPrizeType(tablas, "prizetype");
 
             //Cargamos los subtipos de los RO
             CargarResearhObjectType();
@@ -2151,7 +2176,7 @@ namespace Hercules.MA.Load
             return pListaDatosActivityModality;
         }
 
-        // <summary>
+        /// <summary>
         /// Obtiene los objetos RelationshipType a cargar.
         /// </summary>
         /// <param name="pTablas">Objetos con los datos a obtener.</param>
@@ -2258,7 +2283,6 @@ namespace Hercules.MA.Load
             });
         }
 
-
         private static List<SecondaryResource> ObtenerDatosUnesco(ReferenceTables pTablas, string pSource)
         {
             List<SecondaryResource> secondaryResources = new List<SecondaryResource>();
@@ -2289,7 +2313,11 @@ namespace Hercules.MA.Load
                     ConceptEDMA concept = new ConceptEDMA();
                     concept.Dc_identifier = item.Code;
                     concept.Dc_source = pSource;
-                    concept.Skos_prefLabel = item.Name.First(x => x.lang == "spa").Name;
+                    concept.Skos_prefLabelMulti = new Dictionary<LanguageEnum, string>();
+                    foreach (TableItemNameDetail name in item.Name)
+                    {
+                        concept.Skos_prefLabelMulti.Add(dicIdiomasMapeados[name.lang], name.Name);
+                    }
                     concept.Skos_symbol = level.ToString();
                     listConcepts.Add(concept);
                 }
@@ -2328,6 +2356,115 @@ namespace Hercules.MA.Load
             collection.Dc_source = pSource;
             collection.Skos_member = listConcepts.Where(x => x.Dc_identifier.EndsWith("0000")).ToList();
             collection.Skos_scopeNote = "Tesauro UNESCO";
+            secondaryResources.Add(collection.ToGnossApiResource(mResourceApi, "0"));
+
+            return secondaryResources;
+        }
+
+
+        /// <summary>
+        /// Carga el tesauro de CVN
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarTesauroCVN(Thesaurus pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+            EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "tesauro_cvn");
+            EliminarDatosCargados("http://www.w3.org/2008/05/skos#Concept", "taxonomy", "tesauro_cvn");
+
+            //Obtención de los objetos a cargar.
+            List<SecondaryResource> categorias = ObtenerDatosTesauroCVN(pTablas, "tesauro_cvn");
+
+            //Carga.
+            Parallel.ForEach(categorias, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, categoria =>
+            {
+                mResourceApi.LoadSecondaryResource(categoria);
+            });
+        }
+
+        private static List<SecondaryResource> ObtenerDatosTesauroCVN(Thesaurus pTablas, string pSource)
+        {
+            List<SecondaryResource> secondaryResources = new List<SecondaryResource>();
+
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            List<Concept> listConcepts = new List<Concept>();
+
+            foreach (item item in pTablas.item)
+            {
+
+                ConceptEDMA concept = new ConceptEDMA();
+                concept.Dc_identifier = item.itemId;
+                concept.Dc_source = pSource;
+                concept.Skos_prefLabelMulti = new Dictionary<LanguageEnum, string>();
+                concept.Skos_broader = new List<Concept>();
+                concept.Skos_narrower = new List<Concept>();
+                foreach (string idioma in dicIdiomasMapeados.Keys)
+                {
+                    switch (idioma)
+                    {
+                        case "spa":
+                            concept.Skos_prefLabelMulti.Add(dicIdiomasMapeados[idioma], item.itemDescription.First(x => x.NameDetail.lang == "spa").NameDetail.Name);
+                            break;
+                        case "eng":
+                            concept.Skos_prefLabelMulti.Add(dicIdiomasMapeados[idioma], item.itemDescription.First(x => x.NameDetail.lang == "eng").NameDetail.Name);
+                            break;
+                        default:
+                            concept.Skos_prefLabelMulti.Add(dicIdiomasMapeados[idioma], item.itemDescription.First(x => x.NameDetail.lang == "spa").NameDetail.Name);
+                            break;
+                    }
+                }
+                listConcepts.Add(concept);
+            }
+
+            //Broaders
+            foreach (Concept concept in listConcepts)
+            {
+                item item = pTablas.item.First(x => x.itemId == concept.Dc_identifier);
+                Concept conceptBroader = listConcepts.FirstOrDefault(x => x.Dc_identifier == item.itemAncestorId);
+                if (conceptBroader != null)
+                {
+                    concept.Skos_broader.Add(conceptBroader);
+                }
+            }
+
+            //Narrowers
+            foreach (Concept concept in listConcepts)
+            {
+                List<Concept> conceptsNarrower = listConcepts.Where(x => x.Skos_broader.FirstOrDefault()?.Dc_identifier == concept.Dc_identifier).ToList();
+                if (conceptsNarrower != null)
+                {
+                    concept.Skos_narrower = conceptsNarrower;
+                }
+            }
+
+            //Levels
+            foreach (Concept concept in listConcepts)
+            {
+                int level = 0;
+                Concept conceptBroader = concept;
+                while (conceptBroader != null)
+                {
+                    conceptBroader = listConcepts.FirstOrDefault(x => x.Dc_identifier == conceptBroader.Skos_broader.FirstOrDefault()?.Dc_identifier);
+                    level++;
+                }
+                concept.Skos_symbol = level.ToString();
+            }
+
+            foreach (Concept concept in listConcepts)
+            {
+                secondaryResources.Add(((ConceptEDMA)concept).ToGnossApiResource(mResourceApi, concept.Dc_identifier));
+            }
+
+
+
+            CollectionEDMA collection = new CollectionEDMA();
+            collection.Dc_source = pSource;
+            collection.Skos_member = listConcepts.Where(x => x.Skos_broader.Count == 0).ToList();
+            collection.Skos_scopeNote = "Tesauro CVN";
             secondaryResources.Add(collection.ToGnossApiResource(mResourceApi, "0"));
 
             return secondaryResources;
@@ -2541,7 +2678,7 @@ namespace Hercules.MA.Load
             EliminarDatosCargados("http://w3id.org/roh/HIndexSource", pOntology);
 
             //Obtención de los objetos a cargar.
-            List<HIndexSource> hindexsources =  ObtenerDatosHIndexSource();
+            List<HIndexSource> hindexsources = ObtenerDatosHIndexSource();
 
             //Carga.
             Parallel.ForEach(hindexsources, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, hindexsource =>
@@ -2569,10 +2706,10 @@ namespace Hercules.MA.Load
                     Dc_identifier = "OTHERS",
                     Dc_title = new Dictionary<LanguageEnum, string>()
                 };
-                foreach(LanguageEnum lang in dicIdiomasMapeados.Values)
+                foreach (LanguageEnum lang in dicIdiomasMapeados.Values)
                 {
                     string texto = "";
-                    switch(lang)
+                    switch (lang)
                     {
                         case LanguageEnum.ca:
                             texto = "Altres";
@@ -2648,6 +2785,337 @@ namespace Hercules.MA.Load
             }
             return hIndexSources;
         }
+
+
+        /// <summary>
+        /// Carga la entidad secundaria QualificationType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarQualificationType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/QualificationType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<QualificationType> qualificationTypes = new List<QualificationType>();
+            qualificationTypes = ObtenerDatosQualificationType(pTablas, idQualificationType, qualificationTypes);
+
+            //Carga.
+            Parallel.ForEach(qualificationTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, qualificationType =>
+            {
+                mResourceApi.LoadSecondaryResource(qualificationType.ToGnossApiResource(mResourceApi, pOntology + "_" + qualificationType.Dc_identifier));
+            });
+        }
+
+
+        /// <summary>
+        /// Obtiene los objetos QualificationType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosQualificationType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<QualificationType> ObtenerDatosQualificationType(ReferenceTables pTablas, string pCodigoTabla, List<QualificationType> pListaDatosQualificationType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        QualificationType qualificationType = new QualificationType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        qualificationType.Dc_identifier = identificador;
+                        qualificationType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosQualificationType.Add(qualificationType);
+                    }
+                }
+            }
+
+            return pListaDatosQualificationType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria CargarUniversityDegreeType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarUniversityDegreeType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/UniversityDegreeType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<UniversityDegreeType> universityDegreeTypes = new List<UniversityDegreeType>();
+            universityDegreeTypes = ObtenerDatosUniversityDegreeType(pTablas, idUniversityDegreeType, universityDegreeTypes);
+
+            //Carga.
+            Parallel.ForEach(universityDegreeTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, universityDegreeType =>
+            {
+                mResourceApi.LoadSecondaryResource(universityDegreeType.ToGnossApiResource(mResourceApi, pOntology + "_" + universityDegreeType.Dc_identifier));
+            });
+        }
+
+
+        /// <summary>
+        /// Obtiene los objetos UniversityDegreeType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosUniversityDegreeType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<UniversityDegreeType> ObtenerDatosUniversityDegreeType(ReferenceTables pTablas, string pCodigoTabla, List<UniversityDegreeType> pListaDatosUniversityDegreeType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        UniversityDegreeType universityDegreeType = new UniversityDegreeType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        universityDegreeType.Dc_identifier = identificador;
+                        universityDegreeType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosUniversityDegreeType.Add(universityDegreeType);
+                    }
+                }
+            }
+
+            return pListaDatosUniversityDegreeType;
+        }
+        /// <summary>
+        /// Carga la entidad secundaria CargarDegreeType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarDegreeType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/DegreeType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<DegreeType> degreeTypes = new List<DegreeType>();
+            degreeTypes = ObtenerDatosDegreeType(pTablas, idDegreeType, degreeTypes);
+
+            //Carga.
+            Parallel.ForEach(degreeTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, degreeType =>
+            {
+                mResourceApi.LoadSecondaryResource(degreeType.ToGnossApiResource(mResourceApi, pOntology + "_" + degreeType.Dc_identifier));
+            });
+        }
+
+
+        /// <summary>
+        /// Obtiene los objetos UniversityDegreeType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosDegreeType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<DegreeType> ObtenerDatosDegreeType(ReferenceTables pTablas, string pCodigoTabla, List<DegreeType> pListaDatosDegreeType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        DegreeType degreeType = new DegreeType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        degreeType.Dc_identifier = identificador;
+                        degreeType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosDegreeType.Add(degreeType);
+                    }
+                }
+            }
+
+            return pListaDatosDegreeType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria CargarDoctoralProgramType
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarDoctoralProgramType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/DoctoralProgramType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<DoctoralProgramType> doctoralProgramTypes = new List<DoctoralProgramType>();
+            doctoralProgramTypes = ObtenerDatosDoctoralProgramType(pTablas, idDoctoralProgramType, doctoralProgramTypes);
+
+            //Carga.
+            Parallel.ForEach(doctoralProgramTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, doctoralProgramType =>
+            {
+                mResourceApi.LoadSecondaryResource(doctoralProgramType.ToGnossApiResource(mResourceApi, pOntology + "_" + doctoralProgramType.Dc_identifier));
+            });
+        }
+
+
+        /// <summary>
+        /// Obtiene los objetos DoctoralProgramType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosDoctoralProgramType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<DoctoralProgramType> ObtenerDatosDoctoralProgramType(ReferenceTables pTablas, string pCodigoTabla, List<DoctoralProgramType> pListaDatosDoctoralProgramType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        DoctoralProgramType doctoralProgramType = new DoctoralProgramType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        doctoralProgramType.Dc_identifier = identificador;
+                        doctoralProgramType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosDoctoralProgramType.Add(doctoralProgramType);
+                    }
+                }
+            }
+
+            return pListaDatosDoctoralProgramType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria PrizeType
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarPrizeType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/PrizeType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<PrizeType> prizeTypes = new List<PrizeType>();
+            prizeTypes = ObtenerDatosPrizeType(pTablas, idPrizeType, prizeTypes);
+
+            //Carga.
+            Parallel.ForEach(prizeTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, prizeType =>
+            {
+                mResourceApi.LoadSecondaryResource(prizeType.ToGnossApiResource(mResourceApi, pOntology + "_" + prizeType.Dc_identifier));
+            });
+        }
+
+
+        /// <summary>
+        /// Obtiene los objetos DoctoralProgramType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosPrizeType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<PrizeType> ObtenerDatosPrizeType(ReferenceTables pTablas, string pCodigoTabla, List<PrizeType> pListaDatosPrizeType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        PrizeType prizeType = new PrizeType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        prizeType.Dc_identifier = identificador;
+                        prizeType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosPrizeType.Add(prizeType);
+                    }
+                }
+            }
+
+            return pListaDatosPrizeType;
+        }
+
 
         /// <summary>
         /// Elimina los datos del grafo.

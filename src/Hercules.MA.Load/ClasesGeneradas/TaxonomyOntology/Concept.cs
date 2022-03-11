@@ -82,6 +82,10 @@ namespace TaxonomyOntology
 		[RDFProperty("http://www.w3.org/2008/05/skos#prefLabel")]
 		public  string Skos_prefLabel { get; set;}
 
+		[LABEL(LanguageEnum.es, "Etiqueta preferente")]
+		[RDFProperty("http://www.w3.org/2008/05/skos#prefLabel")]
+		public Dictionary<LanguageEnum, string> Skos_prefLabelMulti { get; set; }
+
 		[LABEL(LanguageEnum.es,"Fuente")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/source")]
 		public  string Dc_source { get; set;}
@@ -93,6 +97,15 @@ namespace TaxonomyOntology
 			propList.Add(new StringOntologyProperty("skos:symbol", this.Skos_symbol));
 			propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
 			propList.Add(new StringOntologyProperty("skos:prefLabel", this.Skos_prefLabel));
+
+			if (this.Skos_prefLabelMulti != null)
+			{
+				foreach (LanguageEnum idioma in this.Skos_prefLabelMulti.Keys)
+				{
+					propList.Add(new StringOntologyProperty("skos:prefLabel", this.Skos_prefLabelMulti[idioma], idioma.ToString()));
+				}
+			}
+
 			propList.Add(new StringOntologyProperty("dc:source", this.Dc_source));
 		}
 

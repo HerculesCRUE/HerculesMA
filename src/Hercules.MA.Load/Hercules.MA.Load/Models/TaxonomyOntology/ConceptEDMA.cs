@@ -54,6 +54,13 @@ namespace Hercules.MA.Load.Models.TaxonomyOntology
         private void GetProperties()
         {
             propList.Add(new StringOntologyProperty("skos:prefLabel", this.Skos_prefLabel));
+            if (this.Skos_prefLabelMulti != null)
+            {
+                foreach (LanguageEnum idioma in this.Skos_prefLabelMulti.Keys)
+                {
+                    propList.Add(new StringOntologyProperty("skos:prefLabel", this.Skos_prefLabelMulti[idioma], idioma.ToString()));
+                }
+            }
             propList.Add(new StringOntologyProperty("skos:symbol", this.Skos_symbol));
             propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
             propList.Add(new StringOntologyProperty("dc:source", this.Dc_source));

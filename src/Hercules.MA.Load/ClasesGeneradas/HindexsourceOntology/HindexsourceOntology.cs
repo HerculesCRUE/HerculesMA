@@ -16,7 +16,7 @@ using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ImpactindexcategoryOntology
+namespace HindexsourceOntology
 {
     [ExcludeFromCodeCoverage]
     public class HIndexSource : GnossOCBase
