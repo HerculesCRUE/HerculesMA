@@ -80,17 +80,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 List<CategoryPath> categorias = new List<CategoryPath>();
                 categorias.Add(new CategoryPath() { IdsRoh_categoryNode = cluster.terms });
 
+                List<ClusterPerfil> listClusterPerfil = new();
                 // Creando los perfiles del cluster
                 if (cluster.profiles != null)
                 {
-                    IEnumerable<ClusterPerfil> listClusterPerfil = cluster.profiles.Select(e => new ClusterPerfil()
+                    listClusterPerfil = cluster.profiles.Select(e => new ClusterPerfil()
                     {
-                        GNOSSID = e.entityID,
                         Roh_title = e.name,
                         Roh_hasKnowledgeArea = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } },
                         IdsRdf_member = e.users,
                         Vivo_freeTextKeyword = e.tags
-                    });
+                    }).ToList();
                 }
                 // creando los cluster
                 ClusterOntology.Cluster cRsource = new();
@@ -98,6 +98,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 cRsource.Roh_title = cluster.name;
                 cRsource.Vivo_description = cluster.description;
                 cRsource.Roh_hasKnowledgeArea = categorias;
+                cRsource.Roh_clusterPerfil = listClusterPerfil.ToList();
                 cRsource.Dct_issued = DateTime.Now;
 
                 mResourceApi.ChangeOntoly("cluster");
