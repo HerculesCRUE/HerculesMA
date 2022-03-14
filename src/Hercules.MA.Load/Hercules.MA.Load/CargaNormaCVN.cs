@@ -58,6 +58,7 @@ using FormationtypeOntology;
 using PostgradedegreeOntology;
 using LanguageLevelOntology;
 using FormationactivitytypeOntology;
+using TutorshipsprogramtypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -116,6 +117,10 @@ namespace Hercules.MA.Load
         private static readonly string idPostgradeDegree = "CVN_TITLE_D";
         private static readonly string idLanguageLevel = "CVN_LANGUAGE_B";
         private static readonly string idFormationActivityType = "CVN_ACTIVITY_B";
+        private static readonly string idTutorshipsProgramType = "CVN_PROGRAMME_C";
+
+        
+
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -182,6 +187,7 @@ namespace Hercules.MA.Load
             CargarPostgradeDegree(tablas, "postgradedegree");
             CargarFormationActivityType(tablas, "formationactivitytype");
             CargarLanguageLevel(tablas, "languagelevel");
+            CargarTutorshipsProgramType(tablas, "tutorshipsprogramtype");
 
             //PostgradeDegree
 
@@ -3192,7 +3198,7 @@ namespace Hercules.MA.Load
         }
 
         /// <summary>
-        /// Carga la entidad secundaria CargarLanguageLevel.
+        /// Carga la entidad secundaria LanguageLevel.
         /// </summary>
         /// <param name="pTablas">Tablas con los datos a obtener.</param>
         /// <param name="pOntology">Ontología.</param>
@@ -3220,9 +3226,9 @@ namespace Hercules.MA.Load
         /// </summary>
         /// <param name="pTablas">Objetos con los datos a obtener.</param>
         /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
-        /// <param name="pListaDatosDegreeType">Lista dónde guardar los objetos.</param>
+        /// <param name="pListaDatosLanguageLevel">Lista dónde guardar los objetos.</param>
         /// <returns>Lista con los objetos creados.</returns>
-        private static List<LanguageLevel> ObtenerLanguageLevel(ReferenceTables pTablas, string pCodigoTabla, List<LanguageLevel> pListaDatosDegreeType)
+        private static List<LanguageLevel> ObtenerLanguageLevel(ReferenceTables pTablas, string pCodigoTabla, List<LanguageLevel> pListaDatosLanguageLevel)
         {
             //Mapea los idiomas.
             Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
@@ -3233,7 +3239,7 @@ namespace Hercules.MA.Load
                 {
                     if (string.IsNullOrEmpty(item.Delegate))
                     {
-                        LanguageLevel degreeType = new LanguageLevel();
+                        LanguageLevel languageLevel = new LanguageLevel();
                         Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
                         string identificador = item.Code;
                         foreach (TableItemNameDetail modalidad in item.Name)
@@ -3244,16 +3250,81 @@ namespace Hercules.MA.Load
                         }
 
                         //Se agrega las propiedades.
-                        degreeType.Dc_identifier = identificador;
-                        degreeType.Dc_title = dicIdioma;
+                        languageLevel.Dc_identifier = identificador;
+                        languageLevel.Dc_title = dicIdioma;
 
                         //Se guarda el objeto a la lista.
-                        pListaDatosDegreeType.Add(degreeType);
+                        pListaDatosLanguageLevel.Add(languageLevel);
                     }
                 }
             }
 
-            return pListaDatosDegreeType;
+            return pListaDatosLanguageLevel;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria TutorshipsProgramType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarTutorshipsProgramType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/TutorshipsProgramType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<TutorshipsProgramType> tutorshipsProgramTypes = new List<TutorshipsProgramType>();
+            tutorshipsProgramTypes = ObtenerTutorshipsProgramType(pTablas, idTutorshipsProgramType, tutorshipsProgramTypes);
+
+            //Carga.
+            Parallel.ForEach(tutorshipsProgramTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, tutorshipsProgramType =>
+            {
+                mResourceApi.LoadSecondaryResource(tutorshipsProgramType.ToGnossApiResource(mResourceApi, pOntology + "_" + tutorshipsProgramType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos TutorshipsProgramType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosTutorshipsProgramType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<TutorshipsProgramType> ObtenerTutorshipsProgramType(ReferenceTables pTablas, string pCodigoTabla, List<TutorshipsProgramType> pListaDatosTutorshipsProgramType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        TutorshipsProgramType tutorshipsProgramType = new TutorshipsProgramType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        tutorshipsProgramType.Dc_identifier = identificador;
+                        tutorshipsProgramType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosTutorshipsProgramType.Add(tutorshipsProgramType);
+                    }
+                }
+            }
+
+            return pListaDatosTutorshipsProgramType;
         }
 
 
