@@ -54,6 +54,10 @@ using QualificationtypeOntology;
 using PrizetypeOntology;
 using HindexsourceOntology;
 using UniversitydegreetypeOntology;
+using FormationtypeOntology;
+using PostgradedegreeOntology;
+using LanguageLevelOntology;
+using FormationactivitytypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -108,9 +112,10 @@ namespace Hercules.MA.Load
         private static readonly string idDegreeType = "CVN_TITLE_B";
         private static readonly string idDoctoralProgramType = "CVN_TITLE_C";
         private static readonly string idPrizeType = "CVN_PRIZE_A";
-
-        
-
+        private static readonly string idFormationType = "CVN_FORMATION_A";
+        private static readonly string idPostgradeDegree = "CVN_TITLE_D";
+        private static readonly string idLanguageLevel = "CVN_LANGUAGE_B";
+        private static readonly string idFormationActivityType = "CVN_ACTIVITY_B";
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -173,6 +178,12 @@ namespace Hercules.MA.Load
             CargarDegreeType(tablas, "degreetype");
             CargarDoctoralProgramType(tablas, "doctoralprogramtype");
             CargarPrizeType(tablas, "prizetype");
+            CargarFormationType(tablas, "formationtype");
+            CargarPostgradeDegree(tablas, "postgradedegree");
+            CargarFormationActivityType(tablas, "formationactivitytype");
+            CargarLanguageLevel(tablas, "languagelevel");
+
+            //PostgradeDegree
 
             //Cargamos los subtipos de los RO
             CargarResearhObjectType();
@@ -2940,8 +2951,7 @@ namespace Hercules.MA.Load
             {
                 mResourceApi.LoadSecondaryResource(degreeType.ToGnossApiResource(mResourceApi, pOntology + "_" + degreeType.Dc_identifier));
             });
-        }
-
+        }        
 
         /// <summary>
         /// Obtiene los objetos UniversityDegreeType a cargar.
@@ -2983,6 +2993,269 @@ namespace Hercules.MA.Load
 
             return pListaDatosDegreeType;
         }
+
+        /// <summary>
+        /// Carga la entidad secundaria CargarFormationType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarFormationType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/FormationType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<FormationType> formationTypes = new List<FormationType>();
+            formationTypes = ObtenerDatosFormationType(pTablas, idFormationType, formationTypes);
+
+            //Carga.
+            Parallel.ForEach(formationTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, formationType =>
+            {
+                mResourceApi.LoadSecondaryResource(formationType.ToGnossApiResource(mResourceApi, pOntology + "_" + formationType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos UniversityFormationType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosDegreeType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<FormationType> ObtenerDatosFormationType(ReferenceTables pTablas, string pCodigoTabla, List<FormationType> pListaDatosDegreeType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        FormationType degreeType = new FormationType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        degreeType.Dc_identifier = identificador;
+                        degreeType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosDegreeType.Add(degreeType);
+                    }
+                }
+            }
+
+            return pListaDatosDegreeType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria CargarPostgradeDegree.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarPostgradeDegree(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/PostgradeDegree", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<PostgradeDegree> postgradeDegrees = new List<PostgradeDegree>();
+            postgradeDegrees = ObtenerDatosPostgradeDegree(pTablas, idPostgradeDegree, postgradeDegrees);
+
+            //Carga.
+            Parallel.ForEach(postgradeDegrees, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, postgradeDegree =>
+            {
+                mResourceApi.LoadSecondaryResource(postgradeDegree.ToGnossApiResource(mResourceApi, pOntology + "_" + postgradeDegree.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos UniversityFormationType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosDegreeType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<PostgradeDegree> ObtenerDatosPostgradeDegree(ReferenceTables pTablas, string pCodigoTabla, List<PostgradeDegree> pListaDatosDegreeType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        PostgradeDegree degreeType = new PostgradeDegree();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        degreeType.Dc_identifier = identificador;
+                        degreeType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosDegreeType.Add(degreeType);
+                    }
+                }
+            }
+
+            return pListaDatosDegreeType;
+        }
+
+        // --- CREAR ONTOLOGÍA EL LUNES FormationActivityType y LanguageLevel
+
+        /// <summary>
+        /// Carga la entidad secundaria CargarFormationActivityType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarFormationActivityType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/FormationActivityType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<FormationActivityType> formations = new List<FormationActivityType>();
+            formations = ObtenerFormationActivityType(pTablas, idFormationActivityType, formations);
+
+            //Carga.
+            Parallel.ForEach(formations, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, formation =>
+            {
+                mResourceApi.LoadSecondaryResource(formation.ToGnossApiResource(mResourceApi, pOntology + "_" + formation.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos FormationActivityType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosDegreeType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<FormationActivityType> ObtenerFormationActivityType(ReferenceTables pTablas, string pCodigoTabla, List<FormationActivityType> pListaDatosDegreeType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        FormationActivityType degreeType = new FormationActivityType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        degreeType.Dc_identifier = identificador;
+                        degreeType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosDegreeType.Add(degreeType);
+                    }
+                }
+            }
+
+            return pListaDatosDegreeType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria CargarLanguageLevel.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarLanguageLevel(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/LanguageLevel", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<LanguageLevel> languages = new List<LanguageLevel>();
+            languages = ObtenerLanguageLevel(pTablas, idLanguageLevel, languages);
+
+            //Carga.
+            Parallel.ForEach(languages, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, language =>
+            {
+                mResourceApi.LoadSecondaryResource(language.ToGnossApiResource(mResourceApi, pOntology + "_" + language.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos LanguageLevel a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosDegreeType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<LanguageLevel> ObtenerLanguageLevel(ReferenceTables pTablas, string pCodigoTabla, List<LanguageLevel> pListaDatosDegreeType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        LanguageLevel degreeType = new LanguageLevel();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        degreeType.Dc_identifier = identificador;
+                        degreeType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosDegreeType.Add(degreeType);
+                    }
+                }
+            }
+
+            return pListaDatosDegreeType;
+        }
+
 
         /// <summary>
         /// Carga la entidad secundaria CargarDoctoralProgramType
