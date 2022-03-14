@@ -259,6 +259,19 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
         public string value { get; set; }
     }
 
+    public class TagsItem
+    {
+        /// <summary>
+        /// Id del elemento
+        /// </summary>
+        public string id { get; set; }
+        /// <summary>
+        /// Nombre del elemento
+        /// </summary>
+        public string name { get; set; }
+
+    }
+
 
     public class ThesaurusItem
     {
