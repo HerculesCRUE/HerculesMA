@@ -71,7 +71,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("searchTags")]
         public IActionResult SearchTags([Required] string tagInput)
         {
-            List<TagsItem> idClusterRes = new();
+            List<string> idClusterRes = new();
             try
             {
                 AccionesCluster accionCluster = new AccionesCluster();

@@ -150,12 +150,54 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return idRecurso;
         }
 
-        internal List<TagsItem> SearchTags(string tagInput)
+        /// <summary>
+        /// Método público buscar diferentes tags
+        /// </summary>
+        /// <param name="pSearch">parámetro que corresponde a la cadena de búsqueda.</param>
+        /// <returns>Listado de etiquetas de resultado.</returns>
+        public List<string> SearchTags(string pSearch)
         {
-
-            List<TagsItem> resultData = new();
-
-            return resultData;
+            int numMax = 20;
+            string searchText = pSearch.Trim();
+            string filter = "";
+            if (!pSearch.EndsWith(' '))
+            {
+                string[] splitSearch = searchText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (splitSearch.Length > 1)
+                {
+                    searchText = searchText.Substring(0, searchText.LastIndexOf(' '));
+                    if (splitSearch.Last().Length > 3)
+                    {
+                        searchText += " " + splitSearch.Last() + "*";
+                    }
+                    else
+                    {
+                        filter = $" AND lcase(?o) like \"% { splitSearch.Last() }%\" ";
+                    }
+                }
+                else if (searchText.Length > 3)
+                {
+                    searchText += "*";
+                }
+                else // Si tiene menos de 4 caracteres y no termina en espacio, buscamos por like
+                {
+                    filter = $"  lcase(?o) like \"{ searchText }%\" OR lcase(?o) like \"% { searchText }%\" ";
+                    searchText = "";
+                }
+            }
+            if (searchText != "")
+            {
+                filter = $"bif:contains(?o, \"'{ searchText }'\"){filter}";
+            }
+            string select = "SELECT DISTINCT ?s ?o ";
+            string where = $"WHERE {{ ?s a <http://purl.org/ontology/bibo/Document>. ?s <http://vivoweb.org/ontology/core#freeTextKeyword> ?o . FILTER( {filter} )    }} ORDER BY ?o";
+            SparqlObject sparqlObjectAux = mResourceApi.VirtuosoQuery(select, where, "document");
+            List<string> resultados = sparqlObjectAux.results.bindings.Select(x => x["o"].value).Distinct().ToList();
+            if (resultados.Count() > numMax)
+            {
+                resultados = resultados.ToList().GetRange(0, numMax);
+            }
+            return resultados;
         }
 
 
