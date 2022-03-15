@@ -60,6 +60,9 @@ using LanguageLevelOntology;
 using FormationactivitytypeOntology;
 using TutorshipsprogramtypeOntology;
 using ProjectcharactertypeOntology;
+using TeachingtypeOntology;
+using ModalityteachingtypeOntology;
+using ProgramtypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -120,8 +123,12 @@ namespace Hercules.MA.Load
         private static readonly string idFormationActivityType = "CVN_ACTIVITY_B";
         private static readonly string idTutorshipsProgramType = "CVN_PROGRAMME_C";
         private static readonly string idProjectCharacterType = "CVN_PROJECT_A";
-        
+        private static readonly string idTeachingType = "CVN_TEACHING_A";
+        private static readonly string idModalityTeachingType = "CVN_TEACHING_B";
+        private static readonly string idProgramType = "CVN_PROGRAMME_A";
 
+
+        
 
 
         //Número de hilos para el paralelismo.
@@ -191,6 +198,9 @@ namespace Hercules.MA.Load
             CargarLanguageLevel(tablas, "languagelevel");
             CargarTutorshipsProgramType(tablas, "tutorshipsprogramtype");
             CargarProjectCharacterType(tablas, "projectcharactertype");
+            CargarTeachingType(tablas, "teachingtype");
+            CargarModalityTeachingType(tablas, "modalityteachingtype");
+            CargarProgramType(tablas, "programtype");
 
             //PostgradeDegree
 
@@ -3395,6 +3405,200 @@ namespace Hercules.MA.Load
             return pListaDatosProjectCharacterType;
         }
 
+        /// <summary>
+        /// Carga la entidad secundaria TeachingType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarTeachingType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/TeachingType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<TeachingType> teachingTypes = new List<TeachingType>();
+            teachingTypes = ObtenerTeachingType(pTablas, idTeachingType, teachingTypes);
+
+            //Carga.
+            Parallel.ForEach(teachingTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, teachingType =>
+            {
+                mResourceApi.LoadSecondaryResource(teachingType.ToGnossApiResource(mResourceApi, pOntology + "_" + teachingType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos TeachingType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosTeachingType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<TeachingType> ObtenerTeachingType(ReferenceTables pTablas, string pCodigoTabla, List<TeachingType> pListaDatosTeachingType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        TeachingType teachingType = new TeachingType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        teachingType.Dc_identifier = identificador;
+                        teachingType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosTeachingType.Add(teachingType);
+                    }
+                }
+            }
+
+            return pListaDatosTeachingType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria ModalityTeachingType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarModalityTeachingType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ModalityTeachingType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ModalityTeachingType> modalityteachingTypes = new List<ModalityTeachingType>();
+            modalityteachingTypes = ObtenerModalityTeachingType(pTablas, idModalityTeachingType, modalityteachingTypes);
+
+            //Carga.
+            Parallel.ForEach(modalityteachingTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, modalityTeachingType =>
+            {
+                mResourceApi.LoadSecondaryResource(modalityTeachingType.ToGnossApiResource(mResourceApi, pOntology + "_" + modalityTeachingType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos ModalityTeachingType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosModalityTeachingType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ModalityTeachingType> ObtenerModalityTeachingType(ReferenceTables pTablas, string pCodigoTabla, List<ModalityTeachingType> pListaDatosModalityTeachingType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        ModalityTeachingType modalityTeachingType = new ModalityTeachingType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        modalityTeachingType.Dc_identifier = identificador;
+                        modalityTeachingType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosModalityTeachingType.Add(modalityTeachingType);
+                    }
+                }
+            }
+
+            return pListaDatosModalityTeachingType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria ProgramType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarProgramType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ProgramType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ProgramType> ProgramTypes = new List<ProgramType>();
+            ProgramTypes = ObtenerProgramType(pTablas, idProgramType, ProgramTypes);
+
+            //Carga.
+            Parallel.ForEach(ProgramTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, ProgramType =>
+            {
+                mResourceApi.LoadSecondaryResource(ProgramType.ToGnossApiResource(mResourceApi, pOntology + "_" + ProgramType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos ProgramType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosProgramType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ProgramType> ObtenerProgramType(ReferenceTables pTablas, string pCodigoTabla, List<ProgramType> pListaDatosProgramType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        ProgramType ProgramType = new ProgramType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        ProgramType.Dc_identifier = identificador;
+                        ProgramType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosProgramType.Add(ProgramType);
+                    }
+                }
+            }
+
+            return pListaDatosProgramType;
+        }
 
         /// <summary>
         /// Carga la entidad secundaria CargarDoctoralProgramType
