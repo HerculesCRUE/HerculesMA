@@ -59,6 +59,7 @@ using PostgradedegreeOntology;
 using LanguageLevelOntology;
 using FormationactivitytypeOntology;
 using TutorshipsprogramtypeOntology;
+using ProjectcharactertypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -118,8 +119,9 @@ namespace Hercules.MA.Load
         private static readonly string idLanguageLevel = "CVN_LANGUAGE_B";
         private static readonly string idFormationActivityType = "CVN_ACTIVITY_B";
         private static readonly string idTutorshipsProgramType = "CVN_PROGRAMME_C";
-
+        private static readonly string idProjectCharacterType = "CVN_PROJECT_A";
         
+
 
 
         //Número de hilos para el paralelismo.
@@ -188,6 +190,7 @@ namespace Hercules.MA.Load
             CargarFormationActivityType(tablas, "formationactivitytype");
             CargarLanguageLevel(tablas, "languagelevel");
             CargarTutorshipsProgramType(tablas, "tutorshipsprogramtype");
+            CargarProjectCharacterType(tablas, "projectcharactertype");
 
             //PostgradeDegree
 
@@ -3325,6 +3328,71 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosTutorshipsProgramType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria ProjectCharacterType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarProjectCharacterType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ProjectCharacterType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ProjectCharacterType> projectCharacterTypes = new List<ProjectCharacterType>();
+            projectCharacterTypes = ObtenerProjectCharacterType(pTablas, idProjectCharacterType, projectCharacterTypes);
+
+            //Carga.
+            Parallel.ForEach(projectCharacterTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, projectCharacterType =>
+            {
+                mResourceApi.LoadSecondaryResource(projectCharacterType.ToGnossApiResource(mResourceApi, pOntology + "_" + projectCharacterType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos ProjectCharacterType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosProjectCharacterType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ProjectCharacterType> ObtenerProjectCharacterType(ReferenceTables pTablas, string pCodigoTabla, List<ProjectCharacterType> pListaDatosProjectCharacterType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        ProjectCharacterType projectCharacterType = new ProjectCharacterType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        projectCharacterType.Dc_identifier = identificador;
+                        projectCharacterType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosProjectCharacterType.Add(projectCharacterType);
+                    }
+                }
+            }
+
+            return pListaDatosProjectCharacterType;
         }
 
 
