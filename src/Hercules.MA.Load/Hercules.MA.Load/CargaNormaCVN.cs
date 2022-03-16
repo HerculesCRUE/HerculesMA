@@ -63,6 +63,10 @@ using ProjectcharactertypeOntology;
 using TeachingtypeOntology;
 using ModalityteachingtypeOntology;
 using ProgramtypeOntology;
+using CoursetypeOntology;
+using HourscreditsectstypeOntology;
+using EvaluationtypeOntology;
+using CalltypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -126,10 +130,10 @@ namespace Hercules.MA.Load
         private static readonly string idTeachingType = "CVN_TEACHING_A";
         private static readonly string idModalityTeachingType = "CVN_TEACHING_B";
         private static readonly string idProgramType = "CVN_PROGRAMME_A";
-
-
-        
-
+        private static readonly string idCourseType = "CVN_SUBJECT_A";
+        private static readonly string idHoursCreditsECTSType = "CVN_TIME_A";
+        private static readonly string idEvaluationType = "CVN_EVALUATION_A";
+        private static readonly string idCallType = "CVN_SUMMONS_B";
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -201,8 +205,11 @@ namespace Hercules.MA.Load
             CargarTeachingType(tablas, "teachingtype");
             CargarModalityTeachingType(tablas, "modalityteachingtype");
             CargarProgramType(tablas, "programtype");
+            CargarCourseType(tablas, "coursetype");
+            CargarHoursCreditsECTSType(tablas, "hourscreditsectstype");
+            CargarEvaluationType(tablas, "evaluationtype");
+            CargarCallType(tablas, "calltype");
 
-            //PostgradeDegree
 
             //Cargamos los subtipos de los RO
             CargarResearhObjectType();
@@ -2970,7 +2977,7 @@ namespace Hercules.MA.Load
             {
                 mResourceApi.LoadSecondaryResource(degreeType.ToGnossApiResource(mResourceApi, pOntology + "_" + degreeType.Dc_identifier));
             });
-        }        
+        }
 
         /// <summary>
         /// Obtiene los objetos UniversityDegreeType a cargar.
@@ -3598,6 +3605,266 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosProgramType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria CourseType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarCourseType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/CourseType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<CourseType> CourseTypes = new List<CourseType>();
+            CourseTypes = ObtenerCourseType(pTablas, idCourseType, CourseTypes);
+
+            //Carga.
+            Parallel.ForEach(CourseTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, CourseType =>
+            {
+                mResourceApi.LoadSecondaryResource(CourseType.ToGnossApiResource(mResourceApi, pOntology + "_" + CourseType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos CourseType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosCourseType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<CourseType> ObtenerCourseType(ReferenceTables pTablas, string pCodigoTabla, List<CourseType> pListaDatosCourseType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        CourseType CourseType = new CourseType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        CourseType.Dc_identifier = identificador;
+                        CourseType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosCourseType.Add(CourseType);
+                    }
+                }
+            }
+
+            return pListaDatosCourseType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria HoursCreditsECTSType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarHoursCreditsECTSType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/HoursCreditsECTSType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<HoursCreditsECTSType> HoursCreditsECTSTypes = new List<HoursCreditsECTSType>();
+            HoursCreditsECTSTypes = ObtenerHoursCreditsECTSType(pTablas, idHoursCreditsECTSType, HoursCreditsECTSTypes);
+
+            //Carga.
+            Parallel.ForEach(HoursCreditsECTSTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, HoursCreditsECTSType =>
+            {
+                mResourceApi.LoadSecondaryResource(HoursCreditsECTSType.ToGnossApiResource(mResourceApi, pOntology + "_" + HoursCreditsECTSType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos HoursCreditsECTSType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosHoursCreditsECTSType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<HoursCreditsECTSType> ObtenerHoursCreditsECTSType(ReferenceTables pTablas, string pCodigoTabla, List<HoursCreditsECTSType> pListaDatosHoursCreditsECTSType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        HoursCreditsECTSType HoursCreditsECTSType = new HoursCreditsECTSType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        HoursCreditsECTSType.Dc_identifier = identificador;
+                        HoursCreditsECTSType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosHoursCreditsECTSType.Add(HoursCreditsECTSType);
+                    }
+                }
+            }
+
+            return pListaDatosHoursCreditsECTSType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria EvaluationType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarEvaluationType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/EvaluationType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<EvaluationType> EvaluationTypes = new List<EvaluationType>();
+            EvaluationTypes = ObtenerEvaluationType(pTablas, idEvaluationType, EvaluationTypes);
+
+            //Carga.
+            Parallel.ForEach(EvaluationTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, EvaluationType =>
+            {
+                mResourceApi.LoadSecondaryResource(EvaluationType.ToGnossApiResource(mResourceApi, pOntology + "_" + EvaluationType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos EvaluationType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosEvaluationType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<EvaluationType> ObtenerEvaluationType(ReferenceTables pTablas, string pCodigoTabla, List<EvaluationType> pListaDatosEvaluationType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        EvaluationType EvaluationType = new EvaluationType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        EvaluationType.Dc_identifier = identificador;
+                        EvaluationType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosEvaluationType.Add(EvaluationType);
+                    }
+                }
+            }
+
+            return pListaDatosEvaluationType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria CallType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarCallType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/CallType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<CallType> CallTypes = new List<CallType>();
+            CallTypes = ObtenerCallType(pTablas, idCallType, CallTypes);
+
+            //Carga.
+            Parallel.ForEach(CallTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, CallType =>
+            {
+                mResourceApi.LoadSecondaryResource(CallType.ToGnossApiResource(mResourceApi, pOntology + "_" + CallType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos CallType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosCallType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<CallType> ObtenerCallType(ReferenceTables pTablas, string pCodigoTabla, List<CallType> pListaDatosCallType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        CallType CallType = new CallType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        CallType.Dc_identifier = identificador;
+                        CallType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosCallType.Add(CallType);
+                    }
+                }
+            }
+
+            return pListaDatosCallType;
         }
 
         /// <summary>
