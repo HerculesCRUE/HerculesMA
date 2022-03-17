@@ -67,6 +67,8 @@ using CoursetypeOntology;
 using HourscreditsectstypeOntology;
 using EvaluationtypeOntology;
 using CalltypeOntology;
+using SupporttypeOntology;
+using EventgeographicregionOntology;
 
 namespace Hercules.MA.Load
 {
@@ -134,6 +136,8 @@ namespace Hercules.MA.Load
         private static readonly string idHoursCreditsECTSType = "CVN_TIME_A";
         private static readonly string idEvaluationType = "CVN_EVALUATION_A";
         private static readonly string idCallType = "CVN_SUMMONS_B";
+        private static readonly string idSupportType = "CVN_SUPPORT_A";
+        private static readonly string idEventGeographicRegion = "CVN_SCOPE_B";
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -209,6 +213,8 @@ namespace Hercules.MA.Load
             CargarHoursCreditsECTSType(tablas, "hourscreditsectstype");
             CargarEvaluationType(tablas, "evaluationtype");
             CargarCallType(tablas, "calltype");
+            CargarSupportType(tablas, "supporttype");
+            CargarEventGeographicRegion(tablas, "eventgeographicregion");
 
 
             //Cargamos los subtipos de los RO
@@ -1255,7 +1261,7 @@ namespace Hercules.MA.Load
         }
 
         /// <summary>
-        /// Carga la entidad secundaria SupportType.
+        /// Carga la entidad secundaria DocumentFormat.
         /// </summary>
         /// <param name="pTablas">Tablas con los datos a obtener.</param>
         /// <param name="pOntology">Ontología.</param>
@@ -1283,9 +1289,9 @@ namespace Hercules.MA.Load
         /// </summary>
         /// <param name="pTablas">Objetos con los datos a obtener.</param>
         /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
-        /// <param name="pListaSupportType">Lista dónde guardar los objetos.</param>
+        /// <param name="pListaDocumentFormat">Lista dónde guardar los objetos.</param>
         /// <returns>Lista con los objetos creados.</returns>
-        private static List<DocumentFormat> ObtenerDatosDocumentFormat(ReferenceTables pTablas, string pCodigoTabla, List<DocumentFormat> pListaSupportType)
+        private static List<DocumentFormat> ObtenerDatosDocumentFormat(ReferenceTables pTablas, string pCodigoTabla, List<DocumentFormat> pListaDocumentFormat)
         {
             //Mapea los idiomas.
             Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
@@ -1311,12 +1317,12 @@ namespace Hercules.MA.Load
                         publication.Dc_title = dicIdioma;
 
                         //Se guarda el objeto a la lista.
-                        pListaSupportType.Add(publication);
+                        pListaDocumentFormat.Add(publication);
                     }
                 }
             }
 
-            return pListaSupportType;
+            return pListaDocumentFormat;
         }
 
         /// <summary>
@@ -3865,6 +3871,136 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosCallType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria SupportType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarSupportType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/SupportType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<SupportType> SupportTypes = new List<SupportType>();
+            SupportTypes = ObtenerSupportType(pTablas, idSupportType, SupportTypes);
+
+            //Carga.
+            Parallel.ForEach(SupportTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, SupportType =>
+            {
+                mResourceApi.LoadSecondaryResource(SupportType.ToGnossApiResource(mResourceApi, pOntology + "_" + SupportType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos SupportType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosSupportType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<SupportType> ObtenerSupportType(ReferenceTables pTablas, string pCodigoTabla, List<SupportType> pListaDatosSupportType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        SupportType SupportType = new SupportType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        SupportType.Dc_identifier = identificador;
+                        SupportType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosSupportType.Add(SupportType);
+                    }
+                }
+            }
+
+            return pListaDatosSupportType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria EventGeographicRegion.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarEventGeographicRegion(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/EventGeographicRegion", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<EventGeographicRegion> EventGeographicRegions = new List<EventGeographicRegion>();
+            EventGeographicRegions = ObtenerEventGeographicRegion(pTablas, idEventGeographicRegion, EventGeographicRegions);
+
+            //Carga.
+            Parallel.ForEach(EventGeographicRegions, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, EventGeographicRegion =>
+            {
+                mResourceApi.LoadSecondaryResource(EventGeographicRegion.ToGnossApiResource(mResourceApi, pOntology + "_" + EventGeographicRegion.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos EventGeographicRegion a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosEventGeographicRegion">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<EventGeographicRegion> ObtenerEventGeographicRegion(ReferenceTables pTablas, string pCodigoTabla, List<EventGeographicRegion> pListaDatosEventGeographicRegion)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        EventGeographicRegion EventGeographicRegion = new EventGeographicRegion();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        EventGeographicRegion.Dc_identifier = identificador;
+                        EventGeographicRegion.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosEventGeographicRegion.Add(EventGeographicRegion);
+                    }
+                }
+            }
+
+            return pListaDatosEventGeographicRegion;
         }
 
         /// <summary>
