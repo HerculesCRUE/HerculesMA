@@ -69,6 +69,7 @@ using EvaluationtypeOntology;
 using CalltypeOntology;
 using SupporttypeOntology;
 using EventgeographicregionOntology;
+using ResulttypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -138,6 +139,8 @@ namespace Hercules.MA.Load
         private static readonly string idCallType = "CVN_SUMMONS_B";
         private static readonly string idSupportType = "CVN_SUPPORT_A";
         private static readonly string idEventGeographicRegion = "CVN_SCOPE_B";
+        private static readonly string idResultType = "CVN_QUALIFICATION_A";
+        
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -215,6 +218,7 @@ namespace Hercules.MA.Load
             CargarCallType(tablas, "calltype");
             CargarSupportType(tablas, "supporttype");
             CargarEventGeographicRegion(tablas, "eventgeographicregion");
+            CargarResultType(tablas, "resulttype");
 
 
             //Cargamos los subtipos de los RO
@@ -4001,6 +4005,71 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosEventGeographicRegion;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria ResultType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarResultType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/ResultType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<ResultType> ResultTypes = new List<ResultType>();
+            ResultTypes = ObtenerResultType(pTablas, idResultType, ResultTypes);
+
+            //Carga.
+            Parallel.ForEach(ResultTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, ResultType =>
+            {
+                mResourceApi.LoadSecondaryResource(ResultType.ToGnossApiResource(mResourceApi, pOntology + "_" + ResultType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos ResultType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosResultType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<ResultType> ObtenerResultType(ReferenceTables pTablas, string pCodigoTabla, List<ResultType> pListaDatosResultType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        ResultType ResultType = new ResultType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        ResultType.Dc_identifier = identificador;
+                        ResultType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosResultType.Add(ResultType);
+                    }
+                }
+            }
+
+            return pListaDatosResultType;
         }
 
         /// <summary>
