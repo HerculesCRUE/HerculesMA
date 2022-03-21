@@ -1517,13 +1517,13 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                             switch (revista.fuente)
                             {
                                 case "scopus":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == revista.categoria).Key;
                                     break;
                                 case "wos_scie":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Science Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Science Edition - " + revista.categoria).Key;
                                     break;
                                 case "wos_ssci":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
                                     break;
                             }
                             category.Roh_publicationPosition = revista.posicionPublicacion;
@@ -1685,13 +1685,13 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                             switch (revista.fuente)
                             {
                                 case "scopus":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == revista.categoria).Key;
                                     break;
                                 case "wos_scie":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Science Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Science Edition - " + revista.categoria).Key;
                                     break;
                                 case "wos_ssci":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
                                     break;
                             }
                             category.Roh_publicationPosition = revista.posicionPublicacion;
@@ -1851,13 +1851,13 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                             switch (revista.fuente)
                             {
                                 case "scopus":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == revista.categoria).Key;
                                     break;
                                 case "wos_scie":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Science Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Science Edition - " + revista.categoria).Key;
                                     break;
                                 case "wos_ssci":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
                                     break;
                             }
                             category.Roh_publicationPosition = revista.posicionPublicacion;
@@ -2291,8 +2291,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
             // Consulta sparql.
             select.Append("SELECT ?ID ?Nombre ");
             where.Append("WHERE { ");
-            where.Append("?ID ?p ?o. ");
-            where.Append("?o <http://purl.org/dc/elements/1.1/title> ?Nombre. FILTER(lang(?Nombre)='es')");
+            where.Append("?ID <http://purl.org/dc/elements/1.1/title> ?Nombre. FILTER(lang(?Nombre)='es')");
             where.Append("} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "impactindexcategory");
