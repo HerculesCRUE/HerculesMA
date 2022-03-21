@@ -226,7 +226,7 @@ namespace Hercules.MA.Load
             CargarResultType(tablas, "resulttype");
             CargarLaboralDurationType(tablas, "laboraldurationtype");
             CargarSeminarInscriptionType(tablas, "seminarinscriptiontype");
-            CargarSeminarEventType(tablas, "seminareventype");
+            CargarSeminarEventType(tablas, "seminareventtype");
 
             //Cargamos los subtipos de los RO
             CargarResearhObjectType();
