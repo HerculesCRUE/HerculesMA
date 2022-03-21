@@ -81,19 +81,19 @@ namespace ContractmodalityOntology
 		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ActivityModality_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/ContractModality>", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ActivityModality_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/ContractModality\"", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/ActivityModality_{ResourceID}_{ArticleID}>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ContractModality_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/ContractModality>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ContractModality_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/ContractModality\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/ContractModality_{ResourceID}_{ArticleID}>", list, " . ");
 				if(this.Dc_title != null)
 				{
 							foreach (LanguageEnum idioma in this.Dc_title.Keys)
 							{
-								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ActivityModality_{ResourceID}_{ArticleID}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma])}\"", list,  $"{idioma} . ");
+								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ContractModality_{ResourceID}_{ArticleID}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma])}\"", list,  $"{idioma} . ");
 							}
 				}
 				if(this.Dc_identifier != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ActivityModality_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ContractModality_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
 				}
 			return list;
 		}

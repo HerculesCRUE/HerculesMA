@@ -56,7 +56,7 @@ using HindexsourceOntology;
 using UniversitydegreetypeOntology;
 using FormationtypeOntology;
 using PostgradedegreeOntology;
-using LanguageLevelOntology;
+using LanguagelevelOntology;
 using FormationactivitytypeOntology;
 using TutorshipsprogramtypeOntology;
 using ProjectcharactertypeOntology;

@@ -76,6 +76,55 @@ namespace HourscreditsectstypeOntology
 			return resource;
 		}
 
+		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
+		{
+			List<string> list = new List<string>();
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/HoursCreditsECTSType_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/HoursCreditsECTSType>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/HoursCreditsECTSType_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/HoursCreditsECTSType\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/HoursCreditsECTSType_{ResourceID}_{ArticleID}>", list, " . ");
+				if(this.Dc_title != null)
+				{
+							foreach (LanguageEnum idioma in this.Dc_title.Keys)
+							{
+								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/HoursCreditsECTSType_{ResourceID}_{ArticleID}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma])}\"", list,  $"{idioma} . ");
+							}
+				}
+				if(this.Dc_identifier != null)
+				{
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/HoursCreditsECTSType_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
+				}
+			return list;
+		}
+
+		public override List<string> ToSearchGraphTriples(ResourceApi resourceAPI)
+		{
+			List<string> list = new List<string>();
+			List<string> listaSearch = new List<string>();
+			string search = string.Empty;
+				if(this.Dc_title != null)
+				{
+							foreach (LanguageEnum idioma in this.Dc_title.Keys)
+							{
+								AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma]).ToLower()}\"", list,  $"{idioma} . ");
+							}
+				}
+				if(this.Dc_identifier != null)
+				{
+					AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier).ToLower()}\"", list, " . ");
+				}
+			if (listaSearch != null && listaSearch.Count > 0)
+			{
+				foreach(string valorSearch in listaSearch)
+				{
+					search += $"{valorSearch} ";
+				}
+			}
+			if(!string.IsNullOrEmpty(search))
+			{
+				AgregarTripleALista($"http://gnoss/{ResourceID.ToString().ToUpper()}", "http://gnoss/search", $"\"{GenerarTextoSinSaltoDeLinea(search.ToLower())}\"", list, " . ");
+			}
+			return list;
+		}
 
 		public override KeyValuePair<Guid, string> ToAcidData(ResourceApi resourceAPI)
 		{
@@ -133,6 +182,10 @@ namespace HourscreditsectstypeOntology
 				lista.Add((string)propiedad);
 			}
 			return lista;
+		}
+		public override string GetURI(ResourceApi resourceAPI)
+		{
+			return $"{resourceAPI.GraphsUrl}items/HourscreditsectstypeOntology_{ResourceID}_{ArticleID}";
 		}
 
 		private string GenerarTextoSinSaltoDeLinea(string pTexto)

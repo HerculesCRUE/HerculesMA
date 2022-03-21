@@ -32,16 +32,15 @@ namespace DegreetypeOntology
 			this.Dc_title.Add(idiomaUsuario , GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/title")));
 			
 			this.Dc_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/identifier"));
-			
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/DegreeType"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/DegreeType"; } }
-		[LABEL(LanguageEnum.es,"Tipo de publicación")]
+		[LABEL(LanguageEnum.es,"Tipo de inscripción en un evento")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/title")]
 		public  Dictionary<LanguageEnum,string> Dc_title { get; set;}
 
-		[LABEL(LanguageEnum.es,"Identificador del tipo de publicación")]
+		[LABEL(LanguageEnum.es,"Identificador del tipo de inscripción en un evento")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/identifier")]
 		public  string Dc_identifier { get; set;}
 
@@ -94,7 +93,7 @@ namespace DegreetypeOntology
 				}
 				if(this.Dc_identifier != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/QualificationType_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/DegreeType_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
 				}
 			return list;
 		}
