@@ -16,7 +16,7 @@ using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 
-namespace LanguageLevelOntology
+namespace LanguagelevelOntology
 {
 	[ExcludeFromCodeCoverage]
 	public class LanguageLevel : GnossOCBase
@@ -185,7 +185,7 @@ namespace LanguageLevelOntology
 		}
 		public override string GetURI(ResourceApi resourceAPI)
 		{
-			return $"{resourceAPI.GraphsUrl}items/LanguageLevelOntology_{ResourceID}_{ArticleID}";
+			return $"{resourceAPI.GraphsUrl}items/LanguagelevelOntology_{ResourceID}_{ArticleID}";
 		}
 
 		private string GenerarTextoSinSaltoDeLinea(string pTexto)

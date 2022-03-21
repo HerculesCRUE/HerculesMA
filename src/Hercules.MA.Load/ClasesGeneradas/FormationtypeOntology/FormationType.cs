@@ -32,16 +32,13 @@ namespace FormationtypeOntology
 			this.Dc_title.Add(idiomaUsuario , GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/title")));
 			
 			this.Dc_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/identifier"));
-			
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/FormationType"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/FormationType"; } }
-		[LABEL(LanguageEnum.es,"Tipo de publicación")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/title")]
 		public  Dictionary<LanguageEnum,string> Dc_title { get; set;}
 
-		[LABEL(LanguageEnum.es,"Identificador del tipo de publicación")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/identifier")]
 		public  string Dc_identifier { get; set;}
 
@@ -84,7 +81,7 @@ namespace FormationtypeOntology
 			List<string> list = new List<string>();
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/FormationType_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/FormationType>", list, " . ");
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/FormationType_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/FormationType\"", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/DegreeType_{ResourceID}_{ArticleID}>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/FormationType_{ResourceID}_{ArticleID}>", list, " . ");
 				if(this.Dc_title != null)
 				{
 							foreach (LanguageEnum idioma in this.Dc_title.Keys)

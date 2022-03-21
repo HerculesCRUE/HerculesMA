@@ -81,8 +81,8 @@ namespace ScopemanagementactivityOntology
 		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ActivityModality_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/ScopeManagementActivity>", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ActivityModality_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/ScopeManagementActivity\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ScopeManagementActivity_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/ScopeManagementActivity>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ScopeManagementActivity_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/ScopeManagementActivity\"", list, " . ");
 			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/ScopeManagementActivity_{ResourceID}_{ArticleID}>", list, " . ");
 				if(this.Dc_title != null)
 				{

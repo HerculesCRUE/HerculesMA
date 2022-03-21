@@ -32,16 +32,15 @@ namespace UniversitydegreetypeOntology
 			this.Dc_title.Add(idiomaUsuario , GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/title")));
 			
 			this.Dc_identifier = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://purl.org/dc/elements/1.1/identifier"));
-			
 		}
 
 		public virtual string RdfType { get { return "http://w3id.org/roh/UniversityDegreeType"; } }
 		public virtual string RdfsLabel { get { return "http://w3id.org/roh/UniversityDegreeType"; } }
-		[LABEL(LanguageEnum.es,"Tipo de publicación")]
+		[LABEL(LanguageEnum.es,"Tipo de inscripción en un evento")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/title")]
 		public  Dictionary<LanguageEnum,string> Dc_title { get; set;}
 
-		[LABEL(LanguageEnum.es,"Identificador del tipo de publicación")]
+		[LABEL(LanguageEnum.es,"Identificador del tipo de inscripción en un evento")]
 		[RDFProperty("http://purl.org/dc/elements/1.1/identifier")]
 		public  string Dc_identifier { get; set;}
 
@@ -82,19 +81,19 @@ namespace UniversitydegreetypeOntology
 		public override List<string> ToOntologyGnossTriples(ResourceApi resourceAPI)
 		{
 			List<string> list = new List<string>();
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ResearchObjectType_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/UniversityDegreeType>", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/ResearchObjectType_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/UniversityDegreeType\"", list, " . ");
-			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/ResearchObjectType_{ResourceID}_{ArticleID}>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/UniversityDegreeType_{ResourceID}_{ArticleID}", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", $"<http://w3id.org/roh/UniversityDegreeType>", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}items/UniversityDegreeType_{ResourceID}_{ArticleID}", "http://www.w3.org/2000/01/rdf-schema#label", $"\"http://w3id.org/roh/UniversityDegreeType\"", list, " . ");
+			AgregarTripleALista($"{resourceAPI.GraphsUrl}{ResourceID}", "http://gnoss/hasEntidad", $"<{resourceAPI.GraphsUrl}items/UniversityDegreeType_{ResourceID}_{ArticleID}>", list, " . ");
 				if(this.Dc_title != null)
 				{
 							foreach (LanguageEnum idioma in this.Dc_title.Keys)
 							{
-								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/QualificationType_{ResourceID}_{ArticleID}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma])}\"", list,  $"{idioma} . ");
+								AgregarTripleALista($"{resourceAPI.GraphsUrl}items/UniversityDegreeType_{ResourceID}_{ArticleID}", "http://purl.org/dc/elements/1.1/title",  $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_title[idioma])}\"", list,  $"{idioma} . ");
 							}
 				}
 				if(this.Dc_identifier != null)
 				{
-					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/QualificationType_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
+					AgregarTripleALista($"{resourceAPI.GraphsUrl}items/UniversityDegreeType_{ResourceID}_{ArticleID}",  "http://purl.org/dc/elements/1.1/identifier", $"\"{GenerarTextoSinSaltoDeLinea(this.Dc_identifier)}\"", list, " . ");
 				}
 			return list;
 		}

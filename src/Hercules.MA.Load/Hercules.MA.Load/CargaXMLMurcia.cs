@@ -1197,8 +1197,7 @@ namespace Hercules.MA.Load
                     }
 
                     //Evento
-                    documentoACargar.Bibo_presentedAt = new DocumentOntology.Event();
-                    documentoACargar.Bibo_presentedAt.Dc_title = congreso.TITULO_CONGRESO;
+                    documentoACargar.Bibo_presentedAt = congreso.TITULO_CONGRESO;
 
                     //Validación
                     documentoACargar.Roh_isValidated = true;
