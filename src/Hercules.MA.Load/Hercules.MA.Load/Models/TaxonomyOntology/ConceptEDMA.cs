@@ -13,6 +13,7 @@ using System.Globalization;
 using System.Collections;
 using Gnoss.ApiWrapper.Exceptions;
 using TaxonomyOntology;
+using GnossBase;
 
 namespace Hercules.MA.Load.Models.TaxonomyOntology
 {
@@ -51,6 +52,10 @@ namespace Hercules.MA.Load.Models.TaxonomyOntology
         }
 
 
+        [LABEL(LanguageEnum.es, "Etiqueta preferente")]
+        [RDFProperty("http://www.w3.org/2008/05/skos#prefLabel")]
+        public Dictionary<LanguageEnum, string> Skos_prefLabelMulti { get; set; }
+
         private void GetProperties()
         {
             propList.Add(new StringOntologyProperty("skos:prefLabel", this.Skos_prefLabel));
@@ -61,6 +66,11 @@ namespace Hercules.MA.Load.Models.TaxonomyOntology
                     propList.Add(new StringOntologyProperty("skos:prefLabel", this.Skos_prefLabelMulti[idioma], idioma.ToString()));
                 }
             }
+            if (this.Skos_prefLabel != null)
+            {
+                propList.Add(new StringOntologyProperty("skos:prefLabel", this.Skos_prefLabel));
+            }
+
             propList.Add(new StringOntologyProperty("skos:symbol", this.Skos_symbol));
             propList.Add(new StringOntologyProperty("dc:identifier", this.Dc_identifier));
             propList.Add(new StringOntologyProperty("dc:source", this.Dc_source));
