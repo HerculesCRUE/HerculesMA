@@ -72,6 +72,7 @@ using EventgeographicregionOntology;
 using ResulttypeOntology;
 using LaboraldurationtypeOntology;
 using SeminarinscriptiontypeOntology;
+using SeminareventtypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -144,6 +145,7 @@ namespace Hercules.MA.Load
         private static readonly string idResultType = "CVN_QUALIFICATION_A";
         private static readonly string idLaboralDurationType = "CVN_DURATION_A";
         private static readonly string idSeminarInscriptionType = "CVN_SUPERVISION_B";
+        private static readonly string idSeminarEventType = "CVN_EVENT_C";
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -224,6 +226,7 @@ namespace Hercules.MA.Load
             CargarResultType(tablas, "resulttype");
             CargarLaboralDurationType(tablas, "laboraldurationtype");
             CargarSeminarInscriptionType(tablas, "seminarinscriptiontype");
+            CargarSeminarEventType(tablas, "seminareventype");
 
             //Cargamos los subtipos de los RO
             CargarResearhObjectType();
@@ -4204,6 +4207,71 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosSeminarInscriptionType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria SeminarEventType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarSeminarEventType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/SeminarEventType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<SeminarEventType> SeminarEventTypes = new List<SeminarEventType>();
+            SeminarEventTypes = ObtenerSeminarEventType(pTablas, idSeminarEventType, SeminarEventTypes);
+
+            //Carga.
+            Parallel.ForEach(SeminarEventTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, SeminarEventType =>
+            {
+                mResourceApi.LoadSecondaryResource(SeminarEventType.ToGnossApiResource(mResourceApi, pOntology + "_" + SeminarEventType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos SeminarEventType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosSeminarEventType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<SeminarEventType> ObtenerSeminarEventType(ReferenceTables pTablas, string pCodigoTabla, List<SeminarEventType> pListaDatosSeminarEventType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        SeminarEventType SeminarEventType = new SeminarEventType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        SeminarEventType.Dc_identifier = identificador;
+                        SeminarEventType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosSeminarEventType.Add(SeminarEventType);
+                    }
+                }
+            }
+
+            return pListaDatosSeminarEventType;
         }
 
         /// <summary>
