@@ -70,6 +70,8 @@ using CalltypeOntology;
 using SupporttypeOntology;
 using EventgeographicregionOntology;
 using ResulttypeOntology;
+using LaboraldurationtypeOntology;
+using SeminarinscriptiontypeOntology;
 
 namespace Hercules.MA.Load
 {
@@ -140,7 +142,8 @@ namespace Hercules.MA.Load
         private static readonly string idSupportType = "CVN_SUPPORT_A";
         private static readonly string idEventGeographicRegion = "CVN_SCOPE_B";
         private static readonly string idResultType = "CVN_QUALIFICATION_A";
-        
+        private static readonly string idLaboralDurationType = "CVN_DURATION_A";
+        private static readonly string idSeminarInscriptionType = "CVN_SUPERVISION_B";
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -219,7 +222,8 @@ namespace Hercules.MA.Load
             CargarSupportType(tablas, "supporttype");
             CargarEventGeographicRegion(tablas, "eventgeographicregion");
             CargarResultType(tablas, "resulttype");
-
+            CargarLaboralDurationType(tablas, "laboraldurationtype");
+            CargarSeminarInscriptionType(tablas, "seminarinscriptiontype");
 
             //Cargamos los subtipos de los RO
             CargarResearhObjectType();
@@ -4070,6 +4074,136 @@ namespace Hercules.MA.Load
             }
 
             return pListaDatosResultType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria LaboralDurationType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarLaboralDurationType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/LaboralDurationType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<LaboralDurationType> LaboralDurationTypes = new List<LaboralDurationType>();
+            LaboralDurationTypes = ObtenerLaboralDurationType(pTablas, idLaboralDurationType, LaboralDurationTypes);
+
+            //Carga.
+            Parallel.ForEach(LaboralDurationTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, LaboralDurationType =>
+            {
+                mResourceApi.LoadSecondaryResource(LaboralDurationType.ToGnossApiResource(mResourceApi, pOntology + "_" + LaboralDurationType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos LaboralDurationType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosLaboralDurationType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<LaboralDurationType> ObtenerLaboralDurationType(ReferenceTables pTablas, string pCodigoTabla, List<LaboralDurationType> pListaDatosLaboralDurationType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        LaboralDurationType LaboralDurationType = new LaboralDurationType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        LaboralDurationType.Dc_identifier = identificador;
+                        LaboralDurationType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosLaboralDurationType.Add(LaboralDurationType);
+                    }
+                }
+            }
+
+            return pListaDatosLaboralDurationType;
+        }
+
+        /// <summary>
+        /// Carga la entidad secundaria SeminarInscriptionType.
+        /// </summary>
+        /// <param name="pTablas">Tablas con los datos a obtener.</param>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarSeminarInscriptionType(ReferenceTables pTablas, string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/SeminarInscriptionType", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<SeminarInscriptionType> SeminarInscriptionTypes = new List<SeminarInscriptionType>();
+            SeminarInscriptionTypes = ObtenerSeminarInscriptionType(pTablas, idSeminarInscriptionType, SeminarInscriptionTypes);
+
+            //Carga.
+            Parallel.ForEach(SeminarInscriptionTypes, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, SeminarInscriptionType =>
+            {
+                mResourceApi.LoadSecondaryResource(SeminarInscriptionType.ToGnossApiResource(mResourceApi, pOntology + "_" + SeminarInscriptionType.Dc_identifier));
+            });
+        }
+
+        /// <summary>
+        /// Obtiene los objetos SeminarInscriptionType a cargar.
+        /// </summary>
+        /// <param name="pTablas">Objetos con los datos a obtener.</param>
+        /// <param name="pCodigoTabla">ID de la tabla a consultar.</param>
+        /// <param name="pListaDatosSeminarInscriptionType">Lista dónde guardar los objetos.</param>
+        /// <returns>Lista con los objetos creados.</returns>
+        private static List<SeminarInscriptionType> ObtenerSeminarInscriptionType(ReferenceTables pTablas, string pCodigoTabla, List<SeminarInscriptionType> pListaDatosSeminarInscriptionType)
+        {
+            //Mapea los idiomas.
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            foreach (Table tabla in pTablas.Table.Where(x => x.name == pCodigoTabla))
+            {
+                foreach (TableItem item in tabla.Item)
+                {
+                    if (string.IsNullOrEmpty(item.Delegate))
+                    {
+                        SeminarInscriptionType SeminarInscriptionType = new SeminarInscriptionType();
+                        Dictionary<LanguageEnum, string> dicIdioma = new Dictionary<LanguageEnum, string>();
+                        string identificador = item.Code;
+                        foreach (TableItemNameDetail modalidad in item.Name)
+                        {
+                            LanguageEnum idioma = dicIdiomasMapeados[modalidad.lang];
+                            string nombre = modalidad.Name;
+                            dicIdioma.Add(idioma, nombre);
+                        }
+
+                        //Se agrega las propiedades.
+                        SeminarInscriptionType.Dc_identifier = identificador;
+                        SeminarInscriptionType.Dc_title = dicIdioma;
+
+                        //Se guarda el objeto a la lista.
+                        pListaDatosSeminarInscriptionType.Add(SeminarInscriptionType);
+                    }
+                }
+            }
+
+            return pListaDatosSeminarInscriptionType;
         }
 
         /// <summary>
