@@ -165,6 +165,10 @@ namespace Hercules.MA.Load
             //CargarDatos(listaRecursosCargar);
             //listaRecursosCargar.Clear();
 
+            //Borrar ROs.
+            CambiarOntologia("researchobject");
+            EliminarDatosCargados("http://w3id.org/roh/ResearchObject", "researchobject", listaNoBorrar);
+
             //Categorización UM
             //CambiarOntologia("taxonomy");
             //CargaNormaCVN.EliminarDatosCargados("http://www.w3.org/2008/05/skos#Collection", "taxonomy", "um");
@@ -466,7 +470,6 @@ namespace Hercules.MA.Load
                         personaCarga.IdRoh_hasRole = pOrganizacionesCargar["UNIVERSIDAD DE MURCIA"];
                     }
                     personaCarga.Vcard_email = new List<string>() { persona.EMAIL };
-                    personaCarga.Roh_isSynchronized = false;
                     if (!string.IsNullOrEmpty(persona.PERS_DEPT_CODIGO))
                     {
                         personaCarga.IdVivo_departmentOrSchool = $@"http://gnoss.com/items/department_{persona.PERS_DEPT_CODIGO}";
@@ -541,7 +544,7 @@ namespace Hercules.MA.Load
                     }
 
                     //Creamos el recurso.
-                    ComplexOntologyResource resource = personaCarga.ToGnossApiResource(mResourceApi, new List<string>());
+                    ComplexOntologyResource resource = personaCarga.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
 
                     //Guardamos los IDs en el diccionario.
@@ -595,7 +598,7 @@ namespace Hercules.MA.Load
                     if (!dicIDs.ContainsKey(organizacion.ENTIDAD))
                     {
                         //Creamos el recurso.
-                        ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                        ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, null);
                         pListaRecursosCargar.Add(resource);
 
                         dicIDs.Add(organizacion.ENTIDAD, resource.GnossId);
@@ -610,7 +613,7 @@ namespace Hercules.MA.Load
                     OrganizationOntology.Organization organizacionCargar = new OrganizationOntology.Organization();
                     organizacionCargar.Roh_title = "UNIVERSIDAD DE MURCIA";
                     organizacionCargar.IdDc_type = "http://gnoss.com/items/organizationtype_000";
-                    ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
                     dicIDs.Add(organizacionCargar.Roh_title, resource.GnossId);
                 }
@@ -634,7 +637,7 @@ namespace Hercules.MA.Load
                     OrganizationOntology.Organization organizacionCargar = new OrganizationOntology.Organization();
                     organizacionCargar.Roh_title = organizacion.Value;
                     organizacionCargar.Roh_crisIdentifier = organizacion.Key;
-                    ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
                     dicIDs.Add(organizacion.Value, resource.GnossId);
                 }
@@ -685,9 +688,7 @@ namespace Hercules.MA.Load
                     ProjectOntology.Project proyectoCargar = new ProjectOntology.Project();
                     proyectoCargar.Roh_crisIdentifier = proyecto.IDPROYECTO;
                     proyectoCargar.Roh_title = proyecto.NOMBRE;
-                    proyectoCargar.Roh_researchersNumber = pEquiposProyectos.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO).Count();
                     proyectoCargar.Vivo_relates = new List<ProjectOntology.BFO_0000023>();
-                    proyectoCargar.Roh_mainResearchers = new List<ProjectOntology.BFO_0000023>();
 
                     //Fechas.
                     foreach (FechaProyecto fechaProyecto in pFechaProyectos.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
@@ -735,7 +736,7 @@ namespace Hercules.MA.Load
                         ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
                         if (pDicPersonasCargadas.ContainsKey(equipo.IDPERSONA))
                         {
-                            persona.IdRdf_member = pDicPersonasCargadas[equipo.IDPERSONA];
+                            persona.IdRoh_roleOf = pDicPersonasCargadas[equipo.IDPERSONA];
                         }
                         persona.Rdf_comment = Int32.Parse(equipo.NUMEROCOLABORADOR);
 
@@ -771,22 +772,26 @@ namespace Hercules.MA.Load
 
                             if (equipoProyecto.CODTIPOPARTICIPACION == "IP")
                             {
-                                proyectoCargar.Roh_mainResearchers.Add(persona);
+                                persona.Roh_isIP = true;
                             }
                             else
                             {
-                                proyectoCargar.Vivo_relates.Add(persona);
+                                persona.Roh_isIP = false;                                
                             }
+                            proyectoCargar.Vivo_relates.Add(persona);
                         }
                     }
 
                     //Principal Organization.
-                    proyectoCargar.IdsRoh_participates = new List<string>();
+                    proyectoCargar.Roh_participates = new List<ProjectOntology.Organization>();
                     foreach (OrganizacionesExternas organizacion in pOrganizacionesExternas.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
                     {
                         if (pDicOrganizacionesCargadas.ContainsKey(organizacion.ENTIDAD))
                         {
-                            proyectoCargar.IdsRoh_participates.Add(pDicOrganizacionesCargadas[organizacion.ENTIDAD]);
+                            ProjectOntology.Organization organizacionInt = new ProjectOntology.Organization();
+                            organizacionInt.IdRoh_organization = pDicOrganizacionesCargadas[organizacion.ENTIDAD];
+                            organizacionInt.Roh_organizationTitle = organizacion.ENTIDAD;
+                            proyectoCargar.Roh_participates.Add(organizacionInt);
                         }
                     }
 
@@ -831,7 +836,7 @@ namespace Hercules.MA.Load
                     }
 
                     //Organización financiadora
-                    proyectoCargar.IdsRoh_grantedBy = new List<string>();
+                    proyectoCargar.Roh_grantedBy = new List<ProjectOntology.Organization>();
                     HashSet<string> fuentesFinanciacion = new HashSet<string>();
                     foreach (FuentesFinanciacionProyectos fuente in pFuentesFinanciacionProy.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
                     {
@@ -839,11 +844,14 @@ namespace Hercules.MA.Load
                     }
                     foreach (string nomFuente in fuentesFinanciacion)
                     {
-                        proyectoCargar.IdsRoh_grantedBy.Add(pDicOrganizacionesCargadas[nomFuente]);
+                        ProjectOntology.Organization organizacionInt = new ProjectOntology.Organization();
+                        organizacionInt.IdRoh_organization = pDicOrganizacionesCargadas[nomFuente];
+                        organizacionInt.Roh_organizationTitle = nomFuente;
+                        proyectoCargar.Roh_grantedBy.Add(organizacionInt);
                     }
 
-                    //isSynchronized
-                    proyectoCargar.Roh_isSynchronized = false;
+                    //Roh_isValidated
+                    proyectoCargar.Roh_isValidated = true;
 
                     //ScientificExperienceProject
                     if (proyecto.IDPROYECTO.Contains("RRHH"))
@@ -859,17 +867,15 @@ namespace Hercules.MA.Load
                     if (proyectoID == "SOLAYUDAS|13334")
                     {
                         proyectoCargar.Vivo_description = $@"El objetivo general del proyecto Hidroleaf es desarrollar y validar un sistema integral para la producción sostenible de plantas hortícolas de hoja en invernadero y en cultivo de interior mediante luz artificial, aplicando las nuevas tecnologías TICs para optimizar las condiciones de cultivo de las plantas. En concreto fruto de este proyecto se desarrollarán fábricas de cultivos de hortalizas en contenedores inteligentes. La idea es reconvertir contenedores de mercancías para ser usados como medios de cultivo. Dentro de dichos contenedores se establecerán las condiciones óptimas para que la producción agrícola se pueda llevar a cabo, controlando los parámetros de humedad, temperatura, luminosidad, etc empleando para ello sistemas de sensorización y automatización, lo que permite encuadrar este proyecto dentro del ámbito de la Industria 4.0.";
-                        proyectoCargar.Roh_isSupportedBy = new ProjectOntology.Funding();
-                        proyectoCargar.Roh_isSupportedBy.Roh_fundedBy = new List<ProjectOntology.FundingProgram>();
-                        proyectoCargar.Roh_isSupportedBy.Roh_fundedBy.Add(new ProjectOntology.FundingProgram { Roh_title = "Programa Estatal de I+D+i Orientada a los Retos de la Sociedad" });
+                        proyectoCargar.Roh_isSupportedBy = "Programa Estatal de I+D+i Orientada a los Retos de la Sociedad";
                         proyectoCargar.Vivo_relates = new List<ProjectOntology.BFO_0000023>();
                         ProjectOntology.BFO_0000023 persona = new ProjectOntology.BFO_0000023();
-                        persona.IdRdf_member = pDicPersonasCargadas["7747"];
+                        persona.IdRoh_roleOf = pDicPersonasCargadas["7747"];
                         persona.Rdf_comment = 1;
                         proyectoCargar.Vivo_relates.Add(persona);
                     }
 
-                    ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    ComplexOntologyResource resource = proyectoCargar.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
 
                     //Guardamos los IDs en la lista.
@@ -929,30 +935,7 @@ namespace Hercules.MA.Load
                     {
                         documentoACargar.IdVivo_hasPublicationVenue = pRevistasCargadas[$@"issn_{articulo.REIS_ISSN}"];
                     }
-                    else if (!string.IsNullOrEmpty(articulo.REIS_ISSN))
-                    {
-                        MainDocument revista = new MainDocument();
-                        revista.Bibo_issn = articulo.REIS_ISSN;
-                        revista.Roh_title = articulo.NOMBRE_REVISTA;
-
-                        CambiarOntologia("maindocument");
-                        ComplexOntologyResource resourceRevista = revista.ToGnossApiResource(mResourceApi, new List<string>());
-                        CargarDatos(new List<ComplexOntologyResource>() { resourceRevista }); // <--------------- CARGA
-                        CambiarOntologia("document");
-
-                        //Guardamos los IDs en la lista.
-                        pRevistasCargadas.Add($@"issn_{articulo.REIS_ISSN}", resourceRevista.GnossId);
-                    }
-
-                    if (!string.IsNullOrEmpty(articulo.IMPACTO_REVISTA) && float.TryParse(articulo.IMPACTO_REVISTA, out float numFloat1))
-                    {
-                        documentoACargar.Roh_impactIndexInYear = float.Parse(articulo.IMPACTO_REVISTA);
-                    }
-                    if (!string.IsNullOrEmpty(articulo.CUARTIL_REVISTA) && Int32.TryParse(articulo.CUARTIL_REVISTA, out int num1))
-                    {
-                        documentoACargar.Roh_quartile = Int32.Parse(articulo.CUARTIL_REVISTA);
-                    }
-
+                    
                     documentoACargar.Roh_title = articulo.TITULO;
                     documentoACargar.Roh_crisIdentifier = articulo.CODIGO;
 
@@ -1078,7 +1061,7 @@ namespace Hercules.MA.Load
                     documentoACargar.Roh_isValidated = true;
 
                     //Creamos el recurso.
-                    ComplexOntologyResource resource = documentoACargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    ComplexOntologyResource resource = documentoACargar.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
 
                     //Guardamos los IDs en la lista.
@@ -1203,7 +1186,7 @@ namespace Hercules.MA.Load
                     documentoACargar.Roh_isValidated = true;
 
                     //Creamos el recurso.
-                    ComplexOntologyResource resource = documentoACargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    ComplexOntologyResource resource = documentoACargar.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
 
                     //Guardamos los IDs en la lista.
@@ -1276,8 +1259,7 @@ namespace Hercules.MA.Load
                     grupoCargar.Roh_foundationDate = fechaCreacion;
 
                     //MainResearcher y Member
-                    grupoCargar.Roh_mainResearchers = new List<GroupOntology.BFO_0000023>();
-                    grupoCargar.Foaf_member = new List<GroupOntology.BFO_0000023>();
+                    grupoCargar.Vivo_relates = new List<GroupOntology.BFO_0000023>();
 
                     List<DatoEquipoInvestigacion> equipoInvestigacion = pListaDatoEquipoInvestigacion.Where(x => x.IDGRUPOINVESTIGACION == grupo.IDGRUPOINVESTIGACION).ToList();
                     foreach (DatoEquipoInvestigacion equipo in equipoInvestigacion)
@@ -1343,21 +1325,19 @@ namespace Hercules.MA.Load
                                 persona.Vivo_hasResearchArea.Add(lineaArea);
                             }
 
-
-                            if (equipo.CODTIPOPARTICIPACION == "IP")
+                            
+                            if (equipo.CODTIPOPARTICIPACION == "IP")                            
                             {
-                                grupoCargar.Roh_mainResearchers.Add(persona);
+                                persona.Roh_isIP = true;
                             }
                             else
                             {
-                                grupoCargar.Foaf_member.Add(persona);
+                                persona.Roh_isIP = false;
                             }
+                            grupoCargar.Vivo_relates.Add(persona);
 
                         }
                     }
-
-                    //ResearchersNumber
-                    grupoCargar.Roh_researchersNumber = grupoCargar.Roh_mainResearchers.Select(x => x.IdRoh_roleOf).Union(grupoCargar.Foaf_member.Select(x => x.IdRoh_roleOf)).Distinct().Count();
 
                     // ---------- ÑAPA
                     if (grupo.IDGRUPOINVESTIGACION == "E096-02")
@@ -1366,8 +1346,11 @@ namespace Hercules.MA.Load
 Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departamento de Ingeniería de la Información y las Comunicaciones de la Universidad de Murcia.";
                     }
 
+                    //Roh_isValidated
+                    grupoCargar.Roh_isValidated = true;
+
                     //Creamos el recurso.
-                    ComplexOntologyResource resource = grupoCargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    ComplexOntologyResource resource = grupoCargar.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
 
                     //Guardamos los IDs en la lista.
@@ -1444,7 +1427,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                     }
 
                     //Creamos el recurso.
-                    ComplexOntologyResource resource = cvACargar.ToGnossApiResource(mResourceApi, new List<string>());
+                    ComplexOntologyResource resource = cvACargar.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
 
                     //Guardamos los IDs en la lista.
@@ -1971,7 +1954,7 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
 
             foreach (KeyValuePair<string, MainDocument> item in dicRevistas)
             {
-                ComplexOntologyResource resource = item.Value.ToGnossApiResource(mResourceApi, new List<string>());
+                ComplexOntologyResource resource = item.Value.ToGnossApiResource(mResourceApi, null);
                 pListaRecursosCargar.Add(resource);
 
                 //Guardamos los IDs en la lista.

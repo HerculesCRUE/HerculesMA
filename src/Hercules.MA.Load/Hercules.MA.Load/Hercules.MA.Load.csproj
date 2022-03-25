@@ -236,6 +236,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Dataset\UMU\" />
     <Folder Include="Dataset\Revistas\" />
     <Folder Include="Dataset\UMU\" />
   </ItemGroup>
