@@ -205,8 +205,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                         WHERE
 	                    {{
-		                    FILTER(?person=<[PARAMETRO]>)
 		                    {{
+                                FILTER(?person=<[PARAMETRO]>)
 			                    {pVarAnterior} a 'document'.
 			                    ?cv <http://w3id.org/roh/cvOf> ?person.
 			                    ?cv  <http://w3id.org/roh/scientificActivity> ?scientificActivity.
@@ -215,6 +215,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
 		                    }}UNION
 		                    {{
+                                FILTER(?person=<[PARAMETRO]>)
 			                    {pVarAnterior} a 'document'.
 			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
 			                    {pVarAnterior} <http://purl.org/ontology/bibo/authorList> ?list.
@@ -229,9 +230,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                     {{
 	                    SELECT {pVarAnterior}
 	                    WHERE
-	                    {{
-		                    FILTER(?person=<[PARAMETRO]>)
+	                    {{		                    
 		                    {{
+                                FILTER(?person=<[PARAMETRO]>)
 			                    {pVarAnterior} a 'project'.
 			                    ?cv <http://w3id.org/roh/cvOf> ?person.
 			                    ?cv  <http://w3id.org/roh/scientificExperience> ?scientificExperience.
@@ -240,6 +241,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
 		                    }}UNION
 		                    {{
+                                FILTER(?person=<[PARAMETRO]>)
 			                    {pVarAnterior} a 'project'.
 			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
                                             {{
