@@ -78,7 +78,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             filtrosFecha.Add("vivo:start");
             filtrosFecha.Add("vivo:end");
 
-            // Filtros de eteros.
+            // Filtros de enteros.
             List<string> filtrosEnteros = new List<string>();
             filtrosEnteros.Add("roh:publicationsNumber");
             filtrosEnteros.Add("roh:projectsNumber");
@@ -198,6 +198,63 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }}
                         ");
 
+            filtrosPersonalizados.Add("searchPublicacionesPublicasPerson", 
+                $@"
+                    {{
+                        SELECT {pVarAnterior}
+
+                        WHERE
+	                    {{
+		                    FILTER(?person=<[PARAMETRO]>)
+		                    {{
+			                    {pVarAnterior} a 'document'.
+			                    ?cv <http://w3id.org/roh/cvOf> ?person.
+			                    ?cv  <http://w3id.org/roh/scientificActivity> ?scientificActivity.
+			                    ?scientificActivity ?pAux ?oAux.
+			                    ?oAux <http://w3id.org/roh/isPublic> 'true'.
+			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
+		                    }}UNION
+		                    {{
+			                    {pVarAnterior} a 'document'.
+			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
+			                    {pVarAnterior} <http://purl.org/ontology/bibo/authorList> ?list.
+			                    ?list <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+		                    }}
+	                    }}
+                    }}
+                ");
+
+            filtrosPersonalizados.Add("searchProyectosPublicosPerson",
+                $@"
+                    {{
+	                    SELECT {pVarAnterior}
+	                    WHERE
+	                    {{
+		                    FILTER(?person=<[PARAMETRO]>)
+		                    {{
+			                    {pVarAnterior} a 'project'.
+			                    ?cv <http://w3id.org/roh/cvOf> ?person.
+			                    ?cv  <http://w3id.org/roh/scientificExperience> ?scientificExperience.
+			                    ?scientificExperience ?pAux ?oAux.
+			                    ?oAux <http://w3id.org/roh/isPublic> 'true'.
+			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
+		                    }}UNION
+		                    {{
+			                    {pVarAnterior} a 'project'.
+			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
+                                            {{
+                                               {pVarAnterior} a 'project'.
+                                               {pVarAnterior} <http://w3id.org/roh/mainResearchers> ?mainResearcher.
+                                               ?mainResearcher <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                                            }}UNION{{
+                                               {pVarAnterior} a 'project'.
+                                               {pVarAnterior} <http://w3id.org/roh/researchers> ?researchers.
+                                               ?researchers <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                                            }}
+		                    }}
+	                    }}
+                    }}
+                ");
 
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;
