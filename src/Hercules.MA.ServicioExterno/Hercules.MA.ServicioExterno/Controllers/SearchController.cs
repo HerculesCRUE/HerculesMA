@@ -1,18 +1,9 @@
 ﻿using Hercules.MA.ServicioExterno.Controllers.Acciones;
-using Hercules.MA.ServicioExterno.Models;
-using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags;
-using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaProyectos;
-using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaPublicaciones;
-using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
-using Hercules.MA.ServicioExterno.Models.RedesUsuario;
+using Hercules.MA.ServicioExterno.Models.Buscador;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
