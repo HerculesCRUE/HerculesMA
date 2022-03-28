@@ -154,18 +154,34 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 List<int> listaFines = new();
                 foreach (KeyValuePair<string, DataFechas> item in dicResultados)
                 {
-                    if (item.Value.numProyectosInicio.ContainsKey("SEP1"))
+                    if (item.Value.numProyectosInicio.Any())
                     {
-                        listaIniciosCompetitivos.Add(item.Value.numProyectosInicio["SEP1"]);
+                        if (item.Value.numProyectosInicio.ContainsKey("SEP1"))
+                        {
+                            listaIniciosCompetitivos.Add(item.Value.numProyectosInicio["SEP1"]);
+                            listaIniciosNoCompetitivos.Add(0);
+                            listaIniciosOtros.Add(0);
+                        }
+                        if (item.Value.numProyectosInicio.ContainsKey("SEP2"))
+                        {
+                            listaIniciosCompetitivos.Add(0);
+                            listaIniciosNoCompetitivos.Add(item.Value.numProyectosInicio["SEP2"]);
+                            listaIniciosOtros.Add(0);
+                        }
+                        if (item.Value.numProyectosInicio.ContainsKey(""))
+                        {
+                            listaIniciosCompetitivos.Add(0);
+                            listaIniciosNoCompetitivos.Add(0);
+                            listaIniciosOtros.Add(item.Value.numProyectosInicio[""]);
+                        }                        
                     }
-                    if (item.Value.numProyectosInicio.ContainsKey("SEP2"))
+                    else
                     {
-                        listaIniciosNoCompetitivos.Add(item.Value.numProyectosInicio["SEP2"]);
+                        listaIniciosCompetitivos.Add(0);
+                        listaIniciosNoCompetitivos.Add(0);
+                        listaIniciosOtros.Add(0);
                     }
-                    if (item.Value.numProyectosInicio.ContainsKey(""))
-                    {
-                        listaIniciosOtros.Add(item.Value.numProyectosInicio[""]);
-                    }
+
                     listaFines.Add(item.Value.numProyectosFin);
                 }
 

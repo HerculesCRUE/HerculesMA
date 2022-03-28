@@ -239,20 +239,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 			                    ?scientificExperience ?pAux ?oAux.
 			                    ?oAux <http://w3id.org/roh/isPublic> 'true'.
 			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
-		                    }}UNION
+		                    }}
+                            UNION
 		                    {{
                                 FILTER(?person=<[PARAMETRO]>)
 			                    {pVarAnterior} a 'project'.
 			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
-                                            {{
-                                               {pVarAnterior} a 'project'.
-                                               {pVarAnterior} <http://w3id.org/roh/mainResearchers> ?mainResearcher.
-                                               ?mainResearcher <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-                                            }}UNION{{
-                                               {pVarAnterior} a 'project'.
-                                               {pVarAnterior} <http://w3id.org/roh/researchers> ?researchers.
-                                               ?researchers <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-                                            }}
+			                    {pVarAnterior} ?propRol ?rol.
+                                FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+                                ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
 		                    }}
 	                    }}
                     }}
