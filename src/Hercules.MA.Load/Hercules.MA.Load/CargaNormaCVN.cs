@@ -2564,7 +2564,6 @@ namespace Hercules.MA.Load
             dicDatos.Add("SAD1~Publicaciones", "Publicaciones, documentos científicos y técnicos");
             dicDatos.Add("SAD2~En congresos", "Trabajos presentados en congresos nacionales o internacionales");
             dicDatos.Add("SAD3~En jornadas, seminarios…", "Trabajos presentados en jornadas, seminarios, talleres de trabajo y/o cursos nacionales o internacionales");
-            dicDatos.Add("SAD4~De divulgación", "Otras actividades de divulgación");
 
             foreach (KeyValuePair<string, string> itemData in dicDatos)
             {
