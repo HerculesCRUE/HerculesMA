@@ -310,7 +310,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     //DOCUMENTOS
                     {
-                        string select = "SELECT ?person COUNT(distinct ?document) AS ?numRelacionesDocumentos";
+                        string select = "SELECT ?person COUNT(distinct ?documento) AS ?numRelacionesDocumentos";
                         string where = $@"
                     WHERE {{ 
                             ?document a 'document'.
