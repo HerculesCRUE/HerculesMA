@@ -8,69 +8,68 @@ namespace Hercules.MA.ServicioExterno.Models.Buscador
 {
     public class Publication : ObjectSearch
     {
-        public List<string> tagsAuxSearch { get; set; }
-        public string descriptionAuxSearch { get; set; }
+        public List<HashSet<string>> tagsAuxSearch { get; set; }
+        public HashSet<string> descriptionAuxSearch { get; set; }
         public HashSet<Person> persons { get; set; }
 
-        public override long Search(string[] pInput)
+        public override long SearchAutocompletar(HashSet<string> pInput, string pLastInput)
         {
-            long respuesta = 0;
-            bool encontradoTitulo = true;
-            bool encontradoDescripcion = true;
+            long respuestaPeso = 0;
+            bool encontradoTitulo = SearchForAutocomplete(titleAuxSearch, pInput, pLastInput);
+            bool encontradoDescripcion = SearchForAutocomplete(descriptionAuxSearch, pInput, pLastInput);
             int numAutores = 0;
             int numTags = 0;
 
-            // Busca si TODAS las palabas se encuentran en el título
-            foreach (string input in pInput)
+            foreach (HashSet<string> tag in tagsAuxSearch)
             {
-                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
-            }
-
-            foreach (string tag in tagsAuxSearch)
-            {
-                bool encontradoTags = true;
-                foreach (string input in pInput)
-                {
-                    encontradoTags = encontradoTags && tag.Contains(input);
-                }
-                if (encontradoTags)
+                if (SearchForAutocomplete(tag, pInput, pLastInput))
                 {
                     numTags++;
                 }
             }
 
-            // Buscar en las descripciones que aparezca TODAS las palabras de la cadena de texto
-            foreach (string input in pInput)
-            {
-                encontradoDescripcion = encontradoDescripcion && descriptionAuxSearch.Contains(input);
-            }
-
             foreach (Person person in persons)
             {
-                if (person.Search(pInput) > 0)
+                if (person.SearchAutocompletar(pInput, pLastInput) > 0)
                 {
-                    numAutores ++;
+                    numAutores++;
                 }
             }
 
             // Resultados
             if (encontradoTitulo)
             {
-                respuesta += 1000;
+                respuestaPeso += 10000000;
             }
 
             if (numTags > 0)
             {
-                respuesta += 100 * numTags;
+                respuestaPeso += 10000 * numTags;
             }
 
             if (encontradoDescripcion)
             {
-                respuesta += 10;
+                respuestaPeso += 1000;
             }
 
-            respuesta += numAutores;
+            respuestaPeso += numAutores;
 
+            return respuestaPeso;
+        }
+
+        public override bool SearchBuscador(HashSet<string> pInput, string pLastInput)
+        {
+            bool respuesta = false;
+            respuesta = respuesta || SearchForSearcher(titleAuxSearch, pInput, pLastInput);
+            respuesta = respuesta || SearchForSearcher(descriptionAuxSearch, pInput, pLastInput);
+            foreach (HashSet<string> tag in tagsAuxSearch)
+            {
+                respuesta = respuesta || SearchForSearcher(tag, pInput, pLastInput);
+            }
+            foreach (Person person in persons)
+            {
+                respuesta = respuesta || person.SearchBuscador(pInput, pLastInput);
+            }
             return respuesta;
         }
     }
