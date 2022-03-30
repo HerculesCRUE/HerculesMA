@@ -415,7 +415,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?person a 'person'.
                         ?person foaf:name ?nombre.
                         {{
-                            <http://gnoss/{pIdProyecto}> <http://vivoweb.org/ontology/core#relates> ?main.
+                            <http://gnoss/{pIdProyecto}> <http://w3id.org/roh/researchers> ?main.
                             ?main <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             BIND(false as ?ip)
                         }}UNION
