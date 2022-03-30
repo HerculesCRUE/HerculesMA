@@ -36,6 +36,10 @@ namespace Hercules.MA.ServicioExterno.Models.Buscador
 
         public bool SearchForSearcher(HashSet<string> pText, HashSet<string> pInput, string pLastInput)
         {
+            if (string.IsNullOrEmpty(pLastInput))
+            {
+                return pText.IsSupersetOf(pInput);
+            }
             return pText.IsSupersetOf(pInput) && pText.Contains(pLastInput);
         }
     }
