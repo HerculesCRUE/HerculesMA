@@ -256,6 +256,46 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                     }}
                 ");
 
+            filtrosPersonalizados.Add("searchColaboradoresPersonPublic",
+                $@"
+                    {{
+                        SELECT DISTINCT {pVarAnterior}
+	                    WHERE 
+	                    {{	
+                                    {pVarAnterior} a 'person'	
+		                    {{
+			                    {{
+				                    #Documentos
+				                    SELECT *
+				                    WHERE {{
+					                    ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutoresA.
+					                    ?listaAutoresA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <[PARAMETRO]>.
+					                    ?documento a 'document'.
+					                    ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
+					                    ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                    }}
+			                    }}
+			                    UNION 
+			                    {{
+				                    #Proyectos
+				                    SELECT *
+				                    WHERE {{
+					                    ?proy ?propRolA ?roleA.
+                    FILTER(?propRolA in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+                    ?roleA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <[PARAMETRO]>.
+
+					                    ?proy a 'project'.
+					                    ?proy ?propRol ?role.
+					                    FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+					                    ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                    }}
+			                    }}
+		                    }}	
+		                    FILTER({pVarAnterior} != <[PARAMETRO]>)
+	                    }}
+                    }}
+                ");
+
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;
 
