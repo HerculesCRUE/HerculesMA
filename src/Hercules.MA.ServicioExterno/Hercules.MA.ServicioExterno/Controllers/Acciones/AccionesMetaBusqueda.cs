@@ -89,7 +89,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                         {
                                             id = id,
                                             title = nombre,
-                                            titleAuxSearch = ObtenerTextoNormalizado(nombre),
+                                            titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(nombre).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
                                             searchable = isActive
                                         };
                                         personsAuxTemp[id] = person;
@@ -147,7 +147,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                         }
 
                                         Publication publication = publicationsTemp.FirstOrDefault(x => x.id == id);
-                                        if(publication==null)
+                                        if (publication == null)
                                         {
                                             string title = fila["title"].value;
                                             string description = "";
@@ -160,11 +160,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 id = id,
                                                 title = title,
-                                                titleAuxSearch = ObtenerTextoNormalizado(title),
-                                                descriptionAuxSearch = ObtenerTextoNormalizado(description),
-                                                tagsAuxSearch = tags.Split('|').Select(x => ObtenerTextoNormalizado(x)).ToList(),
+                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                tagsAuxSearch = tags.Split('|').Select(x => new HashSet<string>(ObtenerTextoNormalizado(x).Split(' ', StringSplitOptions.RemoveEmptyEntries))).ToList(),
                                                 persons = new HashSet<Person>()
-                                            };                                            
+                                            };
+
                                             publicationsTemp.Add(publication);
                                         }
                                         if (author != Guid.Empty)
@@ -235,9 +236,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 id = id,
                                                 title = title,
-                                                titleAuxSearch = ObtenerTextoNormalizado(title),
-                                                descriptionAuxSearch = ObtenerTextoNormalizado(description),
-                                                tagsAuxSearch = tags.Split('|').Select(x => ObtenerTextoNormalizado(x)).ToList(),
+                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                tagsAuxSearch = tags.Split('|').Select(x => new HashSet<string>(ObtenerTextoNormalizado(x).Split(' ', StringSplitOptions.RemoveEmptyEntries))).ToList(),
                                                 persons = new HashSet<Person>()
                                             };
                                             researchObjectsTemp.Add(researchObject);
@@ -254,7 +255,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     {
                                         break;
                                     }
-                                } else
+                                }
+                                else
                                 {
                                     break;
                                 }
@@ -264,7 +266,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         #endregion
 
                         #region CargarGrupo
-                       {
+                        {
                             int limit = 10000;
                             int offset = 0;
                             while (true)
@@ -296,7 +298,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                 {
                                     offset += limit;
                                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                                    {                                        
+                                    {
                                         Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
 
                                         string autorId = "";
@@ -312,7 +314,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                                         Group group = groupsTemp.FirstOrDefault(e => e.id == id);
 
-                                        if (group==null)
+                                        if (group == null)
                                         {
                                             string title = fila["title"].value;
                                             string description = "";
@@ -325,10 +327,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 id = id,
                                                 title = title,
-                                                titleAuxSearch = ObtenerTextoNormalizado(title),
-                                                descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
                                                 persons = new HashSet<Person>()
-                                            };                                            
+                                            };
                                             groupsTemp.Add(group);
                                         }
                                         if (author != Guid.Empty)
@@ -399,7 +401,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 author = new Guid(autorId.Replace("http://gnoss/", ""));
                                             }
                                         }
-                                        
+
                                         var currentPersons = projectsTemp.Where(e => e.id == id).ToArray();
 
                                         if (currentPersons.Length == 0)
@@ -415,8 +417,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 id = id,
                                                 title = title,
-                                                titleAuxSearch = ObtenerTextoNormalizado(title),
-                                                descriptionAuxSearch = ObtenerTextoNormalizado(description),
+                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
                                                 persons = new HashSet<Person>()
                                             };
 
@@ -428,7 +430,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 }
                                             }
                                             projectsTemp.Add(project);
-                                        } else
+                                        }
+                                        else
                                         {
                                             if (author != Guid.Empty)
                                             {
@@ -469,80 +472,110 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pStringBusqueda">string de búsqueda</param>
         /// <param name="pLang">Idioma</param>
-        public Dictionary<string, List<ObjectSearch>> Busqueda(string pStringBusqueda, string pLang)
+        public Dictionary<string,KeyValuePair<bool, List<ObjectSearch>>> Busqueda(string pStringBusqueda, string pLang)
         {
             //TODO configurable
             int maxItems = 3;
-            Dictionary<string, List<ObjectSearch>> respuesta = new Dictionary<string, List<ObjectSearch>>();
+            Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>> respuesta = new Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>>();
 
             pStringBusqueda = ObtenerTextoNormalizado(pStringBusqueda);
-            string[] inputs = pStringBusqueda.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+            string lastInput = "";
+            HashSet<string> inputs = new HashSet<string>();
+            if (pStringBusqueda.EndsWith(" "))
+            {
+                inputs = new HashSet<string>(pStringBusqueda.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries));
+            }
+            else
+            {
+                if (pStringBusqueda.Contains(" "))
+                {
+                    inputs = new HashSet<string>(pStringBusqueda.Substring(0, pStringBusqueda.LastIndexOf(" ")).Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries));
+                    lastInput = pStringBusqueda.Substring(pStringBusqueda.LastIndexOf(" ")).Trim();
+                }
+                else
+                {
+                    lastInput = pStringBusqueda;
+                }
+
+            }
+
+
 
             //Personas
             if (persons != null)
             {
-                respuesta["persona"] = new List<ObjectSearch>();
-                List<Person> personas = persons.Select(person => new KeyValuePair<long, Person>(person.Search(inputs), person)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
-                int min = Math.Min(personas.Count, maxItems);
-                foreach (Person person in personas.GetRange(0, min))
+                List<Person> personasFilter = persons.Select(person => new KeyValuePair<long, Person>(person.SearchAutocompletar(inputs, lastInput), person)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                bool searh = personasFilter.Exists(x => x.SearchBuscador(inputs, lastInput));                
+                int min = Math.Min(personasFilter.Count, maxItems);
+                List<ObjectSearch> lista = new List<ObjectSearch>();
+                foreach (Person person in personasFilter.GetRange(0, min))
                 {
-                    respuesta["persona"].Add(person);
+                    lista.Add(person);
                 }
+                respuesta["persona"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
             }
 
             //Publicaciones
             if (publications != null)
             {
-                respuesta["publicacion"] = new List<ObjectSearch>();
-                List<Publication> publicaciones = publications.Select(publication => new KeyValuePair<long, Publication>(publication.Search(inputs), publication)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
-                int min = Math.Min(publicaciones.Count, maxItems);
-                foreach (Publication publicacion in publicaciones.GetRange(0, min))
+                List<Publication> publicacionesFilter = publications.Select(publication => new KeyValuePair<long, Publication>(publication.SearchAutocompletar(inputs, lastInput), publication)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                bool searh = publicacionesFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
+                int min = Math.Min(publicacionesFilter.Count, maxItems);
+                List<ObjectSearch> lista = new List<ObjectSearch>();
+                foreach (Publication publicacion in publicacionesFilter.GetRange(0, min))
                 {
-                    respuesta["publicacion"].Add(publicacion);
+                    lista.Add(publicacion);
                 }
+                respuesta["publicacion"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
             }
 
             //ResearchObjects
             if (researchObjects != null)
             {
-                respuesta["researchObject"] = new List<ObjectSearch>();
-                List<ResearchObject> researchObjectsFilter = researchObjects.Select(researchObject => new KeyValuePair<long, ResearchObject>(researchObject.Search(inputs), researchObject)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                List<ResearchObject> researchObjectsFilter = researchObjects.Select(researchObject => new KeyValuePair<long, ResearchObject>(researchObject.SearchAutocompletar(inputs, lastInput), researchObject)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                bool searh = researchObjectsFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
                 int min = Math.Min(researchObjectsFilter.Count, maxItems);
+                List<ObjectSearch> lista = new List<ObjectSearch>();
                 foreach (ResearchObject researchObj in researchObjectsFilter.GetRange(0, min))
                 {
-                    respuesta["researchObject"].Add(researchObj);
+                    lista.Add(researchObj);
                 }
+                respuesta["researchObject"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
             }
 
             //Grupos
             if (groups != null)
             {
-                respuesta["group"] = new List<ObjectSearch>();
-                List<Group> groupsFilter = groups.Select(group => new KeyValuePair<long, Group>(group.Search(inputs), group)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                List<Group> groupsFilter = groups.Select(group => new KeyValuePair<long, Group>(group.SearchAutocompletar(inputs, lastInput), group)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                bool searh = groupsFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
                 int min = Math.Min(groupsFilter.Count, maxItems);
-                foreach (Group grp in groupsFilter.GetRange(0, min))
+                List<ObjectSearch> lista = new List<ObjectSearch>();
+                foreach (Group group in groupsFilter.GetRange(0, min))
                 {
-                    respuesta["group"].Add(grp);
+                    lista.Add(group);
                 }
+                respuesta["group"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
             }
 
             //Proyectos
             if (projects != null)
             {
-                respuesta["project"] = new List<ObjectSearch>();
-                List<Project> projectFilter = projects.Select(project => new KeyValuePair<long, Project>(project.Search(inputs), project)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                List<Project> projectFilter = projects.Select(project => new KeyValuePair<long, Project>(project.SearchAutocompletar(inputs, lastInput), project)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                bool searh = projectFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
                 int min = Math.Min(projectFilter.Count, maxItems);
+                List<ObjectSearch> lista = new List<ObjectSearch>();
                 foreach (Project project in projectFilter.GetRange(0, min))
                 {
-                    respuesta["project"].Add(project);
+                    lista.Add(project);
                 }
+                respuesta["project"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
             }
 
 
             List<Guid> ids = new List<Guid>();
-            foreach(string key in respuesta.Keys)
+            foreach (string key in respuesta.Keys)
             {
-                ids=ids.Union(respuesta[key].Select(x => x.id).ToList()).ToList();            
+                ids = ids.Union(respuesta[key].Value.Select(x => x.id).ToList()).ToList();
             }
             List<ResponseGetUrl> enlaces = new List<ResponseGetUrl>();
             if (ids.Count > 0)
@@ -552,7 +585,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             foreach (string key in respuesta.Keys)
             {
-                foreach (ObjectSearch item in respuesta[key])
+                foreach (ObjectSearch item in respuesta[key].Value)
                 {
                     item.url = enlaces.FirstOrDefault(x => x.resource_id == item.id)?.url;
                 }
