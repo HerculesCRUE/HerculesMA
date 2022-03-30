@@ -25,7 +25,7 @@ namespace Hercules.MA.ServicioExterno.Models.Buscador
 
 
         public override bool SearchBuscador(HashSet<string> pInput, string pLastInput)
-        {
+        {            
             return SearchForSearcher(titleAuxSearch, pInput, pLastInput);
         }
     }
