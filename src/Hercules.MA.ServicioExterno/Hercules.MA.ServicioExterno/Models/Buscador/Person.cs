@@ -13,21 +13,20 @@ namespace Hercules.MA.ServicioExterno.Models.Buscador
         /**
          * Método para buscar dentro de Person
          */
-        public override long Search(string[] pInput)
+        public override long SearchAutocompletar(HashSet<string> pInput, string pLastInput)
         {
-            long respuesta = 0;
-            bool encontradoTitulo = true;
-            // Busca si TODAS las palabas se encuentran en el título
-            foreach (string input in pInput)
+            long respuestaPeso = 0;
+            if (SearchForAutocomplete(titleAuxSearch, pInput, pLastInput))
             {
-                encontradoTitulo = encontradoTitulo && titleAuxSearch.Contains(input);
+                respuestaPeso += 1;
             }
-            // Resultados
-            if (encontradoTitulo)
-            {
-                respuesta += 1000;
-            }
-            return respuesta;
+            return respuestaPeso;
+        }
+
+
+        public override bool SearchBuscador(HashSet<string> pInput, string pLastInput)
+        {
+            return SearchForSearcher(titleAuxSearch, pInput, pLastInput);
         }
     }
 
