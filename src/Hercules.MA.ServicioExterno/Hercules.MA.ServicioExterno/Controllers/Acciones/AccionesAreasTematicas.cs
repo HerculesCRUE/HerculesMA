@@ -43,7 +43,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     filtroElemento = $@"?documento roh:isProducedBy <{idGrafoBusqueda}>.";
                     break;
                 case "person":
-                    filtroElemento = $@"?documento roh:publicAuthorList <{idGrafoBusqueda}>.";
+                    filtroElemento = $@"?documento bibo:authorList ?lista. ";
+                    filtroElemento += $@"?lista rdf:member <{idGrafoBusqueda}>.";
                     break;
                 case "project":
                     filtroElemento = $@"?documento roh:project <{idGrafoBusqueda}>.";
@@ -161,7 +162,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     filtroElemento = $@"?documento roh:isProducedBy <{idGrafoBusqueda}>.";
                     break;
                 case "person":
-                    filtroElemento = $@"?documento roh:publicAuthorList <{idGrafoBusqueda}>.";
+                    filtroElemento = $@"?documento bibo:authorList ?lista. ";
+                    filtroElemento += $@"?lista rdf:member <{idGrafoBusqueda}>.";
                     break;
                 case "project":
                     filtroElemento = $@"?documento roh:project <{idGrafoBusqueda}>.";

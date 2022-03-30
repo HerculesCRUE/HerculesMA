@@ -78,7 +78,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             filtrosFecha.Add("vivo:start");
             filtrosFecha.Add("vivo:end");
 
-            // Filtros de eteros.
+            // Filtros de enteros.
             List<string> filtrosEnteros = new List<string>();
             filtrosEnteros.Add("roh:publicationsNumber");
             filtrosEnteros.Add("roh:projectsNumber");
@@ -155,7 +155,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 				                            #Documentos
 				                            SELECT *
 				                            WHERE {{
-					                            ?documento <http://w3id.org/roh/publicAuthorList> <http://gnoss/[PARAMETRO]>.
+                                                ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutoresA.
+					                            ?listaAutoresA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/[PARAMETRO]>.					                           
 					                            ?documento a 'document'.
 					                            ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
 					                            ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
@@ -166,11 +167,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 				                            #Proyectos
 				                            SELECT *
 				                            WHERE {{
-					                            ?proy <http://w3id.org/roh/publicAuthorList> <http://gnoss/[PARAMETRO]>.
+					                            ?proy ?propRolA ?roleA.
+					                            FILTER(?propRolA in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+					                            ?roleA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/[PARAMETRO]>.
 					                            ?proy a 'project'.
-					                            ?proy ?propRol ?role.
-					                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://w3id.org/roh/mainResearchers>))
-					                            ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+					                            ?proy ?propRolB ?roleB.
+					                            FILTER(?propRolB in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+					                            ?roleB <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
 				                            }}
 			                            }}
 		                            }}		
@@ -198,6 +201,100 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }}
                         ");
 
+            filtrosPersonalizados.Add("searchPublicacionesPublicasPerson", 
+                $@"
+                    {{
+                        SELECT {pVarAnterior}
+
+                        WHERE
+	                    {{
+		                    {{
+                                FILTER(?person=<[PARAMETRO]>)
+			                    {pVarAnterior} a 'document'.
+			                    ?cv <http://w3id.org/roh/cvOf> ?person.
+			                    ?cv  <http://w3id.org/roh/scientificActivity> ?scientificActivity.
+			                    ?scientificActivity ?pAux ?oAux.
+			                    ?oAux <http://w3id.org/roh/isPublic> 'true'.
+			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
+		                    }}UNION
+		                    {{
+                                FILTER(?person=<[PARAMETRO]>)
+			                    {pVarAnterior} a 'document'.
+			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
+			                    {pVarAnterior} <http://purl.org/ontology/bibo/authorList> ?list.
+			                    ?list <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+		                    }}
+	                    }}
+                    }}
+                ");
+
+            filtrosPersonalizados.Add("searchProyectosPublicosPerson",
+                $@"
+                    {{
+	                    SELECT {pVarAnterior}
+	                    WHERE
+	                    {{		                    
+		                    {{
+                                FILTER(?person=<[PARAMETRO]>)
+			                    {pVarAnterior} a 'project'.
+			                    ?cv <http://w3id.org/roh/cvOf> ?person.
+			                    ?cv  <http://w3id.org/roh/scientificExperience> ?scientificExperience.
+			                    ?scientificExperience ?pAux ?oAux.
+			                    ?oAux <http://w3id.org/roh/isPublic> 'true'.
+			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
+		                    }}
+                            UNION
+		                    {{
+                                FILTER(?person=<[PARAMETRO]>)
+			                    {pVarAnterior} a 'project'.
+			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
+			                    {pVarAnterior} ?propRol ?rol.
+                                FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+                                ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+		                    }}
+	                    }}
+                    }}
+                ");
+
+            filtrosPersonalizados.Add("searchColaboradoresPersonPublic",
+                $@"
+                    {{
+                        SELECT DISTINCT {pVarAnterior}
+	                    WHERE 
+	                    {{	
+                                    {pVarAnterior} a 'person'	
+		                    {{
+			                    {{
+				                    #Documentos
+				                    SELECT *
+				                    WHERE {{
+					                    ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutoresA.
+					                    ?listaAutoresA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <[PARAMETRO]>.
+					                    ?documento a 'document'.
+					                    ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
+					                    ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                    }}
+			                    }}
+			                    UNION 
+			                    {{
+				                    #Proyectos
+				                    SELECT *
+				                    WHERE {{
+					                    ?proy ?propRolA ?roleA.
+                    FILTER(?propRolA in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+                    ?roleA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <[PARAMETRO]>.
+
+					                    ?proy a 'project'.
+					                    ?proy ?propRol ?role.
+					                    FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+					                    ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                    }}
+			                    }}
+		                    }}	
+		                    FILTER({pVarAnterior} != <[PARAMETRO]>)
+	                    }}
+                    }}
+                ");
 
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;

@@ -154,18 +154,34 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 List<int> listaFines = new();
                 foreach (KeyValuePair<string, DataFechas> item in dicResultados)
                 {
-                    if (item.Value.numProyectosInicio.ContainsKey("SEP1"))
+                    if (item.Value.numProyectosInicio.Any())
                     {
-                        listaIniciosCompetitivos.Add(item.Value.numProyectosInicio["SEP1"]);
+                        if (item.Value.numProyectosInicio.ContainsKey("SEP1"))
+                        {
+                            listaIniciosCompetitivos.Add(item.Value.numProyectosInicio["SEP1"]);
+                            listaIniciosNoCompetitivos.Add(0);
+                            listaIniciosOtros.Add(0);
+                        }
+                        if (item.Value.numProyectosInicio.ContainsKey("SEP2"))
+                        {
+                            listaIniciosCompetitivos.Add(0);
+                            listaIniciosNoCompetitivos.Add(item.Value.numProyectosInicio["SEP2"]);
+                            listaIniciosOtros.Add(0);
+                        }
+                        if (item.Value.numProyectosInicio.ContainsKey(""))
+                        {
+                            listaIniciosCompetitivos.Add(0);
+                            listaIniciosNoCompetitivos.Add(0);
+                            listaIniciosOtros.Add(item.Value.numProyectosInicio[""]);
+                        }                        
                     }
-                    if (item.Value.numProyectosInicio.ContainsKey("SEP2"))
+                    else
                     {
-                        listaIniciosNoCompetitivos.Add(item.Value.numProyectosInicio["SEP2"]);
+                        listaIniciosCompetitivos.Add(0);
+                        listaIniciosNoCompetitivos.Add(0);
+                        listaIniciosOtros.Add(0);
                     }
-                    if (item.Value.numProyectosInicio.ContainsKey(""))
-                    {
-                        listaIniciosOtros.Add(item.Value.numProyectosInicio[null]);
-                    }
+
                     listaFines.Add(item.Value.numProyectosFin);
                 }
 
@@ -285,26 +301,24 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 numMiembros.Add("11-30", 0);
                 numMiembros.Add("30+", 0);
 
-                foreach (string id in dicNumMiembrosProyecto.Keys)
+                foreach(KeyValuePair<string, int> item in dicNumMiembrosProyecto)
                 {
-                    string text = "";
-                    if (dicNumMiembrosProyecto[id] > 0 && dicNumMiembrosProyecto[id] < 4)
+                    if (item.Value > 0 && item.Value < 4)
                     {
-                        text = "1-3";
+                        numMiembros["1-3"]++;
                     }
-                    else if (dicNumMiembrosProyecto[id] >= 4 && dicNumMiembrosProyecto[id] < 11)
+                    else if (item.Value >= 4 && item.Value < 11)
                     {
-                        text = "4-10";
+                        numMiembros["4-10"]++;
                     }
-                    else if (dicNumMiembrosProyecto[id] >= 11 && dicNumMiembrosProyecto[id] < 31)
+                    else if (item.Value >= 11 && item.Value < 31)
                     {
-                        text = "11-30";
+                        numMiembros["11-30"]++;
                     }
-                    else if (dicNumMiembrosProyecto[id] >= 31)
+                    else if (item.Value >= 31)
                     {
-                        text = "30+";
+                        numMiembros["30+"]++;
                     }
-                    numMiembros[text] ++;
                 }
 
                 // Se construye el objeto con los datos.
