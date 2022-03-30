@@ -308,6 +308,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                     }}
                     }}
                 ");
+            filtrosPersonalizados.Add("searchProyectosPorGrupo",
+                $@"
+                    {{
+                       SELECT DISTINCT {pVarAnterior}
+                       WHERE {{
+                           {pVarAnterior} a 'project'.
+                           {pVarAnterior} <http://w3id.org/roh/isProducedBy> <[PARAMETRO]>
+                       }}
+                    }}
+                ");
 
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;
