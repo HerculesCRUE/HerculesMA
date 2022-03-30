@@ -283,7 +283,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         string where = $@"
                     WHERE {{ 
                             ?project a 'project'.
-					        ?proy ?propRolA ?roleA.
+					        ?project ?propRolA ?roleA.
                             FILTER(?propRolA in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
                             ?roleA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/{pIdPersona}>.
                             ?project ?propRol ?rolProy.
@@ -313,7 +313,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         string select = "SELECT ?person COUNT(distinct ?documento) AS ?numRelacionesDocumentos";
                         string where = $@"
                     WHERE {{ 
-                            ?document a 'document'.
+                            ?documento a 'document'.
                             ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutoresA.
 					        ?listaAutoresA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member><http://gnoss/{pIdPersona}>.
                             ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutoresB.
