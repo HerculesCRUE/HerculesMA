@@ -11,7 +11,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
     [Route("[controller]")]
     [EnableCors("_myAllowSpecificOrigins")]
     public class SearchController : ControllerBase
-    {        
+    {
 
         /// <summary>
         /// Inicia una búsqueda en los elementos seleccionados
@@ -20,14 +20,14 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="lang">Idioma</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
         [HttpGet("DoMetaSearch")]
-        public IActionResult DoMetaSearch(string stringSearch,string lang)
+        public IActionResult DoMetaSearch(string stringSearch, string lang)
         {
-            Dictionary<string, List<ObjectSearch>> resultBusqueda = null;
+            Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>> resultBusqueda = null;
 
             try
             {
                 AccionesMetaBusqueda accionBusqueda = new AccionesMetaBusqueda();
-                resultBusqueda = accionBusqueda.Busqueda(stringSearch,lang);
+                resultBusqueda = accionBusqueda.Busqueda(stringSearch, lang);
             }
             catch (Exception)
             {
