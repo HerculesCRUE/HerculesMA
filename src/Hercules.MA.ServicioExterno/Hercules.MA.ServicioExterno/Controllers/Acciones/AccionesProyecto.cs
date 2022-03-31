@@ -278,7 +278,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     ?proyecto a 'project'.
                                     OPTIONAL{{
                                         ?proyecto ?propRol ?rol.
-                                        FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://w3id.org/roh/mainResearchers>))
+                                        FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
                                         ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                                     }}
                                     {UtilidadesAPI.CrearFiltros(UtilidadesAPI.ObtenerParametros(pParametros), "?proyecto", ref aux)}
@@ -712,7 +712,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         string where = $@"
                     WHERE {{ 
                             ?document a 'document'.
-                            ?document <http://w3id.org/roh/publicAuthorList> ?person. 
+                            ?document <http://purl.org/ontology/bibo/authorList> ?person. 
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}order by desc(?numRelacionesDocumentos)";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
