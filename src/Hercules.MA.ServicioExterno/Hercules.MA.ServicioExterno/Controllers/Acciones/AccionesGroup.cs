@@ -387,7 +387,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         string where = $@"
                     WHERE {{ 
                             ?project a 'project'.
-                            ?project <http://w3id.org/roh/publicGroupList> <http://gnoss/{pIdGroup}>.
+                            ?project <http://w3id.org/roh/isProducedBy> <http://gnoss/{pIdGroup}>.
                             ?project ?propRol ?rolProy.
                             FILTER(?propRol in (<http://vivoweb.org/ontology/core#researchers>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rolProy <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
@@ -524,7 +524,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?project ?propRol ?rol.
                             FILTER(?propRol in (<http://vivoweb.org/ontology/core#researchers>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-                            ?project <http://w3id.org/roh/publicGroupList>  <http://gnoss/{pIdGroup}>.
+                            ?project <http://w3id.org/roh/isProducedBy> <http://gnoss/{pIdGroup}>.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
