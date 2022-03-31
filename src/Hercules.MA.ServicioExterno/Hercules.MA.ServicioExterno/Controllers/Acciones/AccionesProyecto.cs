@@ -323,7 +323,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 // Se construye el objeto con los datos.
                 List<DatosBarra> listaDatos = new List<DatosBarra>();
-                listaDatos.Add(new DatosBarra("Miembros", "#BF4858", numMiembros.Values.ToList(), 1, null));
+                listaDatos.Add(new DatosBarra("Proyectos", "#BF4858", numMiembros.Values.ToList(), 1, null));
                 // Se crea el objeto de la gráfica.
                 graficasProyectos.graficaBarrasMiembros = new GraficaBarras(new DataGraficaBarras(numMiembros.Keys.ToList(), listaDatos));
 
