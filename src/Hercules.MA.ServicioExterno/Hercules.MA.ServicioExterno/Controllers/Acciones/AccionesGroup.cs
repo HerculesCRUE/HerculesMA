@@ -160,7 +160,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?document a 'document'.
                             ?document <http://w3id.org/roh/isProducedBy> <http://gnoss/{pIdGroup}>.
-                            ?document <http://w3id.org/bibo/authorList> ?lista. 
+                            ?document <http://purl.org/ontology/bibo/authorList> ?lista. 
                             ?lista <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
                         }}order by desc(?numRelacionesDocumentos)";
@@ -389,7 +389,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?project a 'project'.
                             ?project <http://w3id.org/roh/publicGroupList> <http://gnoss/{pIdGroup}>.
                             ?project ?propRol ?rolProy.
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainResearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#researchers>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rolProy <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}order by desc(?numRelacionesProyectos)";
@@ -417,7 +417,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?document a 'document'.
                             ?document <http://w3id.org/roh/isProducedBy> <http://gnoss/{pIdGroup}>.
-                            ?document <http://w3id.org/roh/publicAuthorList> ?person. 
+                            ?document <http://purl.org/ontology/bibo/authorList> ?lista.
+                            ?lista <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}order by desc(?numRelacionesDocumentos)";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -521,7 +522,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?project a 'project'.
                             ?project ?propRol ?rol.
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainResearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#researchers>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             ?project <http://w3id.org/roh/publicGroupList>  <http://gnoss/{pIdGroup}>.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))

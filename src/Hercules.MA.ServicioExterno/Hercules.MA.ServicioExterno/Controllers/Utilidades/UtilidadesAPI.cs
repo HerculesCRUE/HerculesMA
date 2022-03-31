@@ -329,6 +329,46 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         }} 
                     }}
                 ");
+            filtrosPersonalizados.Add("searchColaboradoresGruposExternos",
+                $@"
+                    {{
+                        SELECT DISTINCT {pVarAnterior}
+                        WHERE
+                            {{
+                            {pVarAnterior} a 'person'
+                        {{
+                            {{
+                            #Documentos
+                            SELECT {pVarAnterior}
+                            WHERE {{
+                            ?documento <http://w3id.org/roh/isProducedBy> <[PARAMETRO]>.
+                            ?documento a 'document'.
+                            ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
+                            ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+                            }}
+                        }}
+                        UNION
+                        {{
+                            #Proyectos
+                            SELECT {pVarAnterior}
+                            WHERE {{
+                            ?proy <http://w3id.org/roh/isProducedBy> <[PARAMETRO]>.
+                            ?proy a 'project'.
+                            ?proy ?propRol ?role.
+                            FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+                            ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+                            }}
+                        }}
+                        }}
+                        MINUS
+                        {{
+                            <[PARAMETRO]> ?propRol ?rol.
+                            FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+                            ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+                        }}
+                        }}
+                    }}
+                ");
 
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;
