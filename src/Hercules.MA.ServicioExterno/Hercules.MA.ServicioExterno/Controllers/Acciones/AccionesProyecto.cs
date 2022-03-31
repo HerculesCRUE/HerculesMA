@@ -278,7 +278,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     ?proyecto a 'project'.
                                     OPTIONAL{{
                                         ?proyecto ?propRol ?rol.
-                                        FILTER(?propRol in (<http://w3id.org/roh/relates>,<http://w3id.org/roh/mainResearchers>))
+                                        FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://w3id.org/roh/mainResearchers>))
                                         ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                                     }}
                                     {UtilidadesAPI.CrearFiltros(UtilidadesAPI.ObtenerParametros(pParametros), "?proyecto", ref aux)}

@@ -117,14 +117,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 					                            ?proy <http://w3id.org/roh/publicGroupList> <http://gnoss/[PARAMETRO]>.
 					                            ?proy a 'project'.
 					                            ?proy ?propRol ?role.
-					                            FILTER(?propRol in (<http://w3id.org/roh/relates>,<http://w3id.org/roh/mainResearchers>))
+					                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://w3id.org/roh/mainResearchers>))
 					                            ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
 				                            }}
 			                            }}
 		                            }}		
 		                            MINUS
 		                            {{
-			                            {pVarAnterior} <http://w3id.org/roh/relates> <http://gnoss/[PARAMETRO]>
+			                            {pVarAnterior} <http://vivoweb.org/ontology/core#relates> <http://gnoss/[PARAMETRO]>
 		                            }}
 	                            }}
                             }}
