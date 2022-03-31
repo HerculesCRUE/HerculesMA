@@ -506,7 +506,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?project a 'project'.
                             ?project ?propRol ?rol
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
                         }}";
@@ -685,7 +685,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?project a 'project'.
                             ?project ?propRol ?rolProy.
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rolProy <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}order by desc(?numRelacionesProyectos)";
@@ -816,7 +816,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?project a 'project'.
                             ?project ?propRol ?rol.
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}";

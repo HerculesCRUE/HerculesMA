@@ -318,6 +318,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                        }}
                     }}
                 ");
+            filtrosPersonalizados.Add("searchMiembrosGrupo",
+                $@"
+                    {{
+                        SELECT {pVarAnterior}
+                        WHERE {{
+                        <[PARAMETRO]> ?propRol ?rol.
+                        FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+                        ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+                        }} 
+                    }}
+                ");
 
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;

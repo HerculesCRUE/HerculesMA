@@ -53,7 +53,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?person foaf:name ?nombre.
                         {{
                             <http://gnoss/{pIdGroup}> <http://w3id.org/roh/mainResearchers> ?main.
-                            ?main <http://w3id.org/roh/roleOf> ?person.
+                            ?main <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             OPTIONAL{{?main <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.}}
                             OPTIONAL{{?main <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.}}
                             BIND(IF(bound(?fechaPersonaEnd), xsd:integer(?fechaPersonaEnd), 30000000000000) as ?fechaPersonaEndAux)
@@ -61,8 +61,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             BIND(true as ?ip)
                         }}UNION
                         {{
-                            <http://gnoss/{pIdGroup}> <http://xmlns.com/foaf/0.1/member> ?member.
-                            ?member <http://w3id.org/roh/roleOf> ?person.
+                            <http://gnoss/{pIdGroup}> <http://w3id.org/roh/researchers> ?member.
+                            ?member <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             OPTIONAL{{?person <http://vivoweb.org/ontology/core#start> ?fechaPersonaInit.}}
                             OPTIONAL{{?person <http://vivoweb.org/ontology/core#end> ?fechaPersonaEnd.}}
                             BIND(IF(bound(?fechaPersonaEnd), xsd:integer(?fechaPersonaEnd), 30000000000000) as ?fechaPersonaEndAux)
@@ -118,9 +118,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         string where = $@"
                     WHERE {{ 
                             ?project a 'project'.
-                            ?project <http://w3id.org/roh/publicGroupList> <http://gnoss/{pIdGroup}>.
+                            ?project <http://w3id.org/roh/isProducedBy> <http://gnoss/{pIdGroup}>.
                             ?project ?propRol ?rolProy.
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#researchers>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rolProy <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
                         }}order by desc(?numRelacionesProyectos)";
@@ -160,7 +160,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?document a 'document'.
                             ?document <http://w3id.org/roh/isProducedBy> <http://gnoss/{pIdGroup}>.
-                            ?document <http://w3id.org/roh/publicAuthorList> ?person. 
+                            ?document <http://w3id.org/bibo/authorList> ?lista. 
+                            ?lista <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
                         }}order by desc(?numRelacionesDocumentos)";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -204,7 +205,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?project a 'project'.
                             ?project ?propRol ?rol
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#researchers>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", miembros.Union(ip))}>))
                         }}";
@@ -388,7 +389,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?project a 'project'.
                             ?project <http://w3id.org/roh/publicGroupList> <http://gnoss/{pIdGroup}>.
                             ?project ?propRol ?rolProy.
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rolProy <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}order by desc(?numRelacionesProyectos)";
@@ -520,7 +521,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     WHERE {{ 
                             ?project a 'project'.
                             ?project ?propRol ?rol.
-                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainRersearchers>))
+                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://vivoweb.org/ontology/core#mainResearchers>))
                             ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             ?project <http://w3id.org/roh/publicGroupList>  <http://gnoss/{pIdGroup}>.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
