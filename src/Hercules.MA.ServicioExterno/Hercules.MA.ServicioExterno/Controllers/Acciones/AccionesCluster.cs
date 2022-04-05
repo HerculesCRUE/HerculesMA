@@ -180,7 +180,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 				                        }}";
                 }
                 string union = "";
-                if(string.IsNullOrEmpty(filtroCategorias) && string.IsNullOrEmpty(filtroTags))
+                if(!string.IsNullOrEmpty(filtroCategorias) && !string.IsNullOrEmpty(filtroTags))
                 {
                     union = "UNION";
                 }
