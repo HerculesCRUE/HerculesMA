@@ -49,11 +49,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         /// <summary>
-        /// Método público para guardar / editar la información básica (paso 1) de los cluster
+        /// Método público para guardar / editar un cluster
         /// </summary>
-        /// <param name="listadoCluster">Listado de thesaurus a obtener.</param>
+        /// <param name="pIdGnossUser">Identificador del usuario</param>
+        /// <param name="cluster">Objecto cluster</param>
         /// <returns>Diccionario con las listas de thesaurus.</returns>
-        public string SaveStep1Cluster (string pIdGnossUser, Models.Cluster.Cluster cluster)
+        public string SaveCluster(string pIdGnossUser, Models.Cluster.Cluster cluster)
         {
             string idRecurso = cluster.entityID;
             int MAX_INTENTOS = 10;
@@ -62,11 +63,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtener el id del usuario usando el id de la cuenta
             string select = "select ?s ";
             string where = @$"where {{
-                    ?s a 'person'.
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
                     ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToUpper()}>)
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
             var userGnossId = string.Empty;
             sparqlObject.results.bindings.ForEach(e =>
             {
@@ -150,6 +151,170 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return idRecurso;
         }
 
+        public string LoadProfiles(Models.Cluster.Cluster pDataCluster,List<string> pPersons)
+        {
+            List<string> filtrosPerfiles = new List<string>();
+            foreach(PerfilCluster perfilCluster in pDataCluster.profiles)
+            {
+                string filtroPerfil = $@"";
+            }
+
+            string select = "select ?person ?perfil (count(distinct ?node) + 2*count(distinct ?tag)) as ?scorePerfil ";
+            string where = @$"where {{
+                    ?doc a 'document'.
+				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+				    ?person a 'person'.
+                    FILTER(?person in (<{string.Join(">,<",pPersons)}>))
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where,mIdComunidad);
+
+            /*{
+	select ?s max(?scoreCluster) as ?scoreCluster
+	WHERE
+	{
+		|||||[PARAMETROSEPARADORULTIMODIFERENTE]||||@@@@||||
+		{
+			select ?s (count(distinct ?node) + 2*count(distinct ?tag)) as ?scoreCluster  where 
+			{
+				?doc a 'document'.
+				?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
+				?s a 'person'.
+				|||[PARAMETROSEPARADORULTIMODIFERENTE]||@@@||
+				{
+					?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
+					?area <http://w3id.org/roh/categoryNode> ?node.
+					FILTER(?node in([PARAMETROSEPARADORIN]))
+				} UNION||
+				{
+				?doc <http://vivoweb.org/ontology/core#freeTextKeyword> ?tag.
+				FILTER(?tag in([PARAMETROSEPARADORIN]))
+				}|||
+			}
+		}UNION||||
+		{
+			select ?s (count(distinct ?node) + 2*count(distinct ?tag)) as ?scoreCluster  where 
+			{
+				?doc a 'document'.
+				?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
+				?s a 'person'.
+				|||[PARAMETROSEPARADORULTIMODIFERENTE]||@@@||
+				{
+					?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
+					?area <http://w3id.org/roh/categoryNode> ?node.
+					FILTER(?node in([PARAMETROSEPARADORIN]))
+				} UNION||
+				{
+				?doc <http://vivoweb.org/ontology/core#freeTextKeyword> ?tag.
+				FILTER(?tag in([PARAMETROSEPARADORIN]))
+				}|||
+			}
+		}
+		|||||
+	}
+}*/
+
+
+            return "";
+            //string idRecurso = cluster.entityID;
+            //int MAX_INTENTOS = 10;
+            //bool uploadedR = false;
+
+            //// Obtener el id del usuario usando el id de la cuenta
+            //string select = "select ?s ";
+            //string where = @$"where {{
+            //        ?s a <http://xmlns.com/foaf/0.1/Person>.
+            //        ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
+            //        FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToUpper()}>)
+            //    }}";
+            //SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            //var userGnossId = string.Empty;
+            //sparqlObject.results.bindings.ForEach(e =>
+            //{
+            //    userGnossId = e["s"].value;
+            //});
+
+            //if (!string.IsNullOrEmpty(userGnossId))
+            //{
+            //    // Creando el objeto del cluster
+            //    // Creando las categorías
+            //    List<CategoryPath> categorias = new List<CategoryPath>();
+            //    categorias.Add(new CategoryPath() { IdsRoh_categoryNode = cluster.terms });
+
+            //    List<ClusterPerfil> listClusterPerfil = new();
+            //    // Creando los perfiles del cluster
+            //    if (cluster.profiles != null)
+            //    {
+            //        listClusterPerfil = cluster.profiles.Select(e => new ClusterPerfil()
+            //        {
+            //            Roh_title = e.name,
+            //            Roh_hasKnowledgeArea = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } },
+            //            IdsRdf_member = e.users,
+            //            Vivo_freeTextKeyword = e.tags
+            //        }).ToList();
+            //    }
+            //    // creando los cluster
+            //    ClusterOntology.Cluster cRsource = new();
+            //    cRsource.IdRdf_member = userGnossId;
+            //    cRsource.Roh_title = cluster.name;
+            //    cRsource.Vivo_description = cluster.description;
+            //    cRsource.Roh_hasKnowledgeArea = categorias;
+            //    cRsource.Roh_clusterPerfil = listClusterPerfil.ToList();
+            //    cRsource.Dct_issued = DateTime.Now;
+
+            //    mResourceApi.ChangeOntoly("cluster");
+
+            //    if (idRecurso != null && idRecurso != "")
+            //    {
+            //        string[] recursoSplit = idRecurso.Split('_');
+
+            //        // Modificación.
+            //        ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null, new Guid(recursoSplit[recursoSplit.Length - 2]), new Guid(recursoSplit[recursoSplit.Length - 1]));
+            //        int numIntentos = 0;
+            //        while (!resource.Modified)
+            //        {
+            //            numIntentos++;
+            //            if (numIntentos > MAX_INTENTOS)
+            //            {
+            //                break;
+            //            }
+
+            //            mResourceApi.ModifyComplexOntologyResource(resource, false, false);
+            //        }
+
+            //    }
+            //    else
+            //    {
+            //        // Inserción.
+            //        ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null);
+            //        int numIntentos = 0;
+            //        while (!resource.Uploaded)
+            //        {
+            //            numIntentos++;
+            //            if (numIntentos > MAX_INTENTOS)
+            //            {
+            //                break;
+            //            }
+            //            idRecurso = mResourceApi.LoadComplexSemanticResource(resource, true, true);
+            //            uploadedR = resource.Uploaded;
+            //        }
+            //    }
+            //}
+
+            //if (uploadedR)
+            //{
+            //    return idRecurso;
+            //}
+            //else
+            //{
+            //    throw new Exception("Recurso no creado");
+            //}
+            //return idRecurso;
+        }
+
+
         /// <summary>
         /// Método público buscar diferentes tags
         /// </summary>
@@ -190,7 +355,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 filter = $"bif:contains(?o, \"'{ searchText }'\"){filter}";
             }
             string select = "SELECT DISTINCT ?s ?o ";
-            string where = $"WHERE {{ ?s a <http://purl.org/ontology/bibo/Document>. ?s <http://vivoweb.org/ontology/core#freeTextKeyword> ?o . FILTER( {filter} )    }} ORDER BY ?o";
+            string where = $"WHERE {{ ?s a <http://purl.org/ontology/bibo/Document>. ?s <http://vivoweb.org/ontology/core#freeTextKeyword> ?freeTextKeyword. ?freeTextKeyword <http://w3id.org/roh/title> ?o. FILTER( {filter} )    }} ORDER BY ?o";
             SparqlObject sparqlObjectAux = mResourceApi.VirtuosoQuery(select, where, "document");
             List<string> resultados = sparqlObjectAux.results.bindings.Select(x => x["o"].value).Distinct().ToList();
             if (resultados.Count() > numMax)
