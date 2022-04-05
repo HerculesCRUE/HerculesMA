@@ -43,23 +43,35 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdGnossUser">Usuario de gnoss.</param>
         /// <param name="pDataCluster">Datos a añadir / modificar.</param>
         /// <returns>Id del cluster creado o modificado.</returns>
-        [HttpPost("SetSection1")]
-        public IActionResult SetSection1([Required] string pIdGnossUser, [FromForm] Cluster pDataCluster)
+        [HttpPost("SaveCluster")]
+        public IActionResult SaveCluster([Required] string pIdGnossUser, [FromForm] Cluster pDataCluster)
         {
             string idClusterRes = string.Empty;
             try
             {
                 AccionesCluster accionCluster = new AccionesCluster();
-                idClusterRes = accionCluster.SaveStep1Cluster(pIdGnossUser, pDataCluster);
+                idClusterRes = accionCluster.SaveCluster(pIdGnossUser, pDataCluster);
             }
             catch (Exception)
             {
                 throw;
             }
-
             return Ok(idClusterRes);
         }
 
+        [HttpPost("LoadProfiles")]
+        public IActionResult LoadProfiles([FromForm] Cluster pDataCluster, [FromForm] List<string> pPersons)
+        {
+            try
+            {
+                AccionesCluster accionCluster = new AccionesCluster();
+                return Ok( accionCluster.LoadProfiles(pDataCluster, pPersons));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
 
