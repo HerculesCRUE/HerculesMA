@@ -29,7 +29,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="listadoCluster">Listado de thesaurus a obtener.</param>
         /// <returns>Diccionario con las listas de thesaurus.</returns>
-        public Dictionary<string, List<ThesaurusItem>> GetListThesaurus (string listadoCluster)
+        public Dictionary<string, List<ThesaurusItem>> GetListThesaurus(string listadoCluster)
         {
 
             List<string> thesaurusTypes = new List<string>() { "researcharea" };
@@ -40,7 +40,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     thesaurusTypes = JsonConvert.DeserializeObject<List<string>>(listadoCluster);
                 }
-            } catch (Exception e) { throw new Exception("El texto que ha introducido no corresponde a un json válido"); }
+            }
+            catch (Exception e) { throw new Exception("El texto que ha introducido no corresponde a un json válido"); }
 
             var thesaurus = GetTesauros(thesaurusTypes);
 
@@ -109,7 +110,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     string[] recursoSplit = idRecurso.Split('_');
 
                     // Modificación.
-                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null,new Guid(recursoSplit[recursoSplit.Length-2]), new Guid(recursoSplit[recursoSplit.Length-1]));
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null, new Guid(recursoSplit[recursoSplit.Length - 2]), new Guid(recursoSplit[recursoSplit.Length - 1]));
                     int numIntentos = 0;
                     while (!resource.Modified)
                     {
@@ -118,8 +119,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             break;
                         }
-                        
-                        mResourceApi.ModifyComplexOntologyResource(resource,false,false);
+
+                        mResourceApi.ModifyComplexOntologyResource(resource, false, false);
                     }
 
                 }
@@ -144,174 +145,97 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             if (uploadedR)
             {
                 return idRecurso;
-            } else
+            }
+            else
             {
                 throw new Exception("Recurso no creado");
             }
             return idRecurso;
         }
 
-        public string LoadProfiles(Models.Cluster.Cluster pDataCluster,List<string> pPersons)
+        public Dictionary<string, Dictionary<string, float>> LoadProfiles(Models.Cluster.Cluster pDataCluster, List<string> pPersons)
         {
+            //Persona/perfil/score
+            Dictionary<string, Dictionary<string, float>> respuesta = new Dictionary<string, Dictionary<string, float>>();
+
             List<string> filtrosPerfiles = new List<string>();
-            foreach(PerfilCluster perfilCluster in pDataCluster.profiles)
+            foreach (PerfilCluster perfilCluster in pDataCluster.profiles)
             {
-                string filtroPerfil = $@"";
+                string filtroCategorias = "";
+                if (perfilCluster.terms != null && perfilCluster.terms.Count > 0)
+                {
+                    filtroCategorias = $@"  {{
+					                            ?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
+					                            ?area <http://w3id.org/roh/categoryNode> ?node.
+					                            FILTER(?node in(<{string.Join(">,<", perfilCluster.terms)}>))
+				                            }}";
+                }
+                string filtroTags = "";
+                if (perfilCluster.tags != null && perfilCluster.tags.Count > 0)
+                {
+                    filtroTags = $@"   {{
+				                            ?doc <http://vivoweb.org/ontology/core#freeTextKeyword>  ?keywordO.
+                                            ?keywordO <http://w3id.org/roh/title> ?tag.
+				                            FILTER(?tag in('{string.Join("','", perfilCluster.tags)}'))
+				                        }}";
+                }
+                string union = "";
+                if(string.IsNullOrEmpty(filtroCategorias) && string.IsNullOrEmpty(filtroTags))
+                {
+                    union = "UNION";
+                }
+                string filtroPerfil = $@"   {{
+                                                BIND('{perfilCluster.name}' as ?perfil)
+                                                {filtroCategorias}
+                                                {union}
+                                                {filtroTags}
+                                            }}";
+                filtrosPerfiles.Add(filtroPerfil);
+
+                foreach(string person in pPersons)
+                {
+                    if(!respuesta.ContainsKey(person))
+                    {
+                        respuesta.Add(person,new Dictionary<string, float>());
+                    }
+                    if (!respuesta[person].ContainsKey(perfilCluster.name))
+                    {
+                        respuesta[person].Add(perfilCluster.name,0);
+                    }
+                }
             }
 
             string select = "select ?person ?perfil (count(distinct ?node) + 2*count(distinct ?tag)) as ?scorePerfil ";
             string where = @$"where {{
                     ?doc a 'document'.
+                    ?doc <http://w3id.org/roh/isValidated> 'true'.
 				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
 				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
 				    ?person a 'person'.
-                    FILTER(?person in (<{string.Join(">,<",pPersons)}>))
+                    FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
+                    {string.Join("UNION", filtrosPerfiles)}
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where,mIdComunidad);
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
-            /*{
-	select ?s max(?scoreCluster) as ?scoreCluster
-	WHERE
-	{
-		|||||[PARAMETROSEPARADORULTIMODIFERENTE]||||@@@@||||
-		{
-			select ?s (count(distinct ?node) + 2*count(distinct ?tag)) as ?scoreCluster  where 
-			{
-				?doc a 'document'.
-				?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
-				?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
-				?s a 'person'.
-				|||[PARAMETROSEPARADORULTIMODIFERENTE]||@@@||
-				{
-					?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
-					?area <http://w3id.org/roh/categoryNode> ?node.
-					FILTER(?node in([PARAMETROSEPARADORIN]))
-				} UNION||
-				{
-				?doc <http://vivoweb.org/ontology/core#freeTextKeyword> ?tag.
-				FILTER(?tag in([PARAMETROSEPARADORIN]))
-				}|||
-			}
-		}UNION||||
-		{
-			select ?s (count(distinct ?node) + 2*count(distinct ?tag)) as ?scoreCluster  where 
-			{
-				?doc a 'document'.
-				?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
-				?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
-				?s a 'person'.
-				|||[PARAMETROSEPARADORULTIMODIFERENTE]||@@@||
-				{
-					?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
-					?area <http://w3id.org/roh/categoryNode> ?node.
-					FILTER(?node in([PARAMETROSEPARADORIN]))
-				} UNION||
-				{
-				?doc <http://vivoweb.org/ontology/core#freeTextKeyword> ?tag.
-				FILTER(?tag in([PARAMETROSEPARADORIN]))
-				}|||
-			}
-		}
-		|||||
-	}
-}*/
-
-
-            return "";
-            //string idRecurso = cluster.entityID;
-            //int MAX_INTENTOS = 10;
-            //bool uploadedR = false;
-
-            //// Obtener el id del usuario usando el id de la cuenta
-            //string select = "select ?s ";
-            //string where = @$"where {{
-            //        ?s a <http://xmlns.com/foaf/0.1/Person>.
-            //        ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
-            //        FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToUpper()}>)
-            //    }}";
-            //SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
-            //var userGnossId = string.Empty;
-            //sparqlObject.results.bindings.ForEach(e =>
-            //{
-            //    userGnossId = e["s"].value;
-            //});
-
-            //if (!string.IsNullOrEmpty(userGnossId))
-            //{
-            //    // Creando el objeto del cluster
-            //    // Creando las categorías
-            //    List<CategoryPath> categorias = new List<CategoryPath>();
-            //    categorias.Add(new CategoryPath() { IdsRoh_categoryNode = cluster.terms });
-
-            //    List<ClusterPerfil> listClusterPerfil = new();
-            //    // Creando los perfiles del cluster
-            //    if (cluster.profiles != null)
-            //    {
-            //        listClusterPerfil = cluster.profiles.Select(e => new ClusterPerfil()
-            //        {
-            //            Roh_title = e.name,
-            //            Roh_hasKnowledgeArea = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } },
-            //            IdsRdf_member = e.users,
-            //            Vivo_freeTextKeyword = e.tags
-            //        }).ToList();
-            //    }
-            //    // creando los cluster
-            //    ClusterOntology.Cluster cRsource = new();
-            //    cRsource.IdRdf_member = userGnossId;
-            //    cRsource.Roh_title = cluster.name;
-            //    cRsource.Vivo_description = cluster.description;
-            //    cRsource.Roh_hasKnowledgeArea = categorias;
-            //    cRsource.Roh_clusterPerfil = listClusterPerfil.ToList();
-            //    cRsource.Dct_issued = DateTime.Now;
-
-            //    mResourceApi.ChangeOntoly("cluster");
-
-            //    if (idRecurso != null && idRecurso != "")
-            //    {
-            //        string[] recursoSplit = idRecurso.Split('_');
-
-            //        // Modificación.
-            //        ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null, new Guid(recursoSplit[recursoSplit.Length - 2]), new Guid(recursoSplit[recursoSplit.Length - 1]));
-            //        int numIntentos = 0;
-            //        while (!resource.Modified)
-            //        {
-            //            numIntentos++;
-            //            if (numIntentos > MAX_INTENTOS)
-            //            {
-            //                break;
-            //            }
-
-            //            mResourceApi.ModifyComplexOntologyResource(resource, false, false);
-            //        }
-
-            //    }
-            //    else
-            //    {
-            //        // Inserción.
-            //        ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null);
-            //        int numIntentos = 0;
-            //        while (!resource.Uploaded)
-            //        {
-            //            numIntentos++;
-            //            if (numIntentos > MAX_INTENTOS)
-            //            {
-            //                break;
-            //            }
-            //            idRecurso = mResourceApi.LoadComplexSemanticResource(resource, true, true);
-            //            uploadedR = resource.Uploaded;
-            //        }
-            //    }
-            //}
-
-            //if (uploadedR)
-            //{
-            //    return idRecurso;
-            //}
-            //else
-            //{
-            //    throw new Exception("Recurso no creado");
-            //}
-            //return idRecurso;
+            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+            {
+                string person = fila["person"].value.Replace("http://gnoss/","").ToLower();
+                string perfil = fila["perfil"].value;                
+                PerfilCluster perfilCluster = pDataCluster.profiles.FirstOrDefault(x => x.name == perfil);
+                float scoreAux = float.Parse(fila["scorePerfil"].value);
+                float scoreMax = 0;
+                if(perfilCluster.tags!=null)
+                {
+                    scoreMax += perfilCluster.tags.Count * 2;
+                }
+                if (perfilCluster.terms != null)
+                {
+                    scoreMax += perfilCluster.terms.Count;
+                }
+                float scorePerfil = scoreAux / scoreMax;
+                respuesta[person][perfil] = scorePerfil;
+            }
+            return respuesta;
         }
 
 
