@@ -121,6 +121,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
 
                         mResourceApi.ModifyComplexOntologyResource(resource, false, false);
+                        uploadedR = resource.Modified;
                     }
 
                 }
@@ -212,6 +213,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
 				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
 				    ?person a 'person'.
+                    ?person <http://w3id.org/roh/isActive> 'true'.
                     FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
                     {string.Join("UNION", filtrosPerfiles)}
                 }}";
