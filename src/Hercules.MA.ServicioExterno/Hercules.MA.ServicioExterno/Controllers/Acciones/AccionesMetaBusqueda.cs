@@ -120,7 +120,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             int offset = 0;
                             while (true)
                             {
-                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?author ?description group_concat(?tag;separator=\"|\") as ?tags ";
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?author ?description ";
                                 string where = $@"  where
                                             {{
                                                 ?id a 'document'.
@@ -128,7 +128,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id roh:isValidated 'true'.
                                                 OPTIONAL{{ ?id bibo:abstract ?description}}
                                                 OPTIONAL{{ ?id dct:issued ?fecha}}
-                                                OPTIONAL{{ ?id vivo:freeTextKeyword ?tag}}
                                                 OPTIONAL{{ ?id bibo:authorList ?lista. ?lista rdf:member ?author.}}
                                             }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
 
@@ -155,17 +154,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 description = fila["description"].value;
                                             }
-                                            string tags = fila["tags"].value;
                                             publication = new Publication()
                                             {
                                                 id = id,
                                                 title = title,
                                                 titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
                                                 descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                tagsAuxSearch = tags.Split('|').Select(x => new HashSet<string>(ObtenerTextoNormalizado(x).Split(' ', StringSplitOptions.RemoveEmptyEntries))).ToList(),
+                                                tagsAuxSearch = new List<HashSet<string>>(),
                                                 persons = new HashSet<Person>()
                                             };
-
                                             publicationsTemp.Add(publication);
                                         }
                                         if (author != Guid.Empty)
@@ -186,6 +183,47 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     break;
                                 }
                             }
+
+
+                            limit = 10000;
+                            offset = 0;
+                            while (true)
+                            {
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?tag ";
+                                string where = $@"  where
+                                            {{
+                                                ?id a 'document'.
+                                                ?id roh:isValidated 'true'.
+                                                ?id vivo:freeTextKeyword ?tagAux. ?tagAux roh:title ?tag
+                                            }}ORDER BY DESC(?tag) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
+
+                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                                {
+                                    offset += limit;
+                                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                                    {
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+
+                                        Publication publication = publicationsTemp.FirstOrDefault(x => x.id == id);
+                                        string tag = fila["tag"].value;
+                                        if (publication != null)
+                                        {
+                                            publication.tagsAuxSearch.Add(new HashSet<string>(ObtenerTextoNormalizado(tag).Split(' ', StringSplitOptions.RemoveEmptyEntries)));
+                                        }
+                                    }
+                                    if (resultadoQuery.results.bindings.Count < limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
                             publications = publicationsTemp;
                         }
                         #endregion
