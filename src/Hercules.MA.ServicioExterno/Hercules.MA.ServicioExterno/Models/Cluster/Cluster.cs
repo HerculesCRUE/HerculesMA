@@ -17,6 +17,13 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
         public string name { get; set; }
         public List<string> terms { get; set; }
         public List<string> tags { get; set; }
-        public List<string> users { get; set; }
+        public List<UserCluster> users { get; set; }
+    }
+
+    public class UserCluster
+    {
+        public string userID { get; set; }
+        public string name { get; set; }
+        public int publications { get; set; }
     }
 }
