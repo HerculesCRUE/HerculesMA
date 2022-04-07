@@ -4,6 +4,20 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
 {
     public class Cluster
     {
+        public class PerfilCluster
+        {
+            public class UserCluster
+            {
+                public string userID { get; set; }
+                public string name { get; set; }
+                public int publications { get; set; }
+            }
+            public string entityID { get; set; }
+            public string name { get; set; }
+            public List<string> terms { get; set; }
+            public List<string> tags { get; set; }
+            public List<UserCluster> users { get; set; }
+        }
         public string entityID { get; set; }
         public string name { get; set; }
         public string description { get; set; }
@@ -11,19 +25,11 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
         public List<PerfilCluster> profiles { get; set; }
     }
 
-    public class PerfilCluster
+    public class ScoreCluster
     {
-        public string entityID { get; set; }
-        public string name { get; set; }
-        public List<string> terms { get; set; }
-        public List<string> tags { get; set; }
-        public List<UserCluster> users { get; set; }
+        public float ajuste { get; set; }
+        public int numPublicaciones { get; set; }
+        public int numPublicacionesTotal { get; set; }
     }
 
-    public class UserCluster
-    {
-        public string userID { get; set; }
-        public string name { get; set; }
-        public int publications { get; set; }
-    }
 }
