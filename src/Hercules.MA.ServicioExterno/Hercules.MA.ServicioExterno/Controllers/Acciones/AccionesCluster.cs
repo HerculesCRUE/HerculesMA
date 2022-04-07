@@ -90,7 +90,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         Roh_title = e.name,
                         Roh_hasKnowledgeArea = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } },
-                        IdsRdf_member = e.users,
+                        IdsRdf_member = e.users.Select(x=>x.userID).ToList(),
                         Vivo_freeTextKeyword = e.tags
                     }).ToList();
                 }
