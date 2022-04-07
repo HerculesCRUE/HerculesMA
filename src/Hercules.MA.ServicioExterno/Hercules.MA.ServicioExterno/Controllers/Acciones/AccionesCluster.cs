@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Hercules.MA.ServicioExterno.Models.Cluster.Cluster;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
@@ -151,13 +152,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 throw new Exception("Recurso no creado");
             }
-            return idRecurso;
         }
 
-        public Dictionary<string, Dictionary<string, float>> LoadProfiles(Models.Cluster.Cluster pDataCluster, List<string> pPersons)
+        public Dictionary<string, Dictionary<string, ScoreCluster>> LoadProfiles(Models.Cluster.Cluster pDataCluster, List<string> pPersons)
         {
-            //Persona/perfil/score
-            Dictionary<string, Dictionary<string, float>> respuesta = new Dictionary<string, Dictionary<string, float>>();
+            //ID persona/ID perfil/score
+            Dictionary<string, Dictionary<string, ScoreCluster>> respuesta = new Dictionary<string, Dictionary<string, ScoreCluster>>();
 
             List<string> filtrosPerfiles = new List<string>();
             foreach (PerfilCluster perfilCluster in pDataCluster.profiles)
@@ -186,7 +186,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     union = "UNION";
                 }
                 string filtroPerfil = $@"   {{
-                                                BIND('{perfilCluster.name}' as ?perfil)
+                                                BIND('{perfilCluster.entityID}' as ?perfil)
                                                 {filtroCategorias}
                                                 {union}
                                                 {filtroTags}
@@ -197,16 +197,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     if(!respuesta.ContainsKey(person))
                     {
-                        respuesta.Add(person,new Dictionary<string, float>());
+                        respuesta.Add(person,new Dictionary<string, ScoreCluster>());
                     }
-                    if (!respuesta[person].ContainsKey(perfilCluster.name))
+                    if (!respuesta[person].ContainsKey(perfilCluster.entityID))
                     {
-                        respuesta[person].Add(perfilCluster.name,0);
+                        respuesta[person].Add(perfilCluster.entityID, new ScoreCluster());
                     }
                 }
             }
 
-            string select = "select ?person ?perfil (count(distinct ?node) + 2*count(distinct ?tag)) as ?scorePerfil ";
+            string select = "select ?person ?perfil (count(distinct ?node) + count(distinct ?tag)) as ?scoreAux ";
             string where = @$"where {{
                     ?doc a 'document'.
                     ?doc <http://w3id.org/roh/isValidated> 'true'.
@@ -223,19 +223,62 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 string person = fila["person"].value.Replace("http://gnoss/","").ToLower();
                 string perfil = fila["perfil"].value;                
-                PerfilCluster perfilCluster = pDataCluster.profiles.FirstOrDefault(x => x.name == perfil);
-                float scoreAux = float.Parse(fila["scorePerfil"].value);
+                PerfilCluster perfilCluster = pDataCluster.profiles.FirstOrDefault(x => x.entityID == perfil);
+                float scoreAux = float.Parse(fila["scoreAux"].value);
                 float scoreMax = 0;
                 if(perfilCluster.tags!=null)
                 {
-                    scoreMax += perfilCluster.tags.Count * 2;
+                    scoreMax += perfilCluster.tags.Count;
                 }
                 if (perfilCluster.terms != null)
                 {
                     scoreMax += perfilCluster.terms.Count;
                 }
-                float scorePerfil = scoreAux / scoreMax;
-                respuesta[person][perfil] = scorePerfil;
+                float scoreAjuste = scoreAux / scoreMax;
+                respuesta[person][perfil].ajuste = scoreAjuste;
+            }
+
+            select = "select ?person ?perfil (count(distinct ?doc)) as ?numDoc ";
+            where = @$"where {{
+                    ?doc a 'document'.
+                    ?doc <http://w3id.org/roh/isValidated> 'true'.
+				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+				    ?person a 'person'.
+                    ?person <http://w3id.org/roh/isActive> 'true'.
+                    FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
+                    {string.Join("UNION", filtrosPerfiles)}
+                }}";
+            sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+            {
+                string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
+                string perfil = fila["perfil"].value;
+                int numDoc = int.Parse(fila["numDoc"].value);
+                respuesta[person][perfil].numPublicaciones = numDoc;
+            }
+
+            select = "select ?person (count(distinct ?doc)) as ?numDoc ";
+            where = @$"where {{
+                    ?doc a 'document'.
+                    ?doc <http://w3id.org/roh/isValidated> 'true'.
+				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+				    ?person a 'person'.
+                    ?person <http://w3id.org/roh/isActive> 'true'.
+                    FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
+                }}";
+            sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+            {
+                string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
+                int numDoc = int.Parse(fila["numDoc"].value);
+                foreach(string perfil in respuesta[person].Keys)
+                {
+                    respuesta[person][perfil].numPublicacionesTotal = numDoc;
+                }
             }
             return respuesta;
         }
