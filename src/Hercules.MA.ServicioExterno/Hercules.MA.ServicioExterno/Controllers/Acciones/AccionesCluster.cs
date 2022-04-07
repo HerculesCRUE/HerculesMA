@@ -280,6 +280,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     respuesta[person][perfil].numPublicacionesTotal = numDoc;
                 }
             }
+            foreach(string idperson in respuesta.Keys.ToList())
+            {
+                respuesta[idperson] = respuesta[idperson].OrderByDescending(x => x.Value.ajuste).ToDictionary(x => x.Key, x => x.Value);
+            }
             return respuesta;
         }
 
