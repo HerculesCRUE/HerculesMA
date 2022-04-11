@@ -204,20 +204,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtenemos todos los datos de las areas temáticas
             if (pDataCluster.terms.Count > 0)
             {
-                select = "select ?o";
-                where = @$"where {{
-                    ?s a <http://w3id.org/roh/CategoryPath>.
-                    ?s <http://w3id.org/roh/categoryNode> ?o.
-                    FILTER(?s IN ({string.Join(',',"<" + pDataCluster.terms + ">")}))
-                }}";
-                sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+                pDataCluster.terms = LoadCurrentTerms(pDataCluster.terms);
 
-                pDataCluster.terms = new();
-
-                sparqlObject.results.bindings.ForEach(e =>
-                {
-                    pDataCluster.terms.Add(e["o"].value);
-                });
             }
 
 
@@ -232,27 +220,39 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
                 sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
 
+                PerfilCluster perfilCluster = new();
+                perfilCluster.tags = new();
+                perfilCluster.terms = new();
+                perfilCluster.users = new();
 
+                // Carga los datos en el objeto
                 sparqlObject.results.bindings.ForEach(e =>
                 {
-                    pDataCluster.entityID = @$"http://gnoss/{pIdClusterId.ToUpper()}";
 
                     switch (e["p"].value)
                     {
                         case "http://w3id.org/roh/title":
-                            pDataCluster.name = e["o"].value;
+                            perfilCluster.name = e["o"].value;
                             break;
-                        case "http://vivoweb.org/ontology/core#description":
-                            pDataCluster.description = e["o"].value;
+                        case "http://vivoweb.org/ontology/core#freeTextKeyword":
+                            perfilCluster.tags.Add(e["o"].value);
                             break;
                         case "http://w3id.org/roh/hasKnowledgeArea":
-                            pDataCluster.terms.Add(e["o"].value);
+                            perfilCluster.terms.Add(e["o"].value);
                             break;
-                        case "http://w3id.org/roh/clusterPerfil":
-                            perfiles.Add(e["o"].value);
+                        case "http://www.w3.org/1999/02/22-rdf-syntax-ns#member":
+                            perfilCluster.users.Add(new PerfilCluster.UserCluster()
+                            {
+                                userID = e["o"].value
+                            });
                             break;
                     }
                 });
+
+                perfilCluster.terms = LoadCurrentTerms(perfilCluster.terms);
+
+                // Añade el perfil creado a los datos del cluster
+                pDataCluster.profiles.Add(perfilCluster);
             }
 
             return pDataCluster;
@@ -479,7 +479,29 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
+        private List<string> LoadCurrentTerms(List<string> terms)
+        {
+            
+            string select = "select ?o";
+            string where = @$"where {{
+                ?s a <http://w3id.org/roh/CategoryPath>.
+                ?s <http://w3id.org/roh/categoryNode> ?o.
+                FILTER(?s IN ({string.Join(',', "<" + terms + ">")}))
+            }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
 
+            List<string> termsRes = new();
+
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                termsRes.Add(e["o"].value);
+            });
+
+
+
+
+            return termsRes;
+        }
 
 
         /// <summary>
