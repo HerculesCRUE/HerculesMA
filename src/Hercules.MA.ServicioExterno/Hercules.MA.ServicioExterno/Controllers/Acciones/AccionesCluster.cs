@@ -154,6 +154,110 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
         }
 
+        /// <summary>
+        /// Método público para obtener los datos de un cluster
+        /// </summary>
+        /// <param name="pIdClusterId">Identificador del cluster</param>
+        /// <returns>Diccionario con las listas de thesaurus.</returns>
+        internal Models.Cluster.Cluster LoadCluster(string pIdClusterId)
+        {
+
+            // Obtener el id del usuario usando el id de la cuenta
+            string select = "select ?p ?o ";
+            string where = @$"where {{
+                    ?s a <http://w3id.org/roh/Cluster>.
+                    ?s ?p ?o.
+                    FILTER(?s = <http://gnoss/{pIdClusterId.ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+
+            // Inicizalizamos el modelo del Cluster para devolver
+            Models.Cluster.Cluster pDataCluster = new();
+            pDataCluster.terms = new();
+            pDataCluster.profiles = new();
+
+            // Lista de los ids de los perfiles devuelto por la consulta
+            List<string> perfiles = new();
+
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                pDataCluster.entityID = @$"http://gnoss/{pIdClusterId.ToUpper()}";
+
+                switch (e["p"].value) {
+                    case "http://w3id.org/roh/title":
+                        pDataCluster.name = e["o"].value;
+                        break;
+                    case "http://vivoweb.org/ontology/core#description":
+                        pDataCluster.description = e["o"].value;
+                        break;
+                    case "http://w3id.org/roh/hasKnowledgeArea":
+                        pDataCluster.terms.Add(e["o"].value);
+                        break;
+                    case "http://w3id.org/roh/clusterPerfil":
+                        perfiles.Add(e["o"].value);
+                        break;
+                }
+            });
+
+
+
+            // Obtenemos todos los datos de las areas temáticas
+            if (pDataCluster.terms.Count > 0)
+            {
+                select = "select ?o";
+                where = @$"where {{
+                    ?s a <http://w3id.org/roh/CategoryPath>.
+                    ?s <http://w3id.org/roh/categoryNode> ?o.
+                    FILTER(?s IN ({string.Join(',',"<" + pDataCluster.terms + ">")}))
+                }}";
+                sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+
+                pDataCluster.terms = new();
+
+                sparqlObject.results.bindings.ForEach(e =>
+                {
+                    pDataCluster.terms.Add(e["o"].value);
+                });
+            }
+
+
+            // Obtenemos todos los datos de los perfiles
+            foreach (string p in perfiles)
+            {
+                select = "select ?p ?o ";
+                where = @$"where {{
+                    ?s a <http://w3id.org/roh/ClusterPerfil>.
+                    ?s ?p ?o.
+                    FILTER(?s = <{p}>)
+                }}";
+                sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+
+
+                sparqlObject.results.bindings.ForEach(e =>
+                {
+                    pDataCluster.entityID = @$"http://gnoss/{pIdClusterId.ToUpper()}";
+
+                    switch (e["p"].value)
+                    {
+                        case "http://w3id.org/roh/title":
+                            pDataCluster.name = e["o"].value;
+                            break;
+                        case "http://vivoweb.org/ontology/core#description":
+                            pDataCluster.description = e["o"].value;
+                            break;
+                        case "http://w3id.org/roh/hasKnowledgeArea":
+                            pDataCluster.terms.Add(e["o"].value);
+                            break;
+                        case "http://w3id.org/roh/clusterPerfil":
+                            perfiles.Add(e["o"].value);
+                            break;
+                    }
+                });
+            }
+
+            return pDataCluster;
+        }
+
         public Dictionary<string, Dictionary<string, ScoreCluster>> LoadProfiles(Models.Cluster.Cluster pDataCluster, List<string> pPersons)
         {
             //ID persona/ID perfil/score
@@ -379,7 +483,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         /// <summary>
-        /// Obtiene la ctaegoría padre.
+        /// Obtiene la categoría padre.
         /// </summary>
         /// <param name="pIdTesauro">Categoría a consultar.</param>
         /// <returns>Categoría padre.</returns>
