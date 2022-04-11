@@ -165,11 +165,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtener el id del usuario usando el id de la cuenta
             string select = "select ?p ?o ";
             string where = @$"where {{
-                    ?s a <http://w3id.org/roh/Cluster>.
+                    ?s a 'cluster'.
                     ?s ?p ?o.
                     FILTER(?s = <http://gnoss/{pIdClusterId.ToUpper()}>)
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
             // Inicizalizamos el modelo del Cluster para devolver
             Models.Cluster.Cluster pDataCluster = new();
@@ -481,12 +481,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
         private List<string> LoadCurrentTerms(List<string> terms)
         {
-            
+
+            string termsTxt = String.Join(',', terms.Select(e => "<" + e + ">"));
+
             string select = "select ?o";
             string where = @$"where {{
                 ?s a <http://w3id.org/roh/CategoryPath>.
                 ?s <http://w3id.org/roh/categoryNode> ?o.
-                FILTER(?s IN ({string.Join(',', "<" + terms + ">")}))
+                FILTER(?s IN ({termsTxt}))
             }}";
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
 
