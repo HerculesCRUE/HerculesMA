@@ -364,26 +364,26 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
             // Obtener el número de veces que aparecen documentos con los diferentes tags y categorías
-            select = "select ?person ?perfil (count(distinct ?doc)) as ?numDoc";
-            where = @$"where {{
-                    ?doc a 'document'.
-                    ?doc <http://w3id.org/roh/isValidated> 'true'.
-				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
-				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-				    ?person a 'person'.
-                    ?person <http://w3id.org/roh/isActive> 'true'.
-                    FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
-                    {string.Join("UNION", filtrosPerfiles)}
-                }}";
-            sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+        //    select = "select ?person ?perfil (count(distinct ?doc)) as ?numDoc";
+        //    where = @$"where {{
+        //            ?doc a 'document'.
+        //            ?doc <http://w3id.org/roh/isValidated> 'true'.
+				    //?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				    //?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+				    //?person a 'person'.
+        //            ?person <http://w3id.org/roh/isActive> 'true'.
+        //            FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
+        //            {string.Join("UNION", filtrosPerfiles)}
+        //        }}";
+        //    sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
-            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
-            {
-                string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
-                string perfil = fila["perfil"].value;
-                int numDoc = int.Parse(fila["numDoc"].value);
-                respuesta[person][perfil].numPublicaciones = numDoc;
-            }
+        //    foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+        //    {
+        //        string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
+        //        string perfil = fila["perfil"].value;
+        //        int numDoc = int.Parse(fila["numDoc"].value);
+        //        respuesta[person][perfil].numPublicaciones = numDoc;
+        //    }
 
             // Obtener los documentos por cada categoría
             select = "select ?person ?perfil ?node (count(distinct ?doc)) as ?numDoc";
@@ -410,6 +410,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     respuesta[person][perfil].terms = new();
                 }
                 respuesta[person][perfil].terms.Add(node, numDoc);
+                respuesta[person][perfil].numPublicaciones += numDoc;
 
             }
 
@@ -438,6 +439,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     respuesta[person][perfil].tags = new();
                 }
                 respuesta[person][perfil].tags.Add(node, numDoc);
+                respuesta[person][perfil].numPublicaciones += numDoc;
             }
 
 
