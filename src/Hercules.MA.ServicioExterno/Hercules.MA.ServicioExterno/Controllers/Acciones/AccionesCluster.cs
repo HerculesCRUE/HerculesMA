@@ -264,8 +264,24 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<string, Dictionary<string, ScoreCluster>> respuesta = new Dictionary<string, Dictionary<string, ScoreCluster>>();
 
             List<string> filtrosPerfiles = new List<string>();
+            List<string> filtrosPerfilesTerms = new List<string>();
+            List<string> filtrosPerfilesTags = new List<string>();
             foreach (PerfilCluster perfilCluster in pDataCluster.profiles)
             {
+                // Inicializa cada respuesta
+                foreach (string person in pPersons)
+                {
+                    if (!respuesta.ContainsKey(person))
+                    {
+                        respuesta.Add(person, new Dictionary<string, ScoreCluster>());
+                    }
+                    if (!respuesta[person].ContainsKey(perfilCluster.entityID))
+                    {
+                        respuesta[person].Add(perfilCluster.entityID, new ScoreCluster());
+                    }
+                }
+
+
                 string filtroCategorias = "";
                 if (perfilCluster.terms != null && perfilCluster.terms.Count > 0)
                 {
@@ -297,17 +313,22 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             }}";
                 filtrosPerfiles.Add(filtroPerfil);
 
-                foreach(string person in pPersons)
-                {
-                    if(!respuesta.ContainsKey(person))
-                    {
-                        respuesta.Add(person,new Dictionary<string, ScoreCluster>());
-                    }
-                    if (!respuesta[person].ContainsKey(perfilCluster.entityID))
-                    {
-                        respuesta[person].Add(perfilCluster.entityID, new ScoreCluster());
-                    }
-                }
+
+                string filtroPerfilTerm = $@"   {{
+                                                BIND('{perfilCluster.entityID}' as ?perfil)
+                                                {filtroCategorias}
+                                            }}";
+                filtrosPerfilesTerms.Add(filtroPerfilTerm);
+
+
+                string filtroPerfilTag = $@"   {{
+                                                BIND('{perfilCluster.entityID}' as ?perfil)
+                                                {filtroTags}
+                                            }}";
+                filtrosPerfilesTags.Add(filtroPerfilTag);
+
+
+                
             }
 
             string select = "select ?person ?perfil (count(distinct ?node) + count(distinct ?tag)) as ?scoreAux ";
@@ -342,7 +363,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 respuesta[person][perfil].ajuste = scoreAjuste;
             }
 
-            select = "select ?person ?perfil (count(distinct ?doc)) as ?numDoc ";
+            // Obtener el número de veces que aparecen documentos con los diferentes tags y categorías
+            select = "select ?person ?perfil (count(distinct ?doc)) as ?numDoc";
             where = @$"where {{
                     ?doc a 'document'.
                     ?doc <http://w3id.org/roh/isValidated> 'true'.
@@ -363,6 +385,63 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 respuesta[person][perfil].numPublicaciones = numDoc;
             }
 
+            // Obtener los documentos por cada categoría
+            select = "select ?person ?perfil ?node (count(distinct ?doc)) as ?numDoc";
+            where = @$"where {{
+                    ?doc a 'document'.
+                    ?doc <http://w3id.org/roh/isValidated> 'true'.
+				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+				    ?person a 'person'.
+                    ?person <http://w3id.org/roh/isActive> 'true'.
+                    FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
+                    {string.Join("UNION", filtrosPerfilesTerms)}
+                }}";
+            sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+            {
+                string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
+                string perfil = fila["perfil"].value;
+                string node = fila["node"].value;
+                int numDoc = int.Parse(fila["numDoc"].value);
+                if (respuesta[person][perfil].terms == null)
+                {
+                    respuesta[person][perfil].terms = new();
+                }
+                respuesta[person][perfil].terms.Add(node, numDoc);
+
+            }
+
+            // Obtener los documentos por cada tag
+            select = "select ?person ?perfil ?tag (count(distinct ?doc)) as ?numDoc";
+            where = @$"where {{
+                    ?doc a 'document'.
+                    ?doc <http://w3id.org/roh/isValidated> 'true'.
+				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+				    ?person a 'person'.
+                    ?person <http://w3id.org/roh/isActive> 'true'.
+                    FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
+                    {string.Join("UNION", filtrosPerfilesTags)}
+                }}";
+            sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+            {
+                string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
+                string perfil = fila["perfil"].value;
+                string node = fila["tag"].value;
+                int numDoc = int.Parse(fila["numDoc"].value);
+                if (respuesta[person][perfil].tags == null)
+                {
+                    respuesta[person][perfil].tags = new();
+                }
+                respuesta[person][perfil].tags.Add(node, numDoc);
+            }
+
+
+            // Obtener el número de documentos totales por autor
             select = "select ?person (count(distinct ?doc)) as ?numDoc ";
             where = @$"where {{
                     ?doc a 'document'.

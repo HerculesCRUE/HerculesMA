@@ -30,6 +30,8 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
         public float ajuste { get; set; }
         public int numPublicaciones { get; set; }
         public int numPublicacionesTotal { get; set; }
+        public Dictionary<string, int> terms { get; set; }
+        public Dictionary<string, int> tags { get; set; }
     }
 
 }
