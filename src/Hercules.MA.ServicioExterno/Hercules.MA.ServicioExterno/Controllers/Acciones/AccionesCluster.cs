@@ -422,17 +422,26 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
             // Obtener el número de veces que aparecen documentos con los diferentes tags y categorías
-            select = "select ?person ?perfil (count(distinct ?doc)) as ?numDoc";
+            select = "select ?person ?perfil (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber ";
             where = @$"where {{
-                        ?doc a 'document'.
-                        ?doc <http://w3id.org/roh/isValidated> 'true'.
-            ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
-            ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-            ?person a 'person'.
+                        ?person a 'person'.
                         ?person <http://w3id.org/roh/isActive> 'true'.
                         FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
+                        OPTIONAL {{
+                            ?doc a 'document'.
+                            ?doc <http://w3id.org/roh/isValidated> 'true'.
+                            ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+                            ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                        }}
+                        OPTIONAL {{
+                            ?proj a 'project'.
+                            ?proj <http://w3id.org/roh/isValidated> 'true'.
+                            ?proj <http://vivoweb.org/ontology/core#relates> ?listprojauth.
+                            ?listprojauth <http://w3id.org/roh/roleOf> ?person.
+                            ?listprojauth <http://w3id.org/roh/isIP> 'true'.
+                        }}
                         {string.Join("UNION", filtrosPerfiles)}
-                    }}";
+                }}";
             sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
 
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
@@ -440,6 +449,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
                 string perfil = fila["perfil"].value;
                 int numDoc = int.Parse(fila["numDoc"].value);
+                respuesta[person][perfil].ipNumber = fila.ContainsKey("ipNumber") && fila["ipNumber"].value != null ? int.Parse(fila["ipNumber"].value) : 0;
                 respuesta[person][perfil].numPublicaciones = numDoc;
             }
 
