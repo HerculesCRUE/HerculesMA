@@ -258,6 +258,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return pDataCluster;
         }
 
+        /// <summary>
+        /// Método público para cargar los perfiles de cada investigador sugerido del cluster
+        /// </summary>
+        /// <param name="pDataCluster">Datos del cluster para obtener los perfiles</param>
+        /// <param name="pPersons">Listado de personas sobre los que pedir información</param>
+        /// <returns>Diccionario con los datos necesarios para cada persona por cluster.</returns>
         public Dictionary<string, Dictionary<string, ScoreCluster>> LoadProfiles(Models.Cluster.Cluster pDataCluster, List<string> pPersons)
         {
             //ID persona/ID perfil/score
@@ -448,9 +454,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
                 string perfil = fila["perfil"].value;
-                int numDoc = int.Parse(fila["numDoc"].value);
+                respuesta[person][perfil].numPublicaciones = fila.ContainsKey("numDoc") && fila["numDoc"].value != null ? int.Parse(fila["numDoc"].value) : 0;
                 respuesta[person][perfil].ipNumber = fila.ContainsKey("ipNumber") && fila["ipNumber"].value != null ? int.Parse(fila["ipNumber"].value) : 0;
-                respuesta[person][perfil].numPublicaciones = numDoc;
             }
 
 
