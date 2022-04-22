@@ -95,6 +95,20 @@ namespace Hercules.MA.ServicioExterno.Controllers
             }
         }
 
+        [HttpPost("DatosGraficaColaboradoresCluster")]
+        public IActionResult DatosGraficaColaboradoresCluster ([FromForm] string pParametros, [FromForm] Cluster pCluster, [FromForm] int pMax)
+        {
+            try
+            {
+                AccionesCluster accionCluster = new AccionesCluster();
+                return Ok(accionCluster.DatosGraficaColaboradoresCluster(pParametros, pCluster, pMax));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
 
         /// <summary>
