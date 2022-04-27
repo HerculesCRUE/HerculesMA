@@ -90,14 +90,42 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Creando los perfiles del cluster
                 if (cluster.profiles != null)
                 {
+
+                    // Get the full ID
+                    List<string> numMember = new();
+                    Dictionary<string, string> relationIDs = new();
+                    cluster.profiles.ForEach(e =>
+                    {
+                        numMember = numMember.Union(e.users.Select(x => "<http://gnoss.com/" + x.userID + ">").ToList()).ToList();
+                    });
+                    numMember = numMember.Distinct().ToList();
+
+                    // Query to get the full ID
+                    select = "select distinct ?s ?entidad FROM<http://gnoss.com/person.owl>";
+                    where = @$"where {{
+                        ?s <http://gnoss/hasEntidad> ?entidad.
+                        ?entidad a<http://xmlns.com/foaf/0.1/Person>.
+                        FILTER(?s in ({string.Join(',',numMember)}))
+                    }}
+                    ";
+
+                    sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+                    sparqlObject.results.bindings.ForEach(e =>
+                    {
+                        relationIDs.Add(e["s"].value, e["entidad"].value);
+                    });
+
+                    // Create the list of profiles
                     listClusterPerfil = cluster.profiles.Select(e => new ClusterPerfil()
                     {
                         Roh_title = e.name,
                         Roh_hasKnowledgeArea = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } },
-                        IdsRdf_member = e.users.Select(x=> "http://gnoss/" + x.userID.ToUpper()).ToList(),
+                        IdsRdf_member = e.users.Select(x => relationIDs["http://gnoss.com/" + x.userID]).ToList(),
                         Vivo_freeTextKeyword = e.tags
                     }).ToList();
                 }
+
+
                 // creando los cluster
                 ClusterOntology.Cluster cRsource = new();
                 cRsource.IdRdf_member = userGnossId;
@@ -216,10 +244,22 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtenemos todos los datos de los perfiles
             foreach (string p in perfiles)
             {
-                select = "select ?p ?o ";
+                select = "select distinct ?s ?title ?memberPerfil ?nombreUser group_concat(distinct ?freeTextKeyword;separator=',') as ?freeTextKeywordGroup group_concat(distinct ?KnowledgeArea;separator=',') as ?knowledgeAreaGroup " +
+                    " FROM <http://gnoss.com/person.owl>";
                 where = @$"where {{
                     ?s a <http://w3id.org/roh/ClusterPerfil>.
-                    ?s ?p ?o.
+                    ?s <http://w3id.org/roh/title> ?title.
+                    OPTIONAL
+                    {{
+                        ?s <http://vivoweb.org/ontology/core#freeTextKeyword> ?freeTextKeyword.
+                        ?s <http://w3id.org/roh/hasKnowledgeArea> ?hasKnowledgeArea.
+                        ?hasKnowledgeArea <http://w3id.org/roh/categoryNode> ?KnowledgeArea.
+                    }}
+                    OPTIONAL
+                    {{ 
+                        ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
+                        ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
+                    }}
                     FILTER(?s = <{p}>)
                 }}";
                 sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
@@ -232,28 +272,26 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Carga los datos en el objeto
                 sparqlObject.results.bindings.ForEach(e =>
                 {
+                    perfilCluster.entityID = e["s"].value;
+                    perfilCluster.name = e["title"].value;
+                    perfilCluster.tags = e["freeTextKeywordGroup"].value.Split(',').ToList();
+                    perfilCluster.terms = e["knowledgeAreaGroup"].value.Split(',').ToList();
 
-                    switch (e["p"].value)
+                    SparqlObject.Data nombreUser;
+                    SparqlObject.Data memberPerfil;
+                    if (e.TryGetValue("nombreUser", out nombreUser) && e.TryGetValue("memberPerfil", out memberPerfil))
                     {
-                        case "http://w3id.org/roh/title":
-                            perfilCluster.name = e["o"].value;
-                            break;
-                        case "http://vivoweb.org/ontology/core#freeTextKeyword":
-                            perfilCluster.tags.Add(e["o"].value);
-                            break;
-                        case "http://w3id.org/roh/hasKnowledgeArea":
-                            perfilCluster.terms.Add(e["o"].value);
-                            break;
-                        case "http://www.w3.org/1999/02/22-rdf-syntax-ns#member":
-                            perfilCluster.users.Add(new PerfilCluster.UserCluster()
-                            {
-                                userID = e["o"].value
-                            });
-                            break;
+                        perfilCluster.users.Add(new PerfilCluster.UserCluster()
+                        {
+                            userID = memberPerfil.value.ToString(),
+                            name =  nombreUser.value.ToString(),
+                        });
                     }
+                    
+
                 });
 
-                perfilCluster.terms = LoadCurrentTerms(perfilCluster.terms);
+                // perfilCluster.terms = LoadCurrentTerms(perfilCluster.terms);
 
                 // Añade el perfil creado a los datos del cluster
                 pDataCluster.profiles.Add(perfilCluster);
