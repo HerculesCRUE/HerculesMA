@@ -22,12 +22,12 @@ using Organization = OrganizationOntology.Organization;
 namespace ProjectOntology
 {
 	[ExcludeFromCodeCoverage]
-	public class Organization : GnossOCBase
+	public class OrganizationAux : GnossOCBase
 	{
 
-		public Organization() : base() { } 
+		public OrganizationAux() : base() { } 
 
-		public Organization(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
+		public OrganizationAux(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
@@ -56,8 +56,8 @@ namespace ProjectOntology
 			this.Roh_organizationTitle = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://w3id.org/roh/organizationTitle"));
 		}
 
-		public virtual string RdfType { get { return "http://w3id.org/roh/Organization"; } }
-		public virtual string RdfsLabel { get { return "http://w3id.org/roh/Organization"; } }
+		public virtual string RdfType { get { return "http://w3id.org/roh/OrganizationAux"; } }
+		public virtual string RdfsLabel { get { return "http://w3id.org/roh/OrganizationAux"; } }
 		public OntologyEntity Entity { get; set; }
 
 		[RDFProperty("https://www.w3.org/2006/vcard/ns#hasCountryName")]

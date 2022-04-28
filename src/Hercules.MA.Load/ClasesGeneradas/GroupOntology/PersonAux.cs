@@ -20,12 +20,12 @@ using Person = PersonOntology.Person;
 namespace GroupOntology
 {
 	[ExcludeFromCodeCoverage]
-	public class Person : GnossOCBase
+	public class PersonAux : GnossOCBase
 	{
 
-		public Person() : base() { } 
+		public PersonAux() : base() { } 
 
-		public Person(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
+		public PersonAux(SemanticEntityModel pSemCmsModel, LanguageEnum idiomaUsuario) : base()
 		{
 			this.mGNOSSID = pSemCmsModel.Entity.Uri;
 			this.mURL = pSemCmsModel.Properties.FirstOrDefault(p => p.PropertyValues.Any(prop => prop.DownloadUrl != null))?.FirstPropertyValue.DownloadUrl;
@@ -40,8 +40,8 @@ namespace GroupOntology
 			this.Foaf_firstName = GetPropertyValueSemCms(pSemCmsModel.GetPropertyByPath("http://xmlns.com/foaf/0.1/firstName"));
 		}
 
-		public virtual string RdfType { get { return "http://xmlns.com/foaf/0.1/Person"; } }
-		public virtual string RdfsLabel { get { return "http://xmlns.com/foaf/0.1/Person"; } }
+		public virtual string RdfType { get { return "http://w3id.org/roh/PersonAux"; } }
+		public virtual string RdfsLabel { get { return "http://w3id.org/roh/PersonAux"; } }
 		public OntologyEntity Entity { get; set; }
 
 		[LABEL(LanguageEnum.es,"Persona")]
