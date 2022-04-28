@@ -475,14 +475,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
                 string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
-                string perfil = fila["perfil"].value;
-                string node = fila["tag"].value;
+                string perfil = fila["perfil"].value;                
+                
                 int numDoc = int.Parse(fila["numDoc"].value);
                 if (respuesta[person][perfil].tags == null)
                 {
                     respuesta[person][perfil].tags = new();
                 }
-                respuesta[person][perfil].tags.Add(node, numDoc);
+                if (fila.ContainsKey("tag"))
+                {
+                    string node = fila["tag"].value;
+                    respuesta[person][perfil].tags.Add(node, numDoc);
+                }
                 respuesta[person][perfil].numPublicaciones += numDoc;
             }
 
@@ -548,9 +552,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return respuesta;
         }
 
-        public List<DataItemRelacion> DatosGraficaColaboradoresCluster(Models.Cluster.Cluster pCluster, List<string> pPersons)
+        public List<DataItemRelacion> DatosGraficaColaboradoresCluster(Models.Cluster.Cluster pCluster, List<string> pPersons,bool seleccionados)
         {
             List<string> colaboradores = pPersons.Select(x => "http://gnoss/" + x.ToUpper()).ToList();
+            if(seleccionados)
+            {
+                colaboradores = new List<string>();
+            }
             if (pCluster.profiles != null)
             {
                 foreach (PerfilCluster perfilCluster in pCluster.profiles)
