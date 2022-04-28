@@ -51,6 +51,8 @@ namespace Hercules.MA.Load
         /// </summary>
         public static void CargarEntidadesPrincipales()
         {
+
+
             //Lectura de datos XML.   
             List<AreasUnescoProyectos> areasUnescoProyectos = LeerAreasUnescoProyectos(inputFolder + "/Areas UNESCO Proyectos.xml");
             List<Articulo> articulos = LeerArticulos(inputFolder + "/Articulos.xml");
@@ -98,7 +100,7 @@ namespace Hercules.MA.Load
             listaRecursosSecundariosCargar.Clear();
 
             //Persona en específico a cargar.
-            HashSet<string> personasACargar = new HashSet<string>() { "6811", "7747", "9292" }; // Investigadores: 6811, 7747, 9292
+            HashSet<string> personasACargar = new HashSet<string>() { "6811", "7747", "9292", "8310" }; // Investigadores: 6811, 7747, 9292
             //HashSet<string> personasACargar = new HashSet<string>();
 
             //Recursos para NO borrarlos.
@@ -106,6 +108,19 @@ namespace Hercules.MA.Load
 
             //Lista de recursos a cargar.
             List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
+
+
+            //Cargar personas. ÑAPA
+            CambiarOntologia("person");
+            PersonOntology.Person dianaCortes= new PersonOntology.Person();
+            dianaCortes.Roh_isActive = true;
+            dianaCortes.Roh_crisIdentifier = "27281387213879";
+            dianaCortes.Foaf_name = "Diana Castilla López";
+            dianaCortes.Roh_ORCID = "0000-0002-1631-1220";
+            listaRecursosCargar.Add(dianaCortes.ToGnossApiResource(mResourceApi,null));
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
+
 
             //Cargar revistas desde la fuente de datos.
             //CambiarOntologia("maindocument");
@@ -148,14 +163,14 @@ namespace Hercules.MA.Load
             //Cargar documentos. (Publicaciones)
             CambiarOntologia("document");
             EliminarDatosCargados("http://purl.org/ontology/bibo/Document", "document", listaNoBorrar);
-            Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos, listaTuplas, listaConcepts, ref revistasCargar);
-            CargarDatos(listaRecursosCargar);
-            listaRecursosCargar.Clear();
+            //Dictionary<string, string> documentosCargar = ObtenerDocumentos(proyectosCargar, personasACargar, personasCargar, ref listaRecursosCargar, articulos, autoresArticulos, personas, palabrasClave, proyectos, equiposProyectos, listaTuplas, listaConcepts, ref revistasCargar);
+            //CargarDatos(listaRecursosCargar);
+            //listaRecursosCargar.Clear();
 
             //Cargar documentos. (Congresos)
-            CambiarOntologia("document");
-            Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
-            CargarDatos(listaRecursosCargar);
+            //CambiarOntologia("document");
+            //Dictionary<string, string> congresosCargar = ObtenerCongresos(proyectosCargar, personasACargar, personasCargar, ref listaRecursosCargar, congresos, autoresCongresos, personas, equiposProyectos);
+            //CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
 
             //Cargar curriculums
@@ -168,6 +183,22 @@ namespace Hercules.MA.Load
             //Borrar ROs.
             CambiarOntologia("researchobject");
             EliminarDatosCargados("http://w3id.org/roh/ResearchObject", "researchobject", listaNoBorrar);
+
+            //Borrar etiquetas.
+            CambiarOntologia("keywordconcept");
+            EliminarDatosCargados("http://w3id.org/roh/KeyWordConcept", "keywordconcept", listaNoBorrar);
+
+            //Borrar autorizaciones de los proyectos.
+            CambiarOntologia("projectauthorization");
+            EliminarDatosCargados("http://w3id.org/roh/ProjectAuthorization", "projectauthorization", listaNoBorrar);
+
+            //Borrar notificaciones.
+            CambiarOntologia("notification");
+            EliminarDatosCargados("http://w3id.org/roh/Notification", "notification", listaNoBorrar);
+
+            //Borrar cluster.
+            CambiarOntologia("cluster");
+            EliminarDatosCargados("http://w3id.org/roh/Cluster", "cluster", listaNoBorrar);
 
             //Categorización UM
             //CambiarOntologia("taxonomy");
@@ -542,6 +573,11 @@ namespace Hercules.MA.Load
                         personaCarga.Vcard_address = "Despacho 2.25. Facultad de Informatica. Universidad de Murcia. Campus de Espinardo. CP. 30100, Murcia, SPAIN";
                         personaCarga.Vivo_description = $@"Manuel Campos inició su actividad investigadora en el grupo de investigación AIKE, ha participado en varios proyectos de investigación nacionales y contratos enfocados a las líneas de investigación de aplicaciones clínicas, con más de 50 congresos y revistas nacionales e internacionales. Ha sido Vicedecano de Relaciones Externas de la Facultad de Informática (2010-2012). Ha sido Coordinador de Prácticas en el Vicerrectorado de Estudios de la Universidad de Murcia (2012-2017).";
                     }
+                    else if (idPersona == "8310") // José Palma 
+                    {
+                        personaCarga.Roh_crisIdentifier = "31248453";
+                        personaCarga.Roh_ORCID = "0000-0003-2502-4378";
+                    }
 
                     //Creamos el recurso.
                     ComplexOntologyResource resource = personaCarga.ToGnossApiResource(mResourceApi, null);
@@ -612,7 +648,6 @@ namespace Hercules.MA.Load
                 {
                     OrganizationOntology.Organization organizacionCargar = new OrganizationOntology.Organization();
                     organizacionCargar.Roh_title = "UNIVERSIDAD DE MURCIA";
-                    organizacionCargar.IdDc_type = "http://gnoss.com/items/organizationtype_000";
                     ComplexOntologyResource resource = organizacionCargar.ToGnossApiResource(mResourceApi, null);
                     pListaRecursosCargar.Add(resource);
                     dicIDs.Add(organizacionCargar.Roh_title, resource.GnossId);
@@ -783,12 +818,12 @@ namespace Hercules.MA.Load
                     }
 
                     //Principal Organization.
-                    proyectoCargar.Roh_participates = new List<ProjectOntology.Organization>();
+                    proyectoCargar.Roh_participates = new List<ProjectOntology.OrganizationAux>();
                     foreach (OrganizacionesExternas organizacion in pOrganizacionesExternas.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
                     {
                         if (pDicOrganizacionesCargadas.ContainsKey(organizacion.ENTIDAD))
                         {
-                            ProjectOntology.Organization organizacionInt = new ProjectOntology.Organization();
+                            ProjectOntology.OrganizationAux organizacionInt = new ProjectOntology.OrganizationAux();
                             organizacionInt.IdRoh_organization = pDicOrganizacionesCargadas[organizacion.ENTIDAD];
                             organizacionInt.Roh_organizationTitle = organizacion.ENTIDAD;
                             proyectoCargar.Roh_participates.Add(organizacionInt);
@@ -836,7 +871,7 @@ namespace Hercules.MA.Load
                     }
 
                     //Organización financiadora
-                    proyectoCargar.Roh_grantedBy = new List<ProjectOntology.Organization>();
+                    proyectoCargar.Roh_grantedBy = new List<ProjectOntology.OrganizationAux>();
                     HashSet<string> fuentesFinanciacion = new HashSet<string>();
                     foreach (FuentesFinanciacionProyectos fuente in pFuentesFinanciacionProy.Where(x => x.IDPROYECTO == proyecto.IDPROYECTO))
                     {
@@ -844,7 +879,7 @@ namespace Hercules.MA.Load
                     }
                     foreach (string nomFuente in fuentesFinanciacion)
                     {
-                        ProjectOntology.Organization organizacionInt = new ProjectOntology.Organization();
+                        ProjectOntology.OrganizationAux organizacionInt = new ProjectOntology.OrganizationAux();
                         organizacionInt.IdRoh_organization = pDicOrganizacionesCargadas[nomFuente];
                         organizacionInt.Roh_organizationTitle = nomFuente;
                         proyectoCargar.Roh_grantedBy.Add(organizacionInt);
@@ -1499,13 +1534,13 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                             switch (revista.fuente)
                             {
                                 case "scopus":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == revista.categoria).Key;
                                     break;
                                 case "wos_scie":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Science Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Science Edition - " + revista.categoria).Key;
                                     break;
                                 case "wos_ssci":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
                                     break;
                             }
                             category.Roh_publicationPosition = revista.posicionPublicacion;
@@ -1667,13 +1702,13 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                             switch (revista.fuente)
                             {
                                 case "scopus":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == revista.categoria).Key;
                                     break;
                                 case "wos_scie":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Science Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Science Edition - " + revista.categoria).Key;
                                     break;
                                 case "wos_ssci":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
                                     break;
                             }
                             category.Roh_publicationPosition = revista.posicionPublicacion;
@@ -1833,13 +1868,13 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                             switch (revista.fuente)
                             {
                                 case "scopus":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == revista.categoria).Key;
                                     break;
                                 case "wos_scie":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Science Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Science Edition - " + revista.categoria).Key;
                                     break;
                                 case "wos_ssci":
-                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.First(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
+                                    category.IdRoh_impactIndexCategory = dicAreasCategoria.FirstOrDefault(x => x.Value == "Social Sciences Edition - " + revista.categoria).Key;
                                     break;
                             }
                             category.Roh_publicationPosition = revista.posicionPublicacion;
