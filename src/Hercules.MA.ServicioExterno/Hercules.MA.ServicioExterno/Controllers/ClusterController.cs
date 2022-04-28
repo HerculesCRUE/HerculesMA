@@ -45,7 +45,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <returns>Id del cluster creado o modificado.</returns>
         [HttpPost("SaveCluster")]
         [Produces("application/json")]
-        public IActionResult SaveCluster([FromQuery][Required] string pIdGnossUser, [FromBody] Cluster pDataCluster)
+        public IActionResult SaveCluster([FromForm] string pIdGnossUser, [FromForm] Cluster pDataCluster)
         {
 
             string idClusterRes = string.Empty;
