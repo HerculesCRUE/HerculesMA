@@ -102,7 +102,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             {
                                 if (us.userID != null && us.shortUserID != null)
                                 {
-                                    relationIDs.Add("http://gnoss.com/" + us.shortUserID, us.userID);
+                                    relationIDs["http://gnoss.com/" + us.shortUserID]= us.userID;
                                 }
                                 else
                                 {
