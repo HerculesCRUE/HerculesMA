@@ -127,16 +127,30 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             relationIDs.Add(e["s"].value, e["entidad"].value);
                         });
                     }
-
-                    // Create the list of profiles
-                    listClusterPerfil = cluster.profiles.Select(e => new ClusterPerfil()
+                    try
                     {
-                        Roh_title = e.name,
-                        GNOSSID = e.entityID,
-                        Roh_hasKnowledgeArea = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } },
-                        IdsRdf_member = e.users.Select(x => relationIDs["http://gnoss.com/" + x.shortUserID]).ToList(),
-                        Vivo_freeTextKeyword = e.tags
-                    }).ToList();
+
+                        // Create the list of profiles
+                        listClusterPerfil = cluster.profiles.Select(e =>
+                        {
+                            var theUsersP = e.users.Select(x => relationIDs.ContainsKey(("http://gnoss.com/" + x.shortUserID)) ? relationIDs[("http://gnoss.com/" + x.shortUserID)] : "http://gnoss.com/" + x.shortUserID).ToList();
+                            var knowledge = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } };
+                            var clsp = new ClusterPerfil()
+                            {
+                                Roh_title = e.name,
+                                Roh_hasKnowledgeArea = knowledge,
+                                IdsRdf_member = theUsersP,
+                                Vivo_freeTextKeyword = e.tags
+                            };
+                            if (e.entityID.StartsWith("http"))
+                            {
+                                clsp.GNOSSID = e.entityID;
+                            }
+                            return clsp;
+                        }).ToList();
+
+
+                    } catch(Exception e) { }
                 }
 
 
