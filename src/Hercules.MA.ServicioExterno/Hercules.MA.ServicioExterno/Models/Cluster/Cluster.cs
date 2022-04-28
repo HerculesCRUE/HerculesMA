@@ -9,6 +9,7 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
             public class UserCluster
             {
                 public string userID { get; set; }
+                public string shortUserID { get; set; }
                 public string name { get; set; }
                 public int publications { get; set; }
             }
