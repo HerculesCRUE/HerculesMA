@@ -531,7 +531,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return respuesta;
         }
 
-        public List<DataItemRelacion> DatosGraficaColaboradoresCluster(string pParametros, Models.Cluster.Cluster pCluster, int pMax)
+        public List<DataItemRelacion> DatosGraficaColaboradoresCluster(Models.Cluster.Cluster pCluster)
         {
 
             string select = string.Empty;
@@ -549,42 +549,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new Dictionary<string, List<DataQueryRelaciones>>();
             //Respuesta
             List<DataItemRelacion> items = new List<DataItemRelacion>();
-            Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
-
-            string searchClusterMixtoStr = dicParametros["searchClusterMixto"][0];
-            dicParametros.Remove("searchClusterMixto");
-
-            int aux = 0;
-            string filtrosPersonas = UtilidadesAPI.CrearFiltros(dicParametros, "?person", ref aux);
-
-            List<List<string>> searchClusterMixtoList = new();
-            searchClusterMixtoList = searchClusterMixtoStr.Split("@@@@").Select(e => e.Split("@@@").ToList()).ToList();
-            List<string> whereFilterCustom = new();
-
-            foreach (var clst in searchClusterMixtoList)
-            {
-                whereFilterCustom.Add($@"
-		            {{
-			            select ?person ((count(distinct ?node) + count(distinct ?tag))*(count(distinct ?doc))) as ?scoreCluster  where 
-			            {{
-				            ?doc a 'document'.
-				            ?doc <http://w3id.org/roh/isValidated> 'true'.
-				            ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
-				            ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-				            ?person <http://w3id.org/roh/isActive> 'true'.
-				            {{
-					            ?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
-					            ?area <http://w3id.org/roh/categoryNode> ?node.
-					            FILTER(?node in({clst[0]}))
-				            }} UNION
-				            {{
-					            ?doc <http://vivoweb.org/ontology/core#freeTextKeyword>  ?keywordO.
-					            ?keywordO <http://w3id.org/roh/title> ?tag.
-					            FILTER(?tag in({clst[1]}))
-				            }}
-			            }}
-		            }}");
-            }
 
             #region Cargamos nodos
             {
@@ -616,6 +580,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
             }
             #endregion
+            
             if (colaboradores.Count > 0)
             {
                 #region Relaciones con el cluster
