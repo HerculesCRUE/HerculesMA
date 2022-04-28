@@ -169,7 +169,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 cRsource.Vivo_description = cluster.description;
                 cRsource.Roh_hasKnowledgeArea = categorias;
                 cRsource.Roh_clusterPerfil = listClusterPerfil.ToList();
-                cRsource.Dct_issued = DateTime.Now;
+                cRsource.Dct_issued = DateTime.UtcNow;
 
                 mResourceApi.ChangeOntoly("cluster");
 
