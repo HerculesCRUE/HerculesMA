@@ -469,14 +469,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
                 string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
-                string perfil = fila["perfil"].value;
-                string node = fila["node"].value;
+                string perfil = fila["perfil"].value;                
                 int numDoc = int.Parse(fila["numDoc"].value);
                 if (respuesta[person][perfil].terms == null)
                 {
                     respuesta[person][perfil].terms = new();
                 }
-                respuesta[person][perfil].terms.Add(node, numDoc);
+                if (fila.ContainsKey("node"))
+                {
+                    string node = fila["node"].value;
+                    respuesta[person][perfil].terms.Add(node, numDoc);
+                }
                 respuesta[person][perfil].numPublicaciones += numDoc;
 
             }
