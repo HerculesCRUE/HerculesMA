@@ -98,9 +98,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         foreach (var us in e.users)
                         {
-                            if (us.userID != null && us.shortUserID != null) {
+                            if (us.userID != null && us.shortUserID != null)
+                            {
                                 relationIDs.Add("http://gnoss.com/" + us.shortUserID, us.userID);
-                            } else
+                            }
+                            else
                             {
                                 numMember.Add("<http://gnoss.com/" + us.shortUserID + ">");
                             }
@@ -243,7 +245,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 pDataCluster.entityID = @$"http://gnoss/{pIdClusterId.ToUpper()}";
 
-                switch (e["p"].value) {
+                switch (e["p"].value)
+                {
                     case "http://w3id.org/roh/title":
                         pDataCluster.name = e["o"].value;
                         break;
@@ -312,10 +315,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         perfilCluster.users.Add(new PerfilCluster.UserCluster()
                         {
                             userID = memberPerfil.value.ToString(),
-                            name =  nombreUser.value.ToString(),
+                            name = nombreUser.value.ToString(),
                         });
                     }
-                    
+
 
                 });
 
@@ -378,7 +381,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 				                        }}";
                 }
                 string union = "";
-                if(!string.IsNullOrEmpty(filtroCategorias) && !string.IsNullOrEmpty(filtroTags))
+                if (!string.IsNullOrEmpty(filtroCategorias) && !string.IsNullOrEmpty(filtroTags))
                 {
                     union = "UNION";
                 }
@@ -405,7 +408,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 filtrosPerfilesTags.Add(filtroPerfilTag);
 
 
-                
+
             }
 
             string select = "select ?person ?perfil (count(distinct ?node) + count(distinct ?tag)) as ?scoreAux ";
@@ -423,12 +426,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
-                string person = fila["person"].value.Replace("http://gnoss/","").ToLower();
-                string perfil = fila["perfil"].value;                
+                string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
+                string perfil = fila["perfil"].value;
                 PerfilCluster perfilCluster = pDataCluster.profiles.FirstOrDefault(x => x.entityID == perfil);
                 float scoreAux = float.Parse(fila["scoreAux"].value);
                 float scoreMax = 0;
-                if(perfilCluster.tags!=null)
+                if (perfilCluster.tags != null)
                 {
                     scoreMax += perfilCluster.tags.Count;
                 }
@@ -547,29 +550,35 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
                 int numDoc = int.Parse(fila["numDoc"].value);
-                foreach(string perfil in respuesta[person].Keys)
+                foreach (string perfil in respuesta[person].Keys)
                 {
                     respuesta[person][perfil].numPublicacionesTotal = numDoc;
                 }
             }
-            foreach(string idperson in respuesta.Keys.ToList())
+            foreach (string idperson in respuesta.Keys.ToList())
             {
                 respuesta[idperson] = respuesta[idperson].OrderByDescending(x => x.Value.ajuste).ToDictionary(x => x.Key, x => x.Value);
             }
             return respuesta;
         }
 
-        public List<DataItemRelacion> DatosGraficaColaboradoresCluster(string pParametros, Models.Cluster.Cluster pCluster, int pMax)
+        public List<DataItemRelacion> DatosGraficaColaboradoresCluster(Models.Cluster.Cluster pCluster, List<string> pPersons)
         {
-
-            string select = string.Empty;
-            string order = "ORDER BY desc ( ?scoreCluster  )  desc ( ?s )";
-            string where = string.Empty;
-
-            HashSet<string> colaboradores = new HashSet<string>();
-            Dictionary<string, int> numRelacionesResultadosCluster = new Dictionary<string, int>();
-            Dictionary<string, int> numRelacionesColaboradorDocumentoCluster = new Dictionary<string, int>();
-            Dictionary<string, int> numRelacionesColaboradorProyectoCluster = new Dictionary<string, int>();
+            List<string> colaboradores = pPersons.Select(x => "http://gnoss/" + x.ToUpper()).ToList();
+            if (pCluster.profiles != null)
+            {
+                foreach (PerfilCluster perfilCluster in pCluster.profiles)
+                {
+                    if (perfilCluster.users != null)
+                    {
+                        foreach (PerfilCluster.UserCluster userCluster in perfilCluster.users)
+                        {
+                            colaboradores.Add("http://gnoss/" + userCluster.shortUserID.ToUpper());
+                        }
+                    }
+                }
+            }
+            colaboradores = colaboradores.Distinct().ToList();
 
             //Nodos            
             Dictionary<string, string> dicNodos = new Dictionary<string, string>();
@@ -577,172 +586,38 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new Dictionary<string, List<DataQueryRelaciones>>();
             //Respuesta
             List<DataItemRelacion> items = new List<DataItemRelacion>();
-            Dictionary<string, List<string>> dicParametros = UtilidadesAPI.ObtenerParametros(pParametros);
 
-            string searchClusterMixtoStr = dicParametros["searchClusterMixto"][0];
-            dicParametros.Remove("searchClusterMixto");
-
-            int aux = 0;
-            string filtrosPersonas = UtilidadesAPI.CrearFiltros(dicParametros, "?person", ref aux);
-
-            List<List<string>> searchClusterMixtoList = new();
-            searchClusterMixtoList = searchClusterMixtoStr.Split("@@@@").Select(e => e.Split("@@@").ToList()).ToList();
-            List<string> whereFilterCustom = new();
-
-            foreach (var clst in searchClusterMixtoList)
-            {
-                whereFilterCustom.Add($@"
-		            {{
-			            select ?person ((count(distinct ?node) + count(distinct ?tag))*(count(distinct ?doc))) as ?scoreCluster  where 
-			            {{
-				            ?doc a 'document'.
-				            ?doc <http://w3id.org/roh/isValidated> 'true'.
-				            ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
-				            ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-				            ?person <http://w3id.org/roh/isActive> 'true'.
-				            {{
-					            ?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
-					            ?area <http://w3id.org/roh/categoryNode> ?node.
-					            FILTER(?node in({clst[0]}))
-				            }} UNION
-				            {{
-					            ?doc <http://vivoweb.org/ontology/core#freeTextKeyword>  ?keywordO.
-					            ?keywordO <http://w3id.org/roh/title> ?tag.
-					            FILTER(?tag in({clst[1]}))
-				            }}
-			            }}
-		            }}");
-            }
-
-            #region Cargamos nodos
-            {
-                //Miembros
-                select = $@"{mPrefijos}
-                                select distinct ?person ?nombre max(?scoreCluster) as ?scoreCluster";
-                where = $@"
-	            WHERE
-	            {{
-                    {filtrosPersonas}
-                    ?person a 'person'.
-                    ?person foaf:name ?nombre.
-                    {string.Join("UNION",whereFilterCustom)}
-		            
-	            }}
-                {order}";
-
-                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
-                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
-                {
-                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                    {
-                        if (!dicNodos.ContainsKey(fila["person"].value))
-                        {
-                            dicNodos.Add(fila["person"].value, fila["nombre"].value);
-                        }
-                        colaboradores.Add(fila["person"].value);
-                    }
-                }
-            }
-            #endregion
+            string select = "";
+            string where = "";
             if (colaboradores.Count > 0)
             {
-                #region Relaciones con el cluster
+                #region Cargamos los nodos
                 {
-                    //Proyectos
+                    //Miembros
+                    select = $@"{mPrefijos}
+                                select distinct ?person ?nombre";
+                    where = $@" WHERE
+	                            {{
+                                    ?person a 'person'.
+                                    ?person foaf:name ?nombre.
+                                    FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
+		            
+	                            }}";
+
+                    SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                    if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                     {
-                        select = "SELECT ?person COUNT(distinct ?project) AS ?numRelacionesProyectos";
-                        where = $@"
-                    WHERE {{ 
-                            ?project a 'project'.
-                            ?project ?propRol ?rolProy.
-                            FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
-                            ?rolProy <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-                            FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
-                        }}order by desc(?numRelacionesProyectos)";
-                        SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
-                            string person = fila["person"].value;
-                            int numRelaciones = int.Parse(fila["numRelacionesProyectos"].value);
-                            if (!numRelacionesResultadosCluster.ContainsKey(person))
+                            if (!dicNodos.ContainsKey(fila["person"].value))
                             {
-                                numRelacionesResultadosCluster[person] = 0;
+
+                                dicNodos.Add(fila["person"].value, fila["nombre"].value);
                             }
-                            if (!numRelacionesColaboradorProyectoCluster.ContainsKey(person))
-                            {
-                                numRelacionesColaboradorProyectoCluster[person] = 0;
-                            }
-                            numRelacionesResultadosCluster[person] += numRelaciones;
-                            numRelacionesColaboradorProyectoCluster[person] += numRelaciones;
-                        }
-                    }
-                    //DOCUMENTOS
-                    {
-                        select = "SELECT ?person COUNT(distinct ?document) AS ?numRelacionesDocumentos";
-                        where = $@"
-                    WHERE {{ 
-                            ?document a 'document'.
-                            ?document <http://purl.org/ontology/bibo/authorList> ?lista.
-                            ?lista <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-                            FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
-                        }}order by desc(?numRelacionesDocumentos)";
-                        SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
-                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
-                        {
-                            string person = fila["person"].value;
-                            int numRelaciones = int.Parse(fila["numRelacionesDocumentos"].value);
-                            if (!numRelacionesResultadosCluster.ContainsKey(person))
-                            {
-                                numRelacionesResultadosCluster[person] = 0;
-                            }
-                            if (!numRelacionesColaboradorDocumentoCluster.ContainsKey(person))
-                            {
-                                numRelacionesColaboradorDocumentoCluster[person] = 0;
-                            }
-                            numRelacionesResultadosCluster[person] += numRelaciones;
-                            numRelacionesColaboradorDocumentoCluster[person] += numRelaciones;
                         }
                     }
                 }
                 #endregion
-
-                //Seleccionamos los pMax colaboradores mas relacionados con el cluster
-                // Obtenemos los ids de los investigadores seleccionados
-                List<string> investigadores = new();
-                try
-                {
-                    // Get only the users selected
-                    var investigadoresTMP = pCluster.profiles.Select(e => e.users != null ? e.users.Select(usr => usr.userID) : new List<string>()).ToList();
-                    investigadores = investigadoresTMP.SelectMany(e => e).ToList();
-                    // Remove the duplicated and add the structure of a ID for the compare
-                    investigadores = investigadores.Distinct().Select(e => $@"http://gnoss/{e.ToUpper()}").ToList();
-                }
-                catch (Exception e) { }
-
-
-                numRelacionesResultadosCluster = numRelacionesResultadosCluster.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-
-                // Eliminamos los investigadores seleccionados que aparecen en la búsqueda de resultados actual y lo eliminamos del sitio
-                List<string> selectedResearchers = investigadores.Intersect(numRelacionesResultadosCluster.Keys).ToList();
-                investigadores.ToList().ForEach(e => numRelacionesResultadosCluster.Remove(e));
-                // Establecemos el número de investigadores que hay que eliminar del listado
-                int numCurrentSelected = investigadores.Count;
-
-
-                if (numRelacionesResultadosCluster.Count > pMax - numCurrentSelected)
-                {
-                    colaboradores = new HashSet<string>(numRelacionesResultadosCluster.Keys.ToList().GetRange(0, pMax - numCurrentSelected));
-                }
-                colaboradores = investigadores.Union(colaboradores).ToHashSet();
-                //Eliminamos los nodos que no son necesarios
-                foreach (string idNodo in dicNodos.Keys.ToList())
-                {
-                    if (!colaboradores.Contains(idNodo))
-                    {
-                        dicNodos.Remove(idNodo);
-                    }
-                }
-                
 
                 #region Relaciones entre miembros DENTRO DEl CLUSTER
                 {
