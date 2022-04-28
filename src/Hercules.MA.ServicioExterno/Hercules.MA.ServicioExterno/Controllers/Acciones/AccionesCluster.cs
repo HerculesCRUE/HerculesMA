@@ -96,31 +96,45 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     Dictionary<string, string> relationIDs = new();
                     cluster.profiles.ForEach(e =>
                     {
-                        numMember = numMember.Union(e.users.Select(x => "<http://gnoss.com/" + x.userID + ">").ToList()).ToList();
+                        foreach (var us in e.users)
+                        {
+                            if (us.userID != null && us.shortUserID != null) {
+                                relationIDs.Add("http://gnoss.com/" + us.shortUserID, us.userID);
+                            } else
+                            {
+                                numMember.Add("<http://gnoss.com/" + us.shortUserID + ">");
+                            }
+                        }
+                        // numMember = numMember.Union(e.users.Select(x => "<http://gnoss.com/" + x.userID + ">").ToList()).ToList();
                     });
                     numMember = numMember.Distinct().ToList();
 
                     // Query to get the full ID
-                    select = "select distinct ?s ?entidad FROM<http://gnoss.com/person.owl>";
-                    where = @$"where {{
-                        ?s <http://gnoss/hasEntidad> ?entidad.
-                        ?entidad a<http://xmlns.com/foaf/0.1/Person>.
-                        FILTER(?s in ({string.Join(',',numMember)}))
-                    }}
-                    ";
-
-                    sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
-                    sparqlObject.results.bindings.ForEach(e =>
+                    if (numMember.Count > 0)
                     {
-                        relationIDs.Add(e["s"].value, e["entidad"].value);
-                    });
+
+                        select = "select distinct ?s ?entidad FROM<http://gnoss.com/person.owl>";
+                        where = @$"where {{
+                            ?s <http://gnoss/hasEntidad> ?entidad.
+                            ?entidad a<http://xmlns.com/foaf/0.1/Person>.
+                            FILTER(?s in ({string.Join(',', numMember)}))
+                        }}
+                        ";
+
+                        sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+                        sparqlObject.results.bindings.ForEach(e =>
+                        {
+                            relationIDs.Add(e["s"].value, e["entidad"].value);
+                        });
+                    }
 
                     // Create the list of profiles
                     listClusterPerfil = cluster.profiles.Select(e => new ClusterPerfil()
                     {
                         Roh_title = e.name,
+                        GNOSSID = e.entityID,
                         Roh_hasKnowledgeArea = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } },
-                        IdsRdf_member = e.users.Select(x => relationIDs["http://gnoss.com/" + x.userID]).ToList(),
+                        IdsRdf_member = e.users.Select(x => relationIDs["http://gnoss.com/" + x.shortUserID]).ToList(),
                         Vivo_freeTextKeyword = e.tags
                     }).ToList();
                 }
