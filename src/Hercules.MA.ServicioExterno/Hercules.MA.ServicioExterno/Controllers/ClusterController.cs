@@ -98,7 +98,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         [HttpPost("DatosGraficaColaboradoresCluster")]
-        public IActionResult DatosGraficaColaboradoresCluster ([FromForm] string pParametros, [FromForm] Cluster pCluster, [FromForm] int pMax)
+        public IActionResult DatosGraficaColaboradoresCluster ([FromForm] Cluster pCluster)
         {
             try
             {
