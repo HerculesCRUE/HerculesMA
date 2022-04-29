@@ -627,7 +627,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 colaboradores = new List<string>();
             }
             List<string> listSeleccionados = new List<string>();
-            if (pCluster.profiles != null)
+            if (pCluster!=null && pCluster.profiles != null)
             {
                 foreach (PerfilCluster perfilCluster in pCluster.profiles)
                 {
