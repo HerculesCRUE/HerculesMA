@@ -315,10 +315,34 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 });
 
                 //Datos de los miembros
-                select = "select distinct ?memberPerfil ?nombreUser FROM <http://gnoss.com/person.owl>";
+                select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
                 where = @$"where {{
                     ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
                     ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
+                    OPTIONAL {{
+                        ?doc a <http://purl.org/ontology/bibo/Document>.
+                        ?doc <http://w3id.org/roh/isValidated> 'true'.
+                        ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+                        ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
+                    }}
+                    OPTIONAL {{
+                        ?proj a <http://vivoweb.org/ontology/core#Project>.
+                        ?proj <http://w3id.org/roh/isValidated> 'true'.
+                        ?proj <http://vivoweb.org/ontology/core#relates> ?listprojauth.
+                        ?listprojauth <http://w3id.org/roh/roleOf> ?memberPerfil.
+                        ?listprojauth <http://w3id.org/roh/isIP> 'true'.
+                    }}
+                    OPTIONAL {{
+                        ?memberPerfil <http://w3id.org/roh/hasPosition> ?hasPosition.
+                    }}
+                    OPTIONAL {{
+                        ?memberPerfil <http://vivoweb.org/ontology/core#departmentOrSchool> ?dept.
+                        ?dept <http://purl.org/dc/elements/1.1/title> ?departamento
+                    }}
+                    OPTIONAL {{
+                        ?memberPerfil <http://w3id.org/roh/hasRole> ?org.
+                        ?org <http://w3id.org/roh/title> ?tituloOrg
+                    }}
                     FILTER(?s = <{p}>)
                 }}";
                 sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
@@ -326,10 +350,28 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Carga los datos en el objeto
                 sparqlObject.results.bindings.ForEach(e =>
                 {
+                    List<string> infoList = new List<string>(); ;
+                    if(e.ContainsKey("hasPosition"))
+                    {
+                        infoList.Add( e["hasPosition"].value);
+                    }
+                    if (e.ContainsKey("tituloOrg"))
+                    {
+                        infoList.Add(e["tituloOrg"].value);
+                    }
+                    if (e.ContainsKey("departamento"))
+                    {
+                        infoList.Add(e["departamento"].value);
+                    }
+                    string info = string.Join(", ",infoList);
                     perfilCluster.users.Add(new PerfilCluster.UserCluster()
                     {
                         userID = e["memberPerfil"].value,
                         name = e["nombreUser"].value,
+                        shortUserID = mResourceApi.GetShortGuid(e["memberPerfil"].value).ToString().ToLower(),
+                        numPublicacionesTotal= e.ContainsKey("numDoc") ? int.Parse(e["numDoc"].value):0,
+                        ipNumber = e.ContainsKey("ipNumber") ? int.Parse(e["ipNumber"].value) : 0,
+                        info=info
                     });
                 });
 
@@ -521,7 +563,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             select = "select ?person ?perfil (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber ";
             where = @$"where {{
                         ?person a 'person'.
-                        ?person <http://w3id.org/roh/isActive> 'true'.
                         FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))
                         OPTIONAL {{
                             ?doc a 'document'.
