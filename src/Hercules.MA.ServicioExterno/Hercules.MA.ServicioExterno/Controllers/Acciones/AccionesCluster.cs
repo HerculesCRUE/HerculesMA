@@ -626,6 +626,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 colaboradores = new List<string>();
             }
+            List<string> listSeleccionados = new List<string>();
             if (pCluster.profiles != null)
             {
                 foreach (PerfilCluster perfilCluster in pCluster.profiles)
@@ -635,6 +636,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         foreach (PerfilCluster.UserCluster userCluster in perfilCluster.users)
                         {
                             colaboradores.Add("http://gnoss/" + userCluster.shortUserID.ToUpper());
+                            listSeleccionados.Add("http://gnoss/" + userCluster.shortUserID.ToUpper());
                         }
                     }
                 }
@@ -748,6 +750,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         string clave = nodo.Key;
                         Models.Graficas.DataItemRelacion.Data.Type type = Models.Graficas.DataItemRelacion.Data.Type.none;
                         type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
+                        if(listSeleccionados.Contains(nodo.Key))
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_ip;
+                        }
                         Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", type);
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
                         items.Add(dataColabo);
