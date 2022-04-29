@@ -11,7 +11,9 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
                 public string userID { get; set; }
                 public string shortUserID { get; set; }
                 public string name { get; set; }
-                public int publications { get; set; }
+                public string info { get; set; }
+                public int numPublicacionesTotal { get; set; }
+                public int ipNumber { get; set; }
             }
             public string entityID { get; set; }
             public string name { get; set; }
