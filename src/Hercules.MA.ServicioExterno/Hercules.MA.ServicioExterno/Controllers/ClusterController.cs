@@ -136,6 +136,31 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
 
+        /// <summary>
+        /// Borra un cluster
+        /// </summary>
+        /// <param name="pIdClusterId">Id del Cluster a borrar.</param>
+        /// <returns>Un booleano si ha sido borrado.</returns>
+        [HttpPost("borrarCluster")]
+        public IActionResult BorrarCluster([Required] string pIdClusterId)
+        {
+
+            bool borrado = false;
+
+            try
+            {
+                AccionesCluster accionCluster = new AccionesCluster();
+                borrado = accionCluster.BorrarCluster(pIdClusterId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(borrado);
+        }
+
+
 
         /// <summary>
         /// Controlador que sugiere etiquetas con la búsqueda dada
