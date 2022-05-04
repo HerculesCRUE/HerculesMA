@@ -446,6 +446,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             List<string> filtrosPerfiles = new List<string>();
             List<string> filtrosPerfilesTerms = new List<string>();
             List<string> filtrosPerfilesTags = new List<string>();
+
+            // Genera la consulta para cada perfil
             foreach (PerfilCluster perfilCluster in pDataCluster.profiles)
             {
                 // Inicializa cada respuesta
@@ -462,6 +464,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
 
 
+                // Establece las variables para la consulta
+                // Añade la consulta para las categorías de los perfiles, si no dispone de categorías, usará las del cluster
                 string filtroCategorias = "";
                 if (perfilCluster.terms != null && perfilCluster.terms.Count > 0)
                 {
@@ -470,7 +474,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 					                            ?area <http://w3id.org/roh/categoryNode> ?node.
 					                            FILTER(?node in(<{string.Join(">,<", perfilCluster.terms)}>))
 				                            }}";
+                } else if (pDataCluster.terms != null && pDataCluster.terms.Count > 0)
+                {
+                    filtroCategorias = $@"  {{
+					                            ?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
+					                            ?area <http://w3id.org/roh/categoryNode> ?node.
+					                            FILTER(?node in(<{string.Join(">,<", pDataCluster.terms)}>))
+				                            }}";
                 }
+
+                // Añade la consulta para los descriptores de los perfiles
                 string filtroTags = "";
                 if (perfilCluster.tags != null && perfilCluster.tags.Count > 0)
                 {
@@ -480,6 +493,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 				                            FILTER(?tag in('{string.Join("','", perfilCluster.tags)}'))
 				                        }}";
                 }
+
+                // Termina de formar la consulta de condiciones del perfil
                 string union = "";
                 if (!string.IsNullOrEmpty(filtroCategorias) && !string.IsNullOrEmpty(filtroTags))
                 {
