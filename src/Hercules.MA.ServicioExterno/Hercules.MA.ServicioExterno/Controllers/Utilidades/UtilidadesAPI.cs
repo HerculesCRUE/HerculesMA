@@ -88,6 +88,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             // Filtros de inversas.
             Dictionary<string, int> filtrosReciprocos = new Dictionary<string, int>();
             filtrosReciprocos.Add("foaf:member@@@roh:roleOf@@@roh:title", 2);
+            filtrosReciprocos.Add("roh:members@@@roh:title", 1);
 
             //Filtros personalizados
             Dictionary<string, string> filtrosPersonalizados = new Dictionary<string, string>();
