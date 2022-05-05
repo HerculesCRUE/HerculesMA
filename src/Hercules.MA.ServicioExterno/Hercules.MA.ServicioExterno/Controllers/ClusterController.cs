@@ -1,5 +1,6 @@
 ﻿using Hercules.MA.ServicioExterno.Controllers.Acciones;
 using Hercules.MA.ServicioExterno.Models.Cluster;
+using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -109,6 +110,54 @@ namespace Hercules.MA.ServicioExterno.Controllers
             {
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Obtiene los datos para crear la gráfica de áreas temáticas
+        /// </summary>
+        /// <param name="pPersons">Listado de personas.</param>
+        /// <returns>JSON con los datos necesarios para el JS.</returns>
+        [HttpPost("DatosGraficaAreasTematicasCluster")]
+        public IActionResult DatosGraficaAreasTematicasCluster([FromForm] List<string> pPersons)
+        {
+            DataGraficaAreasTags datos = null;
+
+            try
+            {
+                AccionesCluster accionCluster = new AccionesCluster();
+                datos = accionCluster.DatosGraficaAreasTematicas(pPersons);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datos);
+        }
+
+
+        /// <summary>
+        /// Borra un cluster
+        /// </summary>
+        /// <param name="pIdClusterId">Id del Cluster a borrar.</param>
+        /// <returns>Un booleano si ha sido borrado.</returns>
+        [HttpPost("borrarCluster")]
+        public IActionResult BorrarCluster([Required] string pIdClusterId)
+        {
+
+            bool borrado = false;
+
+            try
+            {
+                AccionesCluster accionCluster = new AccionesCluster();
+                borrado = accionCluster.BorrarCluster(pIdClusterId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(borrado);
         }
 
 

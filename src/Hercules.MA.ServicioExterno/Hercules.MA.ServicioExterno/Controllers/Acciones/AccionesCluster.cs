@@ -14,6 +14,7 @@ using static Hercules.MA.ServicioExterno.Models.Cluster.Cluster;
 using Hercules.MA.ServicioExterno.Models;
 using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
+using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
@@ -142,7 +143,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             {
                                 theUsersP = e.users.Select(x => relationIDs.ContainsKey(("http://gnoss.com/" + x.shortUserID)) ? relationIDs[("http://gnoss.com/" + x.shortUserID)] : "http://gnoss.com/" + x.shortUserID).ToList();
                             }
-                            var knowledge = new List<CategoryPath>() { new CategoryPath() { IdsRoh_categoryNode = e.terms } };
+                            var knowledge = e.terms.Select(term => new CategoryPath() { IdsRoh_categoryNode = new List<string>() { term } }).ToList();
                             var clsp = new ClusterPerfil()
                             {
                                 Roh_title = e.name,
@@ -222,6 +223,55 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
+
+        /// <summary>
+        /// Método público para eliminar un cluster
+        /// </summary>
+        /// <param name="pIdClusterId">Identificador del usuario</param>
+        /// <returns>Diccionario con las listas de thesaurus.</returns>
+        public bool BorrarCluster(string pIdClusterId)
+        {
+
+            if (!string.IsNullOrEmpty(pIdClusterId))
+            {
+                // Carga los datos del Cluster
+                Models.Cluster.Cluster clusterData = LoadCluster(pIdClusterId);
+
+                // Obtengo los perfiles
+                List<Guid> perfiles = clusterData.profiles.Select(e => mResourceApi.GetShortGuid(e.entityID)).ToList();
+                // Establezco las entidades secundarias a borrar
+                List<string> urlSecondaryListEntities = new() { "http://w3id.org/roh/categoryNode" };
+
+                mResourceApi.ChangeOntoly("cluster");
+
+                if (pIdClusterId != null && pIdClusterId != "")
+                {
+                    Guid resourceGuid = mResourceApi.GetShortGuid(pIdClusterId);
+
+                    try
+                    {
+                        mResourceApi.CommunityShortName = mResourceApi.GetCommunityShortNameByResourceID(resourceGuid);
+
+                        // Establece las entidades secundarias a borrar
+                        mResourceApi.DeleteSecondaryEntitiesList(ref urlSecondaryListEntities);
+                        // Borra los perfiles
+                        // perfiles.ForEach(e => mResourceApi.PersistentDelete(e));
+                        // borra el recurso
+                        mResourceApi.PersistentDelete(resourceGuid);
+                    } catch (Exception e ) {
+                        return false;
+                    }
+                    
+                }
+            }
+            else
+            {
+                throw new Exception("Recurso no creado");
+            }
+            return true;
+        }
+
+
         /// <summary>
         /// Método público para obtener los datos de un cluster
         /// </summary>
@@ -274,7 +324,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             if (pDataCluster.terms.Count > 0)
             {
                 pDataCluster.terms = LoadCurrentTerms(pDataCluster.terms);
-
             }
 
 
@@ -397,6 +446,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             List<string> filtrosPerfiles = new List<string>();
             List<string> filtrosPerfilesTerms = new List<string>();
             List<string> filtrosPerfilesTags = new List<string>();
+
+            // Genera la consulta para cada perfil
             foreach (PerfilCluster perfilCluster in pDataCluster.profiles)
             {
                 // Inicializa cada respuesta
@@ -413,6 +464,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
 
 
+                // Establece las variables para la consulta
+                // Añade la consulta para las categorías de los perfiles, si no dispone de categorías, usará las del cluster
                 string filtroCategorias = "";
                 if (perfilCluster.terms != null && perfilCluster.terms.Count > 0)
                 {
@@ -421,7 +474,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 					                            ?area <http://w3id.org/roh/categoryNode> ?node.
 					                            FILTER(?node in(<{string.Join(">,<", perfilCluster.terms)}>))
 				                            }}";
+                } else if (pDataCluster.terms != null && pDataCluster.terms.Count > 0)
+                {
+                    filtroCategorias = $@"  {{
+					                            ?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
+					                            ?area <http://w3id.org/roh/categoryNode> ?node.
+					                            FILTER(?node in(<{string.Join(">,<", pDataCluster.terms)}>))
+				                            }}";
                 }
+
+                // Añade la consulta para los descriptores de los perfiles
                 string filtroTags = "";
                 if (perfilCluster.tags != null && perfilCluster.tags.Count > 0)
                 {
@@ -431,6 +493,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 				                            FILTER(?tag in('{string.Join("','", perfilCluster.tags)}'))
 				                        }}";
                 }
+
+                // Termina de formar la consulta de condiciones del perfil
                 string union = "";
                 if (!string.IsNullOrEmpty(filtroCategorias) && !string.IsNullOrEmpty(filtroTags))
                 {
@@ -619,7 +683,107 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return respuesta;
         }
 
-        public List<DataItemRelacion> DatosGraficaColaboradoresCluster(Models.Cluster.Cluster pCluster, List<string> pPersons,bool seleccionados)
+
+        /// <summary>
+        /// Método público que obtiene el objeto para crear la gráfica de áreas temáticas
+        /// </summary>
+        /// <param name="pPersons">Personas sobre las que realizar el filtrado de áreas temáticas.</param>
+        /// <returns>Objeto que se trata en JS para contruir la gráfica.</returns>
+        public DataGraficaAreasTags DatosGraficaAreasTematicas(List<string> pPersons)
+        {
+            string filtroElemento = "";
+
+            filtroElemento = $@"?documento bibo:authorList ?lista. ";
+            filtroElemento += $@"?lista rdf:member ?person.";
+            filtroElemento += $@"FILTER(?person in (<http://gnoss/{string.Join(">,<http://gnoss/", pPersons.Select(x => x.ToUpper()))}>))";
+
+            Dictionary<string, int> dicResultados = new Dictionary<string, int>();
+            int numDocumentos = 0;
+            {
+                //Nº de documentos por categoría
+                SparqlObject resultadoQuery = null;
+                string select = $"{mPrefijos} Select ?nombreCategoria count(distinct ?documento) as ?numCategorias";
+                string where = $@"  where
+                                {{
+                                    ?documento a 'document'. 
+                                    {filtroElemento}
+                                    ?documento roh:hasKnowledgeArea ?area.
+                                    ?area roh:categoryNode ?categoria.
+                                    ?documento <http://w3id.org/roh/isValidated> 'true'.
+                                    ?categoria skos:prefLabel ?nombreCategoria.
+                                    MINUS
+                                    {{
+                                        ?categoria skos:narrower ?hijos
+                                    }}
+                                }}
+                                Group by(?nombreCategoria)";
+
+                resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                {
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    {
+                        string nombreCategoria = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombreCategoria");
+                        int numCategoria = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numCategorias"));
+                        dicResultados.Add(nombreCategoria + " (" + numCategoria +")", numCategoria);
+                    }
+                }
+            }
+            {
+                //Nº total de documentos
+                SparqlObject resultadoQuery = null;
+                string select = $"{mPrefijos} Select count(distinct ?documento) as ?numDocumentos";
+                string where = $@"  where
+                                {{
+                                    ?documento a 'document'. 
+                                    {filtroElemento}
+                                }}";
+
+                resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                {
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    {
+                        numDocumentos = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numDocumentos"));
+                    }
+                }
+            }
+
+            //Ordenar diccionario
+            var dicionarioOrdenado = dicResultados.OrderByDescending(x => x.Value);
+
+            Dictionary<string, double> dicResultadosPorcentaje = new Dictionary<string, double>();
+            foreach (KeyValuePair<string, int> item in dicionarioOrdenado)
+            {
+                double porcentaje = Math.Round((double)(100 * item.Value) / numDocumentos, 2);
+                dicResultadosPorcentaje.Add(item.Key, porcentaje);
+            }
+
+            // Contruir el objeto de la gráfica.
+            List<string> listaColores = UtilidadesAPI.CrearListaColores(dicionarioOrdenado.Count(), "#6cafe3");
+            Datasets datasets = new Datasets(dicResultadosPorcentaje.Values.ToList(), listaColores);
+            Models.Graficas.DataGraficaAreasTags.Data data = new Models.Graficas.DataGraficaAreasTags.Data(dicResultadosPorcentaje.Keys.ToList(), new List<Datasets> { datasets });
+
+            // Máximo.
+            x xAxes = new x(new Ticks(0, 100), new ScaleLabel(true, "Percentage"));
+
+            Options options = new Options("y", new Plugins(null, new Legend(false)), new Scales(xAxes));
+            DataGraficaAreasTags dataGrafica = new DataGraficaAreasTags("bar", data, options);
+
+            return dataGrafica;
+        }
+
+
+        /// <summary>
+        /// Método público que obtiene el objeto para crear la gráfica tipo araña de las relaciones entre los perfiles seleccionados en el cluster
+        /// </summary>
+        /// <param name="pCluster">Cluster con los datos de las personas sobre las que realizar el filtrado de áreas temáticas.</param>
+        /// <param name="pPersons">Personas sobre las que realizar el filtrado de áreas temáticas (Por si se envía directamente).</param>
+        /// <param name="seleccionados">Determina si se envía el listado de personas desde el cluster o desde las personas</param>
+        /// <returns>Objeto que se trata en JS para contruir la gráfica.</returns>
+        public List<DataItemRelacion> DatosGraficaColaboradoresCluster(Models.Cluster.Cluster pCluster, List<string> pPersons, bool seleccionados)
         {
             List<string> colaboradores = pPersons.Select(x => "http://gnoss/" + x.ToUpper()).ToList();
             if(seleccionados)
@@ -880,6 +1044,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
+        /// <summary>
+        /// Método privado para obtener las taxonomías de un 'CategoryPath'.
+        /// </summary>
+        /// <param name="terms">Listado de la categoría a obtener.</param>
+        /// <returns>listado de las categorías.</returns>
         private List<string> LoadCurrentTerms(List<string> terms)
         {
 
