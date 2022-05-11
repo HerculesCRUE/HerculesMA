@@ -51,8 +51,6 @@ namespace Hercules.MA.Load
         /// </summary>
         public static void CargarEntidadesPrincipales()
         {
-
-
             //Lectura de datos XML.   
             List<AreasUnescoProyectos> areasUnescoProyectos = LeerAreasUnescoProyectos(inputFolder + "/Areas UNESCO Proyectos.xml");
             List<Articulo> articulos = LeerArticulos(inputFolder + "/Articulos.xml");
@@ -109,19 +107,6 @@ namespace Hercules.MA.Load
             //Lista de recursos a cargar.
             List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
 
-
-            //Cargar personas. ÑAPA
-            CambiarOntologia("person");
-            PersonOntology.Person dianaCortes= new PersonOntology.Person();
-            dianaCortes.Roh_isActive = true;
-            dianaCortes.Roh_crisIdentifier = "27281387213879";
-            dianaCortes.Foaf_name = "Diana Castilla López";
-            dianaCortes.Roh_ORCID = "0000-0002-1631-1220";
-            listaRecursosCargar.Add(dianaCortes.ToGnossApiResource(mResourceApi,null));
-            CargarDatos(listaRecursosCargar);
-            listaRecursosCargar.Clear();
-
-
             //Cargar revistas desde la fuente de datos.
             //CambiarOntologia("maindocument");
             //EliminarDatosCargados("http://w3id.org/roh/MainDocument", "maindocument", listaNoBorrar);
@@ -145,6 +130,55 @@ namespace Hercules.MA.Load
             Dictionary<string, string> personasCargar = ObtenerPersonas(personasACargar, ref listaRecursosCargar, personas, autoresArticulos, autoresCongresos, autoresExposiciones, directoresTesis, equiposProyectos, inventoresPatentes, organizacionesCargar, datoEquiposInvestigacion);
             CargarDatos(listaRecursosCargar);
             listaRecursosCargar.Clear();
+
+            // --- ÑAPA
+            PersonOntology.Person dianaCortes = new PersonOntology.Person();
+            dianaCortes.Roh_isActive = true;
+            dianaCortes.Roh_crisIdentifier = "27281387213879";
+            dianaCortes.Foaf_name = "Diana Castilla López";
+            dianaCortes.Roh_ORCID = "0000-0002-1631-1220";
+            listaRecursosCargar.Add(dianaCortes.ToGnossApiResource(mResourceApi, null));
+            CargarDatos(listaRecursosCargar);
+            listaRecursosCargar.Clear();
+
+            PersonOntology.Person elena = new PersonOntology.Person();
+            elena.Roh_isActive = true;
+            elena.Roh_crisIdentifier = "11335577992468";
+            elena.Foaf_name = "Elena García Barriocanal";
+            elena.Roh_ORCID = "0000-0001-6752-9599";
+            listaRecursosCargar.Add(elena.ToGnossApiResource(mResourceApi, null));
+            CargarDatos(listaRecursosCargar);
+
+            PersonOntology.Person miguel = new PersonOntology.Person();
+            miguel.Roh_isActive = true;
+            miguel.Roh_crisIdentifier = "224466880013579";
+            miguel.Foaf_name = "Miguel Ángel Sicilia Urbán";
+            miguel.Roh_ORCID = "0000-0003-3067-4180";
+            listaRecursosCargar.Add(miguel.ToGnossApiResource(mResourceApi, null));
+            CargarDatos(listaRecursosCargar);
+
+            PersonOntology.Person masal = new PersonOntology.Person();
+            masal.Roh_isActive = true;
+            masal.Roh_crisIdentifier = "113355112223334";
+            masal.Foaf_name = "Marçal Mora Cantallops";
+            masal.Roh_ORCID = "0000-0002-2480-1078";
+            listaRecursosCargar.Add(masal.ToGnossApiResource(mResourceApi, null));
+            CargarDatos(listaRecursosCargar);
+
+            PersonOntology.Person juanManuel = new PersonOntology.Person();
+            juanManuel.Roh_isActive = true;
+            juanManuel.Roh_crisIdentifier = "31256195";
+            juanManuel.Foaf_name = "Juan Manuel Dodero";
+            juanManuel.Roh_ORCID = "0000-0002-4105-5679";
+            listaRecursosCargar.Add(juanManuel.ToGnossApiResource(mResourceApi, null));
+            CargarDatos(listaRecursosCargar);
+
+            PersonOntology.Person danielaFz = new PersonOntology.Person();
+            danielaFz.Roh_isActive = true;
+            danielaFz.Roh_crisIdentifier = "113636170221114";
+            danielaFz.Foaf_name = "Daniela Fernández";
+            listaRecursosCargar.Add(danielaFz.ToGnossApiResource(mResourceApi, null));
+            CargarDatos(listaRecursosCargar);
 
             //Cargar grupos de investigación.
             CambiarOntologia("group");
@@ -578,6 +612,10 @@ namespace Hercules.MA.Load
                         personaCarga.Roh_crisIdentifier = "31248453";
                         personaCarga.Roh_ORCID = "0000-0003-2502-4378";
                     }
+                    else if (idPersona == "11573")
+                    {
+                        personaCarga.Roh_ORCID = "0000-0002-8491-4592";
+                    }
 
                     //Creamos el recurso.
                     ComplexOntologyResource resource = personaCarga.ToGnossApiResource(mResourceApi, null);
@@ -811,7 +849,7 @@ namespace Hercules.MA.Load
                             }
                             else
                             {
-                                persona.Roh_isIP = false;                                
+                                persona.Roh_isIP = false;
                             }
                             proyectoCargar.Vivo_relates.Add(persona);
                         }
@@ -970,7 +1008,7 @@ namespace Hercules.MA.Load
                     {
                         documentoACargar.IdVivo_hasPublicationVenue = pRevistasCargadas[$@"issn_{articulo.REIS_ISSN}"];
                     }
-                    
+
                     documentoACargar.Roh_title = articulo.TITULO;
                     documentoACargar.Roh_crisIdentifier = articulo.CODIGO;
 
@@ -1360,8 +1398,8 @@ namespace Hercules.MA.Load
                                 persona.Vivo_hasResearchArea.Add(lineaArea);
                             }
 
-                            
-                            if (equipo.CODTIPOPARTICIPACION == "IP")                            
+
+                            if (equipo.CODTIPOPARTICIPACION == "IP")
                             {
                                 persona.Roh_isIP = true;
                             }
@@ -2070,15 +2108,19 @@ Actualmente 78 investigadores forman el grupo, todos ellos miembros del Departam
                     {
                         break;
                     }
+
                     if (pListaRecursosCargar.Last() == recursoCargar)
                     {
-
                         mResourceApi.LoadComplexSemanticResource(recursoCargar, false, true);
-
                     }
                     else
                     {
                         mResourceApi.LoadComplexSemanticResource(recursoCargar);
+                    }
+
+                    if (!recursoCargar.Uploaded)
+                    {
+                        Thread.Sleep(1000 * numIntentos);
                     }
                 }
             });
