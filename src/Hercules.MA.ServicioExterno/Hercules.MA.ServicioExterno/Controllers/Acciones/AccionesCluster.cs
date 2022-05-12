@@ -15,9 +15,11 @@ using Hercules.MA.ServicioExterno.Models;
 using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
 using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags;
+using Microsoft.AspNetCore.Cors;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
+    [EnableCors("_myAllowSpecificOrigins")]
     public class AccionesCluster
     {
         #region --- Constantes   

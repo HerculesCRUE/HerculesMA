@@ -84,6 +84,12 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok(idClusterRes);
         }
 
+        /// <summary>
+        /// Controlador para guardar los datos del cluster.
+        /// </summary>
+        /// <param name="pDataCluster">Datos del cluster.</param>
+        /// <param name="pPersons">Usuarios de gnoss.</param>
+        /// <returns>Id del cluster creado o modificado.</returns>
         [HttpPost("LoadProfiles")]
         public IActionResult LoadProfiles([FromForm] Cluster pDataCluster, [FromForm] List<string> pPersons)
         {
