@@ -45,6 +45,7 @@ using ScientificexperienceprojectOntology;
 using ActivitymodalityOntology;
 using TaxonomyOntology;
 using Hercules.MA.Load.Models.TaxonomyOntology;
+using FramingsectorOntology;
 using ResearchobjecttypeOntology;
 using ContractmodalityOntology;
 using ScopemanagementactivityOntology;
@@ -227,8 +228,9 @@ namespace Hercules.MA.Load
             //CargarLaboralDurationType(tablas, "laboraldurationtype");
             //CargarSeminarInscriptionType(tablas, "seminarinscriptiontype");
             //CargarSeminarEventType(tablas, "seminareventtype");
-
-
+            CargarOfferState("offerstate");
+            CargarMatureStates("maturestate");
+            CargarFramingSectors("framingsector");
 
             //Cargamos los subtipos de los RO
             //CargarResearhObjectType();
@@ -406,6 +408,119 @@ namespace Hercules.MA.Load
             return pListaModality;
         }
 
+
+
+        /// <summary>
+        /// Carga la entidad secundaria OfferState.
+        /// </summary>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarOfferState(string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/FramingSector", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<OfferState> states = new List<OfferState>();
+            string[] sectors = new string[] {
+                "En Borrador",
+                "En Revisión",
+                "Validada",
+                "Denegada",
+                "Archivada",
+            };
+
+            states = sectors.Select((e, i) => new OfferState() { Dc_identifier = i, Dc_title = "" }).toList();
+
+            // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
+
+            //Carga.
+            Parallel.ForEach(states, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, state =>
+            {
+                mResourceApi.LoadSecondaryResource(state.ToGnossApiResource(mResourceApi, pOntology + "_" + state.Dc_identifier));
+            });
+        }
+
+
+
+        /// <summary>
+        /// Carga la entidad secundaria MatureState.
+        /// </summary>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarMatureStates(string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/FramingSector", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<MatureState> states = new List<MatureState>();
+            string[] sectors = new string[] {
+                "En investigación (TRL 1-2)",
+                "Tecnología validada en laboratorio (TRL 3-5)",
+                "Tecnología demostrada con prototipo funcional (TRL 6-7)",
+                "Sistema completo disponible para cliente-mercado (TRL 8-9)",
+            };
+
+            states = sectors.Select((e, i) => new MatureState() { Dc_identifier = i, Dc_title = "" }).toList();
+
+            // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
+
+            //Carga.
+            Parallel.ForEach(states, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, state =>
+            {
+                mResourceApi.LoadSecondaryResource(state.ToGnossApiResource(mResourceApi, pOntology + "_" + state.Dc_identifier));
+            });
+        }
+
+
+
+        /// <summary>
+        /// Carga la entidad secundaria FramingSector.
+        /// </summary>
+        /// <param name="pOntology">Ontología.</param>
+        private static void CargarFramingSectors(string pOntology)
+        {
+            //Cambio de ontología.
+            mResourceApi.ChangeOntoly(pOntology);
+
+            //Elimina los datos cargados antes de volverlos a cargar.
+            EliminarDatosCargados("http://w3id.org/roh/FramingSector", pOntology);
+
+            //Obtención de los objetos a cargar.
+            List<FramingSector> framings = new List<FramingSector>();
+            string[] sectors = new string[] {
+                "Acuicultura y Economía Azul",
+                "Agroalimentación",
+                "Arte y Humanidades",
+                "Biomedicina",
+                "Biotecnología",
+                "Ciencias Sociales y Jurídicas",
+                "Deporte",
+                "Energía y Medio Ambiente",
+                "Medicina y Salud",
+                "Nanotecnología",
+                "Química",
+                "Salud y Bienestar Animal",
+                "TICS",
+            };
+
+            framings = sectors.Select((e, i) => new FramingSector() { Dc_identifier = i, Dc_title = "" }).toList();
+
+            // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
+
+            //Carga.
+            Parallel.ForEach(framings, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, framing =>
+            {
+                mResourceApi.LoadSecondaryResource(framing.ToGnossApiResource(mResourceApi, pOntology + "_" + framing.Dc_identifier));
+            });
+        }
+
+
         /// <summary>
         /// Carga la entidad secundaria ContributionGradeProject.
         /// </summary>
@@ -429,6 +544,7 @@ namespace Hercules.MA.Load
                 mResourceApi.LoadSecondaryResource(contribution.ToGnossApiResource(mResourceApi, pOntology + "_" + contribution.Dc_identifier));
             });
         }
+
 
         /// <summary>
         /// Obtiene los objetos ContributionGradeProject a cargar.
