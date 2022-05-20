@@ -74,6 +74,8 @@ using ResulttypeOntology;
 using LaboraldurationtypeOntology;
 using SeminarinscriptiontypeOntology;
 using SeminareventtypeOntology;
+using OfferstateOntology;
+using MaturestateOntology;
 
 namespace Hercules.MA.Load
 {
@@ -432,7 +434,7 @@ namespace Hercules.MA.Load
                 "Archivada",
             };
 
-            states = sectors.Select((e, i) => new OfferState() { Dc_identifier = i, Dc_title = "" }).toList();
+            states = sectors.Select((e, i) => new OfferState() { Dc_identifier = i.ToString(), Dc_title = e }).ToList();
 
             // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
 
@@ -466,7 +468,7 @@ namespace Hercules.MA.Load
                 "Sistema completo disponible para cliente-mercado (TRL 8-9)",
             };
 
-            states = sectors.Select((e, i) => new MatureState() { Dc_identifier = i, Dc_title = "" }).toList();
+            states = sectors.Select((e, i) => new MatureState() { Dc_identifier = i.ToString(), Dc_title = e }).ToList();
 
             // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
 
@@ -509,7 +511,7 @@ namespace Hercules.MA.Load
                 "TICS",
             };
 
-            framings = sectors.Select((e, i) => new FramingSector() { Dc_identifier = i, Dc_title = "" }).toList();
+            framings = sectors.Select((e, i) => new FramingSector() { Dc_identifier = i.ToString(), Dc_title = e }).ToList();
 
             // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
 
