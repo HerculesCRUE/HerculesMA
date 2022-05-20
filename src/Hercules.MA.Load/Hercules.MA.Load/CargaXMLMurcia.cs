@@ -98,7 +98,7 @@ namespace Hercules.MA.Load
             listaRecursosSecundariosCargar.Clear();
 
             //Persona en específico a cargar.
-            HashSet<string> personasACargar = new HashSet<string>() { "6811", "7747", "9292", "8310" }; // Investigadores: 6811, 7747, 9292
+            HashSet<string> personasACargar = new HashSet<string>() { "6811", "7747", "9292", "8310", "15004" }; // Investigadores: 6811, 7747, 9292
             //HashSet<string> personasACargar = new HashSet<string>();
 
             //Recursos para NO borrarlos.
@@ -615,6 +615,11 @@ namespace Hercules.MA.Load
                     else if (idPersona == "11573")
                     {
                         personaCarga.Roh_ORCID = "0000-0002-8491-4592";
+                    }
+                    else if (idPersona == "15004")
+                    {
+                        personaCarga.Roh_ORCID = "0000-0002-6728-121X";
+                        personaCarga.Roh_crisIdentifier = "74336159";
                     }
 
                     //Creamos el recurso.
