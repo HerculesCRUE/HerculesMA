@@ -230,9 +230,9 @@ namespace Hercules.MA.Load
             //CargarLaboralDurationType(tablas, "laboraldurationtype");
             //CargarSeminarInscriptionType(tablas, "seminarinscriptiontype");
             //CargarSeminarEventType(tablas, "seminareventtype");
-            CargarOfferState("offerstate");
-            CargarMatureStates("maturestate");
-            CargarFramingSectors("framingsector");
+            //CargarOfferState("offerstate");
+            //CargarMatureStates("maturestate");
+            //CargarFramingSectors("framingsector");
 
             //Cargamos los subtipos de los RO
             //CargarResearhObjectType();
@@ -422,11 +422,11 @@ namespace Hercules.MA.Load
             mResourceApi.ChangeOntoly(pOntology);
 
             //Elimina los datos cargados antes de volverlos a cargar.
-            EliminarDatosCargados("http://w3id.org/roh/FramingSector", pOntology);
+            EliminarDatosCargados("http://w3id.org/roh/OfferState", pOntology);
 
             //Obtención de los objetos a cargar.
-            List<OfferState> states = new List<OfferState>();
-            string[] sectors = new string[] {
+            List<OfferState> offers = new List<OfferState>();
+            string[] titles = new string[] {
                 "En Borrador",
                 "En Revisión",
                 "Validada",
@@ -434,14 +434,23 @@ namespace Hercules.MA.Load
                 "Archivada",
             };
 
-            states = sectors.Select((e, i) => new OfferState() { Dc_identifier = i.ToString(), Dc_title = e }).ToList();
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            offers = titles.Select((e, i) => {
+                var texts = new Dictionary<LanguageEnum, string>();
+                foreach (var lang in dicIdiomasMapeados)
+                {
+                    texts.Add(lang.Value, e);
+                }
+                return new OfferState() { Dc_identifier = "00" + (i + 1).ToString(), Dc_title =  texts };
+            }).ToList();
 
             // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
 
             //Carga.
-            Parallel.ForEach(states, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, state =>
+            Parallel.ForEach(offers, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, offer =>
             {
-                mResourceApi.LoadSecondaryResource(state.ToGnossApiResource(mResourceApi, pOntology + "_" + state.Dc_identifier));
+                mResourceApi.LoadSecondaryResource(offer.ToGnossApiResource(mResourceApi, pOntology + "_" + offer.Dc_identifier));
             });
         }
 
@@ -457,7 +466,7 @@ namespace Hercules.MA.Load
             mResourceApi.ChangeOntoly(pOntology);
 
             //Elimina los datos cargados antes de volverlos a cargar.
-            EliminarDatosCargados("http://w3id.org/roh/FramingSector", pOntology);
+            EliminarDatosCargados("http://w3id.org/roh/MatureState", pOntology);
 
             //Obtención de los objetos a cargar.
             List<MatureState> states = new List<MatureState>();
@@ -468,7 +477,16 @@ namespace Hercules.MA.Load
                 "Sistema completo disponible para cliente-mercado (TRL 8-9)",
             };
 
-            states = sectors.Select((e, i) => new MatureState() { Dc_identifier = i.ToString(), Dc_title = e }).ToList();
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+            states = sectors.Select((e, i) => {
+                var texts = new Dictionary<LanguageEnum, string>();
+                foreach (var lang in dicIdiomasMapeados)
+                {
+                    texts.Add( lang.Value, e );
+                }
+                return new MatureState() { Dc_identifier = "00" + (i + 1).ToString(), Dc_title =  texts };
+            }).ToList();
 
             // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
 
@@ -495,7 +513,7 @@ namespace Hercules.MA.Load
 
             //Obtención de los objetos a cargar.
             List<FramingSector> framings = new List<FramingSector>();
-            string[] sectors = new string[] {
+            string[] titles = new string[] {
                 "Acuicultura y Economía Azul",
                 "Agroalimentación",
                 "Arte y Humanidades",
@@ -511,7 +529,19 @@ namespace Hercules.MA.Load
                 "TICS",
             };
 
-            framings = sectors.Select((e, i) => new FramingSector() { Dc_identifier = i.ToString(), Dc_title = e }).ToList();
+            Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
+
+
+            framings = titles.Select((e, i) => {
+                var texts = new Dictionary<LanguageEnum, string>();
+                foreach (var lang in dicIdiomasMapeados)
+                {
+                    texts.Add(lang.Value, e);
+                }
+                return new FramingSector() { Dc_identifier = "00" + (i + 1).ToString(), Dc_title =  texts };
+            }).ToList();
+
+            // framings = titles.Select((e, i) => new FramingSector() { Dc_identifier = i.ToString(), Dc_title = e }).ToList();
 
             // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
 
