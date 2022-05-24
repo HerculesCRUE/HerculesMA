@@ -318,15 +318,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 OPTIONAL{{ ?id vivo:description ?description}}                                                
                                                 OPTIONAL
                                                 {{
-                                                    ?author a 'person'.
-                                                    {{
-                                                        ?id roh:mainResearchers ?main.
-                                                        ?main rdf:member ?author.
-                                                    }}UNION
-                                                    {{
-                                                        ?id roh:researchers ?main.
-                                                        ?main rdf:member ?author.
-                                                    }}
+                                                    ?author a 'person'.                                                    
+                                                    ?id roh:membersGroup ?main.
+                                                    ?main rdf:member ?author.
                                                 }}
                                             }}ORDER BY DESC(?author) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
 
@@ -637,7 +631,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             string normalizedString = pText.Normalize(NormalizationForm.FormD);
             StringBuilder sb = new StringBuilder();
             foreach (char charin in normalizedString)
-            {
+            {                
                 if (char.IsLetterOrDigit(charin) || charin == ' ')
                 {
                     sb.Append(charin);
