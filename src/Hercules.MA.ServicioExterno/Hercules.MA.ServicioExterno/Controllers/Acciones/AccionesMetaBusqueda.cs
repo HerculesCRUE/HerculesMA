@@ -326,7 +326,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id a 'researchobject'.
                                                 ?id roh:title ?title.
                                                 ?id roh:isValidated 'true'.
-                                                OPTIONAL{{ ?id bibo:authorList ?lista. ?lista rdf:member ?author.}}
+                                                ?id bibo:authorList ?lista. 
+                                                ?lista rdf:member ?author.
                                             }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
 
                                 SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -369,7 +370,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id a 'researchobject'.
                                                 ?id roh:title ?title.
                                                 ?id roh:isValidated 'true'.
-                                                OPTIONAL{{ ?id vivo:freeTextKeyword ?tag}}
+                                                ?id vivo:freeTextKeyword ?tag
                                             }}ORDER BY DESC(?id) DESC(?tag) }} LIMIT {limit} OFFSET {offset}";
 
                                 SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -470,12 +471,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {{
                                                 ?id a 'group'.
                                                 ?id roh:title ?title.
-                                                ?id roh:isValidated 'true'.                                              
-                                                OPTIONAL
-                                                {{
-                                                    ?author a 'person'.                                                    
-                                                    ?id roh:membersGroup ?author.
-                                                }}
+                                                ?id roh:isValidated 'true'.   
+                                                ?author a 'person'.                                                    
+                                                ?id roh:membersGroup ?author.
                                             }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
 
                                 SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -587,11 +585,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id a 'project'.
                                                 ?id roh:title ?title.
                                                 ?id roh:isValidated 'true'.
-                                                OPTIONAL
-                                                {{
-                                                    ?author a 'person'.
-                                                    ?id roh:membersProject  ?author.
-                                                }}
+                                                ?author a 'person'.
+                                                ?id roh:membersProject  ?author.
                                             }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
 
                                 SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
