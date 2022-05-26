@@ -22,7 +22,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("DoMetaSearch")]
         public IActionResult DoMetaSearch(string stringSearch, string lang)
         {
-            Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>> resultBusqueda = null;
+            Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>> resultBusqueda = null; 
 
             try
             {
