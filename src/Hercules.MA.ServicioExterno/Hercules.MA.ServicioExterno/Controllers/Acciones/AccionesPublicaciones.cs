@@ -47,7 +47,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     ?documento a 'document'.
                                     ?documento dct:issued ?fechaAux.
                                     {UtilidadesAPI.CrearFiltros(UtilidadesAPI.ObtenerParametros(pParametros), "?documento", ref aux)}
-                                    BIND((?fechaAux/10000000000) as ?fecha)
+                                    BIND(xsd:int(?fechaAux/10000000000) as ?fecha)
                                     OPTIONAL{{?documento <http://w3id.org/roh/quartile> ?cuartil}}
                                 }}ORDER BY ?fecha";
 
@@ -94,7 +94,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     ?documento a 'document'.
                                     ?documento dct:issued ?fechaAux.
                                     {UtilidadesAPI.CrearFiltros(UtilidadesAPI.ObtenerParametros(pParametros), "?documento", ref aux)}
-                                    BIND((?fechaAux/10000000000) as ?fecha)
+                                    BIND(xsd:int(?fechaAux/10000000000) as ?fecha)
                                     ?documento <http://w3id.org/roh/citationCount> ?numCitas
                                 }}ORDER BY ?fecha";
 
