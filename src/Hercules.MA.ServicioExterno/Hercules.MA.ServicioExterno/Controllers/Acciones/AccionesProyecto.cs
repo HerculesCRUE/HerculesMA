@@ -56,7 +56,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     int aux = 0;
                     string where = $@"WHERE {{ 
                                     ?proyecto vivo:start ?fecha
-                                    BIND( (?fecha/10000000000) AS ?anyoInicio)
+                                    BIND( xsd:int(?fecha/10000000000) AS ?anyoInicio)
                                     OPTIONAL{{
                                         ?proyecto roh:scientificExperienceProject ?tipo.
                                         ?tipo dc:identifier ?idTipo
@@ -101,7 +101,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     int aux = 0;
                     string where = $@"WHERE {{ 
                                     ?proyecto vivo:end ?fecha
-                                    BIND( (?fecha/10000000000) AS ?anyoFin)
+                                    BIND( xsd:int(?fecha/10000000000) AS ?anyoFin)
                                     {UtilidadesAPI.CrearFiltros(UtilidadesAPI.ObtenerParametros(pParametros), "?proyecto", ref aux)}
                                 }}ORDER BY ?anyoFin";
                     resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
