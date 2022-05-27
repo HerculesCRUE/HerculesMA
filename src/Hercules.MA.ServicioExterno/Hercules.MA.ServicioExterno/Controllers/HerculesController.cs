@@ -31,15 +31,9 @@ namespace Hercules.MA.ServicioExterno.Controllers
         public IActionResult DatosGraficaPublicaciones(string pParametros)
         {
 
-            try
-            {
+            
                 string contenido = System.IO.File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config");
-                throw new Exception(contenido);
-            }
-            catch(Exception ex)
-            {
-                throw;
-            }
+           
 
 
 
