@@ -30,16 +30,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("DatosGraficaPublicaciones")]
         public IActionResult DatosGraficaPublicaciones(string pParametros)
         {
-
-            
-                string contenido = System.IO.File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config");
-           
-
-
-
-
-        DataGraficaPublicaciones datosPublicaciones = null;
-
+            DataGraficaPublicaciones datosPublicaciones = null;
             try
             {
                 AccionesPublicaciones accionesPublicaciones = new AccionesPublicaciones();
