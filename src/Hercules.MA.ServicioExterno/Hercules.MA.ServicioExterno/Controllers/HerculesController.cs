@@ -34,7 +34,9 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 string contenido = System.IO.File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config");
-            }catch(Exception ex)
+                throw new Exception(contenido);
+            }
+            catch(Exception ex)
             {
                 throw;
             }
