@@ -43,19 +43,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             //ID persona/ID perfil/score
             Dictionary<string, UsersOffer> respuesta = new();
 
-            List<string> filtrosPerfiles = new List<string>();
-            List<string> filtrosPerfilesTerms = new List<string>();
-            List<string> filtrosPerfilesTags = new List<string>();
-
             string select = $@"{ mPrefijos }
                             select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento";
             string where = @$"where {{
                     ?main a <http://xmlns.com/foaf/0.1/Person>.
                     ?main <http://w3id.org/roh/gnossUser> ?idGnoss.
-
-                    ?main <http://vivoweb.org/ontology/core#relates> ?group.
-                    ?group ?propRol ?person.
-                    FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>)).
+                    
+                    ?group a <http://xmlns.com/foaf/0.1/Group>.
+                    ?group roh:membersGroup ?main.
+                    
+                    ?group roh:membersGroup ?person.
+                    
                     ?person foaf:name ?name.
                     OPTIONAL{{
                         ?person roh:hasRole ?organization.
@@ -70,6 +68,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     ?person <http://w3id.org/roh/isActive> 'true'.
 
+                    FILTER(?idGnoss = <http://gnoss/D7711FD2-41D2-464B-8838-E42C52213927>)
+
                     FILTER(?idGnoss = <http://gnoss/{researcherId.ToUpper()}>)
                 }}";
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -83,14 +83,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 string hasPosition = fila["hasPosition"].value;
                 string departamento = fila["departamento"].value;
 
-                respuesta.Add(person, new UsersOffer()
+                try
                 {
-                    name = name,
-                    groups = groups.Split(',').ToList(),
-                    organization = organization,
-                    hasPosition = hasPosition,
-                    departamento = departamento
-                });
+                    respuesta.Add(person, new UsersOffer()
+                    {
+                        name = name,
+                        groups = (groups != "" || groups != null) ? groups.Split(',').ToList() : new List<string>(),
+                        organization = organization,
+                        hasPosition = hasPosition,
+                        departamento = departamento
+                    });
+                } catch( Exception e ) {}
 
             }
 
