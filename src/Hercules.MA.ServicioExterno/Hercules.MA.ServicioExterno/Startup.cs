@@ -1,3 +1,4 @@
+using Hercules.MA.ServicioExterno.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -51,6 +52,7 @@ namespace Hercules.MA.ServicioExterno
             app.UseRouting();
             app.UseCors();
             app.UseAuthorization();
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseSwagger(c =>
             {
                 c.PreSerializeFilters.Add((swaggerDoc, httpReq) => swaggerDoc.Servers = new List<OpenApiServer>
