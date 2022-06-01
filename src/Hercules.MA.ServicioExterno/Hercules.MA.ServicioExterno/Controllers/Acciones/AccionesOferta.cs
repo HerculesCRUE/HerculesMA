@@ -38,13 +38,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="researcherId">Datos del cluster para obtener los perfiles</param>
         /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
+        
         public Dictionary<string, UsersOffer> LoadUsers(string researcherId)
         {
             //ID persona/ID perfil/score
             Dictionary<string, UsersOffer> respuesta = new();
 
             string select = $@"{ mPrefijos }
-                            select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento";
+                            select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento FROM <http://gnoss.com/organization.owl>  FROM <http://gnoss.com/group.owl> FROM <http://gnoss.com/department.owl> ";
             string where = @$"where {{
                     ?main a <http://xmlns.com/foaf/0.1/Person>.
                     ?main <http://w3id.org/roh/gnossUser> ?idGnoss.
@@ -68,23 +69,22 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     ?person <http://w3id.org/roh/isActive> 'true'.
 
-                    FILTER(?idGnoss = <http://gnoss/D7711FD2-41D2-464B-8838-E42C52213927>)
-
                     FILTER(?idGnoss = <http://gnoss/{researcherId.ToUpper()}>)
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
 
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
-                string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
-                string name = fila["name"].value;
-                string groups = fila["groups"].value;
-                string organization = fila["tituloOrg"].value;
-                string hasPosition = fila["hasPosition"].value;
-                string departamento = fila["departamento"].value;
 
                 try
                 {
+                    string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
+                    string name = fila["name"].value;
+                    string groups = fila.ContainsKey("groups") ? fila["groups"].value : null;
+                    string organization = fila.ContainsKey("tituloOrg") ? fila["tituloOrg"].value : null;
+                    string hasPosition = fila.ContainsKey("hasPosition") ? fila["hasPosition"].value : null;
+                    string departamento = fila.ContainsKey("departamento") ? fila["departamento"].value : null;
+
                     respuesta.Add(person, new UsersOffer()
                     {
                         name = name,
