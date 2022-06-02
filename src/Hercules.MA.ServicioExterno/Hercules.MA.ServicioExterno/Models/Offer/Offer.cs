@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Hercules.MA.ServicioExterno.Models.Offer
 {
@@ -12,6 +13,8 @@ namespace Hercules.MA.ServicioExterno.Models.Offer
 
     public class UsersOffer
     {
+        public string id { get; set; }
+        public Guid idCorto { get; set; }
         public string name { get; set; }
         public int numPublicaciones { get; set; }
         public int numPublicacionesTotal { get; set; }

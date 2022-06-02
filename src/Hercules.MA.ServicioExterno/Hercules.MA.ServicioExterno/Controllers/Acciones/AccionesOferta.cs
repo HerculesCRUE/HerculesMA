@@ -45,7 +45,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<string, UsersOffer> respuesta = new();
 
             string select = $@"{ mPrefijos }
-                            select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento FROM <http://gnoss.com/organization.owl>  FROM <http://gnoss.com/group.owl> FROM <http://gnoss.com/department.owl> ";
+                            select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento (count(distinct ?doc)) as ?numDoc
+                            FROM <http://gnoss.com/organization.owl>  FROM <http://gnoss.com/group.owl> FROM <http://gnoss.com/department.owl> FROM <http://gnoss.com/document.owl>";
             string where = @$"where {{
                     ?main a <http://xmlns.com/foaf/0.1/Person>.
                     ?main <http://w3id.org/roh/gnossUser> ?idGnoss.
@@ -68,6 +69,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?dept <http://purl.org/dc/elements/1.1/title> ?departamento
                     }}
                     ?person <http://w3id.org/roh/isActive> 'true'.
+                    
+                    OPTIONAL{{
+                        ?doc a <http://purl.org/ontology/bibo/Document>.
+                        ?doc <http://w3id.org/roh/isValidated> 'true'.
+				        ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				        ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                    }}
 
                     FILTER(?idGnoss = <http://gnoss/{researcherId.ToUpper()}>)
                 }}";
@@ -79,19 +87,28 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 try
                 {
                     string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
+
+                    Guid guid = new Guid(person.Split('_')[1]);
                     string name = fila["name"].value;
                     string groups = fila.ContainsKey("groups") ? fila["groups"].value : null;
                     string organization = fila.ContainsKey("tituloOrg") ? fila["tituloOrg"].value : null;
                     string hasPosition = fila.ContainsKey("hasPosition") ? fila["hasPosition"].value : null;
                     string departamento = fila.ContainsKey("departamento") ? fila["departamento"].value : null;
+                    // Número de publicaciones totales, intenta convertirlo en entero
+                    string numDoc = fila.ContainsKey("numDoc") ? fila["numDoc"].value : null;
+                    int numPublicacionesTotal = 0;
+                    int.TryParse(fila["numDoc"].value, out numPublicacionesTotal);
 
                     respuesta.Add(person, new UsersOffer()
                     {
                         name = name,
+                        idCorto = guid,
+                        id = person,
                         groups = (groups != "" || groups != null) ? groups.Split(',').ToList() : new List<string>(),
                         organization = organization,
                         hasPosition = hasPosition,
-                        departamento = departamento
+                        departamento = departamento,
+                        numPublicacionesTotal = numPublicacionesTotal
                     });
                 } catch( Exception e ) {}
 
