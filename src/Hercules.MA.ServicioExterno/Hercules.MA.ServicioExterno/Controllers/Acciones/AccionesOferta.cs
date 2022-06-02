@@ -102,7 +102,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     respuesta.Add(person, new UsersOffer()
                     {
                         name = name,
-                        idCorto = guid,
+                        shortId = guid,
                         id = person,
                         groups = (groups != "" || groups != null) ? groups.Split(',').ToList() : new List<string>(),
                         organization = organization,

@@ -14,7 +14,7 @@ namespace Hercules.MA.ServicioExterno.Models.Offer
     public class UsersOffer
     {
         public string id { get; set; }
-        public Guid idCorto { get; set; }
+        public Guid shortId { get; set; }
         public string name { get; set; }
         public int numPublicaciones { get; set; }
         public int numPublicacionesTotal { get; set; }
