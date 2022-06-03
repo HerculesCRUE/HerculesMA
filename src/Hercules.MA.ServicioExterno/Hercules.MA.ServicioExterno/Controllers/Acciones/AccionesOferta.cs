@@ -44,41 +44,54 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             //ID persona/ID perfil/score
             Dictionary<string, UsersOffer> respuesta = new();
 
-            string select = $@"{ mPrefijos }
-                            select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento (count(distinct ?doc)) as ?numDoc
-                            FROM <http://gnoss.com/organization.owl>  FROM <http://gnoss.com/group.owl> FROM <http://gnoss.com/department.owl> FROM <http://gnoss.com/document.owl>";
-            string where = @$"where {{
-                    ?main a <http://xmlns.com/foaf/0.1/Person>.
-                    ?main <http://w3id.org/roh/gnossUser> ?idGnoss.
-                    
-                    ?group a <http://xmlns.com/foaf/0.1/Group>.
-                    ?group roh:membersGroup ?main.
-                    
-                    ?group roh:membersGroup ?person.
-                    
-                    ?person foaf:name ?name.
-                    OPTIONAL{{
-                        ?person roh:hasRole ?organization.
-                        ?organization <http://w3id.org/roh/title> ?tituloOrg.
-                    }}
-                    OPTIONAL{{
-                        ?person <http://w3id.org/roh/hasPosition> ?hasPosition.
-                    }}
-                    OPTIONAL{{
-                        ?person <http://vivoweb.org/ontology/core#departmentOrSchool> ?dept.
-                        ?dept <http://purl.org/dc/elements/1.1/title> ?departamento
-                    }}
-                    ?person <http://w3id.org/roh/isActive> 'true'.
-                    
-                    OPTIONAL{{
-                        ?doc a <http://purl.org/ontology/bibo/Document>.
-                        ?doc <http://w3id.org/roh/isValidated> 'true'.
-				        ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
-				        ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-                    }}
+            // Comprueba que el id dado es un guid válido
+            Guid userGUID = Guid.Empty;
+            try
+            {
+                userGUID = new Guid(researcherId);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("The id is't a correct guid");
+            }
 
-                    FILTER(?idGnoss = <http://gnoss/{researcherId.ToUpper()}>)
-                }}";
+
+            string select = $@"{ mPrefijos }
+                select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento (count(distinct ?doc)) as ?numDoc
+                FROM <http://gnoss.com/organization.owl>  FROM <http://gnoss.com/group.owl> FROM <http://gnoss.com/department.owl> FROM <http://gnoss.com/document.owl>";
+
+            string where = @$"where {{
+                ?main a <http://xmlns.com/foaf/0.1/Person>.
+                ?main <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    
+                ?group a <http://xmlns.com/foaf/0.1/Group>.
+                ?group roh:membersGroup ?main.
+                    
+                ?group roh:membersGroup ?person.
+                    
+                ?person foaf:name ?name.
+                OPTIONAL{{
+                    ?person roh:hasRole ?organization.
+                    ?organization <http://w3id.org/roh/title> ?tituloOrg.
+                }}
+                OPTIONAL{{
+                    ?person <http://w3id.org/roh/hasPosition> ?hasPosition.
+                }}
+                OPTIONAL{{
+                    ?person <http://vivoweb.org/ontology/core#departmentOrSchool> ?dept.
+                    ?dept <http://purl.org/dc/elements/1.1/title> ?departamento
+                }}
+                ?person <http://w3id.org/roh/isActive> 'true'.
+                    
+                OPTIONAL{{
+                    ?doc a <http://purl.org/ontology/bibo/Document>.
+                    ?doc <http://w3id.org/roh/isValidated> 'true'.
+				    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+				    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                }}
+
+                FILTER(?idGnoss = <http://gnoss/{userGUID.ToString().ToUpper()}>)
+            }}";
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
 
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
@@ -99,7 +112,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     int numPublicacionesTotal = 0;
                     int.TryParse(fila["numDoc"].value, out numPublicacionesTotal);
 
-                    respuesta.Add(person, new UsersOffer()
+                    respuesta.Add(guid.ToString(), new UsersOffer()
                     {
                         name = name,
                         shortId = guid,
@@ -110,9 +123,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         departamento = departamento,
                         numPublicacionesTotal = numPublicacionesTotal
                     });
-                } catch( Exception e ) {}
+                }
+                catch (Exception e) { }
 
             }
+            
+
+            
 
             return respuesta;
         }
