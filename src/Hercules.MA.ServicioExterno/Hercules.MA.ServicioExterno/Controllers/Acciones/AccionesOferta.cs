@@ -215,7 +215,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     ?s a <http://w3id.org/roh/MatureState>.
                     ?s dc:title ?title.
                     ?s dc:identifier ?identifier.
-                    FILTER( lang(?w) = '{lang}' OR lang(?w) = '')
+                    FILTER( lang(?title) = '{lang}' OR lang(?title) = '')
                 }} ORDER BY ASC(?identifier)";
                 SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "maturestate");
 
@@ -266,7 +266,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     ?s a <http://w3id.org/roh/FramingSector>.
                     ?s dc:title ?title.
                     ?s dc:identifier ?identifier.
-                    FILTER(langMatches(lang(?title), ""{lang}""))
+                    FILTER( lang(?title) = '{lang}' OR lang(?title) = '')
                 }} ORDER BY ASC(?title)";
                 SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "framingsector");
 
