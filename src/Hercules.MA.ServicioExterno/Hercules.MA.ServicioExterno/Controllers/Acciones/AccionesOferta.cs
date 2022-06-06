@@ -215,7 +215,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     ?s a <http://w3id.org/roh/MatureState>.
                     ?s dc:title ?title.
                     ?s dc:identifier ?identifier.
-                    FILTER(langMatches(lang(?title), ""{lang}""))
+                    FILTER( lang(?w) = '{lang}' OR lang(?w) = '')
                 }} ORDER BY ASC(?identifier)";
                 SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "maturestate");
 
