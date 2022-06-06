@@ -129,12 +129,169 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
             
 
-            
+            return respuesta;
+        }
+
+
+
+
+        /// <summary>
+        /// Método público para cargar los investigadores del grupo al que pertenece el usuario
+        /// </summary>
+        /// <param name="ids">Ids de los investigadores</param>
+        /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
+
+        public List<string> LoadLineResearchs(string[] ids)
+        {
+            //ID persona/ID perfil/score
+            List<string> respuesta = new();
+
+            List<Guid> usersGUIDs = new();
+            foreach (var id in ids)
+            {
+                try
+                {
+                    // Comprueba que el id dado es un guid válido
+                    usersGUIDs.Add(new Guid(id));
+
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("The id is't a correct guid");
+                }
+
+            }
+
+            string select = $@"{ mPrefijos }
+                        select distinct ?lineResearch";
+
+            string where = @$"where {{
+
+                        ?group a 'group'.
+                        ?group roh:membersGroup ?person.
+                        ?group roh:lineResearch ?lineResearch.
+
+                        FILTER(?person in(<http://gnoss/{string.Join(">,<http://gnoss/", usersGUIDs.Select(x => x.ToString().ToUpper()))}>))
+                    }}";
+
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+            {
+
+                try
+                {
+                    string lineResearch = fila["lineResearch"].value;
+
+                    respuesta.Add(lineResearch);
+                }
+                catch (Exception e) { }
+
+            }
 
             return respuesta;
         }
 
-        
+
+
+
+        /// <summary>
+        /// Método público para cargar los matureStates
+        /// </summary>
+        /// <param name="lang">Idioma a cargar</param>
+        /// <returns>Diccionario con los datos.</returns>
+
+        public Dictionary<string, string> LoadMatureStates(string lang)
+        {
+            Dictionary<string, string> respuesta = new();
+
+            if (lang.Length < 3)
+            {
+
+                string select = $@"{ mPrefijos }
+                    select distinct ?identifier ?title";
+
+                string where = @$"where {{
+                    ?s a <http://w3id.org/roh/MatureState>.
+                    ?s dc:title ?title.
+                    ?s dc:identifier ?identifier.
+                    FILTER(langMatches(lang(?title), ""{lang}""))
+                }} ORDER BY ASC(?identifier)";
+                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "maturestate");
+
+                foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+                {
+
+                    try
+                    {
+                        string identifier = fila["identifier"].value;
+                        string title = fila["title"].value;
+
+                        if (!respuesta.ContainsKey(identifier))
+                        {
+
+                            respuesta.Add(identifier, title);
+                        }
+
+                    }
+                    catch (Exception e) { }
+
+                }
+            }
+
+            return respuesta;
+        }
+
+
+
+
+        /// <summary>
+        /// Método público para cargar los FramingSectors
+        /// </summary>
+        /// <param name="lang">Idioma a cargar</param>
+        /// <returns>Diccionario con los datos.</returns>
+
+        public Dictionary<string, string> LoadFramingSectors(string lang)
+        {
+
+            Dictionary<string, string> respuesta = new();
+
+            if (lang.Length < 3)
+            {
+
+                string select = $@"{ mPrefijos }
+                    select distinct ?identifier ?title ?lang";
+
+                string where = @$"where {{
+                    ?s a <http://w3id.org/roh/FramingSector>.
+                    ?s dc:title ?title.
+                    ?s dc:identifier ?identifier.
+                    FILTER(langMatches(lang(?title), ""{lang}""))
+                }} ORDER BY ASC(?title)";
+                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "framingsector");
+
+                foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+                {
+
+                    try
+                    {
+                        string identifier = fila["identifier"].value;
+                        string title = fila["title"].value;
+
+                        if (!respuesta.ContainsKey(identifier))
+                        {
+
+                            respuesta.Add(identifier, title);
+                        }
+
+                    }
+                    catch (Exception e) { }
+
+                }
+            }
+
+            return respuesta;
+        }
 
     }
 }

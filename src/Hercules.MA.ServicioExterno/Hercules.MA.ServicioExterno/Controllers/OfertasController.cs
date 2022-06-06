@@ -23,7 +23,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdClusterId">Usuario de gnoss.</param>
         /// <returns>Id del cluster creado o modificado.</returns>
         [HttpGet("LoadCluster")]
-        public IActionResult LoadCluster([Required] string pIdClusterId)
+        public IActionResult LoadOffer([Required] string pIdClusterId)
         {
             Offer idClusterRes;
             try
@@ -51,6 +51,67 @@ namespace Hercules.MA.ServicioExterno.Controllers
             {
                 AccionesOferta accionOferta = new AccionesOferta();
                 return Ok(accionOferta.LoadUsers(pIdUserId));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
+        /// <summary>
+        /// Controlador para Obtener las líneas de invetigación de los grupos de los usuarios investigadores dados
+        /// </summary>
+        /// <param name="pIdUsersId">Usuarios investigadores.</param>
+        /// <returns>Listado de las líneas de investigación.</returns>
+        [HttpPost("LoadLineResearchs")]
+        public IActionResult LoadLineResearchs([FromBody] string[] pIdUsersId)
+        {
+            try
+            {
+                AccionesOferta accionOferta = new AccionesOferta();
+                return Ok(accionOferta.LoadLineResearchs(pIdUsersId));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// Controlador para Obtener los sectores de encuadre
+        /// </summary>
+        /// <param name="lang">Idioma a cargar.</param>
+        /// <returns>Listado de las líneas de investigación.</returns>
+        [HttpGet("LoadFramingSectors")]
+        public IActionResult LoadFramingSectors(string lang)
+        {
+            try
+            {
+                AccionesOferta accionOferta = new AccionesOferta();
+                return Ok(accionOferta.LoadFramingSectors(lang));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// Controlador para Obtener los estados de madurez
+        /// </summary>
+        /// <param name="lang">Idioma a cargar.</param>
+        /// <returns>Listado de las líneas de investigación.</returns>
+        [HttpGet("LoadMatureStates")]
+        public IActionResult LoadMatureStates(string lang)
+        {
+            try
+            {
+                AccionesOferta accionOferta = new AccionesOferta();
+                return Ok(accionOferta.LoadMatureStates(lang));
             }
             catch (Exception)
             {
