@@ -66,7 +66,8 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdUsersId">Usuarios investigadores.</param>
         /// <returns>Listado de las líneas de investigación.</returns>
         [HttpPost("LoadLineResearchs")]
-        public IActionResult LoadLineResearchs([FromBody] string[] pIdUsersId)
+        [Produces("application/json")]
+        public IActionResult LoadLineResearchs([FromForm] string[] pIdUsersId)
         {
             try
             {
