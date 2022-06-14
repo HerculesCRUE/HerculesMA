@@ -188,6 +188,33 @@ namespace OfferOntology
 
 
 
+		public virtual ComplexOntologyResource ToGnossApiResource(ResourceApi resourceAPI, List<string> listaDeCategorias)
+		{
+			return ToGnossApiResource(resourceAPI, listaDeCategorias, Guid.Empty, Guid.Empty);
+		}
+
+		public virtual ComplexOntologyResource ToGnossApiResource(ResourceApi resourceAPI, List<string> listaDeCategorias, Guid idrecurso, Guid idarticulo)
+		{
+			ComplexOntologyResource resource = new ComplexOntologyResource();
+			Ontology ontology = null;
+			GetEntities();
+			GetProperties();
+			if (idrecurso.Equals(Guid.Empty) && idarticulo.Equals(Guid.Empty))
+			{
+				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, RdfType, RdfsLabel, prefList, propList, entList);
+			}
+			else
+			{
+				ontology = new Ontology(resourceAPI.GraphsUrl, resourceAPI.OntologyUrl, RdfType, RdfsLabel, prefList, propList, entList, idrecurso, idarticulo);
+			}
+			resource.Id = GNOSSID;
+			resource.Ontology = ontology;
+			resource.TextCategories=listaDeCategorias;
+			AddResourceTitle(resource);
+			AddResourceDescription(resource);
+			return resource;
+		}
+
 
 	}
 }

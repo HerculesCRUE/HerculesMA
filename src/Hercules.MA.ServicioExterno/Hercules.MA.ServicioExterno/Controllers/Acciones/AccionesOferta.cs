@@ -29,6 +29,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static Guid mIdComunidad = mCommunityApi.GetCommunityId();
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
+        private static string[] listTagsNotForvidden = new string[] { "<ol>", "<li>", "<b>", "<i>", "<u>", "<ul>", "<strike>", "<blockquote>", "<div>", "<hr>", "</ol>", "</li>", "</b>", "</i>", "</u>", "</ul>", "</strike>", "</blockquote>", "</div>", "<br/>" };
         #endregion
 
 
@@ -38,7 +39,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="researcherId">Datos del cluster para obtener los perfiles</param>
         /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
-        
+
         public Dictionary<string, UsersOffer> LoadUsers(string researcherId)
         {
             //ID persona/ID perfil/score
@@ -291,6 +292,357 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
             return respuesta;
+        }
+
+        /// <summary>
+        /// Controlador para guardar los datos de la oferta 
+        /// </summary>
+        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
+        /// <param name="oferta">Objeto con la oferta tecnológica a añadir / modificar.</param>
+        /// <returns>Id de la oferta creada o modificada.</returns>
+        public string SaveOffer(string pIdGnossUser, Offer oferta)
+        {
+            string idRecurso = oferta.entityID;
+            int MAX_INTENTOS = 10;
+            bool uploadedR = false;
+
+            // Obtener el id del usuario usando el id de la cuenta
+            string select = "select ?s ";
+            string where = @$"where {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            var userGnossId = string.Empty;
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                userGnossId = e["s"].value;
+            });
+
+            if (!string.IsNullOrEmpty(userGnossId))
+            {
+                // Creando el objeto la oferta
+                // Creando las categorías
+                List<CategoryPath> categorias = new List<CategoryPath>();
+                categorias.Add(new CategoryPath() { IdsRoh_categoryNode = oferta.tags });
+
+                List<ClusterPerfil> listClusterPerfil = new();
+                // Creando los perfiles del cluster
+
+                // Obtiene el ID largo de los investigadores
+                List<string> numMember = new();
+                Dictionary<string, string> relationIDs = new();
+                if (oferta.researchers != null)
+                {
+                    oferta.researchers.Values.ToList().ForEach(user =>
+                    {
+                        if (user != null)
+                        {
+                            if (user.shortId != Guid.Empty)
+                            {
+                                numMember.Add("<http://gnoss.com/" + user.shortId + ">");
+                            }
+                        }
+                    });
+                    numMember = numMember.Distinct().ToList();
+
+                    // Query to get the full ID
+                    if (numMember.Count > 0)
+                    {
+
+                        select = "select distinct ?s ?entidad FROM <http://gnoss.com/person.owl>";
+                        where = @$"where {{
+                            ?s <http://gnoss/hasEntidad> ?entidad.
+                            ?entidad a <http://xmlns.com/foaf/0.1/Person>.
+                            FILTER(?s in ({string.Join(',', numMember)}))
+                        }}
+                        ";
+
+                        try
+                        {
+                            sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+                            sparqlObject.results.bindings.ForEach(e =>
+                            {
+                                relationIDs.Add(e["s"].value, e["entidad"].value);
+                            });
+                        } catch (Exception e) { }
+                        
+                    }
+                }
+
+
+                // Obtiene el ID largo de los proyectos
+                List<string> numProj = new();
+                Dictionary<string, string> relationProjIDs = new();
+                if (oferta.projects != null)
+                {
+                    oferta.projects.Values.ToList().ForEach(item =>
+                    {
+                        if (item != null)
+                        {
+                            if (item.shortId != Guid.Empty)
+                            {
+                                numProj.Add("<http://gnoss.com/" + item.shortId + ">");
+                            }
+                        }
+                    });
+
+                    // Query to get the full ID
+                    if (numProj.Count > 0)
+                    {
+
+                        select = "select distinct ?s ?entidad FROM <http://gnoss.com/project.owl>";
+                        where = @$"where {{
+                            ?s <http://gnoss/hasEntidad> ?entidad.
+                            ?entidad a <http://vivoweb.org/ontology/core#Project>.
+                            FILTER(?s in ({string.Join(',', numProj)}))
+                        }}
+                        ";
+                        try
+                        {
+                            sparqlObject = mResourceApi.VirtuosoQuery(select, where, "project");
+                            sparqlObject.results.bindings.ForEach(e =>
+                            {
+                                relationProjIDs.Add(e["s"].value, e["entidad"].value);
+                            });
+                        }
+                        catch (Exception e) { }
+
+                    }
+                }
+
+
+
+                // Obtiene el ID largo de los Documentos
+                List<string> numDocs = new();
+                Dictionary<string, string> relationDocsIDs = new();
+                if (oferta.documents != null)
+                {
+                    oferta.documents.Values.ToList().ForEach(item =>
+                    {
+                        if (item != null)
+                        {
+                            if (item.shortId != Guid.Empty)
+                            {
+                                numDocs.Add("<http://gnoss.com/" + item.shortId + ">");
+                            }
+                        }
+                    });
+
+                    // Query to get the full ID
+                    if (numDocs.Count > 0)
+                    {
+
+                        select = "select distinct ?s ?entidad FROM <http://gnoss.com/document.owl>";
+                        where = @$"where {{
+                            ?s <http://gnoss/hasEntidad> ?entidad.
+                            ?entidad a <http://purl.org/ontology/bibo/Document>.
+                            FILTER(?s in ({string.Join(',', numDocs)}))
+                        }}
+                        ";
+                        try
+                        {
+                            sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
+                            sparqlObject.results.bindings.ForEach(e =>
+                            {
+                                relationDocsIDs.Add(e["s"].value, e["entidad"].value);
+                            });
+                        }
+                        catch (Exception e) { }
+
+                    }
+                }
+
+
+
+
+                // Obtiene el ID largo de los Documentos
+                List<string> numPII = new();
+                Dictionary<string, string> relationPiiIDs = new();
+                if (oferta.pii != null)
+                {
+                    oferta.documents.Values.ToList().ForEach(item =>
+                    {
+                        if (item != null)
+                        {
+                            if (item.shortId != Guid.Empty)
+                            {
+                                numPII.Add("<http://gnoss.com/" + item.shortId + ">");
+                            }
+                        }
+                    });
+
+                    // Query to get the full ID
+                    if (numPII.Count > 0)
+                    {
+
+                        select = "select distinct ?s ?entidad FROM <http://gnoss.com/patent.owl>";
+                        where = @$"where {{
+                            ?s <http://gnoss/hasEntidad> ?entidad.
+                            ?entidad a <http://purl.org/ontology/bibo/Patent>.
+                            FILTER(?s in ({string.Join(',', numPII)}))
+                        }}
+                        ";
+                        try
+                        {
+                            sparqlObject = mResourceApi.VirtuosoQuery(select, where, "patent");
+                            sparqlObject.results.bindings.ForEach(e =>
+                            {
+                                relationPiiIDs.Add(e["s"].value, e["entidad"].value);
+                            });
+                        }
+                        catch (Exception e) { }
+
+                    }
+                }
+
+
+
+                // Registrar cambio en la disponibilidad
+                OfferOntology.AvailabilityChangeEvent availabilityChangeEvent = new();
+                availabilityChangeEvent.IdRoh_roleOf = userGnossId;
+                availabilityChangeEvent.IdSchema_availability = "001";
+                availabilityChangeEvent.Schema_validFrom = DateTime.UtcNow;
+
+                // creando los cluster
+                OfferOntology.Offer cRsource = new();
+                // Usuario creador
+                cRsource.IdSchema_offeredBy = userGnossId;
+                // Otros campos
+                cRsource.Schema_name = oferta.name;
+                cRsource.Dct_issued = DateTime.UtcNow;
+                // Estado inicial (En borrador)
+                cRsource.IdSchema_availability = "001";
+                // Sección de las descripciones
+                cRsource.Schema_description = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.descripcion, listTagsNotForvidden);
+                cRsource.Roh_innovation = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.innovacion, listTagsNotForvidden);
+                cRsource.Drm_origin = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.origen, listTagsNotForvidden);
+                cRsource.Roh_partnerType = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.socios, listTagsNotForvidden);
+                cRsource.Roh_collaborationSought = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.colaboracion, listTagsNotForvidden);
+                cRsource.Qb_observation = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.observaciones, listTagsNotForvidden);
+                cRsource.Roh_application = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.aplicaciones, listTagsNotForvidden);
+                cRsource.Bibo_recipient = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.destinatarios, listTagsNotForvidden);
+                // Selectores de los estados de madurez y el sector
+                cRsource.IdRoh_framingSector = oferta.framingSector;
+                cRsource.IdBibo_status = oferta.matureState;
+                // Añadir evento de creación
+                cRsource.Roh_availabilityChangeEvent = new();
+                try
+                {
+                    cRsource.Roh_availabilityChangeEvent.Add(availabilityChangeEvent);
+                }
+                catch (Exception e) { }
+
+                try
+                {
+                    cRsource.Vivo_freetextKeyword = oferta.tags;
+                    cRsource.Roh_lineResearch = oferta.lineResearchs.Values.ToList();
+                }
+                catch (Exception e) {}
+
+                // Añadir los investigadores de la oferta
+                try
+                {
+                    cRsource.IdsRoh_researchers =  relationIDs.Values.ToList();
+                }
+                catch (Exception e) { }
+
+
+                // Proyectos, Documentos y PII
+                try
+                {
+                    if (oferta.projects != null)
+                    {
+                        cRsource.IdsRoh_project = relationProjIDs.Values.ToList();
+                    }
+                    else
+                    {
+                        cRsource.IdsRoh_project = null;
+                    }
+                } catch (Exception e)
+                {
+                    cRsource.IdsRoh_project = null;
+                }
+                try
+                {
+                    if (oferta.documents != null)
+                    {
+                        cRsource.IdsRoh_document = relationDocsIDs.Values.ToList();
+                    } else
+                    {
+                        cRsource.IdsRoh_document = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    cRsource.IdsRoh_document = null;
+                }
+                try
+                {
+                    if (oferta.pii != null)
+                    {
+                        cRsource.IdsRoh_patents = relationPiiIDs.Values.ToList();
+                    } else
+                    {
+                        cRsource.IdsRoh_patents = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    cRsource.IdsRoh_patents = null;
+                }
+
+
+                // Guardando o actualizando el recurso
+                mResourceApi.ChangeOntoly("offer");
+                // Comprueba si es una actualización o no
+                if (idRecurso != null && idRecurso != "")
+                {
+                    string[] recursoSplit = idRecurso.Split('_');
+
+                    // Modificación.
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null, new Guid(recursoSplit[recursoSplit.Length - 2]), new Guid(recursoSplit[recursoSplit.Length - 1]));
+                    int numIntentos = 0;
+                    while (!resource.Modified)
+                    {
+                        numIntentos++;
+                        if (numIntentos > MAX_INTENTOS)
+                        {
+                            break;
+                        }
+
+                        mResourceApi.ModifyComplexOntologyResource(resource, false, false);
+                        uploadedR = resource.Modified;
+                    }
+
+                }
+                else
+                {
+                    // Inserción.
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null);
+                    int numIntentos = 0;
+                    while (!resource.Uploaded)
+                    {
+                        numIntentos++;
+                        if (numIntentos > MAX_INTENTOS)
+                        {
+                            break;
+                        }
+                        idRecurso = mResourceApi.LoadComplexSemanticResource(resource, true, true);
+                        uploadedR = resource.Uploaded;
+                    }
+                }
+            }
+
+            if (uploadedR)
+            {
+                return idRecurso;
+            }
+            else
+            {
+                throw new Exception("Recurso no creado");
+            }
         }
 
     }

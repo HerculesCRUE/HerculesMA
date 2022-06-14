@@ -118,5 +118,29 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
         }
+
+
+        /// <summary>
+        /// Controlador para guardar los datos de la oferta 
+        /// </summary>
+        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
+        /// <param name="oferta">Objeto con la oferta tecnológica a añadir / modificar.</param>
+        /// <returns>Id de la oferta creada o modificada.</returns>
+        [HttpPost("SaveOffer")]
+        [Produces("application/json")]
+        public IActionResult SaveOffer([FromForm] string pIdGnossUser, [FromForm] Offer oferta)
+        {
+            try
+            {
+                AccionesOferta accionOferta = new AccionesOferta();
+                return Ok(accionOferta.SaveOffer(pIdGnossUser, oferta));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
     }
 }
