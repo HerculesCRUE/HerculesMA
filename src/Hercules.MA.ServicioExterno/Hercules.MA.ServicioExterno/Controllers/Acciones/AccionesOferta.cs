@@ -514,15 +514,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 cRsource.Dct_issued = DateTime.UtcNow;
                 // Estado inicial (En borrador)
                 cRsource.IdSchema_availability = "001";
-                // Sección de las descripciones
-                cRsource.Schema_description = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.descripcion, listTagsNotForvidden);
-                cRsource.Roh_innovation = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.innovacion, listTagsNotForvidden);
-                cRsource.Drm_origin = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.origen, listTagsNotForvidden);
-                cRsource.Roh_partnerType = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.socios, listTagsNotForvidden);
-                cRsource.Roh_collaborationSought = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.colaboracion, listTagsNotForvidden);
-                cRsource.Qb_observation = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.observaciones, listTagsNotForvidden);
-                cRsource.Roh_application = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.aplicaciones, listTagsNotForvidden);
-                cRsource.Bibo_recipient = CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.destinatarios, listTagsNotForvidden);
+                // Sección de las descripciones, limpiamos los strings de tags que no queramos
+                cRsource.Schema_description = oferta.objectFieldsHtml.descripcion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.descripcion, listTagsNotForvidden) : "";
+                cRsource.Roh_innovation = oferta.objectFieldsHtml.innovacion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.innovacion, listTagsNotForvidden) : "";
+                cRsource.Drm_origin = oferta.objectFieldsHtml.origen != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.origen, listTagsNotForvidden) : "";
+                cRsource.Roh_partnerType = oferta.objectFieldsHtml.socios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.socios, listTagsNotForvidden) : "";
+                cRsource.Roh_collaborationSought = oferta.objectFieldsHtml.colaboracion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.colaboracion, listTagsNotForvidden) : "";
+                cRsource.Qb_observation = oferta.objectFieldsHtml.observaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.observaciones, listTagsNotForvidden) : "";
+                cRsource.Roh_application = oferta.objectFieldsHtml.aplicaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.aplicaciones, listTagsNotForvidden) : "";
+                cRsource.Bibo_recipient = oferta.objectFieldsHtml.destinatarios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.destinatarios, listTagsNotForvidden) : "";
                 // Selectores de los estados de madurez y el sector
                 cRsource.IdRoh_framingSector = oferta.framingSector;
                 cRsource.IdBibo_status = oferta.matureState;
