@@ -1,3 +1,4 @@
+using Hercules.MA.ServicioExterno.Controllers;
 using Hercules.MA.ServicioExterno.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,6 +43,9 @@ namespace Hercules.MA.ServicioExterno
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ServicioExterno", Version = "v1" });
             });
+
+            // Configuración.
+            services.AddSingleton(typeof(ConfigService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

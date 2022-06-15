@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="dotNetRDF" Version="2.7.2" />
     <PackageReference Include="GnossApiWrapper.NetCore" Version="1.0.8" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
@@ -24,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="Config\ConfigOAuth\OAuthV3.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
