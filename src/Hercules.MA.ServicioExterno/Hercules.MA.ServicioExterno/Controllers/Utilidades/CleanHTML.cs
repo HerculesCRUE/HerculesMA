@@ -10,20 +10,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 {
     public class CleanHTML
     {
-        public static string StripTagsRegex(string source)
-        {
-            return Regex.Replace(source, "<.*?>", string.Empty);
-        }
-
-        static Regex _htmlRegex = new Regex("<.*?>", RegexOptions.Compiled);
 
         static Regex _AttrStyleRegex = new Regex("[^style]+[ ]?=[ ]?\"[^\"]*\"", RegexOptions.Compiled);
-
-
-        public static string StripTagsRegexCompiled(string source)
-        {
-            return _htmlRegex.Replace(source, string.Empty);
-        }
 
         /// <summary>
         /// Método para limpiar un string de tags, a excepción de los permitidos

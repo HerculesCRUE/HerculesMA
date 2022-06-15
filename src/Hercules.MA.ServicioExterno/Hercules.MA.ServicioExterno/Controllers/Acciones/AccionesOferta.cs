@@ -210,7 +210,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
 
                 string select = $@"{ mPrefijos }
-                    select distinct ?identifier ?title";
+                    select distinct ?s ?identifier ?title";
 
                 string where = @$"where {{
                     ?s a <http://w3id.org/roh/MatureState>.
@@ -225,13 +225,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     try
                     {
+                        string s = fila["s"].value;
                         string identifier = fila["identifier"].value;
                         string title = fila["title"].value;
 
                         if (!respuesta.ContainsKey(identifier))
                         {
 
-                            respuesta.Add(identifier, title);
+                            respuesta.Add(s, title);
                         }
 
                     }
@@ -261,7 +262,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
 
                 string select = $@"{ mPrefijos }
-                    select distinct ?identifier ?title ?lang";
+                    select distinct ?s ?identifier ?title ?lang";
 
                 string where = @$"where {{
                     ?s a <http://w3id.org/roh/FramingSector>.
@@ -276,13 +277,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     try
                     {
+                        string s = fila["s"].value;
                         string identifier = fila["identifier"].value;
                         string title = fila["title"].value;
 
                         if (!respuesta.ContainsKey(identifier))
                         {
 
-                            respuesta.Add(identifier, title);
+                            respuesta.Add(s, title);
                         }
 
                     }
@@ -293,6 +295,52 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             return respuesta;
         }
+
+        /// <summary>
+        /// Método público para cargar los estados de la oferta (activado, en borrador,...)
+        /// </summary>
+        /// <param name="lang">Idioma a cargar</param>
+        /// <returns>Diccionario con los datos.</returns>
+
+        public List<Tuple<string, string, string>> LoadOfferStates(string lang)
+        {
+            List<Tuple<string, string, string>> respuesta = new();
+
+            if (lang.Length < 3)
+            {
+
+                string select = $@"{ mPrefijos }
+                    select distinct ?s ?identifier ?title";
+
+                string where = @$"where {{
+                    ?s a <http://w3id.org/roh/OfferState>.
+                    ?s dc:title ?title.
+                    ?s dc:identifier ?identifier.
+                    FILTER( lang(?title) = '{lang}' OR lang(?title) = '')
+                }} ORDER BY ASC(?identifier)";
+                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offerstate");
+
+                foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
+                {
+
+                    try
+                    {
+                        string s = fila["s"].value;
+                        string identifier = fila["identifier"].value;
+                        string title = fila["title"].value;
+
+                        respuesta.Add(new Tuple<string, string, string>(s, identifier, title));
+
+                    }
+                    catch (Exception e) { }
+
+                }
+            }
+
+            return respuesta;
+        }
+
+
 
         /// <summary>
         /// Controlador para guardar los datos de la oferta 
@@ -498,11 +546,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
 
 
+                // Obtengo todos los estados
+                var todosLosEstados = LoadOfferStates("es");
+                var estado = todosLosEstados.Find(e => e.Item2 == "001");
+
 
                 // Registrar cambio en la disponibilidad
                 OfferOntology.AvailabilityChangeEvent availabilityChangeEvent = new();
                 availabilityChangeEvent.IdRoh_roleOf = userGnossId;
-                availabilityChangeEvent.IdSchema_availability = "001";
+                availabilityChangeEvent.IdSchema_availability = estado.Item1;
                 availabilityChangeEvent.Schema_validFrom = DateTime.UtcNow;
 
                 // creando los cluster
@@ -513,7 +565,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 cRsource.Schema_name = oferta.name;
                 cRsource.Dct_issued = DateTime.UtcNow;
                 // Estado inicial (En borrador)
-                cRsource.IdSchema_availability = "001";
+                cRsource.IdSchema_availability = estado.Item1;
                 // Sección de las descripciones, limpiamos los strings de tags que no queramos
                 cRsource.Schema_description = oferta.objectFieldsHtml.descripcion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.descripcion, listTagsNotForvidden) : "";
                 cRsource.Roh_innovation = oferta.objectFieldsHtml.innovacion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.innovacion, listTagsNotForvidden) : "";
@@ -524,8 +576,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 cRsource.Roh_application = oferta.objectFieldsHtml.aplicaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.aplicaciones, listTagsNotForvidden) : "";
                 cRsource.Bibo_recipient = oferta.objectFieldsHtml.destinatarios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.destinatarios, listTagsNotForvidden) : "";
                 // Selectores de los estados de madurez y el sector
-                cRsource.IdRoh_framingSector = oferta.framingSector;
-                cRsource.IdBibo_status = oferta.matureState;
+                cRsource.IdRoh_framingSector = oferta.framingSector != null ? oferta.framingSector : null;
+                cRsource.IdBibo_status = oferta.matureState != null ? oferta.matureState : null;
                 // Añadir evento de creación
                 cRsource.Roh_availabilityChangeEvent = new();
                 try
