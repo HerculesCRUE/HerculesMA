@@ -16,27 +16,49 @@ namespace Hercules.MA.ServicioExterno.Controllers
     public class OfertasController : ControllerBase
     {
 
-
         /// <summary>
-        /// Controlador para guardar los datos del cluster.
+        /// Borra una oferta
         /// </summary>
-        /// <param name="pIdClusterId">Usuario de gnoss.</param>
-        /// <returns>Id del cluster creado o modificado.</returns>
-        [HttpGet("LoadCluster")]
-        public IActionResult LoadOffer([Required] string pIdClusterId)
+        /// <param name="pIdOfferId">Id de la oferta a borrar.</param>
+        /// <returns>Un booleano si ha sido borrado.</returns>
+        [HttpPost("borrarCluster")]
+        public IActionResult BorrarOferta([Required] string pIdOfferId)
         {
-            Offer idClusterRes;
+
+            bool borrado = false;
+
             try
             {
-                AccionesCluster accionCluster = new AccionesCluster();
-                idClusterRes = null;
-                //idClusterRes = accionCluster.LoadCluster(pIdClusterId);
+                AccionesOferta accionCluster = new AccionesOferta();
+                borrado = accionCluster.BorrarOferta(pIdOfferId);
             }
             catch (Exception)
             {
                 throw;
             }
-            return Ok(idClusterRes);
+
+            return Ok(borrado);
+        }
+
+        /// <summary>
+        /// Controlador para guardar los datos de la oferta.
+        /// </summary>
+        /// <param name="pIdOfertaId">Id de la oferta.</param>
+        /// <returns>Objeto "leible" de la oferta.</returns>
+        [HttpGet("LoadOffer")]
+        public IActionResult LoadOffer([Required] string pIdOfertaId)
+        {
+            Offer Oferta;
+            try
+            {
+                AccionesOferta accionCluster = new AccionesOferta();
+                Oferta = accionCluster.LoadOffer(pIdOfertaId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return Ok(Oferta);
         }
 
         /// <summary>

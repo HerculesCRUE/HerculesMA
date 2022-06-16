@@ -7,6 +7,10 @@ namespace Hercules.MA.ServicioExterno.Models.Offer
     {
         public string entityID { get; set; }
         public string name { get; set; }
+        public string creatorId { get; set; }
+        public string creatorName { get; set; }
+        public string state { get; set; }
+        public string date { get; set; }
         public List<string> tags { get; set; }
         public Dictionary<string, string> lineResearchs { get; set; }
         public Dictionary<Guid, UsersOffer> researchers { get; set; }
@@ -37,6 +41,7 @@ namespace Hercules.MA.ServicioExterno.Models.Offer
         public string info { get; set; }
         public string description { get; set; }
         public List<string> researchers { get; set; }
+        public string[] dates { get; set; }
     }
     public class DocumentsOffer
     {
@@ -55,6 +60,7 @@ namespace Hercules.MA.ServicioExterno.Models.Offer
         public string name { get; set; }
         public string info { get; set; }
         public string description { get; set; }
+        public string[] dates { get; set; }
         public List<string> researchers { get; set; }
     }
     public class UsersOffer

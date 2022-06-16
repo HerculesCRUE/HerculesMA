@@ -611,6 +611,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         }
 
 
+        /// <summary>
+        /// Función que obtiene el ID corto mediante el ID del recurso en el grafo de búsqueda a través de su ID en el grafo de la ontología
+        /// </summary>
+        /// <param name="pRsourceApi">API</param>
+        /// <param name="pIdOntologia">ID del grafo de la ontología.</param>
+        /// <returns>ID del grafo de búsqueda.</returns>
+        public static Guid ObtenerIdCorto(ResourceApi pRsourceApi, string pIdOntologia)
+        {
+            Guid idCorto = pRsourceApi.GetShortGuid(pIdOntologia);
+            return idCorto;
+        }
+
+
         public static void ProcessRelations(string pNombreRelacion, Dictionary<string, List<string>> pItems, ref Dictionary<string, List<DataQueryRelaciones>> pDicRelaciones)
         {
             foreach (string itemA in pItems.Keys)
@@ -653,5 +666,68 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                 }
             }
         }
+
+
+        /// <summary>
+        /// Método que obtiene los Ids largos a través de los Ids cortos 
+        /// </summary>
+        /// <param name="ids">Lista de Ids cortos sobre los que queremos obtener sus IDs largos.</param>
+        /// <param name="mResourceApi">Instancia de la clase ResourceApi.</param>
+        /// <param name="rdfOntology">RDF de la ontología.</param>
+        /// <param name="nameOntology">Nombre de la ontología.</param>
+        /// <param name="urlOntology">(Opcional) Url de la ontología.</param>
+        /// <returns>Devuelve una relación (diccionario) de los guids enviados con sus correspondientes Ids largos.</returns>
+        internal static Dictionary<Guid, string> GetLongIds (List<Guid> ids, ResourceApi mResourceApi, string rdfOntology, string nameOntology, string urlOntology = null)
+        {
+            // Diccionario de resultados
+            Dictionary<Guid, string> relationProjIDs = new();
+
+            // Definimos la variable que va a contener los IDs de los elementos en formato url
+            List<string> idsURL = new();
+            if (ids != null)
+            {
+                // Obtenemos las urls de los iDs cortos
+                ids.ForEach(item =>
+                {
+                    if (item != Guid.Empty)
+                    {
+                        idsURL.Add("<http://gnoss.com/" + item + ">");
+                    }
+                });
+
+                // Creamos la url de la ontología si ésta está vacía
+                if (urlOntology == null)
+                {
+                    urlOntology = "http://gnoss.com/" + nameOntology + ".owl";
+                }
+
+                // Query to get the full ID
+                if (idsURL.Count > 0)
+                {
+
+                    string select = @$"select distinct ?s ?entidad FROM <{urlOntology}>";
+                    string where = @$"where {{
+                            ?s <http://gnoss/hasEntidad> ?entidad.
+                            ?entidad a <{rdfOntology}>.
+                            FILTER(?s in ({string.Join(',', idsURL)}))
+                        }}
+                        ";
+                    try
+                    {
+                        // Obtenemos el diccionario con la relación entre id corto (GUID) e id largo
+                        SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, nameOntology);
+                        sparqlObject.results.bindings.ForEach(e =>
+                        {
+                            relationProjIDs.Add(new Guid(e["s"].value), e["entidad"].value);
+                        });
+                    }
+                    catch (Exception e) { }
+
+                }
+            }
+
+            return relationProjIDs;
+        }
+
     }
 }
