@@ -21,8 +21,8 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="pIdOfferId">Id de la oferta a borrar.</param>
         /// <returns>Un booleano si ha sido borrado.</returns>
-        [HttpPost("borrarCluster")]
-        public IActionResult BorrarOferta([Required] string pIdOfferId)
+        [HttpPost("BorrarOferta")]
+        public IActionResult BorrarOferta([Required] string id)
         {
 
             bool borrado = false;
@@ -30,7 +30,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 AccionesOferta accionCluster = new AccionesOferta();
-                borrado = accionCluster.BorrarOferta(pIdOfferId);
+                borrado = accionCluster.BorrarOferta(id);
             }
             catch (Exception)
             {
