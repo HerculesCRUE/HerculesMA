@@ -582,126 +582,41 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 // Obtiene el ID largo de los investigadores
                 List<string> numMember = new();
-                Dictionary<string, string> relationIDs = new();
+                Dictionary<Guid, string> relationIDs = new();
                 if (oferta.researchers != null)
                 {
-                    oferta.researchers.Values.ToList().ForEach(user =>
+                    try
                     {
-                        if (user != null)
-                        {
-                            if (user.shortId != Guid.Empty)
-                            {
-                                numMember.Add("<http://gnoss.com/" + user.shortId + ">");
-                            }
-                        }
-                    });
-                    numMember = numMember.Distinct().ToList();
-
-                    // Query to get the full ID
-                    if (numMember.Count > 0)
-                    {
-
-                        select = "select distinct ?s ?entidad FROM <http://gnoss.com/person.owl>";
-                        where = @$"where {{
-                            ?s <http://gnoss/hasEntidad> ?entidad.
-                            ?entidad a <http://xmlns.com/foaf/0.1/Person>.
-                            FILTER(?s in ({string.Join(',', numMember)}))
-                        }}
-                        ";
-
-                        try
-                        {
-                            sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
-                            sparqlObject.results.bindings.ForEach(e =>
-                            {
-                                relationIDs.Add(e["s"].value, e["entidad"].value);
-                            });
-                        } catch (Exception e) { }
-                        
+                        relationIDs = UtilidadesAPI.GetLongIds(oferta.researchers.Select(e => e.Key).ToList(), mResourceApi, "http://xmlns.com/foaf/0.1/Person", "person");
                     }
+                    catch (Exception e) { }
                 }
 
 
                 // Obtiene el ID largo de los proyectos
                 List<string> numProj = new();
-                Dictionary<string, string> relationProjIDs = new();
+                Dictionary<Guid, string> relationProjIDs = new();
                 if (oferta.projects != null)
                 {
-                    oferta.projects.Values.ToList().ForEach(item =>
+                    try
                     {
-                        if (item != null)
-                        {
-                            if (item.shortId != Guid.Empty)
-                            {
-                                numProj.Add("<http://gnoss.com/" + item.shortId + ">");
-                            }
-                        }
-                    });
-
-                    // Query to get the full ID
-                    if (numProj.Count > 0)
-                    {
-
-                        select = "select distinct ?s ?entidad FROM <http://gnoss.com/project.owl>";
-                        where = @$"where {{
-                            ?s <http://gnoss/hasEntidad> ?entidad.
-                            ?entidad a <http://vivoweb.org/ontology/core#Project>.
-                            FILTER(?s in ({string.Join(',', numProj)}))
-                        }}
-                        ";
-                        try
-                        {
-                            sparqlObject = mResourceApi.VirtuosoQuery(select, where, "project");
-                            sparqlObject.results.bindings.ForEach(e =>
-                            {
-                                relationProjIDs.Add(e["s"].value, e["entidad"].value);
-                            });
-                        }
-                        catch (Exception e) { }
-
+                        relationProjIDs = UtilidadesAPI.GetLongIds(oferta.projects.Select(e => e.Key).ToList(), mResourceApi, "http://vivoweb.org/ontology/core#Project", "project");
                     }
+                    catch (Exception e) { }
                 }
 
 
 
                 // Obtiene el ID largo de los Documentos
                 List<string> numDocs = new();
-                Dictionary<string, string> relationDocsIDs = new();
+                Dictionary<Guid, string> relationDocsIDs = new();
                 if (oferta.documents != null)
                 {
-                    oferta.documents.Values.ToList().ForEach(item =>
+                    try
                     {
-                        if (item != null)
-                        {
-                            if (item.shortId != Guid.Empty)
-                            {
-                                numDocs.Add("<http://gnoss.com/" + item.shortId + ">");
-                            }
-                        }
-                    });
-
-                    // Query to get the full ID
-                    if (numDocs.Count > 0)
-                    {
-
-                        select = "select distinct ?s ?entidad FROM <http://gnoss.com/document.owl>";
-                        where = @$"where {{
-                            ?s <http://gnoss/hasEntidad> ?entidad.
-                            ?entidad a <http://purl.org/ontology/bibo/Document>.
-                            FILTER(?s in ({string.Join(',', numDocs)}))
-                        }}
-                        ";
-                        try
-                        {
-                            sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
-                            sparqlObject.results.bindings.ForEach(e =>
-                            {
-                                relationDocsIDs.Add(e["s"].value, e["entidad"].value);
-                            });
-                        }
-                        catch (Exception e) { }
-
+                        relationDocsIDs = UtilidadesAPI.GetLongIds(oferta.documents.Select(e => e.Key).ToList(), mResourceApi, "http://purl.org/ontology/bibo/Document", "document");
                     }
+                    catch (Exception e) { }
                 }
 
 
@@ -709,42 +624,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 // Obtiene el ID largo de los Documentos
                 List<string> numPII = new();
-                Dictionary<string, string> relationPiiIDs = new();
+                Dictionary<Guid, string> relationPiiIDs = new();
                 if (oferta.pii != null)
                 {
-                    oferta.documents.Values.ToList().ForEach(item =>
+                    try
                     {
-                        if (item != null)
-                        {
-                            if (item.shortId != Guid.Empty)
-                            {
-                                numPII.Add("<http://gnoss.com/" + item.shortId + ">");
-                            }
-                        }
-                    });
-
-                    // Query to get the full ID
-                    if (numPII.Count > 0)
-                    {
-
-                        select = "select distinct ?s ?entidad FROM <http://gnoss.com/patent.owl>";
-                        where = @$"where {{
-                            ?s <http://gnoss/hasEntidad> ?entidad.
-                            ?entidad a <http://purl.org/ontology/bibo/Patent>.
-                            FILTER(?s in ({string.Join(',', numPII)}))
-                        }}
-                        ";
-                        try
-                        {
-                            sparqlObject = mResourceApi.VirtuosoQuery(select, where, "patent");
-                            sparqlObject.results.bindings.ForEach(e =>
-                            {
-                                relationPiiIDs.Add(e["s"].value, e["entidad"].value);
-                            });
-                        }
-                        catch (Exception e) { }
-
+                        relationPiiIDs = UtilidadesAPI.GetLongIds(oferta.pii.Select(e => e.Key).ToList(), mResourceApi, "http://purl.org/ontology/bibo/Patent", "patent");
                     }
+                    catch (Exception e) { }
                 }
 
 
@@ -860,8 +747,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     where = @$"where {{
                             ?offer <http://w3id.org/roh/availabilityChangeEvent> ?s.
                             ?s <http://w3id.org/roh/roleOf> ?roleOf.
-                            ?s <http://www.schema.org/roleOf> ?validFrom.
-                            ?s <http://www.schema.org/roleOf> ?availability.
+                            ?s <http://www.schema.org/validFrom> ?validFrom.
+                            ?s <http://www.schema.org/availability> ?availability.
 	                        ?s ?p ?o.
 	                        FILTER(?offer = <{idRecurso}>)
                         }}";
@@ -871,13 +758,21 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offer");
                         sparqlObject.results.bindings.ForEach(e =>
                         {
-                            relationPiiIDs.Add(e["s"].value, e["entidad"].value);
+
+                            //Use of DateTime.ParseExact()
+                            // Convert the date into DateTime object
+                            DateTime DateObject = new DateTime();
+                            try
+                            {
+                                DateObject = DateTime.ParseExact(e["validFrom"].value, "yyyyMMddhhmmss", null);
+                            } catch (Exception exc) { }
+
                             cRsource.Roh_availabilityChangeEvent.Add(new OfferOntology.AvailabilityChangeEvent()
                             {
                                 GNOSSID = e["s"].value,
-                                IdRoh_roleOf = e["s"].value,
-                                IdSchema_availability = e["s"].value,
-                                Schema_validFrom = new DateTime(long.Parse(e["s"].value), DateTimeKind.Utc),
+                                IdRoh_roleOf = e["roleOf"].value,
+                                IdSchema_availability = e["availability"].value,
+                                Schema_validFrom = DateObject,
                             });
                         });
                     }

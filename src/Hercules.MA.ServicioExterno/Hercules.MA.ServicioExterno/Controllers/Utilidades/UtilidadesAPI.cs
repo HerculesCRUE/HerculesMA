@@ -691,7 +691,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                 {
                     if (item != Guid.Empty)
                     {
-                        idsURL.Add("<http://gnoss.com/" + item + ">");
+                        idsURL.Add("<http://gnoss.com/" + item.ToString() + ">");
                     }
                 });
 
@@ -718,7 +718,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, nameOntology);
                         sparqlObject.results.bindings.ForEach(e =>
                         {
-                            relationProjIDs.Add(new Guid(e["s"].value), e["entidad"].value);
+                            relationProjIDs.Add(new Guid(e["s"].value.Split("http://gnoss.com/").Last()), e["entidad"].value);
                         });
                     }
                     catch (Exception e) { }
