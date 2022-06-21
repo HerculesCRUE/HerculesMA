@@ -295,3 +295,4 @@ UrisFactory/UrisAutoGenerator/logs/log_202041.txt
 .project
 .vscode/
 src/Hercules.MA.Load/Hercules.MA.Load/Config/configOAuth/OAuthV3.config
+src/Hercules.MA.ServicioExterno/Hercules.MA.ServicioExterno/Config/ConfigOAuth/OAuthV3.config
