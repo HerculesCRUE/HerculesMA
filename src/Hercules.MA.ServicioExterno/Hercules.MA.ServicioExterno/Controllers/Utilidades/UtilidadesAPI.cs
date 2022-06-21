@@ -281,14 +281,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 				                    #Proyectos
 				                    SELECT *
 				                    WHERE {{
-					                    ?proy ?propRolA ?roleA.
-                    FILTER(?propRolA in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
-                    ?roleA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <[PARAMETRO]>.
-
+					                    ?proy <http://w3id.org/roh/membersProject> <[PARAMETRO]>.
 					                    ?proy a 'project'.
-					                    ?proy ?propRol ?role.
-					                    FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
-					                    ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+					                    ?proy <http://w3id.org/roh/membersProject> {pVarAnterior}.
 				                    }}
 			                    }}
 		                    }}	
