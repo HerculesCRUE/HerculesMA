@@ -40,6 +40,34 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok(borrado);
         }
 
+
+        /// <summary>
+        /// Cambiar el estado de una oferta
+        /// </summary>
+        /// <param name="pIdOfferId">Id de la oferta a borrar.</param>
+        /// <param name="estado">Id de la oferta a borrar.</param>
+        /// <param name="estadoActual">Id de la oferta a borrar.</param>
+        /// <param name="pIdGnossUser">Id del usuario del sitio.</param>
+        /// <returns>Un booleano si ha sido borrado.</returns>
+        [HttpPost("CambiarEstado")]
+        public IActionResult CambiarEstado([FromForm] string pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser)
+        {
+
+            string cambiado = "";
+
+            try
+            {
+                AccionesOferta accionCluster = new AccionesOferta();
+                cambiado = accionCluster.CambiarEstado(pIdOfferId, estado, estadoActual, pIdGnossUser);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(cambiado);
+        }
+
         /// <summary>
         /// Controlador para guardar los datos de la oferta.
         /// </summary>

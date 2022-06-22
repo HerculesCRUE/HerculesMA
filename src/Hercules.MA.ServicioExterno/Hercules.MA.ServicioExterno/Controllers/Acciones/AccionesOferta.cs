@@ -30,6 +30,121 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string[] listTagsNotForvidden = new string[] { "<ol>", "<li>", "<b>", "<i>", "<u>", "<ul>", "<strike>", "<blockquote>", "<div>", "<hr>", "</ol>", "</li>", "</b>", "</i>", "</u>", "</ul>", "</strike>", "</blockquote>", "</div>", "<br/>" };
+
+
+        /// <summary>
+        /// Método público para modificar  los investigadores del grupo al que pertenece el usuario
+        /// </summary>
+        /// <param name="idRecurso">Id de la oferta tecnológica</param>
+        /// <param name="estado">Id del estado al que se quiere establecer</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado</param>
+        /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
+        internal string CambiarEstado(string idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser)
+        {
+            int MAX_INTENTOS = 10;
+            bool uploadedR = false;
+
+            // Obtener el id del usuario usando el id de la cuenta
+            string select = "select ?s ?isOtriManager";
+            string where = @$"where {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    OPTIONAL {{?s <http://w3id.org/roh/isOtriManager> ?isOtriManager.}}
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            var userGnossId = string.Empty;
+            var isOtriManager = false;
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                userGnossId = e["s"].value;
+                try
+                {
+                    bool.TryParse(e["isOtriManager"].value, out isOtriManager);
+                } catch (Exception exc) { }
+            });
+
+
+            if (!isOtriManager && nuevoEstado != "http://gnoss.com/items/offerstate_001" && nuevoEstado != "http://gnoss.com/items/offerstate_002")
+            {
+                throw new Exception("Error al intentar modificar el estado, no tienes permiso para cambiar a este estado");
+            }
+
+            // Modificar el estado y añadir un nuevo estado en el "historial"
+            if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && !string.IsNullOrEmpty(idRecurso))
+            {
+
+                // Añadir cambio en el historial de la disponibilidad
+                // Comprueba si el id del recuro no está vacío
+                mResourceApi.ChangeOntoly("offer");
+
+                // Inserto un historial en la base de datos
+                // Obtengo el guid del recurso
+                Guid guid = mResourceApi.GetShortGuid(idRecurso);
+                // Inicio el diccionario con el triplete
+                Dictionary<Guid, List<TriplesToInclude>> triples = new() { { guid, new List<TriplesToInclude>() } };
+                // Creo el id del recurso auxiliar para guardarlo
+                string idAux = mResourceApi.GraphsUrl + "items/AvailabilityChangeEvent_" + guid.ToString().ToLower() + "_" + Guid.NewGuid().ToString().ToLower();
+
+                // Creo los tripletes
+                TriplesToInclude t1 = new();
+                t1.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://w3id.org/roh/roleOf";
+                t1.NewValue = idAux + "|" + userGnossId;
+                triples[guid].Add(t1);
+                TriplesToInclude t2 = new();
+                t2.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://www.schema.org/availability";
+                t2.NewValue = idAux + "|" + nuevoEstado;
+                triples[guid].Add(t2);
+                TriplesToInclude t3 = new();
+                t3.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://www.schema.org/validFrom";
+                t3.NewValue = idAux + "|" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                triples[guid].Add(t3);
+
+                try
+                {
+                    // Guardo los tripletes
+                    var resultado = mResourceApi.InsertPropertiesLoadedResources(triples);
+                } catch (Exception e)
+                {
+                    throw;
+                }
+
+                // Modifico el estado
+                try
+                {
+
+                    Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
+                    List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+
+
+                    // Modificación (Triples).
+                    TriplesToModify triple = new TriplesToModify();
+                    triple.Predicate = "http://www.schema.org/availability";
+                    triple.NewValue = nuevoEstado;
+                    triple.OldValue = estadoActual;
+                    listaTriplesModificacion.Add(triple);
+
+                    // Modificación.
+                    dicModificacion.Add(guid, listaTriplesModificacion);
+                    mResourceApi.ModifyPropertiesLoadedResources(dicModificacion);
+                }
+                catch (Exception e) { throw; }
+
+
+                
+            }
+
+            return nuevoEstado;
+
+            //if (uploadedR)
+            //{
+            //    return idRecurso;
+            //}
+            //else
+            //{
+            //    throw new Exception("Recurso no actualizado");
+            //}
+        }
         #endregion
 
 
@@ -37,7 +152,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <summary>
         /// Método público para cargar los investigadores del grupo al que pertenece el usuario
         /// </summary>
-        /// <param name="researcherId">Datos del cluster para obtener los perfiles</param>
+        /// <param name="researcherId">Datos del usuario para obtener los investigadores del grupo al que pertenece</param>
         /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
 
         public Dictionary<string, UsersOffer> LoadUsers(string researcherId)
@@ -764,7 +879,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             DateTime DateObject = new DateTime();
                             try
                             {
-                                DateObject = DateTime.ParseExact(e["validFrom"].value, "yyyyMMddhhmmss", null);
+                                DateObject = DateTime.ParseExact(e["validFrom"].value, "yyyyMMddHHmmss", null);
                             } catch (Exception exc) { }
 
                             cRsource.Roh_availabilityChangeEvent.Add(new OfferOntology.AvailabilityChangeEvent()
