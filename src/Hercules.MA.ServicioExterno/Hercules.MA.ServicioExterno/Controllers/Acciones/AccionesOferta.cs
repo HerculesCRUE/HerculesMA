@@ -30,19 +30,21 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string[] listTagsNotForvidden = new string[] { "<ol>", "<li>", "<b>", "<i>", "<u>", "<ul>", "<strike>", "<blockquote>", "<div>", "<hr>", "</ol>", "</li>", "</b>", "</i>", "</u>", "</ul>", "</strike>", "</blockquote>", "</div>", "<br/>" };
+        private static string[] listTagsAttrNotForvidden = new string[] { "style" };
 
 
         /// <summary>
-        /// Método público para modificar  los investigadores del grupo al que pertenece el usuario
+        /// Método público para modificar el estado de las ofertas tecnológicas
+        /// Es necesario indicar el estado actual para modificar el estado
+        /// También añade una entrada al historial de actualizaciones del estado.
         /// </summary>
         /// <param name="idRecurso">Id de la oferta tecnológica</param>
-        /// <param name="estado">Id del estado al que se quiere establecer</param>
-        /// <param name="pIdGnossUser">Id del usuario que modifica el estado</param>
-        /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
+        /// <param name="nuevoEstado">Id del estado al que se quiere establecer</param>
+        /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo)</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
+        /// <returns>String con el id del nuevo estado.</returns>
         internal string CambiarEstado(string idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser)
         {
-            int MAX_INTENTOS = 10;
-            bool uploadedR = false;
 
             // Obtener el id del usuario usando el id de la cuenta
             string select = "select ?s ?isOtriManager";
@@ -112,7 +114,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Modifico el estado
                 try
                 {
-
                     Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
                     List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
 
@@ -157,7 +158,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
         public Dictionary<string, UsersOffer> LoadUsers(string researcherId)
         {
-            //ID persona/ID perfil/score
+            // Diccionario con el ID del investigador e información básica del propio investigador
             Dictionary<string, UsersOffer> respuesta = new();
 
             // Comprueba que el id dado es un guid válido
@@ -171,7 +172,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 throw new Exception("The id is't a correct guid");
             }
 
-
+            // Coonsulta para obtener la información del investigador
             string select = $@"{ mPrefijos }
                 select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento (count(distinct ?doc)) as ?numDoc
                 FROM <http://gnoss.com/organization.owl>  FROM <http://gnoss.com/group.owl> FROM <http://gnoss.com/department.owl> FROM <http://gnoss.com/document.owl>";
@@ -210,6 +211,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }}";
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
 
+            // Obtiene los datos de la consulta y rellena el diccionario de respuesta con los datos de cada investigador.
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
 
@@ -650,7 +652,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtenemos los resúmenes de las propiedades industriales intelectuales (PII) y los añadimos al objeto de la oferta
             try
             {
-                pDataOffer.pii = GetPIITeaser(pDataOffer.pii.Values.Select(x => x.id).ToList());
+                pDataOffer.pii = GetPIITeaserTODO(pDataOffer.pii.Values.Select(x => x.id).ToList());
             }
             catch (Exception ext) { }
 
@@ -771,14 +773,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Estado inicial (En borrador)
                 cRsource.IdSchema_availability = estado.Item1;
                 // Sección de las descripciones, limpiamos los strings de tags que no queramos
-                cRsource.Schema_description = oferta.objectFieldsHtml.descripcion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.descripcion, listTagsNotForvidden) : "";
-                cRsource.Roh_innovation = oferta.objectFieldsHtml.innovacion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.innovacion, listTagsNotForvidden) : "";
-                cRsource.Drm_origin = oferta.objectFieldsHtml.origen != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.origen, listTagsNotForvidden) : "";
-                cRsource.Roh_partnerType = oferta.objectFieldsHtml.socios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.socios, listTagsNotForvidden) : "";
-                cRsource.Roh_collaborationSought = oferta.objectFieldsHtml.colaboracion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.colaboracion, listTagsNotForvidden) : "";
-                cRsource.Qb_observation = oferta.objectFieldsHtml.observaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.observaciones, listTagsNotForvidden) : "";
-                cRsource.Roh_application = oferta.objectFieldsHtml.aplicaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.aplicaciones, listTagsNotForvidden) : "";
-                cRsource.Bibo_recipient = oferta.objectFieldsHtml.destinatarios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.destinatarios, listTagsNotForvidden) : "";
+                cRsource.Schema_description = oferta.objectFieldsHtml.descripcion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.descripcion, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+                cRsource.Roh_innovation = oferta.objectFieldsHtml.innovacion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.innovacion, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+                cRsource.Drm_origin = oferta.objectFieldsHtml.origen != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.origen, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+                cRsource.Roh_partnerType = oferta.objectFieldsHtml.socios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.socios, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+                cRsource.Roh_collaborationSought = oferta.objectFieldsHtml.colaboracion != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.colaboracion, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+                cRsource.Qb_observation = oferta.objectFieldsHtml.observaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.observaciones, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+                cRsource.Roh_application = oferta.objectFieldsHtml.aplicaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.aplicaciones, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+                cRsource.Bibo_recipient = oferta.objectFieldsHtml.destinatarios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.destinatarios, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
                 // Selectores de los estados de madurez y el sector
                 cRsource.IdRoh_framingSector = oferta.framingSector != null ? oferta.framingSector : null;
                 cRsource.IdBibo_status = oferta.matureState != null ? oferta.matureState : null;
@@ -1201,12 +1203,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         /// <summary>
-        /// Función que obtiene un resumen de los proyectos enviados en una lista de IDs (cortos o largos) 
+        /// Función que obtiene un resumen de los PII (Propiedad Industrial Intelectual) enviados en una lista de IDs (cortos o largos) 
         /// </summary>
-        /// <param name="ids">Listado (Ids) de los proyectos.</param>
+        /// <param name="ids">Listado (Ids) de los PII.</param>
         /// <param name="isLongIds">Booleano que determina si los Ids son Ids largos o cortos.</param>
-        /// <returns>relación entre el guid y el objeto de los proyectos correspondientes (resumido).</returns>
-        internal Dictionary<Guid, PIIOffer> GetPIITeaser(List<string> ids, bool isLongIds = true)
+        /// <returns>relación entre el guid y el objeto de los PII correspondientes (resumido).</returns>
+        internal Dictionary<Guid, PIIOffer> GetPIITeaserTODO(List<string> ids, bool isLongIds = true)
         {
 
             Dictionary<Guid, PIIOffer> result = new();
