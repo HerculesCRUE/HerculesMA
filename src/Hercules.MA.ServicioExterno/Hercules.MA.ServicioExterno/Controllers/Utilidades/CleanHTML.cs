@@ -73,7 +73,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                     }
                     continue;
                 }
-                // !inside signofica que no estamos dentro de un tag
+                // !inside significa que no estamos dentro de un tag
                 if (!inside)
                 {
                     array[arrayIndex] = let;
