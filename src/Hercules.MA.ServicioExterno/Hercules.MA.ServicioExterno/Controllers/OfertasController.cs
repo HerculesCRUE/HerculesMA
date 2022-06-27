@@ -151,10 +151,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para Obtener los estados de madurez
+        /// Controlador para Obtener los estados de madurez de las ofertas tecnológicas
         /// </summary>
         /// <param name="lang">Idioma a cargar.</param>
-        /// <returns>Listado de las líneas de investigación.</returns>
+        /// <returns>Listado de los estados de madurez.</returns>
         [HttpGet("LoadMatureStates")]
         public IActionResult LoadMatureStates(string lang)
         {
@@ -171,10 +171,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para guardar los datos de la oferta 
+        /// Controlador para crear/actualizar los datos de la oferta 
         /// </summary>
-        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
-        /// <param name="oferta">Objeto con la oferta tecnológica a añadir / modificar.</param>
+        /// <param name="pIdGnossUser">Usuario de gnoss que realiza la acción.</param>
+        /// <param name="oferta">Objeto con la oferta tecnológica a crear/actualizar.</param>
         /// <returns>Id de la oferta creada o modificada.</returns>
         [HttpPost("SaveOffer")]
         [Produces("application/json")]
