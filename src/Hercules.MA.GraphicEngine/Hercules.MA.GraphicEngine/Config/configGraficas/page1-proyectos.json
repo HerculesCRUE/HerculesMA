@@ -51,7 +51,7 @@
             "nombre": {
               "es": "Proyectos solicitados"
             },
-            "filtro": "roh:scientificExperienceProject@@@dc:title='No competitivos'@es",
+            "filtro": "",
             "tipoDimension": "bar",
             "color": "#666365",
             "yAxisID": "y1",
@@ -355,22 +355,34 @@
     },
     {
       "nombre": {
+        "es": "Tipo de proyecto"
+      },
+      "filtro": "roh:projectType@@@dc:title"
+    },
+    {
+      "nombre": {
         "es": "Ámbito geográfico"
       },
       "filtro": "vivo:geographicFocus@@@dc:title"
     },
-    //{ 
-    //  "nombre": {
-    //    "es": "Áreas Temáticas"
-    //  },
-    //  "filtro": "roh:hasKnowledgeArea@@@roh:categoryNode",
-    //  "tesauro": true
-    //},
+    {
+      "nombre": {
+        "es": "Colaborativos"
+      },
+      "filtro": "roh:collaborative"
+    },
     {
       "nombre": {
         "es": "Organismo financiador"
       },
       "filtro": "roh:grantedBy@@@roh:organizationTitle"
+    },
+    { 
+      "nombre": {
+        "es": "Áreas Temáticas"
+      },
+      "filtro": "roh:hasKnowledgeArea@@@roh:categoryNode",
+      "tesauro": true
     },
     {
       "nombre": {
@@ -386,7 +398,7 @@
     },
     {
       "nombre": {
-        "es": "Participantes"
+        "es": "Investigador"
       },
       "filtro": "vivo:relates@@@roh:roleOf@@@foaf:name",
       "numeroItemsFaceta": 10,

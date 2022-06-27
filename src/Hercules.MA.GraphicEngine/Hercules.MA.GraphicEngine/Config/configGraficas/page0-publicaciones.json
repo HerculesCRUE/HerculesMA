@@ -442,6 +442,31 @@
     },
     {
       "nombre": {
+        "es": "Proyecto"
+      },
+      "filtro": "roh:project@@@roh:title",
+      "verTodos": true
+    },
+    {
+      "nombre": {
+        "es": "Grupos"
+      },
+      "filtro": "roh:isProducedBy@@@roh:title"
+    },
+    {
+      "nombre": {
+        "es": "Género"
+      },
+      "filtro": "roh:genderIP@@@dc:title"
+    },
+    {
+      "nombre": {
+        "es": "Categoría PDI"
+      },
+      "filtro": "roh:positionIP"
+    },
+    {
+      "nombre": {
         "es": "Año"
       },
       "filtro": "roh:year",
@@ -454,8 +479,7 @@
       },
       "filtro": "vivo:hasPublicationVenue@@@roh:title",
       "numeroItemsFaceta": 10,
-      "verTodos": true,
-      "ordenAlfaNum": true
+      "verTodos": true
     },
     {
       "nombre": {

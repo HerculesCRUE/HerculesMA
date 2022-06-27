@@ -591,8 +591,16 @@ namespace Hercules.MA.GraphicEngine.Models
                             listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, fila["aux"].value, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture)));
                         }
                         else
-                        {
-                            listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, string.Empty, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture)));
+                        {                            
+                            if (itemGrafica.filtro == "" && itemGrafica.color == "#666365")
+                            {
+                                // --- ÑAPA
+                                listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, string.Empty, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture) + 5.0f));
+                            }
+                            else
+                            {
+                                listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, string.Empty, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture)));
+                            }
                         }
                     }
                 }
@@ -1189,8 +1197,8 @@ namespace Hercules.MA.GraphicEngine.Models
                 else
                 {
                     if (!string.IsNullOrEmpty(pGrafica.config.ejeX))
-                    { 
-                        valuesEje = new HashSet<string>(valuesEje.OrderBy(item => item)); 
+                    {
+                        valuesEje = new HashSet<string>(valuesEje.OrderBy(item => item));
                     }
                 }
             }

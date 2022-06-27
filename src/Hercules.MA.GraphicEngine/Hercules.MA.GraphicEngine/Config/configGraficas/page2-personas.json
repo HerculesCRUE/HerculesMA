@@ -177,6 +177,18 @@
       },
       "filtro": "vivo:hasResearchArea@@@roh:categoryNode",
       "tesauro": true
-    }
+    },
+    {
+      "nombre": {
+        "es": "Categoría PDI"
+      },
+      "filtro": "roh:hasPosition"
+    },
+    {
+      "nombre": {
+        "es": "Género"
+      },
+      "filtro": "foaf:gender@@@dc:title"
+    }    
   ]
 }
