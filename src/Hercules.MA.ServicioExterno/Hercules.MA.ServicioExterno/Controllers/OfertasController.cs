@@ -44,11 +44,11 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Cambiar el estado de una oferta
         /// </summary>
-        /// <param name="pIdOfferId">Id de la oferta a borrar.</param>
-        /// <param name="estado">Id de la oferta a borrar.</param>
-        /// <param name="estadoActual">Id de la oferta a borrar.</param>
-        /// <param name="pIdGnossUser">Id del usuario del sitio.</param>
-        /// <returns>Un booleano si ha sido borrado.</returns>
+        /// <param name="pIdOfferId">Id de la oferta a modificar.</param>
+        /// <param name="estado">Id del estado al que se quiere establecer.</param>
+        /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo).</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial.</param>
+        /// <returns>String con el id del nuevo estado.</returns>
         [HttpPost("CambiarEstado")]
         public IActionResult CambiarEstado([FromForm] string pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser)
         {
@@ -93,7 +93,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// Controlador para Obtener los usuarios del/los grupos de un investigador
         /// </summary>
         /// <param name="pIdUserId">Usuario investigador.</param>
-        /// <returns>Id del cluster creado o modificado.</returns>
+        /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
         [HttpGet("LoadUsersGroup")]
         public IActionResult LoadUsers([Required] string pIdUserId)
         {
