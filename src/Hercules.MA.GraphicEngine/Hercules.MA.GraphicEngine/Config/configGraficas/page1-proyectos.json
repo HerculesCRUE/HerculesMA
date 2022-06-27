@@ -61,7 +61,7 @@
       }
     },
     {
-      "identificador": "grafica8",
+      "identificador": "grafica2",
       "nombre": {
         "es": "IP principal de la UMU"
       },
@@ -88,7 +88,7 @@
       }
     },
     {
-      "identificador": "grafica2",
+      "identificador": "grafica3",
       "nombre": {
         "es": "Investigadores por proyecto"
       },
@@ -121,7 +121,7 @@
       }
     },
     {
-      "identificador": "grafica3",
+      "identificador": "grafica4",
       "nombre": {
         "es": "Ámbito de los proyectos"
       },
@@ -153,7 +153,7 @@
       }
     },
     {
-      "identificador": "grafica4",
+      "identificador": "grafica5",
       "nombre": {
         "es": "Proyectos por convocatoria"
       },
@@ -187,7 +187,7 @@
       }
     },
     {
-      "identificador": "grafica5",
+      "identificador": "grafica6",
       "nombre": {
         "es": "Proyectos por organismos"
       },
@@ -221,7 +221,7 @@
       }
     },
     {
-      "identificador": "grafica6",
+      "identificador": "grafica7",
       "nombre": {
         "es": "Proyectos por tipo"
       },
@@ -254,7 +254,7 @@
       }
     },
     {
-      "identificador": "grafica7",
+      "identificador": "grafica8",
       "nombre": {
         "es": "Proyectos por grupo"
       },
@@ -276,6 +276,65 @@
           {
             "nombre": {
               "es": "Número de proyectos"
+            },
+            "filtro": "",
+            "tipoDimension": "bar",
+            "color": "#7CBFE3",
+            "xAxisID": "x1",
+            "orden": 1
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica9",
+      "nombre": {
+        "es": "Relaciones entre las áreas temáticas de los proyectos"
+      },
+      "tipo": "Nodos",
+      "propCategoryPath": "roh:hasKnowledgeArea",
+      "idGrupo": "grupo2",
+      "anchura": 12,
+      "config": {
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Relaciones entre las áreas temáticas de los proyectos"
+            },
+            "filtro": "",
+            "numMaxNodos": 10,
+            "colorNodo": "#7CBFE3",
+            "colorLinea": "#BF4858"
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica10",
+      "nombre": {
+        "es": "Áreas temáticas de los proyectos"
+      },
+      "idGrupo": "grupo2",
+      "tipo": "Barras",
+      "propCategoryPath": "roh:hasKnowledgeArea",
+      "anchura": 12,
+      "config": {
+        "datosNodos": true,
+        "abreviar": true,
+        "orientacionVertical": false,
+        "ejeX": "",
+        "orderDesc": false,
+        "rellenarEjeX": false,
+        "xAxisPrint": [
+          {
+            "xAxisID": "x1",
+            "posicion": "bottom"
+          }
+        ],
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Áreas temáticas de los proyectos"
             },
             "filtro": "",
             "tipoDimension": "bar",

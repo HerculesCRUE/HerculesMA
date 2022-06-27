@@ -128,14 +128,14 @@
             "nombre": {
               "es": "Hombre"
             },
-            "filtro": "roh:genderIP='hombre'",
+            "filtro": "roh:genderIP@@@dc:title='Hombre'@es",
             "color": "#BF4858"
           },
           {
             "nombre": {
               "es": "Mujer"
             },
-            "filtro": "roh:genderIP='mujer'",
+            "filtro": "roh:genderIP@@@dc:title='Mujer'@es",
             "color": "#7CBFE3"
           }
         ]
@@ -274,7 +274,7 @@
       "anchura": 12,
       "config": {
         "orientacionVertical": false,
-        "ejeX": "roh:hasPositionIp",
+        "ejeX": "roh:positionIP",
         "orderDesc": false,
         "abreviar": true,
         "rellenarEjeX": false,
