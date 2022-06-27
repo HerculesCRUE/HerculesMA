@@ -230,7 +230,7 @@ namespace Hercules.MA.Load
             //CargarLaboralDurationType(tablas, "laboraldurationtype");
             //CargarSeminarInscriptionType(tablas, "seminarinscriptiontype");
             //CargarSeminarEventType(tablas, "seminareventtype");
-            //CargarOfferState("offerstate");
+            CargarOfferState("offerstate");
             //CargarMatureStates("maturestate");
             //CargarFramingSectors("framingsector");
 
@@ -426,13 +426,15 @@ namespace Hercules.MA.Load
 
             //Obtención de los objetos a cargar.
             List<OfferState> offers = new List<OfferState>();
-            string[] titles = new string[] {
-                "En Borrador",
-                "En Revisión",
-                "Validada",
-                "Denegada",
-                "Archivada",
+            List<Tuple <string, string>> titles = new ()
+            {
+                new Tuple<string, string>("En Borrador", "borrador"),
+                new Tuple<string, string>("En Revisión", "revision"),
+                new Tuple<string, string>("Validada", "validada"),
+                new Tuple<string, string>("Denegada", "denegada"),
+                new Tuple<string, string>("Archivada", "archivada"),
             };
+
 
             Dictionary<string, LanguageEnum> dicIdiomasMapeados = MapearLenguajes();
 
@@ -440,9 +442,9 @@ namespace Hercules.MA.Load
                 var texts = new Dictionary<LanguageEnum, string>();
                 foreach (var lang in dicIdiomasMapeados)
                 {
-                    texts.Add(lang.Value, e);
+                    texts.Add(lang.Value, e.Item1);
                 }
-                return new OfferState() { Dc_identifier = "00" + (i + 1).ToString(), Dc_title =  texts };
+                return new OfferState() { Dc_identifier = "00" + (i + 1).ToString(), Dc_title =  texts, Schema_color = e.Item2 };
             }).ToList();
 
             // contributions = ObtenerDatosContributionGradeProject(pTablas, idContributionGradeProject, contributions);
