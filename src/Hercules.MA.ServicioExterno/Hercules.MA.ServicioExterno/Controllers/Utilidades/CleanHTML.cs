@@ -11,7 +11,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
     public class CleanHTML
     {
 
-        static Regex _AttrStyleRegex = new Regex("[^style]+[ ]?=[ ]?\"[^\"]*\"", RegexOptions.Compiled);
+        // static Regex _AttrStyleRegex = new Regex("[^style]+[ ]?=[ ]?\"[^\"]*\"", RegexOptions.Compiled);
 
         /// <summary>
         /// Método para limpiar un string de tags, a excepción de los permitidos
