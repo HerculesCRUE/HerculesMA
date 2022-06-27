@@ -9,7 +9,7 @@
     {
       "identificador": "grafica1",
       "nombre": {
-        "es": "Número de personas por grupo"
+        "es": "Número de PDI por grupo"
       },
       "tipo": "Barras",
       "anchura": 12,
@@ -29,7 +29,7 @@
         "dimensiones": [
           {
             "nombre": {
-              "es": "Personas por grupos"
+              "es": "Investigadores por grupos"
             },
             "filtro": "",
             "tipoDimension": "bar",
@@ -43,7 +43,7 @@
     {
       "identificador": "grafica2",
       "nombre": {
-        "es": "Géneros de los IP"
+        "es": "Géneros de los PDI"
       },
       "tipo": "Circular",
       "anchura": 12,
@@ -70,7 +70,7 @@
     {
       "identificador": "grafica3",
       "nombre": {
-        "es": "Número de personas por departamento"
+        "es": "Número de PDI por departamento"
       },
       "tipo": "Barras",
       "anchura": 12,
@@ -89,7 +89,7 @@
         "dimensiones": [
           {
             "nombre": {
-              "es": "Personas por departamento"
+              "es": "Investigadores por departamento"
             },
             "filtro": "",
             "tipoDimension": "bar",
@@ -103,7 +103,7 @@
     {
       "identificador": "grafica4",
       "nombre": {
-        "es": "Áreas temáticas de las personas"
+        "es": "Áreas temáticas de los PDI"
       },
       "idGrupo": "grupo3",
       "tipo": "Barras",
@@ -125,7 +125,7 @@
         "dimensiones": [
           {
             "nombre": {
-              "es": "Áreas temáticas de las personas"
+              "es": "Áreas temáticas de los investigadores"
             },
             "filtro": "",
             "tipoDimension": "bar",

@@ -53,7 +53,7 @@
             },
             "filtro": "roh:scientificExperienceProject@@@dc:title='No competitivos'@es",
             "tipoDimension": "bar",
-            "color": "#581845",
+            "color": "#666365",
             "yAxisID": "y1",
             "orden": 3
           }
