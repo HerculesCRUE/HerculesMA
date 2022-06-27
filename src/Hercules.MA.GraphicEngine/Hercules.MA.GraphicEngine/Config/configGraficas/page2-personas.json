@@ -1,0 +1,194 @@
+{
+  "nombre": {
+    "es": "Personal Docente e Investigador"
+  },
+  "filtro": "rdf:type='person'&roh:isActive='true'",
+  "orden": 3,
+  "identificador": "pagina3",
+  "graficas": [
+    {
+      "identificador": "grafica1",
+      "nombre": {
+        "es": "Número de PDI por grupo"
+      },
+      "tipo": "Barras",
+      "anchura": 12,
+      "config": {
+        "orientacionVertical": false,
+        "ejeX": "roh:title",
+        "reciproco": "rdf:type='group'@@@vivo:relates@@@roh:roleOf",
+        "orderDesc": false,
+        "rellenarEjeX": false,
+        "abreviar": true,
+        "xAxisPrint": [
+          {
+            "xAxisID": "x1",
+            "posicion": "bottom"
+          }
+        ],
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Investigadores por grupos"
+            },
+            "filtro": "",
+            "tipoDimension": "bar",
+            "color": "#7CBFE3",
+            "xAxisID": "x1",
+            "orden": 1
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica2",
+      "nombre": {
+        "es": "Géneros de los PDI"
+      },
+      "tipo": "Circular",
+      "anchura": 12,
+      "config": {
+        "porcentual": true,
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Hombre"
+            },
+            "filtro": "foaf:gender@@@dc:title='Hombre'@es",
+            "color": "#BF4858"
+          },
+          {
+            "nombre": {
+              "es": "Mujer"
+            },
+            "filtro": "foaf:gender@@@dc:title='Mujer'@es",
+            "color": "#7CBFE3"
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica3",
+      "nombre": {
+        "es": "Número de PDI por departamento"
+      },
+      "tipo": "Barras",
+      "anchura": 12,
+      "config": {
+        "orientacionVertical": false,
+        "ejeX": "vivo:departmentOrSchool@@@dc:title",
+        "orderDesc": false,
+        "rellenarEjeX": false,
+        "abreviar": true,
+        "xAxisPrint": [
+          {
+            "xAxisID": "x1",
+            "posicion": "bottom"
+          }
+        ],
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Investigadores por departamento"
+            },
+            "filtro": "",
+            "tipoDimension": "bar",
+            "color": "#7CBFE3",
+            "xAxisID": "x1",
+            "orden": 1
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica4",
+      "nombre": {
+        "es": "Áreas temáticas de los PDI"
+      },
+      "idGrupo": "grupo3",
+      "tipo": "Barras",
+      "propCategoryPath": "vivo:hasResearchArea",
+      "anchura": 12,
+      "config": {
+        "datosNodos": true,
+        "abreviar": true,
+        "orientacionVertical": false,
+        "ejeX": "",
+        "orderDesc": false,
+        "rellenarEjeX": false,
+        "xAxisPrint": [
+          {
+            "xAxisID": "x1",
+            "posicion": "bottom"
+          }
+        ],
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Áreas temáticas de los investigadores"
+            },
+            "filtro": "",
+            "tipoDimension": "bar",
+            "color": "#7CBFE3",
+            "xAxisID": "x1",
+            "orden": 1
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica5",
+      "nombre": {
+        "es": "Categorías de PDI"
+      },
+      "tipo": "Barras",
+      "anchura": 12,
+      "config": {
+        "orientacionVertical": false,
+        "ejeX": "roh:hasPosition",
+        "orderDesc": false,
+        "abreviar": true,
+        "rellenarEjeX": false,
+        "xAxisPrint": [
+          {
+            "xAxisID": "x1",
+            "posicion": "bottom"
+          }
+        ],
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Número de investigadores"
+            },
+            "filtro": "",
+            "tipoDimension": "bar",
+            "color": "#7CBFE3",
+            "xAxisID": "x1",
+            "orden": 1
+          }
+        ]
+      }
+    }
+  ],
+  "facetas": [
+    {
+      "nombre": {
+        "es": "Áreas Temáticas"
+      },
+      "filtro": "vivo:hasResearchArea@@@roh:categoryNode",
+      "tesauro": true
+    },
+    {
+      "nombre": {
+        "es": "Categoría PDI"
+      },
+      "filtro": "roh:hasPosition"
+    },
+    {
+      "nombre": {
+        "es": "Género"
+      },
+      "filtro": "foaf:gender@@@dc:title"
+    }    
+  ]
+}
