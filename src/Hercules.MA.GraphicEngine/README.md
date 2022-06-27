@@ -1,6 +1,6 @@
 ![](../../Docs/media/CabeceraDocumentosMD.png)
 
-| Fecha         | 22/06/2022                                                   |
+| Fecha         | 27/06/2022                                                   |
 | ------------- | ------------------------------------------------------------ |
 |Título|Configuración de Indicadores| 
 |Descripción|Descripción de la configuración de las gráficas de indicadores en Hércules|
@@ -29,7 +29,7 @@ Introducción
 
 Este documento describe, mediante un ejemplo práctico, cómo se realiza la configuración de las distintas gráficas de indicadores en Hércules MA. Esta configuración está preparada para que la administre un usuario administrador.
 La configuración de las gráficas se lleva a cabo mediante la edición de archivos JSON situados en la carpeta ./Config/configGraficas/ que definen diversos aspectos para cada uno de las gráficas.
-También se explicará como un usuario puede guardar las gráficas que quiera en su espacio personal de indicadores.
+También se explicará como un usuario no administrador de la plataforma puede guardar las gráficas que quiera en su espacio personal de indicadores.
 
 Ejemplo de configuración de las gráficas de indicadores
 ========================================================
@@ -121,7 +121,9 @@ Dentro de la lista de gráficas, se van a configurar cada una de las gráficas q
 - tipo: Representa el tipo de gráfica (Barras, Circular, Nodos). Obligatorio. String.
 - anchura: Representa el ancho de la gráfica a modo de fracción, es decir, 11 es 1/1, 23 es 2/3, etc... (11, 12, 13, 14, 16, 23, 34, 38, 58). Obligatorio. Número.
 - idGrupo: Junta las gráficas con este mismo identificador en un desplegable. Opcional. String.
+- propCategoryPath: Indica el nombre de la propiedad que apunta al CategoryPath. Opcional, únicamente poner si se trata de un tesauro. String.
 - config: Configuración específica de la gráfica. Varía en función del tipo de gráfica. Obligatorio.
+  - reciproco: Opcional. String. Indica si el valor a obtener es inverso o no. Se agrega el rdftype y los saltos necesarios para acceder a la propiedad. Ej: rdf:type='group'@@@vivo:relates@@@roh:roleOf
   - orientacionVertical: Representa si las barras son verticales u horizontales. Opcional. Boolean.
   - datosNodos: Representa si la gráfica obtiene los datos como una gráfica de nodos. Opcional. Boolean.
   - ejeX: Es el filtro de los datos del eje X. Obligatorio. String.
@@ -248,9 +250,11 @@ Pasando a las gráficas, puede haber tres tipos de botones.
 
 - Desplegable (arriba a la izquierda): Está opción únicamente se mostra cuando en la gráfica esté agregada la configuración de idGrupo. Dicha opción mostrará un listado de gráficas para poder seleccionar la que se quiera visualizar.
 
+- Expandir/Contraer (arriba a la derecha): Aplica/disminuye la gráfica para la visualización de datos.
+
 - Lupa (arriba a la derecha): Se abrirá un popup con la gráfica ampliada.
 
-![image](https://user-images.githubusercontent.com/88077103/174994173-3eb7e90a-e757-4fc1-8b80-5211ed20ff4e.png)
+![image](https://user-images.githubusercontent.com/88077103/175925979-1864f30c-f0cd-4956-bc91-e6dfcb7c4eb5.png)
 
 - Tres puntos (arriba a la derecha): Se abrirá un menú con diversas acciones.
   - Guardar en mi panel: Permite al usuario guardarse la gráfica en "Mis indicadores" (Explicado en el siguiente apartado). 
@@ -264,7 +268,7 @@ Para guardar una gráfica en el espacio personal hay que seguir los siguientes p
 
 - Situados en la página de Indicadores, pulsamos al botón de tres puntos de la gráfica a guardar y seleccionamos la opción de "Guardar en mi panel".
 
-![image](https://user-images.githubusercontent.com/88077103/174978119-d2528543-c78e-4328-b5aa-55fb9eadcf32.png)
+![image](https://user-images.githubusercontent.com/88077103/175925979-1864f30c-f0cd-4956-bc91-e6dfcb7c4eb5.png)
 
 - Se nos abrirá un pop-up con una pequeña configuración de guardado:
 
@@ -291,7 +295,7 @@ Por otro lado, si pulsamos borrar página se nos mostraá un mensaje de borrado.
 
 Pasando al apartado de las gráficas, si pulsamos a los tres puntos se nos abrirá un menú con opciones adicionales.
 
-![image](https://user-images.githubusercontent.com/88077103/174981401-a10944b5-e907-45d4-b8db-f5928311e6c4.png)
+![image](https://user-images.githubusercontent.com/88077103/175926493-e4785f9c-c650-4ec2-9f73-c4fc97ba8cdd.png)
 
 Si pulsamos a editar gráfica se nos abrirá el siguiente popup:
 
