@@ -445,6 +445,7 @@
         "es": "Proyecto"
       },
       "filtro": "roh:project@@@roh:title",
+      "numeroItemsFaceta": 10,
       "verTodos": true
     },
     {
