@@ -309,7 +309,27 @@ Si se selecciona la opción de eliminar gráfica, se nos mostrará un mensaje si
 
 ![image](https://user-images.githubusercontent.com/88077103/174982932-60f6f333-7e30-49d8-b2fa-b2094225ef39.png)
 
+Configuración en el appsettings.json
+====================================
+```json
+{
+  "RabbitMQ": {
+    "colaFuentesExternas": ""
+  },
+  "QueueRabbit": "",
+  "LogPath": ""
+}
+```
+- colaFuentesExternas: Cadena de conexión de la cola de Rabbit.
+- QueueRabbit: Nombre de la cola de Rabbit.
+- LogPath: Ruta dónde se van a almacenar los logs.
 
+Dependencias
+============
+- dotNetRDF: v2.7.2
+- GnossApiWrapper.NetCore: v1.0.8
+- RabbitMQ.Client: v6.3.1
+- Swashbuckle.AspNetCore: v6.2.4
 
 
 
