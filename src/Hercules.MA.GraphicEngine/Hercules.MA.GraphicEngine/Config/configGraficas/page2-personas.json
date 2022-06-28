@@ -180,6 +180,13 @@
     },
     {
       "nombre": {
+        "es": "Grupos"
+      },
+      "filtro": "rdf:type='group'@@@vivo:relates@@@roh:roleOf",
+      "reciproca": true
+    },
+    {
+      "nombre": {
         "es": "Categoría PDI"
       },
       "filtro": "roh:hasPosition"
@@ -189,6 +196,6 @@
         "es": "Género"
       },
       "filtro": "foaf:gender@@@dc:title"
-    }    
+    }
   ]
 }

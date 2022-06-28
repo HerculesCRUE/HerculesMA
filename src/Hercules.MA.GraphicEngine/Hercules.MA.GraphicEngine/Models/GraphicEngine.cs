@@ -1759,6 +1759,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             if (configModel != null)
             {
+                //FacetaConf faceta = configModel.facetas.FirstOrDefault(x => x.filtro.Contains(pIdFaceta));
                 FacetaConf faceta = configModel.facetas.FirstOrDefault(x => x.filtro == pIdFaceta);
                 return CrearFaceta(faceta, configModel.filtro, pFiltroFacetas, pLang, listaFacetasAnios, pGetAll);
             }
@@ -1808,6 +1809,12 @@ namespace Hercules.MA.GraphicEngine.Models
                 faceta.tesauro = true;
             }
 
+            faceta.reciproca = false;
+            if (pFacetaConf.reciproca != false)
+            {
+                faceta.reciproca = true;
+            }
+
             faceta.id = pFacetaConf.filtro;
             faceta.nombre = GetTextLang(pLang, pFacetaConf.nombre);
             faceta.items = new List<ItemFaceta>();
@@ -1815,10 +1822,19 @@ namespace Hercules.MA.GraphicEngine.Models
             // Filtro de página.
             List<string> filtros = new List<string>();
             filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
+            //if (pFacetaConf.reciproca)
+            //{
+            //    filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta", null, pFacetaConf.filtro));
+            //}
+            //else
+            //{
+                filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta"));
+            //}
+            
             if (!faceta.tesauro)
             {
                 filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta"));
-            }
+            }            
             else
             {
                 filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "categoria"));
@@ -2613,10 +2629,6 @@ namespace Hercules.MA.GraphicEngine.Models
             List<string> filtrosQuery = new List<string>();
 
             // Split por salto de ontología.
-            if (!string.IsNullOrEmpty(pReciproco))
-            {
-
-            }
             int i = 0;
             foreach (string item in listaAux)
             {
@@ -2625,7 +2637,16 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     isDate = true;
                 }
-                filtrosQuery.Add(TratarParametros(item, "?s", i, pNombreVar, isDate, pReciproco));
+
+                // --- ÑAPA
+                //if (item.Contains("rdf:type=") && pNombreVar != null)
+                //{
+                //    filtrosQuery.Add(TratarParametros("", "?s", i, pNombreVar, isDate, pReciproco));
+                //}
+                //else
+                //{
+                    filtrosQuery.Add(TratarParametros(item, "?s", i, pNombreVar, isDate, pReciproco));
+                //}
 
                 i += 10;
             }
@@ -2766,7 +2787,16 @@ namespace Hercules.MA.GraphicEngine.Models
 
                 }
             }
-            return filtro.ToString();
+
+            //if (string.IsNullOrEmpty(pFiltro) && string.IsNullOrEmpty(filtro.ToString()))
+            //{
+            //    // --- ÑAPA
+            //    return $@" ?aux roh:title ?{pNombreVar}. ";
+            //}
+            //else
+            //{
+                return filtro.ToString();
+            //}
         }
 
         /// <summary>
