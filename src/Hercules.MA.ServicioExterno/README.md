@@ -114,6 +114,117 @@ Controlador para crear/actualizar los datos de la oferta
 
 
 
+## ClusterController
+La documentación funcional del creador de los clusters está en [Asistente para la creación de cluster (equipo de proyecto)](https://confluence.um.es/confluence/pages/viewpage.action?pageId=398786801).
+
+Los métodos de éste controlador tendrán la siguiente url:
+> https://something.com/servicioexterno/Cluster/[METODO]
+
+
+### [GET] GetThesaurus
+Controlador para obtener los thesaurus usados en el cluster
+
+*Parámetros:*
+ - **listThesaurus** *(string)*: Elemento padre que define el thesaurus
+ 
+*Devuelve:*
+*Object* Diccionario con los datos. (Diccionario clave -> listado de thesaurus)
+
+
+
+
+### [POST] SaveCluster
+Controlador para crear/actualizar los datos del cluster
+
+*Parámetros:*
+ - **pIdGnossUser** *(string)*: Usuario de gnoss que realiza la acción
+ - **pDataCluster** *(Object)*: Objeto con el cluster a crear/actualizar
+ 
+*Devuelve:*
+*string* Id del cluster creado o modificado.
+
+
+
+
+### [GET] LoadCluster
+Controlador para cargar los datos de un cluster
+
+*Parámetros:*
+ - **pIdClusterId** *(string)*: Id del cluster
+ 
+*Devuelve:*
+*Object* Objeto con el contenido del cluster.
+
+
+
+### [POST] LoadProfiles
+Controlador para cargar los perfiles de cada investigador sugerido del cluster
+
+*Parámetros:*
+ - **pDataCluster** *(Object)*: Datos del cluster
+ - **pPersons** *(string[])*: Listado de personas sobre los que pedir información
+ 
+*Devuelve:*
+*Object* Diccionario con los datos necesarios para cada persona por cluster.
+
+
+
+### [POST] DatosGraficaColaboradoresCluster
+Controlador que obtiene el objeto para crear la gráfica tipo araña de las relaciones entre los perfiles seleccionados en el cluster
+
+*Parámetros:*
+ - **pCluster** *(Object)*: Cluster con los datos de las personas sobre las que realizar el filtrado de áreas temáticas
+ - **pPersons** *(string[])*: Personas sobre las que realizar el filtrado de áreas temáticas (Por si se envía directamente)
+ - **seleccionados** *(bool)*: Determina si se envía el listado de personas desde el cluster o desde las personas
+ 
+*Devuelve:*
+*Object* Objeto que se trata en JS para construir la gráfica.
+
+
+
+
+### [POST] DatosGraficaAreasTematicasCluster
+Controlador que obtiene los datos para crear la gráfica de áreas temáticas
+
+*Parámetros:*
+ - **pPersons** *(string[])*: Personas sobre las que realizar el filtrado
+ 
+*Devuelve:*
+*Object* Objeto que se trata en JS para construir la gráfica.
+
+
+
+
+### [POST] BorrarCluster
+Controlador que borra un cluster
+
+*Parámetros:*
+ - **pIdClusterId** *(string)*: Id del Cluster a borrar
+ 
+*Devuelve:*
+*bool* 'true' o 'false' si ha sido borrado o no.
+
+
+
+
+### [GET] SearchTags
+Controlador que sugiere etiquetas con la búsqueda dada
+
+*Parámetros:*
+ - **tagInput** *(string)*: Texto para la búsqueda de etiquetas
+ 
+*Devuelve:*
+*string[]* Listado de las etiquetas de resultado
+
+
+
+
+
+
+
+
+
+
 ## HerculesController
 Es el encargado principalmente de obtener los datos de las gráficas en las diferentes fichas, como puedan ser las fichas de los investigadores, los grupos de investigación, las publicaciones, etc...
 

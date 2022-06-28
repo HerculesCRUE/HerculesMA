@@ -19,7 +19,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Controlador para obtener los thesaurus usados en el cluster.
         /// </summary>
-        /// <param name="listThesaurus">listado de thesaurus</param>
+        /// <param name="listThesaurus">Elemento padre que define el thesaurus</param>
         /// <returns>Diccionario con los datos.</returns>
         [HttpGet("GetThesaurus")]
         public IActionResult GetThesaurus(string listThesaurus = "")
@@ -39,7 +39,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         /// <summary>
-        /// Controlador para guardar los datos del cluster.
+        /// Controlador para crear/actualizar los datos del cluster.
         /// </summary>
         /// <param name="pIdGnossUser">Usuario de gnoss.</param>
         /// <param name="pDataCluster">Datos a añadir / modificar.</param>
@@ -64,10 +64,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para guardar los datos del cluster.
+        /// Controlador para cargar los datos de un cluster.
         /// </summary>
-        /// <param name="pIdClusterId">Usuario de gnoss.</param>
-        /// <returns>Id del cluster creado o modificado.</returns>
+        /// <param name="pIdClusterId">Id del cluster.</param>
+        /// <returns>Objeto con el contenido del cluster.</returns>
         [HttpGet("LoadCluster")]
         public IActionResult LoadCluster([Required] string pIdClusterId)
         {
@@ -85,11 +85,11 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         /// <summary>
-        /// Controlador para guardar los datos del cluster.
+        /// Controlador para cargar los perfiles de cada investigador sugerido del cluster.
         /// </summary>
         /// <param name="pDataCluster">Datos del cluster.</param>
-        /// <param name="pPersons">Usuarios de gnoss.</param>
-        /// <returns>Id del cluster creado o modificado.</returns>
+        /// <param name="pPersons">Listado de personas sobre los que pedir información.</param>
+        /// <returns>Diccionario con los datos necesarios para cada persona por cluster.</returns>
         [HttpPost("LoadProfiles")]
         public IActionResult LoadProfiles([FromForm] Cluster pDataCluster, [FromForm] List<string> pPersons)
         {
@@ -104,6 +104,13 @@ namespace Hercules.MA.ServicioExterno.Controllers
             }
         }
 
+        /// <summary>
+        /// Controlador que obtiene el objeto para crear la gráfica tipo araña de las relaciones entre los perfiles seleccionados en el cluster
+        /// </summary>
+        /// <param name="pCluster">Cluster con los datos de las personas sobre las que realizar el filtrado de áreas temáticas.</param>
+        /// <param name="pPersons">Personas sobre las que realizar el filtrado de áreas temáticas (Por si se envía directamente).</param>
+        /// <param name="seleccionados">Determina si se envía el listado de personas desde el cluster o desde las personas</param>
+        /// <returns>Objeto que se trata en JS para construir la gráfica.</returns>
         [HttpPost("DatosGraficaColaboradoresCluster")]
         public IActionResult DatosGraficaColaboradoresCluster ([FromForm] Cluster pCluster, [FromForm] List<string> pPersons, [FromForm] bool seleccionados)
         {
@@ -119,7 +126,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         /// <summary>
-        /// Obtiene los datos para crear la gráfica de áreas temáticas
+        /// Controlador que obtiene los datos para crear la gráfica de áreas temáticas
         /// </summary>
         /// <param name="pPersons">Listado de personas.</param>
         /// <returns>JSON con los datos necesarios para el JS.</returns>
@@ -143,7 +150,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Borra un cluster
+        /// Controlador que borra un cluster
         /// </summary>
         /// <param name="pIdClusterId">Id del Cluster a borrar.</param>
         /// <returns>Un booleano si ha sido borrado.</returns>
