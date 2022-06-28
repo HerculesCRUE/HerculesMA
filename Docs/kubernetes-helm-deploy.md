@@ -1,4 +1,4 @@
-![](./Docs/media/CabeceraDocumentosMD.png)
+![](./media/CabeceraDocumentosMD.png)
 
 # Despliegue de Hércules ED con Kubernetes y Helm
 
