@@ -71,7 +71,7 @@ where{{
 
 }}";
                 listID = listID.Intersect(mResourceApi.VirtuosoQuery(select, where, "document").results.bindings.Select(x => x["doc"].value)).ToList();
-
+                listID = listID.Select(x => mResourceApi.GetShortGuid(x)).ToList();
             }
             return listID;
         }
