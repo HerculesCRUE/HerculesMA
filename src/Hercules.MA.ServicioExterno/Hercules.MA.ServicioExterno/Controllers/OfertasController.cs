@@ -40,6 +40,34 @@ namespace Hercules.MA.ServicioExterno.Controllers
             return Ok(borrado);
         }
 
+
+        /// <summary>
+        /// Cambiar el estado de una oferta
+        /// </summary>
+        /// <param name="pIdOfferId">Id de la oferta a modificar.</param>
+        /// <param name="estado">Id del estado al que se quiere establecer.</param>
+        /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo).</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial.</param>
+        /// <returns>String con el id del nuevo estado.</returns>
+        [HttpPost("CambiarEstado")]
+        public IActionResult CambiarEstado([FromForm] string pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser)
+        {
+
+            string cambiado = "";
+
+            try
+            {
+                AccionesOferta accionCluster = new AccionesOferta();
+                cambiado = accionCluster.CambiarEstado(pIdOfferId, estado, estadoActual, pIdGnossUser);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(cambiado);
+        }
+
         /// <summary>
         /// Controlador para guardar los datos de la oferta.
         /// </summary>
@@ -65,7 +93,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// Controlador para Obtener los usuarios del/los grupos de un investigador
         /// </summary>
         /// <param name="pIdUserId">Usuario investigador.</param>
-        /// <returns>Id del cluster creado o modificado.</returns>
+        /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
         [HttpGet("LoadUsersGroup")]
         public IActionResult LoadUsers([Required] string pIdUserId)
         {
@@ -123,10 +151,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para Obtener los estados de madurez
+        /// Controlador para Obtener los estados de madurez de las ofertas tecnológicas
         /// </summary>
         /// <param name="lang">Idioma a cargar.</param>
-        /// <returns>Listado de las líneas de investigación.</returns>
+        /// <returns>Listado de los estados de madurez.</returns>
         [HttpGet("LoadMatureStates")]
         public IActionResult LoadMatureStates(string lang)
         {
@@ -143,10 +171,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para guardar los datos de la oferta 
+        /// Controlador para crear/actualizar los datos de la oferta 
         /// </summary>
-        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
-        /// <param name="oferta">Objeto con la oferta tecnológica a añadir / modificar.</param>
+        /// <param name="pIdGnossUser">Usuario de gnoss que realiza la acción.</param>
+        /// <param name="oferta">Objeto con la oferta tecnológica a crear/actualizar.</param>
         /// <returns>Id de la oferta creada o modificada.</returns>
         [HttpPost("SaveOffer")]
         [Produces("application/json")]
