@@ -591,7 +591,7 @@ namespace Hercules.MA.GraphicEngine.Models
                             listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, fila["aux"].value, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture)));
                         }
                         else
-                        {                            
+                        {
                             if (itemGrafica.filtro == "" && itemGrafica.color == "#666365")
                             {
                                 // --- ÑAPA
@@ -1359,7 +1359,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
 
                 select.Append(mPrefijos);
-                select.Append($@"SELECT ?tipo COUNT(?s) AS ?numero ");
+                select.Append($@"SELECT ?tipo COUNT(DISTINCT ?s) AS ?numero ");
                 where.Append("WHERE { ");
                 foreach (string item in filtros)
                 {
@@ -1822,19 +1822,13 @@ namespace Hercules.MA.GraphicEngine.Models
             // Filtro de página.
             List<string> filtros = new List<string>();
             filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
-            //if (pFacetaConf.reciproca)
-            //{
-            //    filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta", null, pFacetaConf.filtro));
-            //}
-            //else
-            //{
                 filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta"));
-            //}
-            
+            }
+
             if (!faceta.tesauro)
             {
                 filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta"));
-            }            
+            }
             else
             {
                 filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "categoria"));
@@ -1854,7 +1848,7 @@ namespace Hercules.MA.GraphicEngine.Models
             if (!faceta.tesauro)
             {
                 select.Append(mPrefijos);
-                select.Append($@"SELECT DISTINCT ?nombreFaceta LANG(?nombreFaceta) AS ?lang COUNT(?s) AS ?numero ");
+                select.Append($@"SELECT DISTINCT ?nombreFaceta LANG(?nombreFaceta) AS ?lang COUNT(DISTINCT ?s) AS ?numero ");
                 where.Append("WHERE { ");
                 foreach (string item in filtros)
                 {
@@ -2638,14 +2632,14 @@ namespace Hercules.MA.GraphicEngine.Models
                     isDate = true;
                 }
 
-                // --- ÑAPA
+                //// ---ÑAPA
                 //if (item.Contains("rdf:type=") && pNombreVar != null)
                 //{
                 //    filtrosQuery.Add(TratarParametros("", "?s", i, pNombreVar, isDate, pReciproco));
                 //}
                 //else
                 //{
-                    filtrosQuery.Add(TratarParametros(item, "?s", i, pNombreVar, isDate, pReciproco));
+                filtrosQuery.Add(TratarParametros(item, "?s", i, pNombreVar, isDate, pReciproco));
                 //}
 
                 i += 10;
@@ -2664,6 +2658,12 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static string TratarParametros(string pFiltro, string pVarAnterior, int pAux, string pNombreVar = null, bool pIsDate = false, string pReciproco = null)
         {
+            // TODO filtro reciproco
+            //if (pFiltro.StartsWith("rdf:type") && pFiltro.Contains("@@@"))
+            //{
+            //    pReciproco = pFiltro;
+            //    pFiltro = "roh:title";
+            //}
             StringBuilder filtro = new StringBuilder();
             string[] filtros = pFiltro.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries);
             int i = 0;

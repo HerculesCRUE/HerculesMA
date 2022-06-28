@@ -27,7 +27,7 @@
         "dimensiones": [
           {
             "nombre": {
-              "es": "Proyectos concedidos competitivos"
+              "es": "Concedidos competitivos"
             },
             "filtro": "roh:scientificExperienceProject@@@dc:title='Competitivos'@es",
             "tipoDimension": "bar",
@@ -38,7 +38,7 @@
           },
           {
             "nombre": {
-              "es": "Proyectos concedidos no competitivos"
+              "es": "Concedidos no competitivos"
             },
             "filtro": "roh:scientificExperienceProject@@@dc:title='No competitivos'@es",
             "tipoDimension": "bar",
@@ -49,7 +49,7 @@
           },
           {
             "nombre": {
-              "es": "Proyectos solicitados"
+              "es": "Solicitados"
             },
             "filtro": "",
             "tipoDimension": "bar",
