@@ -1,8 +1,8 @@
 ![](./media/CabeceraDocumentosMD.png)
 
-# Despliegue de Hércules ED con Kubernetes y Helm
+# Despliegue de Hércules MA con Kubernetes y Helm
 
-El despliegue de EDMA-Hercules requiere de varios pasos
+El despliegue de Hercules MA requiere de varios pasos
 
 ## Paso 1: Desplegar Nginx Ingress Controller
 
@@ -50,9 +50,9 @@ Para desplegar RabbitMQ primero clonaremos el contenido del repositorio RabbitMQ
 * Septimo, creamos si lo necesitamos un ingress para poder acceder a la administración de RabbitMQ. Por defecto la URL es rabbit.hercules.com
   - kubectl apply -f ingress.yaml
 
-## Paso 3 Desplegar EDMA-HERCULES.
+## Paso 3 Desplegar HERCULES-MA.
 
-El despliegue de EDMA-HERCULES está preparado para ser realizado con HELM. 
+El despliegue de HERCULES-MA está preparado para ser realizado con HELM. 
 
 * Primero utilizaremos el comando.
   * helm install <nombre_despligue> oci://docker.gnoss.com/helm-charts/edma-gnoss
