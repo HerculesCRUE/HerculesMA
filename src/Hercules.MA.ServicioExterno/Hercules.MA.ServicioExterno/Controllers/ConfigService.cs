@@ -11,6 +11,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         public static IConfigurationRoot configuracion;
         private string RabbitConnectionString { get; set; }
         private string QueueRabbit { get; set; }
+        private string UrlSimilarity { get; set; }
 
         /// <summary>
         /// Constructor.
@@ -77,6 +78,29 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 QueueRabbit = queue;
             }
             return QueueRabbit;
-        }        
+        }
+
+        /// <summary>
+        /// Obtiene la URL del servicio de similitud
+        /// </summary>
+        /// <returns>Url del servicio</returns>
+        public string GetUrlSimilarity()
+        {
+            if (string.IsNullOrEmpty(QueueRabbit))
+            {
+                IDictionary environmentVariables = Environment.GetEnvironmentVariables();
+                string url = "";
+                if (environmentVariables.Contains("UrlSimilarity"))
+                {
+                    url = environmentVariables["UrlSimilarity"] as string;
+                }
+                else
+                {
+                    url = configuracion["UrlSimilarity"];
+                }
+                UrlSimilarity = url;
+            }
+            return UrlSimilarity;
+        }
     }
 }
