@@ -2,7 +2,7 @@
 
 # Despliegue de Hércules MA con Kubernetes y Helm
 
-El despliegue de Hercules MA requiere de varios pasos
+A continuación se describen los pasos para desplegar Hercules MA en un cluster de Kubernetes: 
 
 ## Paso 1: Desplegar Nginx Ingress Controller
 
