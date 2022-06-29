@@ -36,7 +36,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pConfig">Config</param>
         /// <param name="pType">Tipo: 'research_paper' o 'code_project'</param>
         /// <returns></returns>
-        public Dictionary<Guid, Dictionary<string, float>> GetSimilarities(string pId, ConfigService pConfig, string pType)
+        public List<KeyValuePair<Guid, Dictionary<string, float>>> GetSimilarities(string pId, ConfigService pConfig, string pType)
         {
             Dictionary<string, Dictionary<string, float>> dicSimilarsAux = new Dictionary<string, Dictionary<string, float>>();
 
@@ -97,7 +97,7 @@ where{{
                 List<string> listID = mResourceApi.VirtuosoQuery(select, where, graph).results.bindings.Select(x => x["id"].value).ToList();
                 dicSimilarsAux = dicSimilarsAux.Where(x => listID.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
             }
-            Dictionary<Guid, Dictionary<string, float>> dicSimilars = dicSimilarsAux.ToDictionary(x=>mResourceApi.GetShortGuid(x.Key),x=>x.Value);
+            List<KeyValuePair<Guid, Dictionary<string, float>>> dicSimilars = dicSimilarsAux.ToDictionary(x=>mResourceApi.GetShortGuid(x.Key),x=>x.Value).ToList();
 
             return dicSimilars;
         }
