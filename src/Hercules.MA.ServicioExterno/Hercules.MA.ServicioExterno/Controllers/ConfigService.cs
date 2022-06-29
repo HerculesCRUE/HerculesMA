@@ -86,7 +86,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <returns>Url del servicio</returns>
         public string GetUrlSimilarity()
         {
-            if (string.IsNullOrEmpty(QueueRabbit))
+            if (string.IsNullOrEmpty(UrlSimilarity))
             {
                 IDictionary environmentVariables = Environment.GetEnvironmentVariables();
                 string url = "";

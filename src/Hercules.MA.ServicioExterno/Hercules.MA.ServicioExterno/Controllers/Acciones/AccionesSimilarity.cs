@@ -46,7 +46,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 case "research_paper":
                     rdfType = "http://purl.org/ontology/bibo/Document";
-                    graph = "";
+                    graph = "document";
                     break;
                 case "code_project":
                     rdfType = "http://w3id.org/roh/ResearchObject";
@@ -94,7 +94,7 @@ where{{
     }}
 
 }}";
-                List<string> listID = mResourceApi.VirtuosoQuery(select, where, graph).results.bindings.Select(x => x["doc"].value).ToList();
+                List<string> listID = mResourceApi.VirtuosoQuery(select, where, graph).results.bindings.Select(x => x["id"].value).ToList();
                 dicSimilars = dicSimilars.Where(x => listID.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
             }
             return dicSimilars;

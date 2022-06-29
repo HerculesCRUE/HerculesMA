@@ -25,17 +25,17 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Obtiene los documentos similares
         /// </summary>
-        /// <param name="pId">ID del documento</param>
+        /// <param name="pIdDocument">ID del documento</param>
         /// <returns></returns>
         [HttpGet("GetSimilaritiesDocument")]
-        public IActionResult GetSimilaritiesDocument(string pId)
+        public IActionResult GetSimilaritiesDocument(string pIdDocument)
         {
             Dictionary<string, Dictionary<string, float>> listID = new Dictionary<string, Dictionary<string, float>>();
 
             try
             {
                 AccionesSimilarity accionesSimilarity = new AccionesSimilarity();
-                listID = accionesSimilarity.GetSimilarities(pId, _Configuracion, "research_paper");
+                listID = accionesSimilarity.GetSimilarities(pIdDocument, _Configuracion, "research_paper");
             }
             catch (Exception)
             {
@@ -47,17 +47,17 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Obtiene los research object similares
         /// </summary>
-        /// <param name="pId">ID del researchobject</param>
+        /// <param name="pIdRO">ID del researchobject</param>
         /// <returns></returns>
         [HttpGet("GetSimilaritiesResearchObject")]
-        public IActionResult GetSimilaritiesResearchObject(string pId)
+        public IActionResult GetSimilaritiesResearchObject(string pIdRO)
         {
             Dictionary<string, Dictionary<string, float>> listID = new Dictionary<string, Dictionary<string, float>>();
 
             try
             {
                 AccionesSimilarity accionesSimilarity = new AccionesSimilarity();
-                listID = accionesSimilarity.GetSimilarities(pId, _Configuracion, "code_project");
+                listID = accionesSimilarity.GetSimilarities(pIdRO, _Configuracion, "code_project");
             }
             catch (Exception)
             {
