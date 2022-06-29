@@ -43,7 +43,7 @@
             "filtro": "roh:citationCount",
             "calculo": "SUM",
             "tipoDimension": "line",
-            "color": "#666365",
+            "color": "#817E80",
             "yAxisID": "y2",
             "orden": 1
           },
@@ -107,7 +107,7 @@
             "filtro": "roh:citationCount",
             "calculo": "SUM",
             "tipoDimension": "bar",
-            "color": "#666365",
+            "color": "#817E80",
             "yAxisID": "y2",
             "orden": 2
           }
