@@ -1384,11 +1384,13 @@ namespace Hercules.MA.GraphicEngine.Models
 
             grafica.options = options;
 
+            bool anidado = pGrafica.config.dimensiones.Any(x => x.exterior);
             ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimension = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
             Dictionary<Dimension, DatasetCircular> dimensionesDataset = new Dictionary<Dimension, DatasetCircular>();
             ConcurrentDictionary<string, float> dicNombreData = new ConcurrentDictionary<string, float>();
+            List<List<string>> listaFiltrosInterior = new List<List<string>>();
 
-            Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
+            Parallel.ForEach(pGrafica.config.dimensiones.Where(x => !x.exterior), new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
                 SparqlObject resultadoQuery = null;
                 StringBuilder select = new StringBuilder(), where = new StringBuilder();
@@ -1429,6 +1431,11 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
                     filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
+
+                    List<string> aux = new List<string>();
+                    aux.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
+                    aux.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "aux"));
+                    listaFiltrosInterior.Add(aux);
                 }
 
                 select.Append(mPrefijos);
@@ -1464,7 +1471,15 @@ namespace Hercules.MA.GraphicEngine.Models
             List<string> listaNombres = new List<string>();
             List<string> listaLabels = new List<string>();
             // Ordeno los datos
-            Dictionary<string, float> ordered = dicNombreData.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            Dictionary<string, float> ordered = new Dictionary<string, float>();
+            if (anidado)
+            {
+                ordered = dicNombreData.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+            }
+            else
+            {
+                ordered = dicNombreData.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            }
             List<float> listaData = new List<float>();
             foreach (KeyValuePair<string, float> nombreData in ordered)
             {
@@ -1514,6 +1529,154 @@ namespace Hercules.MA.GraphicEngine.Models
 
             grafica.data.datasets.Add(dataset);
 
+            if (pGrafica.config.dimensiones.Any(x => x.exterior))
+            {
+                ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
+                Dictionary<Dimension, DatasetCircular> dimensionesDatasetExt = new Dictionary<Dimension, DatasetCircular>();
+                ConcurrentDictionary<string, float> dicNombreDataExt = new ConcurrentDictionary<string, float>();
+
+                Parallel.ForEach(pGrafica.config.dimensiones.Where(x => x.exterior), new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
+                {
+                    for (int i = 0; i < listaFiltrosInterior.Count; i++)
+                    {
+                        SparqlObject resultadoQuery = null;
+                        StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+                        // Consulta sparql.
+                        List<string> filtros = new List<string>();
+                        Dictionary<string, float> dicResultados = new Dictionary<string, float>();
+                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
+                        if (!string.IsNullOrEmpty(pFiltroFacetas))
+                        {
+                            if (pFiltroFacetas.Contains("((("))
+                            {
+                                if (pFiltroFacetas.Contains('&'))
+                                {
+                                    foreach (string filtro in pFiltroFacetas.Split('&'))
+                                    {
+                                        if (filtro.Contains("((("))
+                                        {
+                                            filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                        }
+                                        else
+                                        {
+                                            filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                                }
+                            }
+                            else
+                            {
+                                filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(itemGrafica.filtro))
+                        {
+                            filtros.AddRange(listaFiltrosInterior[i]);
+                            filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
+                            filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
+                        }
+
+                        select.Append(mPrefijos);
+                        select.Append($@"SELECT ?tipo ?aux COUNT(DISTINCT ?s) AS ?numero ");
+                        where.Append("WHERE { ");
+                        foreach (string item in filtros)
+                        {
+                            where.Append(item);
+                        }
+                        string limite = itemGrafica.limite == 0 ? "" : "LIMIT " + itemGrafica.limite;
+                        where.Append($@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) ");
+                        where.Append($@"}} ORDER BY DESC (?numero) {limite}");
+
+                        resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+                        if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                        {
+                            foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                            {
+                                try
+                                {
+                                    dicNombreDataExt.TryAdd(fila["aux"].value + "---" + fila["tipo"].value, Int32.Parse(fila["numero"].value));
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new Exception("No se ha configurado el apartado de dimensiones.");
+                                }
+                            }
+                            resultadosDimensionExt[itemGrafica] = dicNombreDataExt;
+                        }
+                    }
+                });
+
+                // Lista de los ordenes de las revistas.
+                List<string> listaNombresExt = new List<string>();
+                List<string> listaLabelsExt = new List<string>();
+                // Ordeno los datos
+                Dictionary<string, float> orderedExt = new Dictionary<string, float>();
+                Dictionary<string, float> parteIzq = new Dictionary<string, float>();
+                Dictionary<string, float> parteDcha = new Dictionary<string, float>();
+
+                int cont = 0;
+                foreach (KeyValuePair<string, float> nombreData in dicNombreDataExt.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value))
+                {
+                    if (cont > dicNombreData.Count/2)
+                    {
+                        parteDcha.Add(nombreData.Key, nombreData.Value);
+                    }
+                    else
+                    {
+                        parteIzq.Add(nombreData.Key, nombreData.Value);
+                    }
+                    cont++;
+                }
+                orderedExt = parteIzq.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+                foreach (KeyValuePair<string, float> item in parteDcha.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value))
+                {
+                    orderedExt.TryAdd(item.Key, item.Value);
+                }
+                List<float> listaDataExt = new List<float>();
+                foreach (KeyValuePair<string, float> nombreData in orderedExt)
+                {
+                    listaNombresExt.Add(nombreData.Key.Split("---").LastOrDefault());
+                    listaDataExt.Add(nombreData.Value);
+                }
+
+                DatasetCircular datasetExt = new DatasetCircular();
+                datasetExt.data = listaDataExt;
+
+                List<string> listaColoresExt = new List<string>();
+
+                foreach (string orden in listaNombresExt)
+                {
+                    foreach (KeyValuePair<Dimension, ConcurrentDictionary<string, float>> item in resultadosDimensionExt)
+                    {
+                        if (item.Key.colorMaximo != null)
+                        {
+                            listaColoresExt = ObtenerDegradadoColores(item.Key.colorMaximo, item.Key.color, item.Value.Count());
+                        }
+                        else
+                        {
+                            string nombreRevista = item.Key.filtro.Contains("=") ? item.Key.filtro.Split("=")[1].Split("@")[0].Substring(1, item.Key.filtro.Split("=")[1].Split("@")[0].Length - 2) : "";
+                            if (nombreRevista == orden)
+                            {
+                                // Nombre del dato en leyenda.
+                                datasetExt.label = GetTextLang(pLang, item.Key.nombre);
+                                // Color. 
+                                listaColoresExt.Add(item.Key.color);
+                            }
+                        }
+                    }
+                }
+                datasetExt.backgroundColor = listaColoresExt;
+
+                // HoverOffset por defecto.
+                datasetExt.hoverOffset = 4;
+
+                grafica.data.datasets.Add(datasetExt);
+            }
             return grafica;
         }
 

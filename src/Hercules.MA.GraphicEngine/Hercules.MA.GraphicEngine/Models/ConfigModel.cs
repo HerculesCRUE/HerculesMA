@@ -73,6 +73,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public string color { get; set; }
         public string colorMaximo { get; set; }
         public string tipoDimension { get; set; }
+        public bool exterior { get; set; }
         public string calculo { get; set; }
         public string stack { get; set; }
         public float anchura { get; set; }
