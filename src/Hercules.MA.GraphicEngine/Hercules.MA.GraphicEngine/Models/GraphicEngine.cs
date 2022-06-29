@@ -367,12 +367,29 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     if (pFiltroFacetas.Contains("((("))
                     {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        if (pFiltroFacetas.Contains('&'))
+                        {
+                            foreach (string filtro in pFiltroFacetas.Split('&'))
+                            {
+                                if (filtro.Contains("((("))
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                }
+                                else
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        }
                     }
                     else
                     {
                         filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
-                    } 
+                    }
                 }
                 if (filtroEspecial)
                 {
@@ -936,7 +953,24 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     if (pFiltroFacetas.Contains("((("))
                     {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        if (pFiltroFacetas.Contains('&'))
+                        {
+                            foreach (string filtro in pFiltroFacetas.Split('&'))
+                            {
+                                if (filtro.Contains("((("))
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                }
+                                else
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        }
                     }
                     else
                     {
@@ -1367,7 +1401,24 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     if (pFiltroFacetas.Contains("((("))
                     {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        if (pFiltroFacetas.Contains('&'))
+                        {
+                            foreach (string filtro in pFiltroFacetas.Split('&'))
+                            {
+                                if (filtro.Contains("((("))
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                }
+                                else
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        }
                     }
                     else
                     {
@@ -1593,7 +1644,24 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     if (pFiltroFacetas.Contains("((("))
                     {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        if (pFiltroFacetas.Contains('&'))
+                        {
+                            foreach (string filtro in pFiltroFacetas.Split('&'))
+                            {
+                                if (filtro.Contains("((("))
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                }
+                                else
+                                {
+                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        }
                     }
                     else
                     {
@@ -1862,7 +1930,24 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 if (pFiltroFacetas.Contains("((("))
                 {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] } , pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                    if (pFiltroFacetas.Contains('&'))
+                    {
+                        foreach (string filtro in pFiltroFacetas.Split('&'))
+                        {
+                            if (filtro.Contains("((("))
+                            {
+                                filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                            }
+                            else
+                            {
+                                filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                    }
                 }
                 else
                 {
@@ -2665,7 +2750,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
 
                 filtrosQuery.Add(TratarParametros(item, "?s", i, pNombreVar, isDate, pReciproco));
-                
+
                 i += 10;
             }
 
