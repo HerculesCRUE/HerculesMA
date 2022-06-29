@@ -1528,7 +1528,7 @@ namespace Hercules.MA.GraphicEngine.Models
             dataset.hoverOffset = 4;
             if (anidado)
             {
-                dataset.label = '';
+                dataset.label = "";
             }
             grafica.data.datasets.Add(dataset);
 
