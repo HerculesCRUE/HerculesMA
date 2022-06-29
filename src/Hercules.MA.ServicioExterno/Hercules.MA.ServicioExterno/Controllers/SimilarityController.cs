@@ -52,7 +52,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("GetSimilaritiesResearchObject")]
         public IActionResult GetSimilaritiesResearchObject(string pIdRO)
         {
-            Dictionary<Guid, Dictionary<string, float>> listID = new Dictionary<Guid, Dictionary<string, float>>();
+            List<KeyValuePair<Guid, Dictionary<string, float>>> listID = new List<KeyValuePair<Guid, Dictionary<string, float>>>();
 
             try
             {
