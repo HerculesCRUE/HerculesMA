@@ -1526,10 +1526,13 @@ namespace Hercules.MA.GraphicEngine.Models
 
             // HoverOffset por defecto.
             dataset.hoverOffset = 4;
-
+            if (anidado)
+            {
+                dataset.label = '';
+            }
             grafica.data.datasets.Add(dataset);
 
-            if (pGrafica.config.dimensiones.Any(x => x.exterior))
+            if (anidado)
             {
                 ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
                 Dictionary<Dimension, DatasetCircular> dimensionesDatasetExt = new Dictionary<Dimension, DatasetCircular>();
@@ -1622,7 +1625,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 int cont = 0;
                 foreach (KeyValuePair<string, float> nombreData in dicNombreDataExt.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value))
                 {
-                    if (cont > dicNombreData.Count/2)
+                    if (cont > dicNombreData.Count / 2)
                     {
                         parteDcha.Add(nombreData.Key, nombreData.Value);
                     }
@@ -1663,15 +1666,24 @@ namespace Hercules.MA.GraphicEngine.Models
                             if (nombreRevista == orden)
                             {
                                 // Nombre del dato en leyenda.
-                                datasetExt.label = GetTextLang(pLang, item.Key.nombre);
+                                listaLabelsExt.Add(GetTextLang(pLang, item.Key.nombre));
                                 // Color. 
                                 listaColoresExt.Add(item.Key.color);
                             }
                         }
                     }
                 }
+                cont = 0;
+                for (int i = 0; i < listaLabelsExt.Count; i++)
+                {
+                    if (i >= listaLabelsExt.Count / 2 && cont < listaLabels.Count-1)
+                    {
+                        cont++;
+                    }
+                    listaLabelsExt[i] += " " + listaLabels[cont].ToLower();
+                }
                 datasetExt.backgroundColor = listaColoresExt;
-
+                datasetExt.label = string.Join('|', listaLabelsExt);
                 // HoverOffset por defecto.
                 datasetExt.hoverOffset = 4;
 
