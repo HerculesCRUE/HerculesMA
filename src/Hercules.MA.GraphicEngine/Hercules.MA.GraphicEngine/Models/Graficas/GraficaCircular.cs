@@ -30,6 +30,7 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
         public string label { get; set; }
         public List<float> data { get; set; }
         public List<string> backgroundColor { get; set; }
+        public List<int> grupos { get; set; } 
         public int hoverOffset { get; set; }
     }
 }

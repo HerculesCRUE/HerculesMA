@@ -376,7 +376,7 @@
             },
             "filtro": "roh:scientificExperienceProject@@@dc:title='Competitivos'@es",
             "exterior": true,
-            "color": "#e29c22"
+            "color": "#777777"
           },
           {
             "nombre": {
@@ -384,7 +384,7 @@
             },
             "filtro": "roh:scientificExperienceProject@@@dc:title='No competitivos'@es",
             "exterior": true,
-            "color": "#318A60"
+            "color": "#FFFFFF"
           }
         ]
       }

@@ -1651,6 +1651,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 datasetExt.data = listaDataExt;
 
                 List<string> listaColoresExt = new List<string>();
+                List<int> listaGrupos = new List<int>();
 
                 foreach (string orden in listaNombresExt)
                 {
@@ -1667,7 +1668,8 @@ namespace Hercules.MA.GraphicEngine.Models
                             {
                                 // Nombre del dato en leyenda.
                                 listaLabelsExt.Add(GetTextLang(pLang, item.Key.nombre));
-                                // Color. 
+                                // Mezclo los colores
+                                
                                 listaColoresExt.Add(item.Key.color);
                             }
                         }
@@ -1681,7 +1683,21 @@ namespace Hercules.MA.GraphicEngine.Models
                         cont++;
                     }
                     listaLabelsExt[i] += " " + listaLabels[cont].ToLower();
+                    // Mezclo los colores
+                    int rInterior = Convert.ToInt32(listaColores[cont].Substring(1, 2), 16);
+                    int gInterior = Convert.ToInt32(listaColores[cont].Substring(3, 2), 16);
+                    int bInterior = Convert.ToInt32(listaColores[cont].Substring(5, 2), 16);
+                    int rExterior = Convert.ToInt32(listaColoresExt[i].Substring(1, 2), 16);
+                    int gExterior = Convert.ToInt32(listaColoresExt[i].Substring(3, 2), 16);
+                    int bExterior = Convert.ToInt32(listaColoresExt[i].Substring(5, 2), 16);
+                    int rMezclado = rExterior + (int)((rInterior - rExterior) * 0.40);
+                    int gMezclado = gExterior + (int)((gInterior - gExterior) * 0.40);
+                    int bMezclado = bExterior + (int)((bInterior - bExterior) * 0.40);
+                    string colorHex = '#' + rMezclado.ToString("X2") + gMezclado.ToString("X2") + bMezclado.ToString("X2");
+                    listaColoresExt[i] = colorHex;
+                    listaGrupos.Add(cont);
                 }
+                datasetExt.grupos = listaGrupos;
                 datasetExt.backgroundColor = listaColoresExt;
                 datasetExt.label = string.Join('|', listaLabelsExt);
                 // HoverOffset por defecto.
