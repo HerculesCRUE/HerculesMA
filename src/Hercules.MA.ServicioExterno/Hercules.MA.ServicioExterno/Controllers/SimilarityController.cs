@@ -25,17 +25,39 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Obtiene los documentos similares
         /// </summary>
-        /// <param name="pIdDocument">ID del socumento</param>
+        /// <param name="pId">ID del documento</param>
         /// <returns></returns>
         [HttpGet("GetSimilaritiesDocument")]
-        public IActionResult GetSimilaritiesDocument(string pIdDocument)
+        public IActionResult GetSimilaritiesDocument(string pId)
         {
-            List<string> listID = new List<string>();
+            Dictionary<string, Dictionary<string, float>> listID = new Dictionary<string, Dictionary<string, float>>();
 
             try
             {
                 AccionesSimilarity accionesSimilarity = new AccionesSimilarity();
-                listID = accionesSimilarity.GetSimilaritiesDocument(pIdDocument, _Configuracion);
+                listID = accionesSimilarity.GetSimilarities(pId, _Configuracion, "research_paper");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return Ok(listID);
+        }
+
+        /// <summary>
+        /// Obtiene los research object similares
+        /// </summary>
+        /// <param name="pId">ID del researchobject</param>
+        /// <returns></returns>
+        [HttpGet("GetSimilaritiesResearchObject")]
+        public IActionResult GetSimilaritiesResearchObject(string pId)
+        {
+            Dictionary<string, Dictionary<string, float>> listID = new Dictionary<string, Dictionary<string, float>>();
+
+            try
+            {
+                AccionesSimilarity accionesSimilarity = new AccionesSimilarity();
+                listID = accionesSimilarity.GetSimilarities(pId, _Configuracion, "code_project");
             }
             catch (Exception)
             {
