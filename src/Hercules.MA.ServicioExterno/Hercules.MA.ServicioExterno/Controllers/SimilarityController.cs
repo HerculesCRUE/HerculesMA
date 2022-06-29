@@ -31,7 +31,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("GetSimilaritiesDocument")]
         public IActionResult GetSimilaritiesDocument(string pIdDocument)
         {
-            Dictionary<Guid, Dictionary<string, float>> listID = new Dictionary<Guid, Dictionary<string, float>>();
+            List<KeyValuePair<Guid, Dictionary<string, float>>> listID = new List<KeyValuePair<Guid, Dictionary<string, float>>>();
             try
             {
                 AccionesSimilarity accionesSimilarity = new AccionesSimilarity();
