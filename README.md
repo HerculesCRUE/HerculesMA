@@ -12,6 +12,10 @@ Los módulos del portal son:
 - **Análisis de proyectos de investigación - Módulo de Gestión y Análisis de Proyectos**. Permite que el usuario sea capaz de analizar los resultados de los proyectos de investigación que se están llevando a cabo en un centro/estructura de investigación. 
 - **Análisis de indicadores de investigación - Módulo de Catálogo de indicadores**. Se proveerá al usuario de indicadores de investigación e innovación que le permitan medir la investigación nacional a partir de la información disponible en la red HERCULES y en fuentes externas.
 
+## Despliegue
+
+La información de despliegue se puede consultar en [Kubernetes Helm Deploy](./Docs/kubernetes-helm-deploy.md)
+
 ## Información de versión y compatibilidad
 
 ![](https://content.gnoss.ws/imagenes/proyectos/personalizacion/7e72bf14-28b9-4beb-82f8-e32a3b49d9d3/cms/logognossazulprincipal.png)
