@@ -344,6 +344,50 @@
           }
         ]
       }
+    },
+    {
+      "identificador": "grafica11",
+      "nombre": {
+        "es": "Proyectos colaborativos y competitivos"
+      },
+      "tipo": "Circular",
+      "anchura": 13,
+      "config": {
+        "porcentual": true,
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Colaborativos"
+            },
+            "filtro": "roh:collaborative='true'",
+            "orden": 1,
+            "color": "#BF4858"
+          },
+          {
+            "nombre": {
+              "es": "No colaborativos"
+            },
+            "filtro": "roh:collaborative='false'",
+            "color": "#7CBFE3"
+          },
+          {
+            "nombre": {
+              "es": "Competitivos"
+            },
+            "filtro": "roh:scientificExperienceProject@@@dc:title='Competitivos'@es",
+            "exterior": true,
+            "color": "#FFDAC1"
+          },
+          {
+            "nombre": {
+              "es": "No competitivos"
+            },
+            "filtro": "roh:scientificExperienceProject@@@dc:title='No competitivos'@es",
+            "exterior": true,
+            "color": "#C7CEEA"
+          }
+        ]
+      }
     }
   ],
   "facetas": [
