@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
@@ -30,8 +31,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("GetSimilaritiesDocument")]
         public IActionResult GetSimilaritiesDocument(string pIdDocument)
         {
-            Dictionary<string, Dictionary<string, float>> listID = new Dictionary<string, Dictionary<string, float>>();
-
+            List<KeyValuePair<Guid, Dictionary<string, float>>> listID = new List<KeyValuePair<Guid, Dictionary<string, float>>>();
             try
             {
                 AccionesSimilarity accionesSimilarity = new AccionesSimilarity();
@@ -52,7 +52,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("GetSimilaritiesResearchObject")]
         public IActionResult GetSimilaritiesResearchObject(string pIdRO)
         {
-            Dictionary<string, Dictionary<string, float>> listID = new Dictionary<string, Dictionary<string, float>>();
+            List<KeyValuePair<Guid, Dictionary<string, float>>> listID = new List<KeyValuePair<Guid, Dictionary<string, float>>>();
 
             try
             {

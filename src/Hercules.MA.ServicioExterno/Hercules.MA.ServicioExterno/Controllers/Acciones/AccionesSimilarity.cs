@@ -36,9 +36,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pConfig">Config</param>
         /// <param name="pType">Tipo: 'research_paper' o 'code_project'</param>
         /// <returns></returns>
-        public Dictionary<string, Dictionary<string, float>> GetSimilarities(string pId, ConfigService pConfig, string pType)
+        public List<KeyValuePair<Guid, Dictionary<string, float>>> GetSimilarities(string pId, ConfigService pConfig, string pType)
         {
-            Dictionary<string, Dictionary<string, float>> dicSimilars = new Dictionary<string, Dictionary<string, float>>();
+            Dictionary<string, Dictionary<string, float>> dicSimilarsAux = new Dictionary<string, Dictionary<string, float>>();
 
             string rdfType = "";
             string graph = "";
@@ -72,16 +72,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             if (responsePost.IsSuccessStatusCode)
             {
                 EnrichmentSimilarityGetResponse responseGetObject = responsePost.Content.ReadAsAsync<EnrichmentSimilarityGetResponse>().Result;
-                dicSimilars = responseGetObject.similar_ros_calculado;
-                dicSimilars.Remove(pId);
+                dicSimilarsAux = responseGetObject.similar_ros_calculado;
+                dicSimilarsAux.Remove(pId);
             }
-            if (dicSimilars.Count > 0)
+            if (dicSimilarsAux.Count > 0)
             {
                 //Hacemos una verificación para que sólo se devuelvan validados o publicios en el cv
                 string select = "select distinct ?id from <http://gnoss.com/curriculumvitae.owl> ";
                 string where = $@"
 where{{
-    FILTER(?id in (<{string.Join(">,<", dicSimilars.Keys)}>))
+    FILTER(?id in (<{string.Join(">,<", dicSimilarsAux.Keys)}>))
     ?id a <{rdfType}>.
     {{ ?id <http://w3id.org/roh/isValidated> 'true'.}}
     UNION
@@ -95,8 +95,10 @@ where{{
 
 }}";
                 List<string> listID = mResourceApi.VirtuosoQuery(select, where, graph).results.bindings.Select(x => x["id"].value).ToList();
-                dicSimilars = dicSimilars.Where(x => listID.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+                dicSimilarsAux = dicSimilarsAux.Where(x => listID.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
             }
+            List<KeyValuePair<Guid, Dictionary<string, float>>> dicSimilars = dicSimilarsAux.ToDictionary(x=>mResourceApi.GetShortGuid(x.Key),x=>x.Value).ToList();
+
             return dicSimilars;
         }
     }
