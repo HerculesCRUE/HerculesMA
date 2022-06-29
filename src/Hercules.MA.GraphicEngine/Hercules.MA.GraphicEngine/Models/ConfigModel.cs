@@ -21,7 +21,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public bool tesauro { get; set; }
         public int numeroItemsFaceta { get; set; }
         public bool verTodos { get; set; }
-        public bool reciproca { get; set; }
+        public string reciproca { get; set; }
     }
 
     public class Grafica

@@ -11,7 +11,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public bool ordenAlfaNum { get; set; }
         public bool verTodos { get; set; }
         public bool tesauro { get; set; }
-        public bool reciproca { get; set; }
+        public string reciproca { get; set; }
         public List<ItemFaceta> items { get; set; }
     }
 

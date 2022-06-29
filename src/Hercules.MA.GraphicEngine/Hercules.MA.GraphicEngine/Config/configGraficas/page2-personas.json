@@ -178,13 +178,6 @@
       "filtro": "vivo:hasResearchArea@@@roh:categoryNode",
       "tesauro": true
     },
-    //{
-    //  "nombre": {
-    //    "es": "Grupos"
-    //  },
-    //  "filtro": "rdf:type='group'@@@vivo:relates@@@roh:roleOf",
-    //  "reciproca": true
-    //},
     {
       "nombre": {
         "es": "Categoría PDI"
@@ -196,6 +189,13 @@
         "es": "Género"
       },
       "filtro": "foaf:gender@@@dc:title"
+    },
+    {
+      "nombre": {
+        "es": "Grupos"
+      },
+      "filtro": "roh:title",
+      "reciproca": "rdf:type='group'@@@vivo:relates@@@roh:roleOf"
     }
   ]
 }
