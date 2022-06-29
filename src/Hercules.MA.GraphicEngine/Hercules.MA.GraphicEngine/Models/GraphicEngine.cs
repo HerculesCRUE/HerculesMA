@@ -617,7 +617,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         }
                         else
                         {
-                            if (itemGrafica.filtro == "" && itemGrafica.color == "#666365")
+                            if (itemGrafica.filtro == "" && itemGrafica.color == "#817E80")
                             {
                                 // --- ÑAPA
                                 listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, string.Empty, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture) + 5.0f));
