@@ -38,6 +38,10 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
                         {
                             dic.Add(label, new List<float>());
                         }
+                        if (dic[label].Count != grupo)
+                        {
+                            dic[label].Add(0);
+                        }
                         dic[label].Add(datasetCircular.data[i]);
                     }
                 }
