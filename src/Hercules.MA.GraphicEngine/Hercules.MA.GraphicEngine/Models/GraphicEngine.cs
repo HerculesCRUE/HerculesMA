@@ -2522,6 +2522,7 @@ namespace Hercules.MA.GraphicEngine.Models
             });
 
             bool insertado = IncluirTriplesRecurso(mResourceApi, shortId, triplesInclude);
+            return insertado;
         }
 
         /// <summary>
