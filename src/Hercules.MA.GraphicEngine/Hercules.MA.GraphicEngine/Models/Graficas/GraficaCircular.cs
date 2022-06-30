@@ -14,10 +14,39 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
         public DataCircular data { get; set; }
         public override byte[] GenerateCSV()
         {
-            StringBuilder csv = new StringBuilder("");
-            csv.AppendLine("\"" + String.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
-            csv.AppendLine("\"" + String.Join(";", data.datasets.FirstOrDefault().data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
-            return Encoding.Latin1.GetBytes(csv.ToString());
+            if (data.datasets.Count == 1)
+            {
+                StringBuilder csv = new StringBuilder("");
+                csv.AppendLine("\"" + String.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                csv.AppendLine("\"" + String.Join(";", data.datasets.FirstOrDefault().data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                return Encoding.Latin1.GetBytes(csv.ToString());
+            }
+            else
+            {
+                StringBuilder csv = new StringBuilder("");
+                csv.AppendLine(";\"" + String.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                Dictionary<string, List<float>> dic = new Dictionary<string, List<float>>();
+
+                foreach (DatasetCircular datasetCircular in data.datasets.Where(x => x.grupos != null))
+                {
+                    for (int i = 0; i < datasetCircular.data.Count; i++)
+                    {
+                        int grupo = datasetCircular.grupos[i];
+                        string quitar = " " + data.labels[grupo].ToLower();
+                        string label = datasetCircular.label.Split('|')[i].Split(quitar)[0];
+                        if (!dic.ContainsKey(label))
+                        {
+                            dic.Add(label, new List<float>());
+                        }
+                        dic[label].Add(datasetCircular.data[i]);
+                    }
+                }
+                foreach (KeyValuePair<string, List<float>> item in dic)
+                {
+                    csv.AppendLine("\"" + item.Key + "\";\"" + String.Join(";", item.Value).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                }
+                return Encoding.Latin1.GetBytes(csv.ToString());
+            }
         }
     }
     public class DataCircular
@@ -30,6 +59,7 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
         public string label { get; set; }
         public List<float> data { get; set; }
         public List<string> backgroundColor { get; set; }
+        public List<int> grupos { get; set; }
         public int hoverOffset { get; set; }
     }
 }

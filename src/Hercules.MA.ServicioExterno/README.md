@@ -15,7 +15,7 @@ Este servicio es un servicio web sobre el que se apoya la web de **Hércules Mé
 
 El servicio externo se compone a su vez de 3 servicios o funcionalidades bien marcadas:
 
-## OfertasController
+# OfertasController
 La documentación funcional del creador de ofertas tecnológicas está en [Ofertas tecnológicas](https://confluence.um.es/confluence/pages/viewpage.action?pageId=468647949).
 
 Los métodos de éste controlador tendrán la siguiente url:
@@ -23,7 +23,7 @@ Los métodos de éste controlador tendrán la siguiente url:
 
 Los métodos son los siguientes:
 
-### [GET] BorrarOferta
+## [GET] BorrarOferta
 Borra una oferta
 
 *Parámetros:*
@@ -33,7 +33,7 @@ Borra una oferta
 *Boolean* True o false si ha sido borrado.
 
 
-### [POST] CambiarEstado
+## [POST] CambiarEstado
 Cambia el estado de una oferta
 
 *Parámetros:*
@@ -46,7 +46,7 @@ Cambia el estado de una oferta
 *String* Id del nuevo estado.
 
 
-### [GET] LoadOffer
+## [GET] LoadOffer
 Controlador para guardar los datos de la oferta
 
 *Parámetros:*
@@ -56,7 +56,7 @@ Controlador para guardar los datos de la oferta
 *Object* Objeto "leible" de la oferta.
 
 
-### [GET] LoadUsers
+## [GET] LoadUsers
 Controlador para Obtener los usuarios del/los grupos de un investigador
 
 *Parámetros:*
@@ -66,7 +66,7 @@ Controlador para Obtener los usuarios del/los grupos de un investigador
 *Object* Diccionario con los datos necesarios para cada persona.
 
 
-### [POST] LoadLineResearchs
+## [POST] LoadLineResearchs
 Controlador para Obtener las líneas de invetigación de los grupos de los usuarios investigadores dados
 
 *Parámetros:*
@@ -77,7 +77,7 @@ Controlador para Obtener las líneas de invetigación de los grupos de los usuar
 
 
 
-### [GET] LoadFramingSectors
+## [GET] LoadFramingSectors
 Controlador para Obtener los sectores de encuadre
 
 *Parámetros:*
@@ -89,7 +89,7 @@ Controlador para Obtener los sectores de encuadre
 
 
 
-### [GET] LoadMatureStates
+## [GET] LoadMatureStates
 Controlador para Obtener los estados de madurez de las ofertas tecnológicas
 
 *Parámetros:*
@@ -101,7 +101,7 @@ Controlador para Obtener los estados de madurez de las ofertas tecnológicas
 
 
 
-### [POST] SaveOffer
+## [POST] SaveOffer
 Controlador para crear/actualizar los datos de la oferta
 
 *Parámetros:*
@@ -114,14 +114,14 @@ Controlador para crear/actualizar los datos de la oferta
 
 
 
-## ClusterController
+# ClusterController
 La documentación funcional del creador de los clusters está en [Asistente para la creación de cluster (equipo de proyecto)](https://confluence.um.es/confluence/pages/viewpage.action?pageId=398786801).
 
 Los métodos de éste controlador tendrán la siguiente url:
 > https://something.com/servicioexterno/Cluster/[METODO]
 
 
-### [GET] GetThesaurus
+## [GET] GetThesaurus
 Controlador para obtener los thesaurus usados en el cluster
 
 *Parámetros:*
@@ -133,7 +133,7 @@ Controlador para obtener los thesaurus usados en el cluster
 
 
 
-### [POST] SaveCluster
+## [POST] SaveCluster
 Controlador para crear/actualizar los datos del cluster
 
 *Parámetros:*
@@ -146,7 +146,7 @@ Controlador para crear/actualizar los datos del cluster
 
 
 
-### [GET] LoadCluster
+## [GET] LoadCluster
 Controlador para cargar los datos de un cluster
 
 *Parámetros:*
@@ -157,7 +157,7 @@ Controlador para cargar los datos de un cluster
 
 
 
-### [POST] LoadProfiles
+## [POST] LoadProfiles
 Controlador para cargar los perfiles de cada investigador sugerido del cluster
 
 *Parámetros:*
@@ -169,7 +169,7 @@ Controlador para cargar los perfiles de cada investigador sugerido del cluster
 
 
 
-### [POST] DatosGraficaColaboradoresCluster
+## [POST] DatosGraficaColaboradoresCluster
 Controlador que obtiene el objeto para crear la gráfica tipo araña de las relaciones entre los perfiles seleccionados en el cluster
 
 *Parámetros:*
@@ -183,7 +183,7 @@ Controlador que obtiene el objeto para crear la gráfica tipo araña de las rela
 
 
 
-### [POST] DatosGraficaAreasTematicasCluster
+## [POST] DatosGraficaAreasTematicasCluster
 Controlador que obtiene los datos para crear la gráfica de áreas temáticas
 
 *Parámetros:*
@@ -195,7 +195,7 @@ Controlador que obtiene los datos para crear la gráfica de áreas temáticas
 
 
 
-### [POST] BorrarCluster
+## [POST] BorrarCluster
 Controlador que borra un cluster
 
 *Parámetros:*
@@ -207,7 +207,7 @@ Controlador que borra un cluster
 
 
 
-### [GET] SearchTags
+## [GET] SearchTags
 Controlador que sugiere etiquetas con la búsqueda dada
 
 *Parámetros:*
@@ -217,15 +217,7 @@ Controlador que sugiere etiquetas con la búsqueda dada
 *string[]* Listado de las etiquetas de resultado
 
 
-
-
-
-
-
-
-
-
-## HerculesController
+# HerculesController
 Es el encargado principalmente de obtener los datos de las gráficas en las diferentes fichas, como puedan ser las fichas de los investigadores, los grupos de investigación, las publicaciones, etc...
 
 ## RedesUsuarioController
@@ -255,4 +247,5 @@ curl -X 'GET' \
 Donde los parámetros serían **stringSearch**, que sería la cadena de texto a buscar, y **lang** el idioma de búsqueda.
 
 ## Otras funcionalidades
+
 También posee la funcionalidad de cargar en memoria periódicamente un listado con los objetos de las diferentes entidades buscables por el metabuscador. Este proceso se iniciará al iniciar el servicio y periódicamente se volverá a ejecutar cargando los nombres, descripciones, urls, tags y autores (según corresponda a cada tipo de entidad) necesarios para realizar la búsqueda en a través del SearchController.
