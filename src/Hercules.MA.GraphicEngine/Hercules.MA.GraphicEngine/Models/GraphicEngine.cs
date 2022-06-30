@@ -1678,7 +1678,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 cont = 0;
                 for (int i = 0; i < listaLabelsExt.Count; i++)
                 {
-                    if (i > listaLabelsExt.Count / 2 && cont < listaLabels.Count-1)
+                    if (i > parteIzq.Count / 2 && cont < listaLabels.Count-1)
                     {
                         cont++;
                     }
