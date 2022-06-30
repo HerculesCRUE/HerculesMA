@@ -2509,6 +2509,12 @@ namespace Hercules.MA.GraphicEngine.Models
             // Filtros
             if (!string.IsNullOrEmpty(pFiltros))
             {
+                // --- ÑAPA
+                if (pFiltros[pFiltros.Length - 3] == '@')
+                {
+                    pFiltros = pFiltros + "_filter";
+                }
+
                 triplesInclude.Add(new TriplesToInclude
                 {
                     Description = false,

@@ -40,7 +40,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                     rabbitMQService.PublishMessage(listaDatosZenodo, _Configuracion.GetQueueRabbit());
 
                     // FigShare
-                    if (dicIDs.ContainsKey("tokenFigshare"))
+                    if (dicIDs.ContainsKey("usuarioFigshare") && dicIDs.ContainsKey("tokenFigshare"))
                     {
                         List<string> listaDatosFigShare = new List<string>() { "figshare", dicIDs["tokenFigshare"] };
                         rabbitMQService.PublishMessage(listaDatosFigShare, _Configuracion.GetQueueRabbit());
