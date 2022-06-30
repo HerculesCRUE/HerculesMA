@@ -2432,7 +2432,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pIdGrafica">ID de la gráfica.</param>
         /// <param name="pFiltros">Filtros a aplicar en la gráfica.</param>
         /// <param name="pUserId">ID del usuario conectado.</param>
-        public static void GuardarGrafica(string pTitulo, string pAnchura, string pIdPaginaGrafica, string pIdGrafica, string pFiltros, string pUserId, string pIdRecursoPagina = null, string pTituloPagina = null)
+        public static bool GuardarGrafica(string pTitulo, string pAnchura, string pIdPaginaGrafica, string pIdGrafica, string pFiltros, string pUserId, string pIdRecursoPagina = null, string pTituloPagina = null)
         {
             string idRecursoPagina = pIdRecursoPagina;
             if (string.IsNullOrEmpty(idRecursoPagina) && !string.IsNullOrEmpty(pTituloPagina))
