@@ -31,6 +31,8 @@ Este documento describe, mediante un ejemplo práctico, cómo se realiza la conf
 La configuración de las gráficas se lleva a cabo mediante la edición de archivos JSON situados en la carpeta ./Config/configGraficas/ que definen diversos aspectos para cada uno de las gráficas.
 También se explicará como un usuario no administrador de la plataforma puede guardar las gráficas que quiera en su espacio personal de indicadores.
 
+El análisis de indicadores se puede consultar en [Análisis de indicadores de investigación - Módulo de Catálogo de indicadores](https://confluence.um.es/confluence/pages/viewpage.action?pageId=397534317)
+
 Ejemplo de configuración de las gráficas de indicadores
 ========================================================
 
