@@ -1,19 +1,18 @@
 ﻿using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
+using Gnoss.ApiWrapper.Model;
 using Hercules.MA.GraphicEngine.Models.Graficas;
 using Hercules.MA.GraphicEngine.Models.Paginas;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
 using System.Web;
-using System.Drawing;
-using Gnoss.ApiWrapper.Model;
 
 namespace Hercules.MA.GraphicEngine.Models
 {
@@ -1625,9 +1624,16 @@ namespace Hercules.MA.GraphicEngine.Models
                 int cont = 0;
                 foreach (KeyValuePair<string, float> nombreData in dicNombreDataExt.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value))
                 {
-                    if (cont > dicNombreData.Count / 2)
+                    if (cont >= dicNombreDataExt.Count / 2)
                     {
-                        parteDcha.Add(nombreData.Key, nombreData.Value);
+                        if (parteIzq.Keys.Any(x => x.StartsWith(nombreData.Key.Split("---")[0])))
+                        {
+                            parteIzq.Add(nombreData.Key, nombreData.Value);
+                        }
+                        else
+                        {
+                            parteDcha.Add(nombreData.Key, nombreData.Value);
+                        }
                     }
                     else
                     {
@@ -1669,7 +1675,7 @@ namespace Hercules.MA.GraphicEngine.Models
                                 // Nombre del dato en leyenda.
                                 listaLabelsExt.Add(GetTextLang(pLang, item.Key.nombre));
                                 // Mezclo los colores
-                                
+
                                 listaColoresExt.Add(item.Key.color);
                             }
                         }
@@ -1678,7 +1684,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 cont = 0;
                 for (int i = 0; i < listaLabelsExt.Count; i++)
                 {
-                    if (i > parteIzq.Count / 2 && cont < listaLabels.Count-1)
+                    if (i > parteIzq.Count / 2 && cont < listaLabels.Count - 1)
                     {
                         cont++;
                     }
