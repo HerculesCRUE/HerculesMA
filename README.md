@@ -29,7 +29,9 @@ Las carpetas del repositorio son:
 
 ## Despliegue
 
-La información de despliegue se puede consultar en [Kubernetes Helm Deploy](./Docs/kubernetes-helm-deploy.md)
+La información de despliegue se puede consultar en [Kubernetes Helm Deploy](./Docs/kubernetes-helm-deploy.md).
+
+La descripción de la arquitectura de Hércules MA se puede consultar en [Arquitectura de Hércules MA](https://confluence.um.es/confluence/pages/viewpage.action?pageId=421167229).
 
 ## Información de versión y compatibilidad
 
