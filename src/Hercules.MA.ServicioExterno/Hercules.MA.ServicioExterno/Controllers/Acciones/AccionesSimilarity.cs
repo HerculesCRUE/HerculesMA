@@ -38,8 +38,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns></returns>
         public List<KeyValuePair<Guid, Dictionary<string, float>>> GetSimilarities(string pId, ConfigService pConfig, string pType)
         {
-            UtilsSimilarity utilsSimilarity = new UtilsSimilarity(pConfig.GetUrlSimilarity(), mResourceApi, pType);
-            return utilsSimilarity.GetSimilars(pId);
+            if (!string.IsNullOrEmpty(pConfig.GetUrlSimilarity()))
+            {
+                UtilsSimilarity utilsSimilarity = new UtilsSimilarity(pConfig.GetUrlSimilarity(), mResourceApi, pType);
+                return utilsSimilarity.GetSimilars(pId);
+            }
+            else
+            {
+                return new List<KeyValuePair<Guid, Dictionary<string, float>>>();
+            }
         }
     }
 }
