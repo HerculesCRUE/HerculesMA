@@ -1,6 +1,18 @@
 ![](./media/CabeceraDocumentosMD.png)
 
+| Fecha         | 29/6/2022                                                   |
+| ------------- | ------------------------------------------------------------ |
+|Título|Despliegue de Hércules MA con Kubernetes y Helm| 
+|Descripción|Guía de despliegue de Hércules MA mediante Kubernetes y Helm|
+|Versión|1.0|
+|Módulo|Documentación|
+|Tipo|Especificación|
+|Cambios de la Versión|Versión inicial|
+
+
 # Despliegue de Hércules MA con Kubernetes y Helm
+
+La arquitectura de componentes se puede consultar en [Arquitectura de Hércules MA](https://confluence.um.es/confluence/pages/viewpage.action?pageId=421167229)
 
 A continuación se describen los pasos para desplegar Hercules MA en un cluster de Kubernetes: 
 
