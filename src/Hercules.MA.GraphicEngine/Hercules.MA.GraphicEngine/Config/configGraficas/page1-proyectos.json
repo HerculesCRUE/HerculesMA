@@ -100,7 +100,6 @@
       "tipo": "Circular",
       "anchura": 13,
       "config": {
-        "porcentual": true,
         "dimensiones": [
           {
             "nombre": {
