@@ -6,4 +6,5 @@ Contiene documentos del proyecto y recursos estáticos, como imágenes, que se u
 
 El listado de documentos es:
 
-- [Kubernetes Helm Deploy](./kubernetes-helm-deploy.md). Información pare el despliegue del proyecto Hércules MA. 
+- [Kubernetes Helm Deploy](./kubernetes-helm-deploy.md). Información pare el despliegue del proyecto Hércules MA.
+- [Dimensionamiento, monitorización y mantenimiento de Hércules MA](./Monitorización%20y%20mantenimiento%20de%20componentes.md). Recomendaciones de dimensionamiento, monitorización y mantenimiento de Hércules MA desplegado con Kubernetes y Helm.
