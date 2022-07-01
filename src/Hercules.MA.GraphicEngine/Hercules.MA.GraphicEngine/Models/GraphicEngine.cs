@@ -2510,7 +2510,7 @@ namespace Hercules.MA.GraphicEngine.Models
             if (!string.IsNullOrEmpty(pFiltros))
             {
                 // --- ÑAPA
-                if (pFiltros[pFiltros.Length - 3] == '@')
+                if (System.Text.RegularExpressions.Regex.Match(pFiltros, "@[\\w]{2}$").Success)
                 {
                     pFiltros = pFiltros + "_filter";
                 }
