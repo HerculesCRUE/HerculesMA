@@ -43,7 +43,7 @@
     {
       "identificador": "grafica2",
       "nombre": {
-        "es": "Géneros de los PDI"
+        "es": "Distribución de los PDI por sexo"
       },
       "tipo": "Circular",
       "anchura": 12,
@@ -186,7 +186,7 @@
     },
     {
       "nombre": {
-        "es": "Género"
+        "es": "Sexo"
       },
       "filtro": "foaf:gender@@@dc:title"
     },

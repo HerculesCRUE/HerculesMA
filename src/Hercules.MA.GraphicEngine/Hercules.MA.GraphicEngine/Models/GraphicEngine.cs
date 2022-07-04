@@ -1387,9 +1387,10 @@ namespace Hercules.MA.GraphicEngine.Models
             ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimension = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
             Dictionary<Dimension, DatasetCircular> dimensionesDataset = new Dictionary<Dimension, DatasetCircular>();
             ConcurrentDictionary<string, float> dicNombreData = new ConcurrentDictionary<string, float>();
+            List<Dimension> listaDimensiones = pGrafica.config.dimensiones.Where(x => !x.exterior).ToList();
             List<List<string>> listaFiltrosInterior = new List<List<string>>();
 
-            Parallel.ForEach(pGrafica.config.dimensiones.Where(x => !x.exterior), new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
+            Parallel.ForEach(listaDimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
                 SparqlObject resultadoQuery = null;
                 StringBuilder select = new StringBuilder(), where = new StringBuilder();
@@ -1457,7 +1458,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         {
                             dicNombreData.TryAdd(fila["tipo"].value, Int32.Parse(fila["numero"].value));
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             throw new Exception("No se ha configurado el apartado de dimensiones.");
                         }
@@ -1536,8 +1537,9 @@ namespace Hercules.MA.GraphicEngine.Models
                 ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
                 Dictionary<Dimension, DatasetCircular> dimensionesDatasetExt = new Dictionary<Dimension, DatasetCircular>();
                 ConcurrentDictionary<string, float> dicNombreDataExt = new ConcurrentDictionary<string, float>();
-
-                Parallel.ForEach(pGrafica.config.dimensiones.Where(x => x.exterior), new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
+                List<Dimension> listaDimensionesExt = pGrafica.config.dimensiones.Where(x => x.exterior).ToList();
+                
+                Parallel.ForEach(listaDimensionesExt, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
                 {
                     for (int i = 0; i < listaFiltrosInterior.Count; i++)
                     {
@@ -1603,7 +1605,7 @@ namespace Hercules.MA.GraphicEngine.Models
                                 {
                                     dicNombreDataExt.TryAdd(fila["aux"].value + "---" + fila["tipo"].value, Int32.Parse(fila["numero"].value));
                                 }
-                                catch (Exception ex)
+                                catch (Exception)
                                 {
                                     throw new Exception("No se ha configurado el apartado de dimensiones.");
                                 }
@@ -2349,7 +2351,7 @@ namespace Hercules.MA.GraphicEngine.Models
             where = new StringBuilder();
 
             select.Append(mPrefijos);
-            select.Append($@"SELECT distinct ?datosGraficas ?titulo ?orden ?idPagina ?idGrafica ?filtro ?anchura ");
+            select.Append($@"SELECT distinct ?datosGraficas ?titulo ?orden ?idPagina ?idGrafica ?filtro ?anchura ?escalas");
             where.Append("WHERE { ");
             where.Append($@"<{pIdPage}> roh:metricGraphic ?datosGraficas. ");
             where.Append("?datosGraficas roh:title ?titulo. ");
@@ -2358,6 +2360,7 @@ namespace Hercules.MA.GraphicEngine.Models
             where.Append("?datosGraficas roh:graphicId ?idGrafica. ");
             where.Append("OPTIONAL{?datosGraficas roh:filters ?filtro. } ");
             where.Append("?datosGraficas roh:width ?anchura. ");
+            where.Append("OPTIONAL{?datosGraficas roh:scales ?escalas. } ");
             where.Append("} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
@@ -2376,6 +2379,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         data.filtro = fila["filtro"].value;
                     }
                     data.anchura = fila["anchura"].value;
+                    data.escalas = fila.ContainsKey("escalas") ? fila["escalas"].value : string.Empty;
                     listaGraficas.Add(data);
                 }
             }
@@ -2438,7 +2442,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pIdGrafica">ID de la gráfica.</param>
         /// <param name="pFiltros">Filtros a aplicar en la gráfica.</param>
         /// <param name="pUserId">ID del usuario conectado.</param>
-        public static bool GuardarGrafica(string pTitulo, string pAnchura, string pIdPaginaGrafica, string pIdGrafica, string pFiltros, string pUserId, string pIdRecursoPagina = null, string pTituloPagina = null)
+        public static bool GuardarGrafica(string pTitulo, string pAnchura, string pIdPaginaGrafica, string pIdGrafica, string pFiltros, string pUserId, string pIdRecursoPagina = null, string pTituloPagina = null, string pEscalas = null)
         {
             string idRecursoPagina = pIdRecursoPagina;
             if (string.IsNullOrEmpty(idRecursoPagina) && !string.IsNullOrEmpty(pTituloPagina))
@@ -2533,6 +2537,17 @@ namespace Hercules.MA.GraphicEngine.Models
                 NewValue = valorBase + pAnchura
             });
 
+            // Escalas
+            if (pEscalas != null)
+            {
+                triplesInclude.Add(new TriplesToInclude
+                {
+                    Description = false,
+                    Title = false,
+                    Predicate = predicadoBase + "http://w3id.org/roh/scales",
+                    NewValue = valorBase + pEscalas
+                });
+            }
             bool insertado = IncluirTriplesRecurso(mResourceApi, shortId, triplesInclude);
             return insertado;
         }
@@ -2880,6 +2895,29 @@ namespace Hercules.MA.GraphicEngine.Models
             triple.Predicate = $@"http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic|http://w3id.org/roh/width";
             triple.NewValue = pPageID + "|" + pGraphicID + "|" + pNewWidth;
             triple.OldValue = pPageID + "|" + pGraphicID + "|" + pOldWidth;
+            listaTriplesModificacion.Add(triple);
+
+            dicModificacion.Add(guid, listaTriplesModificacion);
+            Dictionary<Guid, bool> modificado = mResourceApi.ModifyPropertiesLoadedResources(dicModificacion);
+        }
+
+        /// <summary>
+        /// Borra la relación de la página.
+        /// </summary>
+        /// <param name="pUserId">ID del usuario.</param>
+        /// <param name="pRecursoId">ID del recurso a borrar el triple.</param>
+        public static void EditarEscalasGrafica(string pUserId, string pPageID, string pGraphicID, string pNewScales, string pOldScales)
+        {
+            mResourceApi.ChangeOntoly("person");
+            // ID del recurso del usuario.
+            string idRecurso = GetIdPersonByGnossUser(pUserId);
+            Guid guid = mResourceApi.GetShortGuid(idRecurso);
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
+            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+            TriplesToModify triple = new TriplesToModify();
+            triple.Predicate = $@"http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic|http://w3id.org/roh/scales";
+            triple.NewValue = pPageID + "|" + pGraphicID + "|" + pNewScales;
+            triple.OldValue = pPageID + "|" + pGraphicID + "|" + pOldScales;
             listaTriplesModificacion.Add(triple);
 
             dicModificacion.Add(guid, listaTriplesModificacion);

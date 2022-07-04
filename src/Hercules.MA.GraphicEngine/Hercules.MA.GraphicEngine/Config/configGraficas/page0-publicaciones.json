@@ -117,7 +117,7 @@
     {
       "identificador": "grafica3",
       "nombre": {
-        "es": "Géneros de los IP por publicaciones"
+        "es": "Distribución de primeros autores por sexo"
       },
       "tipo": "Circular",
       "anchura": 13,
@@ -456,7 +456,7 @@
     },
     {
       "nombre": {
-        "es": "Género"
+        "es": "Sexo"
       },
       "filtro": "roh:genderIP@@@dc:title"
     },
