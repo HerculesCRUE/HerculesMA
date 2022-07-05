@@ -23,6 +23,7 @@ namespace Hercules.MA.ServicioExterno.Models.Cluster
         }
         public string entityID { get; set; }
         public string name { get; set; }
+        public string fecha { get; set; }
         public string description { get; set; }
         public List<string> terms { get; set; }
         public List<PerfilCluster> profiles { get; set; }

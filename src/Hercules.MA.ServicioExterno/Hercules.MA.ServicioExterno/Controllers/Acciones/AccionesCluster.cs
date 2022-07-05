@@ -279,7 +279,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pIdClusterId">Identificador del cluster</param>
         /// <returns>Diccionario con las listas de thesaurus.</returns>
-        internal Models.Cluster.Cluster LoadCluster(string pIdClusterId)
+        internal Models.Cluster.Cluster LoadCluster(string pIdClusterId, bool loadUsuarios = true)
         {
 
             // Obtener datos del cluster
@@ -316,6 +316,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         break;
                     case "http://w3id.org/roh/clusterPerfil":
                         perfiles.Add(e["o"].value);
+                        break;
+                    case "http://purl.org/dc/terms/issued":
+                        pDataCluster.fecha = e["o"].value;
                         break;
                 }
             });
@@ -360,14 +363,30 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     perfilCluster.entityID = e["s"].value;
                     perfilCluster.name = e["title"].value;
-                    perfilCluster.tags = e["freeTextKeywordGroup"].value.Split(',',StringSplitOptions.RemoveEmptyEntries).ToList();
-                    perfilCluster.terms = e["knowledgeAreaGroup"].value.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    try
+                    {
+                        perfilCluster.tags = e["freeTextKeywordGroup"].value.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    }
+                    catch (Exception except) {
+                        perfilCluster.tags = new();
+                    }
+                    try
+                    {
+                        perfilCluster.terms = e["knowledgeAreaGroup"].value.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    }
+                    catch (Exception except) {
+                        perfilCluster.terms = new();
+                    }
                     perfilCluster.users = new List<PerfilCluster.UserCluster>();
                 });
 
-                //Datos de los miembros
-                select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
-                where = @$"where {{
+
+                if (loadUsuarios)
+                {
+
+                    //Datos de los miembros
+                    select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
+                    where = @$"where {{
                     ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
                     ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
                     OPTIONAL {{
@@ -396,35 +415,38 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     FILTER(?s = <{p}>)
                 }}";
-                sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+                    sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
 
-                // Carga los datos en el objeto
-                sparqlObject.results.bindings.ForEach(e =>
-                {
-                    List<string> infoList = new List<string>(); ;
-                    if(e.ContainsKey("hasPosition"))
+                    // Carga los datos en el objeto
+                    sparqlObject.results.bindings.ForEach(e =>
                     {
-                        infoList.Add( e["hasPosition"].value);
-                    }
-                    if (e.ContainsKey("tituloOrg"))
-                    {
-                        infoList.Add(e["tituloOrg"].value);
-                    }
-                    if (e.ContainsKey("departamento"))
-                    {
-                        infoList.Add(e["departamento"].value);
-                    }
-                    string info = string.Join(", ",infoList);
-                    perfilCluster.users.Add(new PerfilCluster.UserCluster()
-                    {
-                        userID = e["memberPerfil"].value,
-                        name = e["nombreUser"].value,
-                        shortUserID = mResourceApi.GetShortGuid(e["memberPerfil"].value).ToString().ToLower(),
-                        numPublicacionesTotal= e.ContainsKey("numDoc") ? int.Parse(e["numDoc"].value):0,
-                        ipNumber = e.ContainsKey("ipNumber") ? int.Parse(e["ipNumber"].value) : 0,
-                        info=info
+                        List<string> infoList = new List<string>(); ;
+                        if (e.ContainsKey("hasPosition"))
+                        {
+                            infoList.Add(e["hasPosition"].value);
+                        }
+                        if (e.ContainsKey("tituloOrg"))
+                        {
+                            infoList.Add(e["tituloOrg"].value);
+                        }
+                        if (e.ContainsKey("departamento"))
+                        {
+                            infoList.Add(e["departamento"].value);
+                        }
+                        string info = string.Join(", ", infoList);
+                        perfilCluster.users.Add(new PerfilCluster.UserCluster()
+                        {
+                            userID = e["memberPerfil"].value,
+                            name = e["nombreUser"].value,
+                            shortUserID = mResourceApi.GetShortGuid(e["memberPerfil"].value).ToString().ToLower(),
+                            numPublicacionesTotal= e.ContainsKey("numDoc") ? int.Parse(e["numDoc"].value) : 0,
+                            ipNumber = e.ContainsKey("ipNumber") ? int.Parse(e["ipNumber"].value) : 0,
+                            info=info
+                        });
                     });
-                });
+
+                }
+
 
                 // Añade el perfil creado a los datos del cluster
                 pDataCluster.profiles.Add(perfilCluster);
@@ -683,6 +705,143 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 respuesta[idperson] = respuesta[idperson].OrderByDescending(x => x.Value.ajuste).ToDictionary(x => x.Key, x => x.Value);
             }
             return respuesta;
+        }
+
+
+        /// <summary>
+        /// Método público para cargar los perfiles de cada investigador guardados en los diferentes clusters
+        /// </summary>
+        /// <param name="userId">Id del usuario</param>
+        /// <param name="loadResearchers">Booleano que determina si cargamos los investigadores de cada perfil</param>
+        /// <returns>Diccionario con los datos necesarios para cada perfil.</returns>
+        public List<Models.Cluster.Cluster> loadSavedProfiles(Guid userId, bool loadResearchers = false)
+        {
+            // Listado de clusters para rellenar.
+            List<Models.Cluster.Cluster> clusterList = new();
+            List<string> listIdsClusters = new();
+
+            // Obtener el los profiles a través del id de usuario de la cuenta
+            string select = "select ?cluster ?titleCluster ?issued ?description ?profiles ?title group_concat(distinct ?clKnowledgeArea;separator=',') as ?clKnowledgeAreaGroup  group_concat(distinct ?freeTextKeyword;separator=',') as ?freeTextKeywordGroup group_concat(distinct ?KnowledgeArea;separator=',') as ?knowledgeAreaGroup FROM <http://gnoss.com/cluster.owl> FROM <http://gnoss.com/clusterperfil.owl>";
+            string where = @$"where {{
+                    ?person a <http://xmlns.com/foaf/0.1/Person>.
+                    ?person <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    ?cluster <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                    ?cluster <http://w3id.org/roh/title> ?titleCluster.
+                    ?cluster <http://purl.org/dc/terms/issued> ?issued.
+                    OPTIONAL
+                    {{
+                        ?cluster <http://vivoweb.org/ontology/core#description> ?description.
+                    }}
+
+                    OPTIONAL
+                    {{
+                        ?cluster <http://w3id.org/roh/hasKnowledgeArea> ?clHasKnowledgeArea.
+                        ?clHasKnowledgeArea <http://w3id.org/roh/categoryNode> ?clKnowledgeArea.
+                    }}
+
+
+                    # Profiles cluster
+
+                    ?cluster <http://w3id.org/roh/clusterPerfil> ?profiles.
+                    OPTIONAL
+                    {{
+                        ?profiles <http://w3id.org/roh/hasKnowledgeArea> ?hasKnowledgeArea.
+                        ?hasKnowledgeArea <http://w3id.org/roh/categoryNode> ?KnowledgeArea.
+                    }}
+
+                    ?profiles <http://w3id.org/roh/title> ?title.
+                    OPTIONAL
+                    {{
+                        ?profiles <http://vivoweb.org/ontology/core#freeTextKeyword> ?freeTextKeyword.
+                    }}
+                    OPTIONAL
+                    {{
+                        ?profiles <http://w3id.org/roh/hasKnowledgeArea> ?hasKnowledgeArea.
+                        ?hasKnowledgeArea <http://w3id.org/roh/categoryNode> ?KnowledgeArea.
+                    }}
+
+                    FILTER(?idGnoss = <http://gnoss/{userId.ToString().ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+
+            // Rellena el los clusters
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                // Obtiene un nuevo perfil
+                PerfilCluster profile = new PerfilCluster();
+                profile.terms = new();
+                profile.tags = new();
+                profile.users = new();
+                // Añade las areas temáticas y los descriptores específicos
+
+                if (e["knowledgeAreaGroup"].value != String.Empty)
+                {
+                    profile.terms = e["knowledgeAreaGroup"].value.Split(",").ToList();
+                }
+                if (e["freeTextKeywordGroup"].value != String.Empty)
+                {
+                    profile.tags = e["freeTextKeywordGroup"].value.Split(",").ToList();
+                }
+                // Añade el nombre del perfil
+                profile.name = e["title"].value;
+                profile.entityID = e["profiles"].value;
+
+                // Busca si existe el cluster actualmente
+                if (clusterList.Find(cl => cl.entityID == e["cluster"].value) != null)
+                {
+                    // Añade el perfil al cluster que corresponde previamente cargado
+                    clusterList.Find(cl => cl.entityID == e["cluster"].value).profiles.Add(profile);
+                } else
+                {
+                    // Añade el ID en el listado de IDs
+                    listIdsClusters.Add(e["cluster"].value);
+
+                    // Obtengo las areas de conocimiento del cluster
+                    List<string> clusterTerms = new List<string>();
+                    if (e["clKnowledgeAreaGroup"].value != String.Empty)
+                    {
+                        clusterTerms = e["clKnowledgeAreaGroup"].value.Split(",").ToList();
+                    }
+
+                    // 1. Crea un nuevo cluter
+                    // 2. Añade el perfil al cluster
+                    // 3. Añade el cluster creado al listado de clusters
+                    Models.Cluster.Cluster cluster = new Models.Cluster.Cluster()
+                    {
+                        name = e["titleCluster"].value,
+                        profiles = new(),
+                        entityID = e["cluster"].value,
+                        description = e["description"].value,
+                        fecha = e["issued"].value,
+                        terms = clusterTerms
+                    };
+                    cluster.profiles.Add(profile);
+
+                    // Añade el cluster al listado
+                    clusterList.Add(cluster);
+                }
+
+            });
+
+
+            // Carga los investigadores si se le indica
+            if (loadResearchers)
+            {
+
+                var listPerfiles = clusterList.SelectMany(e => e.profiles).ToList();
+
+                var listUserProfiles = loadUsersProfiles(listPerfiles.Select(e => e.entityID).ToList());
+
+                listPerfiles.ForEach(e =>
+                {
+                    e.users = listUserProfiles.FindAll(tp => tp.Item1 == e.entityID).Select(tp => tp.Item2).ToList();
+                });
+
+            }
+
+
+
+            return clusterList;
         }
 
 
@@ -1172,6 +1331,83 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             return new Tuple<Dictionary<string, string>, Dictionary<string, string>>(dicAreasBroader, dicAreasUltimoNivel);
         }
+
+
+        /// <summary>
+        /// Obtiene los datos de los investigadores de los perfiles indicados.
+        /// </summary>
+        /// <returns>Listado de los ids de los perfiles sobre los que se van a cargar los investigadores.</returns>
+        private List<Tuple<string, PerfilCluster.UserCluster>> loadUsersProfiles(List<string> listProfilesIds)
+        {
+            // Creamos la variable para cargar los investigadores y el id del perfil al que pertenece 
+            List<Tuple<string, PerfilCluster.UserCluster>> result = new();
+
+            //Datos de los miembros
+            string select = "select distinct ?s ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
+            string where = @$"where {{
+                    ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
+                    ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
+                    OPTIONAL {{
+                        ?doc a <http://purl.org/ontology/bibo/Document>.
+                        ?doc <http://w3id.org/roh/isValidated> 'true'.
+                        ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+                        ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
+                    }}
+                    OPTIONAL {{
+                        ?proj a <http://vivoweb.org/ontology/core#Project>.
+                        ?proj <http://w3id.org/roh/isValidated> 'true'.
+                        ?proj <http://vivoweb.org/ontology/core#relates> ?listprojauth.
+                        ?listprojauth <http://w3id.org/roh/roleOf> ?memberPerfil.
+                        ?listprojauth <http://w3id.org/roh/isIP> 'true'.
+                    }}
+                    OPTIONAL {{
+                        ?memberPerfil <http://w3id.org/roh/hasPosition> ?hasPosition.
+                    }}
+                    OPTIONAL {{
+                        ?memberPerfil <http://vivoweb.org/ontology/core#departmentOrSchool> ?dept.
+                        ?dept <http://purl.org/dc/elements/1.1/title> ?departamento
+                    }}
+                    OPTIONAL {{
+                        ?memberPerfil <http://w3id.org/roh/hasRole> ?org.
+                        ?org <http://w3id.org/roh/title> ?tituloOrg
+                    }}
+                    FILTER(?s in ({string.Join(',', listProfilesIds.Select(e => '<' + e + '>'))}))
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+
+            // Carga los datos en el objeto
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                List<string> infoList = new List<string>();
+                if (e.ContainsKey("hasPosition"))
+                {
+                    infoList.Add(e["hasPosition"].value);
+                }
+                if (e.ContainsKey("tituloOrg"))
+                {
+                    infoList.Add(e["tituloOrg"].value);
+                }
+                if (e.ContainsKey("departamento"))
+                {
+                    infoList.Add(e["departamento"].value);
+                }
+                string info = string.Join(", ", infoList);
+
+                // Crea la tupla con el ID del perfil y el usuario correspondiente
+                result.Add(new Tuple<string, PerfilCluster.UserCluster>(e["s"].value, new PerfilCluster.UserCluster()
+                {
+                    userID = e["memberPerfil"].value,
+                    name = e["nombreUser"].value,
+                    shortUserID = mResourceApi.GetShortGuid(e["memberPerfil"].value).ToString().ToLower(),
+                    numPublicacionesTotal= e.ContainsKey("numDoc") ? int.Parse(e["numDoc"].value) : 0,
+                    ipNumber = e.ContainsKey("ipNumber") ? int.Parse(e["ipNumber"].value) : 0,
+                    info=info
+                }));
+            });
+
+            return result;
+        }
+
 
         #endregion
 

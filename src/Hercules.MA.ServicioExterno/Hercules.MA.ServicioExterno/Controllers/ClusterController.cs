@@ -105,6 +105,27 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         /// <summary>
+        /// Controlador para cargar la configuración de los perfiles de todos los clusters de un usuario de la web.
+        /// </summary>
+        /// <param name="pIdUser">Id del usuario.</param>
+        /// <param name="loadSavedProfiles">Booleano que determina si cargamos los investigadores de cada perfil.</param>
+        /// <returns>Listado con los datos necesarios de los clusters y sus perfiles.</returns>
+        [HttpGet("loadSavedProfiles")]
+        public IActionResult LoadSavedProfiles([Required] Guid pIdUser, bool loadSavedProfiles = false)
+        {
+            try
+            {
+                AccionesCluster accionCluster = new AccionesCluster();
+                return Ok(accionCluster.loadSavedProfiles(pIdUser, loadSavedProfiles));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        /// <summary>
         /// Controlador que obtiene el objeto para crear la gráfica tipo araña de las relaciones entre los perfiles seleccionados en el cluster
         /// </summary>
         /// <param name="pCluster">Cluster con los datos de las personas sobre las que realizar el filtrado de áreas temáticas.</param>
