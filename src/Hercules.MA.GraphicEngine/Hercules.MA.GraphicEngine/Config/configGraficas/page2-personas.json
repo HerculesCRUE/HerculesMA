@@ -43,7 +43,7 @@
     {
       "identificador": "grafica2",
       "nombre": {
-        "es": "Géneros de los PDI"
+        "es": "Distribución de los PDI por sexo"
       },
       "tipo": "Circular",
       "anchura": 12,
@@ -180,22 +180,22 @@
     },
     {
       "nombre": {
-        "es": "Grupos"
-      },
-      "filtro": "rdf:type='group'@@@vivo:relates@@@roh:roleOf",
-      "reciproca": true
-    },
-    {
-      "nombre": {
         "es": "Categoría PDI"
       },
       "filtro": "roh:hasPosition"
     },
     {
       "nombre": {
-        "es": "Género"
+        "es": "Sexo"
       },
       "filtro": "foaf:gender@@@dc:title"
+    },
+    {
+      "nombre": {
+        "es": "Grupos"
+      },
+      "filtro": "roh:title",
+      "reciproca": "rdf:type='group'@@@vivo:relates@@@roh:roleOf"
     }
   ]
 }

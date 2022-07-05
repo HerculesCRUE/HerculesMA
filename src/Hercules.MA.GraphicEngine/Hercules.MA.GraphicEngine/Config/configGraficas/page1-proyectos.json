@@ -27,7 +27,7 @@
         "dimensiones": [
           {
             "nombre": {
-              "es": "Proyectos concedidos competitivos"
+              "es": "Concedidos competitivos"
             },
             "filtro": "roh:scientificExperienceProject@@@dc:title='Competitivos'@es",
             "tipoDimension": "bar",
@@ -38,7 +38,7 @@
           },
           {
             "nombre": {
-              "es": "Proyectos concedidos no competitivos"
+              "es": "Concedidos no competitivos"
             },
             "filtro": "roh:scientificExperienceProject@@@dc:title='No competitivos'@es",
             "tipoDimension": "bar",
@@ -49,11 +49,11 @@
           },
           {
             "nombre": {
-              "es": "Proyectos solicitados"
+              "es": "Solicitados"
             },
             "filtro": "",
             "tipoDimension": "bar",
-            "color": "#666365",
+            "color": "#817E80",
             "yAxisID": "y1",
             "orden": 3
           }
@@ -63,26 +63,31 @@
     {
       "identificador": "grafica2",
       "nombre": {
-        "es": "IP principal de la UMU"
+        "es": "Ámbito de los proyectos"
       },
-      "tipo": "Circular",
+      "tipo": "Barras",
       "anchura": 13,
       "config": {
-        "porcentual": true,
+        "orientacionVertical": true,
+        "ejeX": "vivo:geographicFocus@@@dc:title",
+        "orderDesc": false,
+        "rellenarEjeX": false,
+        "yAxisPrint": [
+          {
+            "yAxisID": "y1",
+            "posicion": "left"
+          }
+        ],
         "dimensiones": [
           {
             "nombre": {
-              "es": "IP principal de la UMU"
+              "es": "Número de proyectos por ámbito"
             },
-            "filtro": "roh:mainResearchers@@@rdf:member@@@roh:isActive='true'",
-            "color": "#BF4858"
-          },
-          {
-            "nombre": {
-              "es": "IP principal fuera de la UMU"
-            },
-            "filtro": "roh:mainResearchers@@@rdf:member@@@roh:isActive='false'",
-            "color": "#7CBFE3"
+            "filtro": "",
+            "tipoDimension": "bar",
+            "color": "#BF4858",
+            "yAxisID": "y1",
+            "orden": 1
           }
         ]
       }
@@ -90,10 +95,53 @@
     {
       "identificador": "grafica3",
       "nombre": {
+        "es": "Proyectos colaborativos y competitivos"
+      },
+      "tipo": "Circular",
+      "anchura": 13,
+      "config": {
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Colaborativos"
+            },
+            "filtro": "roh:collaborative='true'",
+            "orden": 1,
+            "color": "#BF4858"
+          },
+          {
+            "nombre": {
+              "es": "No colaborativos"
+            },
+            "filtro": "roh:collaborative='false'",
+            "color": "#7CBFE3"
+          },
+          {
+            "nombre": {
+              "es": "Competitivos"
+            },
+            "filtro": "roh:scientificExperienceProject@@@dc:title='Competitivos'@es",
+            "exterior": true,
+            "color": "#777777"
+          },
+          {
+            "nombre": {
+              "es": "No competitivos"
+            },
+            "filtro": "roh:scientificExperienceProject@@@dc:title='No competitivos'@es",
+            "exterior": true,
+            "color": "#FFFFFF"
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica4",
+      "nombre": {
         "es": "Investigadores por proyecto"
       },
       "tipo": "Barras",
-      "anchura": 12,
+      "anchura": 13,
       "config": {
         "orientacionVertical": true,
         "ejeX": "roh:researchersNumber",
@@ -121,39 +169,34 @@
       }
     },
     {
-      "identificador": "grafica4",
+      "identificador": "grafica5",
       "nombre": {
-        "es": "Ámbito de los proyectos"
+        "es": "IP principal de la UMU"
       },
-      "tipo": "Barras",
-      "anchura": 12,
+      "tipo": "Circular",
+      "anchura": 13,
       "config": {
-        "orientacionVertical": true,
-        "ejeX": "vivo:geographicFocus@@@dc:title",
-        "orderDesc": false,
-        "rellenarEjeX": false,
-        "yAxisPrint": [
-          {
-            "yAxisID": "y1",
-            "posicion": "left"
-          }
-        ],
+        "porcentual": true,
         "dimensiones": [
           {
             "nombre": {
-              "es": "Número de proyectos por ámbito"
+              "es": "IP principal de la UMU"
             },
-            "filtro": "",
-            "tipoDimension": "bar",
-            "color": "#BF4858",
-            "yAxisID": "y1",
-            "orden": 1
+            "filtro": "roh:mainResearchers@@@rdf:member@@@roh:isActive='true'",
+            "color": "#BF4858"
+          },
+          {
+            "nombre": {
+              "es": "IP principal fuera de la UMU"
+            },
+            "filtro": "roh:mainResearchers@@@rdf:member@@@roh:isActive='false'",
+            "color": "#7CBFE3"
           }
         ]
       }
     },
     {
-      "identificador": "grafica5",
+      "identificador": "grafica6",
       "nombre": {
         "es": "Proyectos por convocatoria"
       },
@@ -187,7 +230,7 @@
       }
     },
     {
-      "identificador": "grafica6",
+      "identificador": "grafica7",
       "nombre": {
         "es": "Proyectos por organismos"
       },
@@ -221,7 +264,7 @@
       }
     },
     {
-      "identificador": "grafica7",
+      "identificador": "grafica8",
       "nombre": {
         "es": "Proyectos por tipo"
       },
@@ -254,7 +297,7 @@
       }
     },
     {
-      "identificador": "grafica8",
+      "identificador": "grafica9",
       "nombre": {
         "es": "Proyectos por grupo"
       },
@@ -287,7 +330,7 @@
       }
     },
     {
-      "identificador": "grafica9",
+      "identificador": "grafica10",
       "nombre": {
         "es": "Relaciones entre las áreas temáticas de los proyectos"
       },
@@ -310,7 +353,7 @@
       }
     },
     {
-      "identificador": "grafica10",
+      "identificador": "grafica11",
       "nombre": {
         "es": "Áreas temáticas de los proyectos"
       },
