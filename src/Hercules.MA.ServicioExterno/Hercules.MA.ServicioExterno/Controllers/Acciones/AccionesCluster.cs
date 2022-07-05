@@ -806,19 +806,24 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     // 1. Crea un nuevo cluter
                     // 2. Añade el perfil al cluster
                     // 3. Añade el cluster creado al listado de clusters
-                    Models.Cluster.Cluster cluster = new Models.Cluster.Cluster()
+                    try
                     {
-                        name = e["titleCluster"].value,
-                        profiles = new(),
-                        entityID = e["cluster"].value,
-                        description = e["description"].value,
-                        fecha = e["issued"].value,
-                        terms = clusterTerms
-                    };
-                    cluster.profiles.Add(profile);
+                        Models.Cluster.Cluster cluster = new Models.Cluster.Cluster()
+                        {
+                            name = e.ContainsKey("titleCluster") ? e["titleCluster"].value : String.Empty,
+                            profiles = new(),
+                            entityID = e.ContainsKey("cluster") ? e["cluster"].value : String.Empty,
+                            description = e.ContainsKey("description") ? e["description"].value : String.Empty,
+                            fecha = e.ContainsKey("issued") ? e["issued"].value : String.Empty,
+                            terms = clusterTerms
+                        };
+                        cluster.profiles.Add(profile);
 
-                    // Añade el cluster al listado
-                    clusterList.Add(cluster);
+                        // Añade el cluster al listado
+                        clusterList.Add(cluster);
+
+                    } catch (Exception xcpt) { }
+                    
                 }
 
             });
