@@ -33,11 +33,11 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pIdPagina">Identificador de la página.</param>
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
-        public static Pagina GetPage(string pIdPagina, string pLang)
+        public static Pagina GetPage(string pIdPagina, string pLang, string userId = "")
         {
             // Lectura del JSON de configuración.
             ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.identificador == pIdPagina);
-            return CrearPagina(configModel, pLang);
+            return CrearPagina(configModel, pLang, userId);
         }
         /// <summary>
         /// Obtiene los datos de las páginas.
@@ -45,7 +45,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pIdPagina">Identificador de la página.</param>
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
-        public static List<Pagina> GetPages(string pLang)
+        public static List<Pagina> GetPages(string pLang, string userId = "")
         {
             List<Pagina> listaPaginas = new List<Pagina>();
 
@@ -53,7 +53,7 @@ namespace Hercules.MA.GraphicEngine.Models
             List<ConfigModel> listaConfigModels = TabTemplates;
             foreach (ConfigModel configModel in listaConfigModels)
             {
-                listaPaginas.Add(CrearPagina(configModel, pLang));
+                listaPaginas.Add(CrearPagina(configModel, pLang, userId ));
             }
 
             return listaPaginas;
@@ -65,7 +65,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pConfigModel">Configuración.</param>
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
-        public static Pagina CrearPagina(ConfigModel pConfigModel, string pLang)
+        public static Pagina CrearPagina(ConfigModel pConfigModel, string pLang, string userId = "")
         {
             Pagina pagina = new Pagina();
             pagina.id = pConfigModel.identificador;
@@ -77,8 +77,14 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     id = itemGrafica.identificador,
                     anchura = itemGrafica.anchura,
-                    idGrupo = itemGrafica.idGrupo
+                    idGrupo = itemGrafica.idGrupo,
+                    isPrivate = itemGrafica.isPrivate
+
                 };
+                if (itemGrafica.isPrivate && userId.Equals("ffffffff-ffff-ffff-ffff-ffffffffffff"))
+                {
+                    continue;
+                }
 
                 string prefijoNodos = "nodes";
                 string prefijoBarraHorizonal = "isHorizontal";
@@ -97,7 +103,6 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     itemGrafica.identificador = prefijoAbreviar + "-" + itemGrafica.identificador;
                     configPagina.id = prefijoAbreviar + "-" + configPagina.id;
-
                 }
 
                 if (itemGrafica.tipo == EnumGraficas.Nodos && !itemGrafica.identificador.Contains(prefijoNodos))
