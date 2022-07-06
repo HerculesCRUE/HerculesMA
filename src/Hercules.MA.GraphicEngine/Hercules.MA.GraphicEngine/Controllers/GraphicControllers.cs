@@ -83,9 +83,9 @@ namespace Hercules.MA.GraphicEngine.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public List<Pagina> GetPaginasGraficas(string pLang, string userId = "")
         {
-            return Models.GraphicEngine.GetPages(pLang,userId);
+            return Models.GraphicEngine.GetPages(pLang, userId);
         }
-
+        
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
