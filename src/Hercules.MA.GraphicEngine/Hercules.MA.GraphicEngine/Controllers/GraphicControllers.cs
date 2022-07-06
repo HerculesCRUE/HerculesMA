@@ -72,18 +72,18 @@ namespace Hercules.MA.GraphicEngine.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public Pagina GetPaginaGrafica(string pIdPagina, string pLang)
+        public Pagina GetPaginaGrafica(string pIdPagina, string pLang, string userId = "")
         {
-            return Models.GraphicEngine.GetPage(pIdPagina, pLang);
+            return Models.GraphicEngine.GetPage(pIdPagina, pLang, userId);
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public List<Pagina> GetPaginasGraficas(string pLang)
+        public List<Pagina> GetPaginasGraficas(string pLang, string userId = "")
         {
-            return Models.GraphicEngine.GetPages(pLang);
+            return Models.GraphicEngine.GetPages(pLang,userId);
         }
 
         [HttpGet]
