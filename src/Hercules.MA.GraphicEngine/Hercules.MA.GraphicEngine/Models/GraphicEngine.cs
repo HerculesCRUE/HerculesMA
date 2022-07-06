@@ -1732,7 +1732,6 @@ namespace Hercules.MA.GraphicEngine.Models
                 // HoverOffset por defecto.
                 dataset.hoverOffset = 4;
                 dataset.label = String.Join('|', data.labels);
-                grafica.data.datasets.Add(dataset);
 
                 // Lista de los ordenes de las revistas.
                 List<string> listaNombresExt = new List<string>();
@@ -1779,7 +1778,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                 List<string> listaColoresExt = new List<string>();
                 List<int> listaGrupos = new List<int>();
-
+                string auxLeyenda = "~~~";
                 foreach (string orden in listaNombresExt)
                 {
                     foreach (KeyValuePair<Dimension, ConcurrentDictionary<string, float>> item in resultadosDimensionExt)
@@ -1797,6 +1796,10 @@ namespace Hercules.MA.GraphicEngine.Models
                                 listaLabelsExt.Add(GetTextLang(pLang, item.Key.nombre));
                                 // Obtengo los colores
                                 listaColoresExt.Add(item.Key.color);
+                                if (!auxLeyenda.Contains(GetTextLang(pLang, item.Key.nombre)))
+                                {
+                                    auxLeyenda += GetTextLang(pLang, item.Key.nombre) + '|' + item.Key.color + "---";
+                                }
                             }
                         }
                     }
@@ -1829,6 +1832,8 @@ namespace Hercules.MA.GraphicEngine.Models
                 // HoverOffset por defecto.
                 datasetExt.hoverOffset = 4;
 
+                dataset.label += auxLeyenda.Remove(auxLeyenda.Length-3);
+                grafica.data.datasets.Add(dataset);
                 grafica.data.datasets.Add(datasetExt);
             }
             return grafica;
