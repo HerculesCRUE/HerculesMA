@@ -1819,9 +1819,9 @@ namespace Hercules.MA.GraphicEngine.Models
                     int rExterior = Convert.ToInt32(listaColoresExt[i].Substring(1, 2), 16);
                     int gExterior = Convert.ToInt32(listaColoresExt[i].Substring(3, 2), 16);
                     int bExterior = Convert.ToInt32(listaColoresExt[i].Substring(5, 2), 16);
-                    int rMezclado = rExterior + (int)((rInterior - rExterior) * 0.40);
-                    int gMezclado = gExterior + (int)((gInterior - gExterior) * 0.40);
-                    int bMezclado = bExterior + (int)((bInterior - bExterior) * 0.40);
+                    int rMezclado = rExterior + (int)((rInterior - rExterior) * 0.25);
+                    int gMezclado = gExterior + (int)((gInterior - gExterior) * 0.25);
+                    int bMezclado = bExterior + (int)((bInterior - bExterior) * 0.25);
                     string colorHex = '#' + rMezclado.ToString("X2") + gMezclado.ToString("X2") + bMezclado.ToString("X2");
                     listaColoresExt[i] = colorHex;
                     listaGrupos.Add(cont);
