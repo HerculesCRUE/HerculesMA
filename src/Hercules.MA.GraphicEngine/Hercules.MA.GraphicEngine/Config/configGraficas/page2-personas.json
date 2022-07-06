@@ -125,7 +125,7 @@
         "dimensiones": [
           {
             "nombre": {
-              "es": "Áreas temáticas de los investigadores"
+              "es": "Número de investigadores"
             },
             "filtro": "",
             "tipoDimension": "bar",
