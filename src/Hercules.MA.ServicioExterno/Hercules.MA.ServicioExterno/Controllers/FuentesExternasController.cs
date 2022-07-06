@@ -29,6 +29,15 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 if (!string.IsNullOrEmpty(orcid))
                 {
                     string ultimaFechaMod = Acciones.AccionesFuentesExternas.GetLastUpdatedDate(pUserId);
+
+                    DateTime currentDate = DateTime.Now;
+                    DateTime lastUpdate = new DateTime(Int32.Parse(ultimaFechaMod.Split('-')[0]), Int32.Parse(ultimaFechaMod.Split('-')[1]), Int32.Parse(ultimaFechaMod.Split('-')[2]));
+
+                    if (lastUpdate.AddDays(1) > currentDate)
+                    {
+                        return BadRequest(ultimaFechaMod);
+                    }
+
                     Dictionary<string, string> dicIDs = Acciones.AccionesFuentesExternas.GetUsersIDs(pUserId);
 
                     // Publicaciones.
@@ -52,7 +61,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                         List<string> listaDatosGitHub = new List<string>() { "github", dicIDs["usuarioGitHub"], dicIDs["tokenGitHub"] };
                         rabbitMQService.PublishMessage(listaDatosGitHub, _Configuracion.GetQueueRabbit());
                     }
-                }                
+                }
             }
             catch (Exception)
             {
