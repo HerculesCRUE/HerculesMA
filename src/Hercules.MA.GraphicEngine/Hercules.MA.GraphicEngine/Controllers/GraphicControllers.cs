@@ -76,6 +76,15 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.GetPage(pIdPagina, pLang, userId);
         }
+        
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public bool IsAdmin(string pLang, string pUserId = "")
+        {
+            return Models.GraphicEngine.IsAdmin(pLang, pUserId);
+        }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]

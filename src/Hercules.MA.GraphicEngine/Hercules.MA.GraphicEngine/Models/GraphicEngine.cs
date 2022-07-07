@@ -45,6 +45,44 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pIdPagina">Identificador de la página.</param>
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
+        public static bool IsAdmin(string pLang, string pUserId = "")
+        {
+            bool isAdmin = false;
+            if (pUserId == "")
+            {
+                return false;
+            }
+            // Filtro de página.
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select = new StringBuilder();
+            where = new StringBuilder();
+
+            select.Append(mPrefijos);
+            select.Append($@"SELECT ?permisos ");
+            where.Append("WHERE { ");
+            where.Append($@"?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}>. ");
+            where.Append($@"?s roh:isOtriManager ?permisos. ");
+            where.Append("} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    isAdmin = Boolean.Parse(fila["permisos"].value);
+                }
+            }
+            return isAdmin;
+        }
+        /// <summary>
+        /// Obtiene los datos de las páginas.
+        /// </summary>
+        /// <param name="pIdPagina">Identificador de la página.</param>
+        /// <param name="pLang">Idioma.</param>
+        /// <returns></returns>
         public static List<Pagina> GetPages(string pLang, string userId = "")
         {
             List<Pagina> listaPaginas = new List<Pagina>();
@@ -53,9 +91,8 @@ namespace Hercules.MA.GraphicEngine.Models
             List<ConfigModel> listaConfigModels = TabTemplates;
             foreach (ConfigModel configModel in listaConfigModels)
             {
-                listaPaginas.Add(CrearPagina(configModel, pLang, userId ));
+                listaPaginas.Add(CrearPagina(configModel, pLang, userId));
             }
-
             return listaPaginas;
         }
 
