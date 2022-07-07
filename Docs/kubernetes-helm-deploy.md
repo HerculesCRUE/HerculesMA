@@ -39,29 +39,24 @@ Para desplegar RabbitMQ primero clonaremos el contenido del repositorio RabbitMQ
 * Segundo, aplicamos las reglas RBAC:
   * kubectl apply -f rbac.yaml 
 
-* Tercero, crearemos el servicio para RabbitMQ. Este servicio será de tipo ClusterIP y preparará los puertos 4369, 25672, 5672 y 15672 para la administración y gestión de RabbitMQ:
-  *  kubectl apply -f ./service_rabbit.yaml
+* Tercero, aplicaremos el archivo configmap.yaml para aplicar una configuración básica en el nodo para nuestro RabbitMQ:
+  *  kubectl apply -f configmap.yaml
 
 * Cuarto, crearemos los secretos para poder dar nombre de usuario y contraseña al administrador de RabbitMQ y a sus Erlang Cookie:
   - Nos aseguramos que estamos trabajando en nuestro namespace:
     - kubectl config set-context --current --namespace=edma-hercules
-  - Para crear el secreto de la Cookie:
-    - echo "this secret value is JUST AN EXAMPLE. Replace it!" > cookie
-    - kubectl create secret generic erlang-cookie --from-file=./cookie
-  - Para crear el secreto de administrador:
-    - echo "gnoss" > user
-    - echo "gnoss1234" > pass
-    - kubectl create secret generic rabbitmq-admin --from-file=./user --from-file=./pass
+  - Para aplicar los secretos usaremos:
+    - kubectl apply -f .\mysecret.yaml
+    - **!!IMPORTANTE!!** Si modificamos los valores de usuario y password debermos aplicar estos mismos cambios en la cadena de conexión a Rabbit del despliege Edma-Hercules.
 
-* Quinto, aplicaremos el archivo configmap.yaml para aplicar una configuración básica en el nodo para nuestro RabbitMQ:
-  - kubectl apply -f configmap.yaml
+* Quinto, crearemos el servicio para RabbitMQ. Este servicio será de tipo ClusterIP y preparará los puertos 4369, 25672, 5672 y 15672 para la administración y gestión de RabbitMQ. **¡¡IMPORTANTE!!** Este servicio debe ser creado antes de aplicar el statefulset de RabbitMQ:
+  - kubectl apply -f ./service_rabbit.yaml
 
 * Sexto, desplegamos RabbitMQ utilizando un statefulset para mantener la persistencia de datos:
   - kubectl apply -f statefulset.yaml
 
 * Septimo, creamos si lo necesitamos un ingress para poder acceder a la administración de RabbitMQ. Por defecto la URL es rabbit.hercules.com
   - kubectl apply -f ingress.yaml
-
 ## Paso 3 Desplegar HERCULES-MA.
 
 El despliegue de HERCULES-MA está preparado para ser realizado con HELM. 
@@ -105,9 +100,28 @@ en sus contenedores se realizarán varios reinicios de los contenedores ya que n
 
 ## Paso 4 Abastecer las imagenes.
 
-Como paso final debemos abastecer de contenido al contenedor "interno".
+En este paso debemos abastecer de contenido al contenedor "interno".
 
 Para ello usaremos el comando:
 
   * kubectl cp <local_file_path> <pod_name_interno>:/app/imagenes
 
+## Paso 5 Abastecer archivo OAuthV3.
+
+En este paso debemos colocar el archivo OAuthV3.config. Para ello utilizaremos el Pod con el contenedor "editorcv" el cual usa un PVC compartido con los diferentes Pods que necesitan de este archivo.
+
+  * kubectl cp <local_file_path> <pod_name_editorcv>:/app/Config/ConfigOAuth/
+ 
+## Paso 6 Abastecer el contenido del Pod con Documents.
+ 
+ En este paso debemos colocar el contenido de la carpeta "documentacion" dentro del Statefulset de Documents.
+ 
+ Para ello usaremos el comando:
+   * kubectl cp <local_file_path> <pod_name_documents>:/app/Documentacion
+ 
+## Paso 7 Abastecer el contenido del Pod con Archivo.
+ 
+  En este paso debemos colocar el contenido de la carpeta "ontologias" dentro del Statefulset de Archivos.
+ 
+ Para ello usaremos el comando:
+   * kubectl cp <local_file_path> <pod_name_archivos>:/app/Ontologias
