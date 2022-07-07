@@ -3,6 +3,7 @@ using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
 using Hercules.MA.GraphicEngine.Models.Graficas;
 using Hercules.MA.GraphicEngine.Models.Paginas;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -40,7 +41,7 @@ namespace Hercules.MA.GraphicEngine.Models
             return CrearPagina(configModel, pLang, userId);
         }
         /// <summary>
-        /// Obtiene los datos de las páginas.
+        /// Obtiene si el usuario es admin o no
         /// </summary>
         /// <param name="pIdPagina">Identificador de la página.</param>
         /// <param name="pLang">Idioma.</param>
@@ -77,6 +78,63 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             return isAdmin;
         }
+        /// <summary>
+        /// Obtiene los nombres de los json de configuración.
+        /// </summary>
+        /// <param name="pIdPagina">Identificador de la página.</param>
+        /// <param name="pLang">Idioma.</param>
+        /// <returns></returns>
+        public static List<string> ObtenerConfigs(string pLang, string pUserId = "")
+        {         
+            // Compruebo si es administrador
+            bool isAdmin = IsAdmin(pLang, pUserId);
+            if (!isAdmin)
+            {
+                return null;
+            }
+
+            List<string> nombres = Directory.EnumerateFiles($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas").Select(x => x.Split("\\").LastOrDefault()).OrderBy(x => x).ToList();
+
+            return nombres;
+        }
+        /// <summary>
+        /// Sobreescribe la configuración de la página.
+        /// </summary>
+        /// <param name="pLang">Idioma.</param>
+        /// <param name="pConfigFile">Fichero a subir.</param>
+        /// <param name="pUserId">Identificador del usuario.</param>
+        /// <returns></returns>
+        public static bool SubirConfig(string pLang, IFormFile pConfigFile, string pUserId = "")
+        {
+            // Compruebo si es administrador
+            bool isAdmin = IsAdmin(pLang, pUserId);
+            if (!isAdmin)
+            {
+                return false;
+            }
+            // TODO
+            return true;
+        }
+        /// <summary>
+        /// Descarga el fichero json correspondiente.
+        /// </summary>
+        /// <param name="pLang">Idioma.</param>
+        /// <param name="pConfig">Nombre del fichero.</param>
+        /// <param name="pUserId">Identificador del usuario.</param>
+        /// <returns></returns>
+        public static byte[] DescargarConfig(string pLang, string pConfig, string pUserId = "")
+        {
+            // Compruebo si es administrador
+            bool isAdmin = IsAdmin(pLang, pUserId);
+            if (!isAdmin)
+            {
+                return null;
+            }
+            string config = File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas/{pConfig}", Encoding.UTF8);
+            
+            return Encoding.UTF8.GetBytes(config);
+        }
+        
         /// <summary>
         /// Obtiene los datos de las páginas.
         /// </summary>
