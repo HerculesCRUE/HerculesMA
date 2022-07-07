@@ -81,7 +81,8 @@ namespace Hercules.MA.GraphicEngine.Models
                     isPrivate = itemGrafica.isPrivate
 
                 };
-                if (itemGrafica.isPrivate && userId.Equals("ffffffff-ffff-ffff-ffff-ffffffffffff"))
+                
+                if (itemGrafica.isPrivate && !GetPersonIsGraphicManagerByGnossUser(userId))
                 {
                     continue;
                 }
@@ -2449,6 +2450,43 @@ namespace Hercules.MA.GraphicEngine.Models
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
                     idRecurso = fila["s"].value;
+                }
+            }
+
+            return idRecurso;
+        }
+        
+        /// <summary>
+        /// devuelve la propiedad IsGraphicManager del usuario con id pUserId.
+        /// </summary>
+        /// <param name="pUserId"></param>
+        /// <returns></returns>
+        public static bool GetPersonIsGraphicManagerByGnossUser(string pUserId)
+        {
+            // ID de la persona.
+            bool idRecurso = false;
+
+            // Filtro de página.
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select = new StringBuilder();
+            where = new StringBuilder();
+
+            select.Append(mPrefijos);
+            select.Append($@"SELECT ?permisos ");
+            where.Append("WHERE { ");
+            where.Append($@"?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}>. ");
+            where.Append($@"?s roh:isGraphicManager ?permisos. ");
+            where.Append("} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    idRecurso = Boolean.Parse(fila["permisos"].value);
                 }
             }
 

@@ -1,5 +1,6 @@
 {
   "nombre": {
+
     "es": "Publicaciones"
   },
   "filtro": "rdf:type='document'&roh:isValidated='true'",
@@ -7,6 +8,7 @@
   "identificador": "pagina1",
   "graficas": [
     {
+      "isPrivate": true,
       "identificador": "grafica1",
       "nombre": {
         "es": "Número de publicaciones y citas por año"
@@ -146,6 +148,7 @@
       "nombre": {
         "es": "Número de publicaciones por tipo de actividad científica"
       },
+      "isPrivate": true,
       "tipo": "Barras",
       "anchura": 12,
       "config": {
@@ -178,6 +181,7 @@
       "nombre": {
         "es": "Relaciones entre las áreas temáticas de las publicaciones"
       },
+      "isPrivate": true,
       "tipo": "Nodos",
       "propCategoryPath": "roh:hasKnowledgeArea",
       "idGrupo": "grupo3",
@@ -233,6 +237,7 @@
       }
     },
     {
+      "isPrivate": true,
       "identificador": "grafica7",
       "nombre": {
         "es": "Número de publicaciones por grupo"
