@@ -4,7 +4,7 @@
 | ------------- | ------------------------------------------------------------ |
 |Título|Despliegue de Hércules MA con Kubernetes y Helm| 
 |Descripción|Guía de despliegue de Hércules MA mediante Kubernetes y Helm|
-|Versión|1.0|
+|Versión|1.1|
 |Módulo|Documentación|
 |Tipo|Especificación|
 |Cambios de la Versión|Versión inicial|
