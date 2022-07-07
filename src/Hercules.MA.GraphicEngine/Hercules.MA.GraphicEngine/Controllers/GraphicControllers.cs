@@ -108,9 +108,9 @@ namespace Hercules.MA.GraphicEngine.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public bool SubirConfig(string pLang, IFormFile pConfig, string pUserId = "")
+        public bool SubirConfig(string pLang, IFormFile pConfigFile, string pUserId = "")
         {
-            return Models.GraphicEngine.SubirConfig(pLang, pConfig, pUserId);
+            return Models.GraphicEngine.SubirConfig(pLang, pConfigFile, pUserId);
         }
 
         [HttpGet]

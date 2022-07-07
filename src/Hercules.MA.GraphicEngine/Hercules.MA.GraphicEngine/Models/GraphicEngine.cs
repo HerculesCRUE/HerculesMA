@@ -93,7 +93,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 return null;
             }
 
-            List<string> nombres = Directory.EnumerateFiles($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas").Select(x => x.Split("\\").LastOrDefault()).OrderBy(x => x).ToList();
+            List<string> nombres = Directory.EnumerateFiles($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas").Select(x => x.Split("Config/configGraficas").LastOrDefault()).OrderBy(x => x).ToList();
 
             return nombres;
         }
@@ -112,7 +112,8 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return false;
             }
-            // TODO
+            string path = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas/{pConfigFile.FileName}";
+            //File.WriteAllBytes(path, file);
             return true;
         }
         /// <summary>
