@@ -9,10 +9,9 @@
 |Tipo|Especificación|
 |Cambios de la Versión|Versión inicial|
 
-
 # Despliegue de Hércules MA con Kubernetes y Helm
 
-La arquitectura de componentes se puede consultar en [Arquitectura de Hércules MA](https://confluence.um.es/confluence/pages/viewpage.action?pageId=421167229)
+La arquitectura de componentes se puede consultar en [Arquitectura de Hércules MA](https://confluence.um.es/confluence/pages/viewpage.action?pageId=420085932)
 
 A continuación se describen los pasos para desplegar Hercules MA en un cluster de Kubernetes: 
 
@@ -31,7 +30,9 @@ Manual: https://kubernetes.github.io/ingress-nginx/deploy/
 
 ## Paso 2: Desplegar RabbitMQ
 
-Para desplegar RabbitMQ primero clonaremos el contenido del repositorio RabbitMQ.
+Para desplegar RabbitMQ primero nos descargamos todos los archivos del directorio https://github.com/HerculesCRUE/HerculesMA/tree/main/Deploy/RabbitMQ.
+
+
 
 * Primero crearemos el namespace donde realizaremos el despliegue de nuestra plataforma. **¡¡IMPORTANTE!!** Éste generará un namespace con nombre **"edma-hercules"**.
   * kubectl apply -f ./namespace.yaml 
@@ -47,16 +48,18 @@ Para desplegar RabbitMQ primero clonaremos el contenido del repositorio RabbitMQ
     - kubectl config set-context --current --namespace=edma-hercules
   - Para aplicar los secretos usaremos:
     - kubectl apply -f .\mysecret.yaml
-    - **!!IMPORTANTE!!** Si modificamos los valores de usuario y password debermos aplicar estos mismos cambios en la cadena de conexión a Rabbit del despliege Edma-Hercules.
+    - **!!IMPORTANTE!!** Será necesario establecer los valores de usuario y password en el archivo mysecret.yaml antes de ejecutar ese comando (codificados en base64) y debermos establecer esos mismos valores en la cadena de conexión a Rabbit del despliege Edma-Hercules dentro del archivo values.yaml usado en el paso 3.
 
 * Quinto, crearemos el servicio para RabbitMQ. Este servicio será de tipo ClusterIP y preparará los puertos 4369, 25672, 5672 y 15672 para la administración y gestión de RabbitMQ. **¡¡IMPORTANTE!!** Este servicio debe ser creado antes de aplicar el statefulset de RabbitMQ:
   - kubectl apply -f ./service_rabbit.yaml
 
 * Sexto, desplegamos RabbitMQ utilizando un statefulset para mantener la persistencia de datos:
   - kubectl apply -f statefulset.yaml
+  - **!!IMPORTANTE!!** Antes de ejecutar este comando, es necesario establecer el valor del parámetro storageClassName. 
 
 * Septimo, creamos si lo necesitamos un ingress para poder acceder a la administración de RabbitMQ. Por defecto la URL es rabbit.hercules.com
   - kubectl apply -f ingress.yaml
+
 ## Paso 3 Desplegar HERCULES-MA.
 
 El despliegue de HERCULES-MA está preparado para ser realizado con HELM. 
@@ -64,7 +67,7 @@ El despliegue de HERCULES-MA está preparado para ser realizado con HELM.
 * Primero utilizaremos el comando.
   * helm install <nombre_despligue> oci://docker.gnoss.com/helm-charts/edma-gnoss -f values.yaml
 
-El archivo values.yaml lo puedes encontrar en https://github.com/HerculesCRUE/HerculesMA/blob/main/Docs/values.yaml. Modifica todo lo que necesites según tu infraestructura y las caracterísiticas de tu cluster de Kubernetes antes de ejecutar el comando anterior. 
+El archivo values.yaml lo puedes encontrar en https://github.com/HerculesCRUE/HerculesMA/blob/main/Deploy/EDMA/values.yaml. Modifica todo lo que necesites según tu infraestructura y las caracterísiticas de tu cluster de Kubernetes antes de ejecutar el comando anterior. 
 
 * Segundo. Una vez que PostgreSQL está desplegado debemos volcar la base de datos para que empiece a trabajar con ella.
 Para ello usaremos el archivo “pg_dump_backup.sqlc” ubicado en la carpeta PostgreSQL.
@@ -125,3 +128,8 @@ En este paso debemos colocar el archivo OAuthV3.config. Para ello utilizaremos e
  
  Para ello usaremos el comando:
    * kubectl cp <local_file_path> <pod_name_archivos>:/app/Ontologias
+
+## Verificación
+
+Una vez ejecutados todos los pasos, se puede verificar que EDMA está funcionando correctamente accediendo a la url edma.gnoss.com (o la dirección configurada en el archivo values.yaml). 
+
