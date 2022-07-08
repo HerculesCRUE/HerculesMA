@@ -114,22 +114,29 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             try
             {
+                // Compruebo si es un JSON.
+                string json = new StreamReader(pConfigFile.OpenReadStream()).ReadToEnd();
+                ConfigModel configModel = JsonConvert.DeserializeObject<ConfigModel>(json);
+                if (configModel == null)
+                {
+                    return false;
+                }
                 string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfigName);
                 using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
                     pConfigFile.CopyTo(fileStream);
                 }
+                string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+                mTabTemplates = new List<ConfigModel>();
+                foreach (string file in Directory.EnumerateFiles(pathConfig))
+                {
+                    ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                    mTabTemplates.Add(tab);
+                }
             }
             catch (Exception)
             {
                 return false;
-            }
-            string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
-            mTabTemplates = new List<ConfigModel>();
-            foreach (string file in Directory.EnumerateFiles(pathConfig))
-            {
-                ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
-                mTabTemplates.Add(tab);
             }
             return true;
         }
