@@ -108,7 +108,7 @@ namespace Hercules.MA.GraphicEngine.Models
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
-            if (!isAdmin)
+            if (!isAdmin || pConfigFile == null)
             {
                 return false;
             }
