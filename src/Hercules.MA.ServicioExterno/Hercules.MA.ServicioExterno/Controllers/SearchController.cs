@@ -36,5 +36,27 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok(resultBusqueda);
         }
+
+        /// <summary>
+        /// Inicia una búsqueda en los elementos seleccionados
+        /// </summary>
+        /// <returns>JSON con los un diccionario de 'tipo de items' => 'número de items'.</returns>
+        [HttpGet("GetNumItems")]
+        public IActionResult GetNumItems()
+        {
+            Dictionary<string, int> result = null;
+
+            try
+            {
+                AccionesMetaBusqueda accionBusqueda = new AccionesMetaBusqueda();
+                result = accionBusqueda.GetNumItems();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(result);
+        }
     }
 }
