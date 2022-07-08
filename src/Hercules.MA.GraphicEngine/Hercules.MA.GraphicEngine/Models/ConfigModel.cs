@@ -32,6 +32,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public int anchura { get; set; }
         public string idGrupo { get; set; }
         public string propCategoryPath { get; set; }
+        public bool isPrivate { get; set; }
         public Config config { get; set; }
     }
 

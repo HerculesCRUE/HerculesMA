@@ -377,7 +377,7 @@
         "dimensiones": [
           {
             "nombre": {
-              "es": "Áreas temáticas de los proyectos"
+              "es": "Número de proyectos"
             },
             "filtro": "",
             "tipoDimension": "bar",

@@ -72,20 +72,56 @@ namespace Hercules.MA.GraphicEngine.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public Pagina GetPaginaGrafica(string pIdPagina, string pLang)
+        public Pagina GetPaginaGrafica(string pIdPagina, string pLang, string userId = "")
         {
-            return Models.GraphicEngine.GetPage(pIdPagina, pLang);
+            return Models.GraphicEngine.GetPage(pIdPagina, pLang, userId);
+        }
+        
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public bool IsAdmin(string pLang, string pUserId = "")
+        {
+            return Models.GraphicEngine.IsAdmin(pLang, pUserId);
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public List<Pagina> GetPaginasGraficas(string pLang)
+        public List<string> ObtenerConfigs(string pLang, string pUserId = "")
         {
-            return Models.GraphicEngine.GetPages(pLang);
+            return Models.GraphicEngine.ObtenerConfigs(pLang, pUserId);
         }
 
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult DescargarConfig(string pLang, string pConfig, string pUserId = "")
+        {
+            return File(Models.GraphicEngine.DescargarConfig(pLang, pConfig, pUserId), "application/json", pConfig);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public bool SubirConfig([FromForm]string pLang, [FromForm] string pConfigName, IFormFile pConfigFile, [FromForm] string pUserId = "")
+        {
+            return Models.GraphicEngine.SubirConfig(pLang, pConfigName, pConfigFile, pUserId);
+        }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public List<Pagina> GetPaginasGraficas(string pLang, string userId = "")
+        {
+            return Models.GraphicEngine.GetPages(pLang, userId);
+        }
+        
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
