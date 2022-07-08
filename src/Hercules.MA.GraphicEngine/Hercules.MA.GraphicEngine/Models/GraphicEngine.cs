@@ -124,7 +124,13 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return false;
             }
-            mTabTemplates = null;
+            string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+            mTabTemplates = new List<ConfigModel>();
+            foreach (string file in Directory.EnumerateFiles(pathConfig))
+            {
+                ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                mTabTemplates.Add(tab);
+            }
             return true;
         }
         /// <summary>
