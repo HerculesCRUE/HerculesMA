@@ -104,13 +104,13 @@ namespace Hercules.MA.GraphicEngine.Controllers
             return File(Models.GraphicEngine.DescargarConfig(pLang, pConfig, pUserId), "application/json", pConfig);
         }
 
-        [HttpGet]
+        [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public bool SubirConfig(string pLang, IFormFile pConfigFile, string pUserId = "")
+        public bool SubirConfig([FromForm]string pLang, [FromForm] string pConfigName, IFormFile pConfigFile, [FromForm] string pUserId = "")
         {
-            return Models.GraphicEngine.SubirConfig(pLang, pConfigFile, pUserId);
+            return Models.GraphicEngine.SubirConfig(pLang, pConfigName, pConfigFile, pUserId);
         }
 
         [HttpGet]

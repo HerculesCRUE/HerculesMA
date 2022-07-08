@@ -92,8 +92,8 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return null;
             }
-
-            List<string> nombres = Directory.EnumerateFiles($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas").Select(x => x.Split("Config/configGraficas").LastOrDefault()).OrderBy(x => x).ToList();
+            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+            List<string> nombres = Directory.EnumerateFiles(path).Select(x => x.Split("configGraficas").LastOrDefault()).OrderBy(x => x).ToList();
 
             return nombres;
         }
@@ -104,7 +104,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pConfigFile">Fichero a subir.</param>
         /// <param name="pUserId">Identificador del usuario.</param>
         /// <returns></returns>
-        public static bool SubirConfig(string pLang, IFormFile pConfigFile, string pUserId = "")
+        public static bool SubirConfig(string pLang, string pConfigName, IFormFile pConfigFile, string pUserId = "")
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
@@ -112,8 +112,12 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return false;
             }
-            string path = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas/{pConfigFile.FileName}";
-            //File.WriteAllBytes(path, file);
+
+            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfigName);
+            using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                pConfigFile.CopyTo(fileStream);
+            }
             return true;
         }
         /// <summary>
