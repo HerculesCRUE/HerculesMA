@@ -1,4 +1,5 @@
 {
+  // Sin gráficas
   "nombre": {
     "es": "Propiedad Industrial e Intelectual"
   },
@@ -6,9 +7,9 @@
   "orden": 4,
   "identificador": "pagina4",
   "graficas": [
-    
+
   ],
   "facetas": [
-    
+
   ]
 }
