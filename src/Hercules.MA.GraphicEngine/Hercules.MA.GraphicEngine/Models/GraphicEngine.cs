@@ -112,12 +112,19 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return false;
             }
-
-            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfigName);
-            using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            try
             {
-                pConfigFile.CopyTo(fileStream);
+                string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfigName);
+                using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+                {
+                    pConfigFile.CopyTo(fileStream);
+                }
             }
+            catch (Exception)
+            {
+                return false;
+            }
+            mTabTemplates = null;
             return true;
         }
         /// <summary>
