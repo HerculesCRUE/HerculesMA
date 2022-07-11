@@ -171,6 +171,32 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pConfig">Nombre del JSON a editar.</param>
         /// <param name="pPageName">Nuevo nombre de la página.</param>
         /// <param name="pPageOrder">Nuevo orden de la página.</param>
+        public static Dictionary<string, string> ObtenerPaginaConfig(string pLang, string pUserId, string pConfig)
+        {
+            // Compruebo si es administrador
+            bool isAdmin = IsAdmin(pLang, pUserId);
+            // Obtengo el string del json
+            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfig);
+            string json = File.ReadAllText(path);
+            ConfigModel configModel = JsonConvert.DeserializeObject<ConfigModel>(json);
+            if (!isAdmin || configModel == null)
+            {
+                return null;
+            }
+            Dictionary<string, string> configs = new Dictionary<string, string>();
+            configs.Add("nombre", configModel.nombre[pLang]);
+            configs.Add("orden", configModel.orden.ToString());
+            return configs;
+        }
+
+        /// <summary>
+        /// Edita la configuración de la página.
+        /// </summary>
+        /// <param name="pLang">Idioma.</param>
+        /// <param name="pUserId">ID del usuario.</param>
+        /// <param name="pConfig">Nombre del JSON a editar.</param>
+        /// <param name="pPageName">Nuevo nombre de la página.</param>
+        /// <param name="pPageOrder">Nuevo orden de la página.</param>
         public static bool EditarConfig(string pLang, string pUserId, string pConfig, string pPageName = "", int pPageOrder = 0, List<Dictionary<string, string>> pGraphics = null)
         {
             // Compruebo si es administrador
