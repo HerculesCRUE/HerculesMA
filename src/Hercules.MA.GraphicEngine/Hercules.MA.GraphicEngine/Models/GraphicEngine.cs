@@ -148,96 +148,54 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pConfig">Nombre del JSON a editar.</param>
         /// <param name="pPageName">Nuevo nombre de la página.</param>
         /// <param name="pPageOrder">Nuevo orden de la página.</param>
-        public static List<Grafica> ObtenerGraficasConfig(string pLang, string pUserId, string pConfig)
+        public static Grafica ObtenerGraficaConfig(string pLang, string pUserId, string pPageId, string pGraphicId)
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
-            // Obtengo el string del json
-            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfig);
-            string json = File.ReadAllText(path);
-            ConfigModel configModel = JsonConvert.DeserializeObject<ConfigModel>(json);
+            ConfigModel configModel = mTabTemplates.Where(x => x.identificador == pPageId).FirstOrDefault();
             if (!isAdmin || configModel == null)
             {
                 return null;
             }
-            return configModel.graficas;
+            return configModel.graficas.Where(x => x.identificador == pGraphicId).FirstOrDefault();
         }
-
         /// <summary>
         /// Edita la configuración de la página.
         /// </summary>
         /// <param name="pLang">Idioma.</param>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pConfig">Nombre del JSON a editar.</param>
-        /// <param name="pPageName">Nuevo nombre de la página.</param>
-        /// <param name="pPageOrder">Nuevo orden de la página.</param>
-        public static Dictionary<string, string> ObtenerPaginaConfig(string pLang, string pUserId, string pConfig)
+        /// <param name="pPageId">Página a editar.</param>
+        /// <param name="pGraphicName">Nuevo nombre de la gráfica.</param>
+        /// <param name="pGraphicOrder">Nuevo orden de la gráfica.</param>
+        /// <param name="pGraphicWidth">Nuevo ancho de la gráfica.</param>
+        public static bool EditarConfig(string pLang, string pUserId, string pGraphicId, string pPageId, string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0)
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
-            // Obtengo el string del json
-            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfig);
-            string json = File.ReadAllText(path);
-            ConfigModel configModel = JsonConvert.DeserializeObject<ConfigModel>(json);
-            if (!isAdmin || configModel == null)
-            {
-                return null;
-            }
-            Dictionary<string, string> configs = new Dictionary<string, string>();
-            configs.Add("nombre", configModel.nombre[pLang]);
-            configs.Add("orden", configModel.orden.ToString());
-            return configs;
-        }
-
-        /// <summary>
-        /// Edita la configuración de la página.
-        /// </summary>
-        /// <param name="pLang">Idioma.</param>
-        /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pConfig">Nombre del JSON a editar.</param>
-        /// <param name="pPageName">Nuevo nombre de la página.</param>
-        /// <param name="pPageOrder">Nuevo orden de la página.</param>
-        public static bool EditarConfig(string pLang, string pUserId, string pConfig, string pPageName = "", int pPageOrder = 0, List<Dictionary<string, string>> pGraphics = null)
-        {
-            // Compruebo si es administrador
-            bool isAdmin = IsAdmin(pLang, pUserId);
-            // Obtengo el string del json
-            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfig);
-            string json = File.ReadAllText(path);
-            ConfigModel configModel = JsonConvert.DeserializeObject<ConfigModel>(json);
+            ConfigModel configModel = mTabTemplates.Where(x => x.identificador == pPageId).FirstOrDefault();
             if (!isAdmin || configModel == null)
             {
                 return false;
             }
-            
-            // Edito el nombre de la página.
-            if (pPageName != "")
+            Grafica grafica = configModel.graficas.Where(x => x.identificador == pGraphicId).FirstOrDefault();
+            // Edito el nombre de la gráfica.
+            if (pGraphicName != "")
             {
-                configModel.nombre[pLang] = pPageName;
+                grafica.nombre[pLang] = pGraphicName;
             }
-            // Edito el orden de la página.
-            if (pPageOrder != 0)
+            // Edito la anchura de la gráfica.
+            if (pGraphicWidth != 0)
             {
-                configModel.orden = pPageOrder;
+                grafica.anchura = pGraphicWidth;
             }
-            // Edito las gráficas
-            if (pGraphics != null)
+            // Edito el orden de la gráfica.
+            if (pGraphicOrder != 0)
             {
-                foreach (Dictionary<string, string> configGrafica in pGraphics)
-                {
-                    Grafica grafica = configModel.graficas.Where(x => x.identificador == configGrafica["identificador"]).FirstOrDefault();
-                    grafica.nombre[pLang] = configGrafica["nombre"];
-                    grafica.anchura = int.Parse(configGrafica["anchura"]);
-                    // Orden
-                    int orden = int.Parse(configGrafica["orden"]);
-                    configModel.graficas.Remove(grafica);
-                    configModel.graficas.Insert(orden, grafica);
-                }
+                configModel.graficas.Remove(grafica);
+                configModel.graficas.Insert(pGraphicOrder, grafica);
             }
 
             // Guardo el json.
-            string jsonConfig = JsonConvert.SerializeObject(configModel);
-            File.WriteAllText(path, jsonConfig);
             string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
             mTabTemplates = new List<ConfigModel>();
             foreach (string file in Directory.EnumerateFiles(pathConfig))
