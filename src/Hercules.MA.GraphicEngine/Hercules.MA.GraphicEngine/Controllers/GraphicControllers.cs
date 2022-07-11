@@ -116,9 +116,9 @@ namespace Hercules.MA.GraphicEngine.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public bool EditarConfig(string pLang, string pConfig, string pUserId = "", string pPageName = "", int pPageOrder = 0, List<Dictionary<string, string>> pGraphics = null)
+        public bool EditarConfig(string pLang, string pGraphicId, string pPageId, string pUserId = "", string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0)
         {
-            return Models.GraphicEngine.EditarConfig(pLang, pUserId, pConfig, pPageName, pPageOrder, pGraphics);
+            return Models.GraphicEngine.EditarConfig(pLang, pUserId, pGraphicId, pPageId, pGraphicName, pGraphicOrder, pGraphicWidth);
         }
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
