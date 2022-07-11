@@ -141,6 +141,89 @@ namespace Hercules.MA.GraphicEngine.Models
             return true;
         }
         /// <summary>
+        /// Edita la configuración de la página.
+        /// </summary>
+        /// <param name="pLang">Idioma.</param>
+        /// <param name="pUserId">ID del usuario.</param>
+        /// <param name="pConfig">Nombre del JSON a editar.</param>
+        /// <param name="pPageName">Nuevo nombre de la página.</param>
+        /// <param name="pPageOrder">Nuevo orden de la página.</param>
+        public static List<Grafica> ObtenerGraficasConfig(string pLang, string pUserId, string pConfig)
+        {
+            // Compruebo si es administrador
+            bool isAdmin = IsAdmin(pLang, pUserId);
+            // Obtengo el string del json
+            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfig);
+            string json = File.ReadAllText(path);
+            ConfigModel configModel = JsonConvert.DeserializeObject<ConfigModel>(json);
+            if (!isAdmin || configModel == null)
+            {
+                return null;
+            }
+            return configModel.graficas;
+        }
+
+        /// <summary>
+        /// Edita la configuración de la página.
+        /// </summary>
+        /// <param name="pLang">Idioma.</param>
+        /// <param name="pUserId">ID del usuario.</param>
+        /// <param name="pConfig">Nombre del JSON a editar.</param>
+        /// <param name="pPageName">Nuevo nombre de la página.</param>
+        /// <param name="pPageOrder">Nuevo orden de la página.</param>
+        public static bool EditarConfig(string pLang, string pUserId, string pConfig, string pPageName = "", int pPageOrder = 0, List<Dictionary<string, string>> pGraphics = null)
+        {
+            // Compruebo si es administrador
+            bool isAdmin = IsAdmin(pLang, pUserId);
+            // Obtengo el string del json
+            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfig);
+            string json = File.ReadAllText(path);
+            ConfigModel configModel = JsonConvert.DeserializeObject<ConfigModel>(json);
+            if (!isAdmin || configModel == null)
+            {
+                return false;
+            }
+            
+            // Edito el nombre de la página.
+            if (pPageName != "")
+            {
+                configModel.nombre[pLang] = pPageName;
+            }
+            // Edito el orden de la página.
+            if (pPageOrder != 0)
+            {
+                configModel.orden = pPageOrder;
+            }
+            // Edito las gráficas
+            if (pGraphics != null)
+            {
+                foreach (Dictionary<string, string> configGrafica in pGraphics)
+                {
+                    Grafica grafica = configModel.graficas.Where(x => x.identificador == configGrafica["identificador"]).FirstOrDefault();
+                    grafica.nombre[pLang] = configGrafica["nombre"];
+                    grafica.anchura = int.Parse(configGrafica["anchura"]);
+                    // Orden
+                    int orden = int.Parse(configGrafica["orden"]);
+                    configModel.graficas.Remove(grafica);
+                    configModel.graficas.Insert(orden, grafica);
+                }
+            }
+
+            // Guardo el json.
+            string jsonConfig = JsonConvert.SerializeObject(configModel);
+            File.WriteAllText(path, jsonConfig);
+            string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+            mTabTemplates = new List<ConfigModel>();
+            foreach (string file in Directory.EnumerateFiles(pathConfig))
+            {
+                ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                mTabTemplates.Add(tab);
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Descarga el fichero json correspondiente.
         /// </summary>
         /// <param name="pLang">Idioma.</param>
