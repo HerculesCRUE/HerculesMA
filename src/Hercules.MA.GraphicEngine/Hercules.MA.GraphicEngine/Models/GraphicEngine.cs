@@ -252,6 +252,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", jsonName);
             JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.DefaultValueHandling = DefaultValueHandling.Ignore;
             settings.NullValueHandling = NullValueHandling.Ignore;
             string json = JsonConvert.SerializeObject(configModel, settings);
             File.WriteAllText(path, json);
