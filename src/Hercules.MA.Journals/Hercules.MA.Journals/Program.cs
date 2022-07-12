@@ -1,6 +1,7 @@
 ﻿using ExcelDataReader;
 using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
+using Gnoss.ApiWrapper.Model;
 using Hercules.MA.Journals.Config;
 using Hercules.MA.Journals.Models;
 using System;
@@ -10,6 +11,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Hercules.MA.Journals
 {
@@ -19,14 +22,20 @@ namespace Hercules.MA.Journals
 
         public static ConfigService configuracion = new ConfigService();
 
+        //Número de hilos para el paralelismo.
+        public static int NUM_HILOS = 6;
+
+        //Número máximo de intentos de subida
+        public static int MAX_INTENTOS = 10;
+
         static void Main(string[] args)
         {
             // Obtención de revistas de BBDD.            
-            //List<string> idRecursosRevistas = ObtenerIDsRevistas();
-            //Dictionary<string, Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas);
+            List<string> idRecursosRevistas = ObtenerIDsRevistas();
+            Dictionary<string, Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas);
 
             // Diccionario de revistas.
-            List<Journal> dicRevistas = new List<Journal>();
+            List<Journal> listaRevistas = dicRevistasBBDD.Values.ToList();
 
             // Lectura del excel. 
             Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de Scopus...");
@@ -44,7 +53,7 @@ namespace Hercules.MA.Journals
                 if (ComprobarExcelWOS(dataSetSCIE, anyo, "SCIE"))
                 {
                     Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetSCIE.Tables[dataSetSCIE.Tables[$@"JCR_SCIE_{anyo}"].TableName].Rows.Count} revistas de WoS (SCIE)...");
-                    dicRevistas = GetRevistasWoS(dataSetSCIE, anyo, dicRevistas, "SCIE");
+                    listaRevistas = GetRevistasWoS(dataSetSCIE, anyo, listaRevistas, "SCIE");
                 }
 
                 // Datos de WoS (SSCI). Lectura del excel. 
@@ -53,21 +62,65 @@ namespace Hercules.MA.Journals
                 if (ComprobarExcelWOS(dataSetSSCI, anyo, "SSCI"))
                 {
                     Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetSSCI.Tables[dataSetSSCI.Tables[$@"JCR_SSCI_{anyo}"].TableName].Rows.Count} revistas de WoS (SSCI)...");
-                    dicRevistas = GetRevistasWoS(dataSetSSCI, anyo, dicRevistas, "SSCI");
+                    listaRevistas = GetRevistasWoS(dataSetSSCI, anyo, listaRevistas, "SSCI");
                 }
 
                 // Datos de Scopus.
                 if (ComprobarExcelScopus(dataSetScopus, anyo))
                 {
                     Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetScopus.Tables[dataSetScopus.Tables[$@"CiteScore {anyo}"].TableName].Rows.Count} revistas de Scopus...");
-                    dicRevistas = GetRevistasScopus(dataSetScopus, anyo, dicRevistas);
+                    listaRevistas = GetRevistasScopus(dataSetScopus, anyo, listaRevistas);
                 }
             }
 
             // Ordenación de por Key.
-            dicRevistas = dicRevistas.OrderBy(obj => obj.titulo).ToList();
+            listaRevistas = listaRevistas.OrderBy(obj => obj.titulo).ToList();
 
-            ComprobarErrores(dicRevistas);
+            // Comprobar si hay datos duplicados.
+            ComprobarErrores(listaRevistas);
+
+            // Carga/Modificación/Borrado de datos de BBDD. 
+            ModificarRevistas(listaRevistas);
+        }
+
+
+        private static void ModificarRevistas(List<Journal> pRevistas)
+        {
+            // Obtenemos las revistas de BBDD
+            List<string> idRecursosRevistas = ObtenerIDsRevistas();
+            List<Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas).Values.ToList();
+
+            mResourceApi.ChangeOntoly("maindocument");
+
+            // Creación 
+            List<Journal> revistasCargar = pRevistas.Where(x => string.IsNullOrEmpty(x.idJournal)).ToList();
+            List<ComplexOntologyResource> listaRecursosCargar = new List<ComplexOntologyResource>();
+            ObtenerRevistas(revistasCargar, listaRecursosCargar);
+            CargarDatos(listaRecursosCargar);
+
+            // Borrado
+            foreach (Journal journal in dicRevistasBBDD)
+            {
+                if (!pRevistas.Exists(x => x.idJournal == journal.idJournal))
+                {
+                    mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(journal.idJournal));
+                }
+            }
+
+            // Modificación            
+            foreach (Journal journalBBDD in dicRevistasBBDD)
+            {
+                Journal journalCargar = pRevistas.FirstOrDefault(x => x.idJournal == journalBBDD.idJournal);
+                if (journalCargar != null)
+                {
+                    if (!journalBBDD.Equals(journalCargar))
+                    {
+                        List<ComplexOntologyResource> listaRecursosModificar = new List<ComplexOntologyResource>();
+                        ObtenerRevistas(new List<Journal>() { journalCargar }, listaRecursosModificar);
+                        ModificarDatos(listaRecursosCargar);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -119,8 +172,7 @@ namespace Hercules.MA.Journals
                 if (revista == null)
                 {
                     revista = new Journal();
-                    revista.indicesImpacto = new List<IndiceImpacto>();
-                    revista.categorias = new List<Categoria>();
+                    revista.indicesImpacto = new HashSet<IndiceImpacto>();
                     pListaRevistas.Add(revista);
                 }
 
@@ -156,14 +208,20 @@ namespace Hercules.MA.Journals
                     }
                 }
 
-                if (!encontrado)
+                if (!encontrado && !string.IsNullOrEmpty(fila["SJR"].ToString()))
                 {
                     revista.indicesImpacto.Add(CrearIndiceImpactoScopus(fila, pAnyo));
                 }
 
                 // Categorías.
-                revista.categorias.Add(CrearCategoriaScopus(fila, pAnyo));
+                if (!string.IsNullOrEmpty(fila["Scopus Sub-Subject Area"].ToString()) && !string.IsNullOrEmpty(fila["SJR"].ToString()))
+                {
+                    revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "scopus").categorias.Add(CrearCategoriaScopus(fila, pAnyo));
+                }
+                else
+                {
 
+                }
             }
 
             //Console.WriteLine($@"{DateTime.Now} [{pAnyo}] Revistas sin título: {revistasSinTitulo}");
@@ -221,8 +279,7 @@ namespace Hercules.MA.Journals
                 if (revista == null)
                 {
                     revista = new Journal();
-                    revista.indicesImpacto = new List<IndiceImpacto>();
-                    revista.categorias = new List<Categoria>();
+                    revista.indicesImpacto = new HashSet<IndiceImpacto>();
                     pListaRevistas.Add(revista);
                 }
 
@@ -258,14 +315,20 @@ namespace Hercules.MA.Journals
                     }
                 }
 
-                if (!encontrado)
+                if (!encontrado && !string.IsNullOrEmpty(fila["IMPACT_FACTOR"].ToString()))
                 {
                     revista.indicesImpacto.Add(CrearIndiceImpactoWoS(fila, pAnyo));
                 }
 
                 // Categorías.
-                revista.categorias.Add(CrearCategoriaWoS(fila, pAnyo));
+                if (!string.IsNullOrEmpty(fila["CATEGORY_DESCRIPTION"].ToString()) && !string.IsNullOrEmpty(fila["IMPACT_FACTOR"].ToString()))
+                {
+                    revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "wos").categorias.Add(CrearCategoriaWoS(fila, pAnyo));
+                }
+                else
+                {
 
+                }
             }
 
             //Console.WriteLine($@"{DateTime.Now} [{pAnyo}] Revistas sin título: {revistasSinTitulo}");
@@ -283,6 +346,7 @@ namespace Hercules.MA.Journals
         public static IndiceImpacto CrearIndiceImpactoScopus(DataRow pFila, int pAnyo)
         {
             IndiceImpacto indiceImpacto = new IndiceImpacto();
+            indiceImpacto.categorias = new HashSet<Categoria>();
 
             // Fuente.
             indiceImpacto.fuente = "scopus";
@@ -308,6 +372,7 @@ namespace Hercules.MA.Journals
         public static IndiceImpacto CrearIndiceImpactoWoS(DataRow pFila, int pAnyo)
         {
             IndiceImpacto indiceImpacto = new IndiceImpacto();
+            indiceImpacto.categorias = new HashSet<Categoria>();
 
             // Fuente.
             indiceImpacto.fuente = "wos";
@@ -427,7 +492,13 @@ namespace Hercules.MA.Journals
         public static string LimpiarIdentificador(string pId)
         {
             // Comprobar si el ISSN/EISSN está bien formado.
-            if(pId.Length == 9 && pId.Contains("-") && pId.Split("-")[0].Length == 4 && pId.Split("-")[1].Length == 4)
+            if (pId == "****-****")
+            {
+                return null;
+            }
+
+            // Comprobar si el ISSN/EISSN está bien formado.
+            if (pId.Length == 9 && pId.Contains("-") && pId.Split("-")[0].Length == 4 && pId.Split("-")[1].Length == 4)
             {
                 return pId;
             }
@@ -476,7 +547,7 @@ namespace Hercules.MA.Journals
 
             if (revistasMismoTituloYEditorial.Count > 1 || revistasMismoISSN.Count > 1)
             {
-                throw new Exception("Hay datos duplicados en revistas diferentes.");
+                throw new Exception("Datos duplicados.");
             }
 
             if (revistasMismoTituloYEditorial.Count > 0 && revistasMismoISSN.Count == 0)
@@ -493,6 +564,7 @@ namespace Hercules.MA.Journals
                 // Nos quedamos con la que tenga el mismo ISSN.
                 revista = revistasMismoISSN[0];
                 pListaRevistas.Remove(revistasMismoTituloYEditorial[0]);
+                var x = pListaRevistas.IndexOf(revistasMismoTituloYEditorial[0]);
             }
 
             return revista;
@@ -647,8 +719,7 @@ namespace Hercules.MA.Journals
                             revista.issn = issn;
                             revista.eissn = eissn;
                             revista.publicador = editor;
-                            revista.categorias = new List<Categoria>();
-                            revista.indicesImpacto = new List<IndiceImpacto>();
+                            revista.indicesImpacto = new HashSet<IndiceImpacto>();
                             dicResultado.Add(revista.idJournal, revista);
                         }
 
@@ -720,6 +791,7 @@ namespace Hercules.MA.Journals
                             dicResultado[revistaId].indicesImpacto.Add(new IndiceImpacto()
                             {
                                 idImpactIndex = impactIndexId,
+                                categorias = new HashSet<Categoria>(),
                                 fuente = fuente,
                                 indiceImpacto = impactIndexInYear,
                                 anyo = year
@@ -791,7 +863,7 @@ namespace Hercules.MA.Journals
                                 numCategoria = Int32.Parse(fila["numCategoria"].value);
                             }
 
-                            dicResultado[revistaId].categorias.Add(new Categoria()
+                            dicResultado[revistaId].indicesImpacto.First(x => x.idImpactIndex == impactIndexId).categorias.Add(new Categoria()
                             {
                                 idImpactCategory = impactCategoryId,
                                 nomCategoria = nombreCategoria,
@@ -1049,6 +1121,133 @@ namespace Hercules.MA.Journals
             listaDevolver.Sort();
 
             return listaDevolver;
+        }
+
+        /// <summary>
+        /// Permite crear el objeto a cargar de las revistas.
+        /// </summary>
+        /// <param name="pListaRevistas">Listado de revistas a cargar.</param>
+        /// <param name="pListaRecursos">Listado de recursos a cargar.</param>
+        /// <returns></returns>
+        public static void ObtenerRevistas(List<Journal> pListaRevistas, List<ComplexOntologyResource> pListaRecursos)
+        {
+            foreach (Journal revista in pListaRevistas)
+            {
+                MaindocumentOntology.MainDocument revistaCargar = new MaindocumentOntology.MainDocument();
+                revistaCargar.Roh_title = revista.titulo;
+                revistaCargar.Bibo_issn = revista.issn;
+                revistaCargar.Bibo_eissn = revista.eissn;
+                revistaCargar.Bibo_editor = revista.publicador;
+                revistaCargar.IdRoh_format = "http://gnoss.com/items/documentformat_057";
+                revistaCargar.Roh_impactIndex = new List<MaindocumentOntology.ImpactIndex>();
+                foreach (IndiceImpacto indice in revista.indicesImpacto)
+                {
+                    MaindocumentOntology.ImpactIndex indiceCargar = new MaindocumentOntology.ImpactIndex();
+                    switch (indice.fuente)
+                    {
+                        case "wos":
+                            indiceCargar.IdRoh_impactSource = "http://gnoss.com/items/referencesource_000";
+                            break;
+                        case "scopus":
+                            indiceCargar.IdRoh_impactSource = "http://gnoss.com/items/referencesource_010";
+                            break;
+                        case "inrecs":
+                            indiceCargar.IdRoh_impactSource = "http://gnoss.com/items/referencesource_020";
+                            break;
+                    }
+                    indiceCargar.Roh_impactIndexInYear = indice.indiceImpacto;
+                    indiceCargar.Roh_year = indice.anyo;
+
+                    indiceCargar.Roh_impactCategory = new List<MaindocumentOntology.ImpactCategory>();
+                    foreach (Categoria categoria in indice.categorias)
+                    {
+                        MaindocumentOntology.ImpactCategory categoriaCargar = new MaindocumentOntology.ImpactCategory();
+                        categoriaCargar.Roh_title = categoria.nomCategoria;
+                        categoriaCargar.Roh_publicationPosition = categoria.posicionPublicacion;
+                        categoriaCargar.Roh_journalNumberInCat = categoria.numCategoria;
+                        categoriaCargar.Roh_quartile = categoria.cuartil;
+                        indiceCargar.Roh_impactCategory.Add(categoriaCargar);
+                    }
+
+                    revistaCargar.Roh_impactIndex.Add(indiceCargar);
+                }
+
+                //Creamos el recurso.
+                ComplexOntologyResource resource = revistaCargar.ToGnossApiResource(mResourceApi, null);
+                pListaRecursos.Add(resource);
+            }
+        }
+
+        /// <summary>
+        /// Permite cargar los recursos.
+        /// </summary>
+        /// <param name="pListaRecursosCargar">Lista de recursos a cargar.</param>
+        private static void CargarDatos(List<ComplexOntologyResource> pListaRecursosCargar)
+        {
+            // Carga.
+            Parallel.ForEach(pListaRecursosCargar, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, recursoCargar =>
+            {
+                int numIntentos = 0;
+                while (!recursoCargar.Uploaded)
+                {
+                    numIntentos++;
+
+                    if (numIntentos > MAX_INTENTOS)
+                    {
+                        break;
+                    }
+
+                    if (pListaRecursosCargar.Last() == recursoCargar)
+                    {
+                        mResourceApi.LoadComplexSemanticResource(recursoCargar, false, true);
+                    }
+                    else
+                    {
+                        mResourceApi.LoadComplexSemanticResource(recursoCargar);
+                    }
+
+                    if (!recursoCargar.Uploaded)
+                    {
+                        Thread.Sleep(1000 * numIntentos);
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// Permite modificar los recursos.
+        /// </summary>
+        /// <param name="pListaRecursosModificar">Lista de recursos a modificar.</param>
+        private static void ModificarDatos(List<ComplexOntologyResource> pListaRecursosModificar)
+        {
+            // Modificación.
+            Parallel.ForEach(pListaRecursosModificar, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, recursoModificar =>
+            {
+                int numIntentos = 0;
+                while (!recursoModificar.Modified)
+                {
+                    numIntentos++;
+
+                    if (numIntentos > MAX_INTENTOS)
+                    {
+                        break;
+                    }
+
+                    if (pListaRecursosModificar.Last() == recursoModificar)
+                    {
+                        mResourceApi.ModifyComplexOntologyResource(recursoModificar, false, true);
+                    }
+                    else
+                    {
+                        mResourceApi.ModifyComplexOntologyResource(recursoModificar, false, false);
+                    }
+
+                    if (!recursoModificar.Modified)
+                    {
+                        Thread.Sleep(1000 * numIntentos);
+                    }
+                }
+            });
         }
     }
 }
