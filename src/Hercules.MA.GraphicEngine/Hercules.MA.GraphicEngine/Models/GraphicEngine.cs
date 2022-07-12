@@ -85,7 +85,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
         public static List<string> ObtenerConfigs(string pLang, string pUserId = "")
-        {         
+        {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
             if (!isAdmin)
@@ -191,11 +191,77 @@ namespace Hercules.MA.GraphicEngine.Models
             // Edito el orden de la gráfica.
             if (pGraphicOrder != 0)
             {
+                pGraphicOrder--;
+                Dictionary<string, List<Grafica>> dicGraficasGrupos = new Dictionary<string, List<Grafica>>();
+                List<Grafica> listaRemove = new List<Grafica>();
+                foreach (Grafica item in configModel.graficas)
+                {
+                    if (!string.IsNullOrEmpty(item.idGrupo))
+                    {
+                        if (dicGraficasGrupos.ContainsKey(item.idGrupo))
+                        {
+                            dicGraficasGrupos[item.idGrupo].Add(item);
+                            listaRemove.Add(item);
+                        }
+                        else
+                        {
+                            dicGraficasGrupos.Add(item.idGrupo, new List<Grafica>() {});
+                        }
+                    }
+                }
+                foreach (Grafica item in listaRemove)
+                {
+                    configModel.graficas.Remove(item);
+                }
                 configModel.graficas.Remove(grafica);
-                configModel.graficas.Insert(pGraphicOrder, grafica);
+                if (pGraphicOrder > configModel.graficas.Count)
+                {
+                    configModel.graficas.Add(grafica);
+                }
+                else
+                {
+                    configModel.graficas.Insert(pGraphicOrder, grafica);
+                }
+                if (dicGraficasGrupos.Count > 0)
+                {
+                    foreach (KeyValuePair<string, List<Grafica>> item in dicGraficasGrupos)
+                    {
+                        int index = configModel.graficas.IndexOf(configModel.graficas.Where(x => x.idGrupo == item.Key).FirstOrDefault());
+                        if (index + 1 > configModel.graficas.Count)
+                        {
+                            configModel.graficas.AddRange(item.Value);
+                        }
+                        else
+                        {
+                            configModel.graficas.InsertRange(index + 1, item.Value);
+                        }
+                    }
+                }
             }
-
-
+            // Guardo la configuración en el JSON.
+            string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+            string jsonName = "";
+            foreach (string file in Directory.EnumerateFiles(pathConfig))
+            {
+                ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                if (tab.identificador == configModel.identificador)
+                {
+                    jsonName = file.Split("\\").LastOrDefault();
+                    break;
+                }
+            }
+            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", jsonName);
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.NullValueHandling = NullValueHandling.Ignore;
+            string json = JsonConvert.SerializeObject(configModel, settings);
+            File.WriteAllText(path, json);
+            mTabTemplates = new List<ConfigModel>();
+            foreach (string file in Directory.EnumerateFiles(pathConfig))
+            {
+                ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                mTabTemplates.Add(tab);
+            }
+            
             return true;
         }
 
@@ -215,10 +281,10 @@ namespace Hercules.MA.GraphicEngine.Models
                 return null;
             }
             string config = File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas/{pConfig}", Encoding.UTF8);
-            
+
             return Encoding.UTF8.GetBytes(config);
         }
-        
+
         /// <summary>
         /// Obtiene los datos de las páginas.
         /// </summary>
@@ -260,7 +326,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     isPrivate = itemGrafica.isPrivate
 
                 };
-                
+
                 if (itemGrafica.isPrivate && !GetPersonIsGraphicManagerByGnossUser(userId))
                 {
                     continue;
@@ -1713,7 +1779,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
                 Dictionary<Dimension, DatasetCircular> dimensionesDatasetExt = new Dictionary<Dimension, DatasetCircular>();
                 ConcurrentDictionary<string, float> dicNombreDataExt = new ConcurrentDictionary<string, float>();
-                   
+
                 Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
                 {
                     if (itemGrafica.exterior)
@@ -2012,7 +2078,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 // HoverOffset por defecto.
                 datasetExt.hoverOffset = 4;
 
-                dataset.label += auxLeyenda.Remove(auxLeyenda.Length-3);
+                dataset.label += auxLeyenda.Remove(auxLeyenda.Length - 3);
                 grafica.data.datasets.Add(dataset);
                 grafica.data.datasets.Add(datasetExt);
             }
@@ -2634,7 +2700,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             return idRecurso;
         }
-        
+
         /// <summary>
         /// devuelve la propiedad IsGraphicManager del usuario con id pUserId.
         /// </summary>
