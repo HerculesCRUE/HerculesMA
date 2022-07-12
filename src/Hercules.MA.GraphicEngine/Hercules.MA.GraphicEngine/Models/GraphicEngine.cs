@@ -254,6 +254,7 @@ namespace Hercules.MA.GraphicEngine.Models
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.DefaultValueHandling = DefaultValueHandling.Ignore;
             settings.NullValueHandling = NullValueHandling.Ignore;
+            settings.Formatting = Formatting.Indented;
             configModel.graficas.ForEach(x => x.identificador = x.identificador.Contains('-') ? x.identificador.Split('-').LastOrDefault() : x.identificador);
             string json = JsonConvert.SerializeObject(configModel, settings);
             File.WriteAllText(path, json);
