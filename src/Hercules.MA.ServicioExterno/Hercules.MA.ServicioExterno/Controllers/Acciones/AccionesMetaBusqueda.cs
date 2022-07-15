@@ -28,6 +28,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         public static List<Group> groups = null;
         public static List<Project> projects = null;
         public static List<Person> persons = null;
+        public static List<Offer> offers = null;
 
         public static ObjectSearch objSearch;
         public static List<string> lastSearchs;
@@ -53,6 +54,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         List<Group> groupsTemp = new List<Group>();
                         List<Project> projectsTemp = new List<Project>();
                         List<Person> personsTemp = new List<Person>();
+                        List<Offer> offersTemp = new List<Offer>();
 
 
                         #region CargarInvestigadores
@@ -632,6 +634,108 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
                         #endregion
 
+                        #region cargarOfertas
+                        {
+                            int limit = 10000;
+                            int offset = 0;
+                            while (true)
+                            {
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?fecha ?description ";
+                                string where = $@"  where
+                                            {{
+                                                ?id a 'offer'.
+                                                ?id schema:name ?title.
+                                                ?id schema:availability <http://gnoss.com/items/offerstate_003>.
+                                                OPTIONAL{{ ?id schema:description ?description}}
+                                                OPTIONAL{{ ?id dct:issued ?fecha}}
+                                            }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
+
+                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                                {
+                                    offset += limit;
+                                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                                    {
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+
+                                        Offer offer = offersTemp.FirstOrDefault(x => x.id == id);
+                                        if (offer == null)
+                                        {
+                                            string title = fila["title"].value;
+                                            string description = "";
+                                            if (fila.ContainsKey("description"))
+                                            {
+                                                description = fila["description"].value;
+                                            }
+                                            offer = new Offer()
+                                            {
+                                                id = id,
+                                                title = title,
+                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                persons = new HashSet<Person>()
+                                            };
+                                            offersTemp.Add(offer);
+                                        }
+                                    }
+                                    if (resultadoQuery.results.bindings.Count < limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                            limit = 10000;
+                            offset = 0;
+                            while (true)
+                            {
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?author ";
+                                string where = $@"  where
+                                            {{
+                                                ?id a 'offer'.
+                                                ?id schema:availability <http://gnoss.com/items/offerstate_003>.
+                                                ?id roh:researchers ?author.
+                                            }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
+
+                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                                {
+                                    offset += limit;
+                                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                                    {
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+                                        Guid author = new Guid(fila["author"].value.Replace("http://gnoss/", ""));
+
+                                        Offer offer = offersTemp.FirstOrDefault(x => x.id == id);
+                                        if (offer != null)
+                                        {
+                                            if (personsAuxTemp.ContainsKey(author))
+                                            {
+                                                offer.persons.Add(personsAuxTemp[author]);
+                                            }
+                                        }
+                                    }
+                                    if (resultadoQuery.results.bindings.Count < limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                            offers = offersTemp;
+                        }
+                        #endregion
+
                         //TODO COnfigurable
                         Thread.Sleep(300000);
                     }
@@ -674,8 +778,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
 
             }
-
-
 
             //Personas
             if (persons != null)
@@ -745,6 +847,20 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     lista.Add(project);
                 }
                 respuesta["project"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
+            }
+
+            //Ofertas
+            if (offers != null)
+            {
+                List<Offer> offerFilter = offers.Select(offer => new KeyValuePair<long, Offer>(offer.SearchAutocompletar(inputs, lastInput), offer)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
+                bool searh = offerFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
+                int min = Math.Min(offerFilter.Count, maxItems);
+                List<ObjectSearch> lista = new List<ObjectSearch>();
+                foreach (Offer project in offerFilter.GetRange(0, min))
+                {
+                    lista.Add(project);
+                }
+                respuesta["offer"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
             }
 
 
