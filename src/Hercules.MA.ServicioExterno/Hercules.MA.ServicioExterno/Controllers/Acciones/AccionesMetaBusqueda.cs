@@ -747,6 +747,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }).Start();
         }
 
+
         /// <summary>
         /// Busca los elementos necesarios y devuelve los resultados
         /// </summary>
@@ -886,6 +887,31 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return respuesta;
         }
 
+        /// <summary>
+        /// Método que obtiene el número total de elementos de cada tipo (basado en el hilo que obtiene los datos de la búsqueda)
+        /// </summary>
+        /// <returns>Devuelve diccionario de 'tipo de items' => 'número de items'.</returns>
+        public Dictionary<string, int> GetNumItems()
+        {
+            Dictionary<string, int> result = new Dictionary<string, int>();
+
+            //public static Dictionary<Guid, Person> personsAux = null;
+            //public static List<Publication> publications = null;
+            //public static List<ResearchObject> researchObjects = null;
+            //public static List<Group> groups = null;
+            //public static List<Project> projects = null;
+            //public static List<Person> persons = null;
+
+            result.Add("persons", persons.Count);
+            result.Add("documents", publications.Count);
+            result.Add("researchObjects", researchObjects.Count);
+            result.Add("groups", groups.Count);
+            result.Add("projects", projects.Count);
+
+            return result;
+
+        }
+
         private static string ObtenerTextoNormalizado(string pText)
         {
             string normalizedString = pText.Normalize(NormalizationForm.FormD);
@@ -899,5 +925,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
             return sb.ToString().ToLower();
         }
+
+
+
     }
 }

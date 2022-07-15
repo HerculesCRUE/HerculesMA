@@ -85,7 +85,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
         public static List<string> ObtenerConfigs(string pLang, string pUserId = "")
-        {         
+        {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
             if (!isAdmin)
@@ -108,18 +108,166 @@ namespace Hercules.MA.GraphicEngine.Models
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
-            if (!isAdmin)
+            if (!isAdmin || pConfigFile == null)
             {
                 return false;
             }
-
-            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfigName);
-            using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            try
             {
-                pConfigFile.CopyTo(fileStream);
+                // Compruebo si es un JSON.
+                string json = new StreamReader(pConfigFile.OpenReadStream()).ReadToEnd();
+                ConfigModel configModel = JsonConvert.DeserializeObject<ConfigModel>(json);
+                if (configModel == null)
+                {
+                    return false;
+                }
+                string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfigName);
+                using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+                {
+                    pConfigFile.CopyTo(fileStream);
+                }
+                string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+                mTabTemplates = new List<ConfigModel>();
+                foreach (string file in Directory.EnumerateFiles(pathConfig))
+                {
+                    ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                    mTabTemplates.Add(tab);
+                }
+            }
+            catch (Exception)
+            {
+                return false;
             }
             return true;
         }
+        /// <summary>
+        /// Edita la configuración de la página.
+        /// </summary>
+        /// <param name="pLang">Idioma.</param>
+        /// <param name="pUserId">ID del usuario.</param>
+        /// <param name="pConfig">Nombre del JSON a editar.</param>
+        /// <param name="pPageName">Nuevo nombre de la página.</param>
+        /// <param name="pPageOrder">Nuevo orden de la página.</param>
+        public static Grafica ObtenerGraficaConfig(string pLang, string pUserId, string pPageId, string pGraphicId)
+        {
+            // Compruebo si es administrador
+            bool isAdmin = IsAdmin(pLang, pUserId);
+            ConfigModel configModel = mTabTemplates.Where(x => x.identificador == pPageId).FirstOrDefault();
+            if (!isAdmin || configModel == null)
+            {
+                return null;
+            }
+            return configModel.graficas.Where(x => x.identificador == pGraphicId).FirstOrDefault();
+        }
+        /// <summary>
+        /// Edita la configuración de la página.
+        /// </summary>
+        /// <param name="pLang">Idioma.</param>
+        /// <param name="pUserId">ID del usuario.</param>
+        /// <param name="pPageId">Página a editar.</param>
+        /// <param name="pGraphicName">Nuevo nombre de la gráfica.</param>
+        /// <param name="pGraphicOrder">Nuevo orden de la gráfica.</param>
+        /// <param name="pGraphicWidth">Nuevo ancho de la gráfica.</param>
+        public static bool EditarConfig(string pLang, string pUserId, string pGraphicId, string pPageId, string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0)
+        {
+            // Compruebo si es administrador
+            bool isAdmin = IsAdmin(pLang, pUserId);
+            ConfigModel configModel = mTabTemplates.Where(x => x.identificador == pPageId).FirstOrDefault();
+            if (!isAdmin || configModel == null)
+            {
+                return false;
+            }
+            Grafica grafica = configModel.graficas.Where(x => x.identificador == pGraphicId).FirstOrDefault();
+            // Edito el nombre de la gráfica.
+            if (pGraphicName != "")
+            {
+                grafica.nombre[pLang] = pGraphicName;
+            }
+            // Edito la anchura de la gráfica.
+            if (pGraphicWidth != 0)
+            {
+                grafica.anchura = pGraphicWidth;
+            }
+            // Edito el orden de la gráfica.
+            if (pGraphicOrder != 0)
+            {
+                pGraphicOrder--;
+                Dictionary<string, List<Grafica>> dicGraficasGrupos = new Dictionary<string, List<Grafica>>();
+                List<Grafica> listaRemove = new List<Grafica>();
+                foreach (Grafica item in configModel.graficas)
+                {
+                    if (!string.IsNullOrEmpty(item.idGrupo))
+                    {
+                        if (dicGraficasGrupos.ContainsKey(item.idGrupo))
+                        {
+                            dicGraficasGrupos[item.idGrupo].Add(item);
+                            listaRemove.Add(item);
+                        }
+                        else
+                        {
+                            dicGraficasGrupos.Add(item.idGrupo, new List<Grafica>() {});
+                        }
+                    }
+                }
+                foreach (Grafica item in listaRemove)
+                {
+                    configModel.graficas.Remove(item);
+                }
+                configModel.graficas.Remove(grafica);
+                if (pGraphicOrder > configModel.graficas.Count)
+                {
+                    configModel.graficas.Add(grafica);
+                }
+                else
+                {
+                    configModel.graficas.Insert(pGraphicOrder, grafica);
+                }
+                if (dicGraficasGrupos.Count > 0)
+                {
+                    foreach (KeyValuePair<string, List<Grafica>> item in dicGraficasGrupos)
+                    {
+                        int index = configModel.graficas.IndexOf(configModel.graficas.Where(x => x.idGrupo == item.Key).FirstOrDefault());
+                        if (index + 1 > configModel.graficas.Count)
+                        {
+                            configModel.graficas.AddRange(item.Value);
+                        }
+                        else
+                        {
+                            configModel.graficas.InsertRange(index + 1, item.Value);
+                        }
+                    }
+                }
+            }
+            // Guardo la configuración en el JSON.
+            string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+            string jsonName = "";
+            foreach (string file in Directory.EnumerateFiles(pathConfig))
+            {
+                ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                if (tab.identificador == configModel.identificador)
+                {
+                    jsonName = file.Split("\\").LastOrDefault();
+                    break;
+                }
+            }
+            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", jsonName);
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.DefaultValueHandling = DefaultValueHandling.Ignore;
+            settings.NullValueHandling = NullValueHandling.Ignore;
+            settings.Formatting = Formatting.Indented;
+            configModel.graficas.ForEach(x => x.identificador = x.identificador.Contains('-') ? x.identificador.Split('-').LastOrDefault() : x.identificador);
+            string json = JsonConvert.SerializeObject(configModel, settings);
+            File.WriteAllText(path, json);
+            mTabTemplates = new List<ConfigModel>();
+            foreach (string file in Directory.EnumerateFiles(pathConfig))
+            {
+                ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                mTabTemplates.Add(tab);
+            }
+            
+            return true;
+        }
+
         /// <summary>
         /// Descarga el fichero json correspondiente.
         /// </summary>
@@ -136,10 +284,10 @@ namespace Hercules.MA.GraphicEngine.Models
                 return null;
             }
             string config = File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/configGraficas/{pConfig}", Encoding.UTF8);
-            
+
             return Encoding.UTF8.GetBytes(config);
         }
-        
+
         /// <summary>
         /// Obtiene los datos de las páginas.
         /// </summary>
@@ -181,7 +329,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     isPrivate = itemGrafica.isPrivate
 
                 };
-                
+
                 if (itemGrafica.isPrivate && !GetPersonIsGraphicManagerByGnossUser(userId))
                 {
                     continue;
@@ -666,6 +814,10 @@ namespace Hercules.MA.GraphicEngine.Models
                     foreach (string item in filtros)
                     {
                         where.Append(item);
+                    }
+                    if (!string.IsNullOrEmpty(itemGrafica.minus))
+                    {
+                        where.Append($@"MINUS {{ ?s {itemGrafica.minus} ?menos }}");
                     }
                     if (filtroEspecial)
                     {
@@ -1634,7 +1786,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
                 Dictionary<Dimension, DatasetCircular> dimensionesDatasetExt = new Dictionary<Dimension, DatasetCircular>();
                 ConcurrentDictionary<string, float> dicNombreDataExt = new ConcurrentDictionary<string, float>();
-                   
+
                 Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
                 {
                     if (itemGrafica.exterior)
@@ -1933,7 +2085,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 // HoverOffset por defecto.
                 datasetExt.hoverOffset = 4;
 
-                dataset.label += auxLeyenda.Remove(auxLeyenda.Length-3);
+                dataset.label += auxLeyenda.Remove(auxLeyenda.Length - 3);
                 grafica.data.datasets.Add(dataset);
                 grafica.data.datasets.Add(datasetExt);
             }
@@ -2555,7 +2707,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             return idRecurso;
         }
-        
+
         /// <summary>
         /// devuelve la propiedad IsGraphicManager del usuario con id pUserId.
         /// </summary>

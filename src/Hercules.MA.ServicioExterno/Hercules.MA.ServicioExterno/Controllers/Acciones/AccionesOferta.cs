@@ -54,6 +54,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     OPTIONAL {{?s <http://w3id.org/roh/isOtriManager> ?isOtriManager.}}
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
                 }}";
+
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
             var userGnossId = string.Empty;
             var isOtriManager = false;
@@ -155,7 +156,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="researcherId">Datos del usuario para obtener los investigadores del grupo al que pertenece</param>
         /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
-
         public Dictionary<string, UsersOffer> LoadUsers(string researcherId)
         {
             // Diccionario con el ID del investigador e información básica del propio investigador
@@ -258,7 +258,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="ids">Ids de los investigadores</param>
         /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
-
         public List<string> LoadLineResearchs(string[] ids)
         {
             //ID persona/ID perfil/score
@@ -318,7 +317,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="lang">Idioma a cargar</param>
         /// <returns>Diccionario con los datos.</returns>
-
         public Dictionary<string, string> LoadMatureStates(string lang)
         {
             Dictionary<string, string> respuesta = new();
@@ -369,7 +367,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="lang">Idioma a cargar</param>
         /// <returns>Diccionario con los datos.</returns>
-
         public Dictionary<string, string> LoadFramingSectors(string lang)
         {
 
@@ -418,7 +415,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="lang">Idioma a cargar</param>
         /// <returns>Diccionario con los datos.</returns>
-
         public List<Tuple<string, string, string>> LoadOfferStates(string lang)
         {
             List<Tuple<string, string, string>> respuesta = new();
@@ -1290,6 +1286,93 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return result;
 
         }
+
+
+
+
+        /// <summary>
+        /// Método público para modificar el estado de diferentes ontologías.
+        /// </summary>
+        /// <param name="idRecurso">Id de la oferta tecnológica</param>
+        /// <param name="nuevoEstado">Id del estado al que se quiere establecer</param>
+        /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo)</param>
+        /// <param name="predicado">Predicado a modificar</param>
+        /// <param name="ontology">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
+        /// <returns>String con el id del nuevo estado.</returns>
+        internal string ModificarTripleteUsuario(string idRecurso, string nuevoEstado, string estadoActual, string predicado, Guid pIdGnossUser)
+        {
+
+            // Obtener el id del usuario usando el id de la cuenta
+            string select = "select ?s ?isOtriManager";
+            string where = @$"where {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    OPTIONAL {{?s <http://w3id.org/roh/isOtriManager> ?isOtriManager.}}
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            var userGnossId = string.Empty;
+            var isOtriManager = false;
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                userGnossId = e["s"].value;
+                try
+                {
+                    bool.TryParse(e["isOtriManager"].value, out isOtriManager);
+                }
+                catch (Exception exc) { }
+            });
+
+            
+            // Modificar el estado y añadir un nuevo estado en el "historial"
+            if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && !string.IsNullOrEmpty(idRecurso))
+            {
+
+                // Añadir cambio en el historial de la disponibilidad
+                // Comprueba si el id del recuro no está vacío
+                mResourceApi.ChangeOntoly("person");
+
+                // Inserto un historial en la base de datos
+                // Obtengo el guid del recurso
+                Guid guid = mResourceApi.GetShortGuid(idRecurso);
+
+                // Modifico el estado
+                try
+                {
+                    Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
+                    List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+
+
+                    // Modificación (Triples).
+                    TriplesToModify triple = new TriplesToModify();
+                    triple.Predicate = predicado;
+                    // triple.Predicate = "http://w3id.org/roh/isOtriManager";
+                    triple.NewValue = nuevoEstado;
+                    triple.OldValue = estadoActual;
+                    listaTriplesModificacion.Add(triple);
+
+                    // Modificación.
+                    dicModificacion.Add(guid, listaTriplesModificacion);
+                    mResourceApi.ModifyPropertiesLoadedResources(dicModificacion);
+                }
+                catch (Exception e) { throw; }
+
+
+
+            }
+
+            return nuevoEstado;
+
+            //if (uploadedR)
+            //{
+            //    return idRecurso;
+            //}
+            //else
+            //{
+            //    throw new Exception("Recurso no actualizado");
+            //}
+        }
+
 
 
     }

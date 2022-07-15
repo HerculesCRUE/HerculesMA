@@ -112,6 +112,22 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.SubirConfig(pLang, pConfigName, pConfigFile, pUserId);
         }
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public bool EditarConfig(string pLang, string pGraphicId, string pPageId, string pUserId = "", string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0)
+        {
+            return Models.GraphicEngine.EditarConfig(pLang, pUserId, pGraphicId, pPageId, pGraphicName, pGraphicOrder, pGraphicWidth);
+        }
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public Grafica ObtenerGraficaConfig(string pLang, string pPageId, string pGraphicId, string pUserId = "")
+        {
+            return Models.GraphicEngine.ObtenerGraficaConfig(pLang, pUserId, pPageId, pGraphicId);
+        }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -210,6 +226,6 @@ namespace Hercules.MA.GraphicEngine.Controllers
         public void EditarEscalasGrafica(string pUserId, string pPageID, string pGraphicID, string pNewScales, string pOldScales)
         {
             Models.GraphicEngine.EditarEscalasGrafica(pUserId, pPageID, pGraphicID, pNewScales, pOldScales);
-        }
+        }        
     }
 }
