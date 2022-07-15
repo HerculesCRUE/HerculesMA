@@ -44,10 +44,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                 SELECT ?fecha ?cuartil COUNT(DISTINCT(?documento)) AS ?NumPublicaciones ";
                 int aux = 0;
                 string where = $@"  WHERE {{
-                                    ?documento a 'document'.
-                                    ?documento dct:issued ?fechaAux.
+                                    ?documento a 'document'.                                    
                                     {UtilidadesAPI.CrearFiltros(UtilidadesAPI.ObtenerParametros(pParametros), "?documento", ref aux)}
-                                    BIND(xsd:int(?fechaAux/10000000000) as ?fecha)
+                                    {{?documento dct:issued ?fechaAux.
+                                    BIND(xsd:int(?fechaAux/10000000000) as ?fecha)}}
                                     OPTIONAL{{?documento <http://w3id.org/roh/quartile> ?cuartil}}
                                 }}ORDER BY ?fecha";
 
@@ -92,9 +92,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 int aux = 0;
                 string where = $@"  WHERE {{
                                     ?documento a 'document'.
-                                    ?documento dct:issued ?fechaAux.
                                     {UtilidadesAPI.CrearFiltros(UtilidadesAPI.ObtenerParametros(pParametros), "?documento", ref aux)}
-                                    BIND(xsd:int(?fechaAux/10000000000) as ?fecha)
+                                    {{?documento dct:issued ?fechaAux.
+                                    BIND(xsd:int(?fechaAux/10000000000) as ?fecha)}}
                                     ?documento <http://w3id.org/roh/citationCount> ?numCitas
                                 }}ORDER BY ?fecha";
 
