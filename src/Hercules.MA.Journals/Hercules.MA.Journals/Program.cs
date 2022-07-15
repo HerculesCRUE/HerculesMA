@@ -103,7 +103,14 @@ namespace Hercules.MA.Journals
             {
                 if (!pRevistas.Exists(x => x.idJournal == journal.idJournal))
                 {
-                    mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(journal.idJournal));
+                    try
+                    {
+                        mResourceApi.PersistentDelete(mResourceApi.GetShortGuid(journal.idJournal));
+                    }
+                    catch
+                    {
+                        // Si entra por aquí, es error de CORE.
+                    }
                 }
             }
 
@@ -218,14 +225,7 @@ namespace Hercules.MA.Journals
                 {
                     revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "scopus").categorias.Add(CrearCategoriaScopus(fila, pAnyo));
                 }
-                else
-                {
-
-                }
             }
-
-            //Console.WriteLine($@"{DateTime.Now} [{pAnyo}] Revistas sin título: {revistasSinTitulo}");
-            //Console.WriteLine($@"{DateTime.Now} [{pAnyo}] Revistas sin ISSN ni EISSN: {revistasSinIdentificadores}");
 
             return pListaRevistas;
         }
@@ -325,14 +325,7 @@ namespace Hercules.MA.Journals
                 {
                     revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "wos").categorias.Add(CrearCategoriaWoS(fila, pAnyo));
                 }
-                else
-                {
-
-                }
             }
-
-            //Console.WriteLine($@"{DateTime.Now} [{pAnyo}] Revistas sin título: {revistasSinTitulo}");
-            //Console.WriteLine($@"{DateTime.Now} [{pAnyo}] Revistas sin ISSN ni EISSN: {revistasSinIdentificadores}");
 
             return pListaRevistas;
         }
@@ -675,10 +668,10 @@ namespace Hercules.MA.Journals
                 do
                 {
                     // Consulta sparql.
-                    string select = "SELECT * WHERE { SELECT ?revista ?titulo ?issn ?eissn ?editor FROM <http://gnoss.com/documentformat.owl> FROM <http://gnoss.com/referencesource.owl> FROM <http://gnoss.com/impactindexcategory.owl> ";
+                    string select = $@"SELECT * WHERE {{ SELECT ?revista ?titulo ?issn ?eissn ?editor FROM <{mResourceApi.GraphsUrl}documentformat.owl> FROM <{mResourceApi.GraphsUrl}referencesource.owl> FROM <{mResourceApi.GraphsUrl}impactindexcategory.owl> ";
                     string where = $@"WHERE {{
                                 ?revista a <http://w3id.org/roh/MainDocument>. 
-                                ?revista <http://w3id.org/roh/format> <http://gnoss.com/items/documentformat_057>. 
+                                ?revista <http://w3id.org/roh/format> <{mResourceApi.GraphsUrl}items/documentformat_057>. 
                                 ?revista <http://w3id.org/roh/title> ?titulo. 
                                 OPTIONAL{{?revista <http://purl.org/ontology/bibo/issn> ?issn. }} 
                                 OPTIONAL{{?revista <http://purl.org/ontology/bibo/eissn> ?eissn. }} 
@@ -748,10 +741,10 @@ namespace Hercules.MA.Journals
                 do
                 {
                     // Consulta sparql.
-                    string select = "SELECT * WHERE { SELECT ?revista ?impactIndex ?fuente ?year ?impactIndexInYear FROM <http://gnoss.com/documentformat.owl> FROM <http://gnoss.com/referencesource.owl> FROM <http://gnoss.com/impactindexcategory.owl> ";
+                    string select = $@"SELECT * WHERE {{ SELECT ?revista ?impactIndex ?fuente ?year ?impactIndexInYear FROM <{mResourceApi.GraphsUrl}documentformat.owl> FROM <{mResourceApi.GraphsUrl}referencesource.owl> FROM <{mResourceApi.GraphsUrl}impactindexcategory.owl> ";
                     string where = $@"WHERE {{
                                 ?revista a <http://w3id.org/roh/MainDocument>.
-                                ?revista <http://w3id.org/roh/format> <http://gnoss.com/items/documentformat_057>. 
+                                ?revista <http://w3id.org/roh/format> <{mResourceApi.GraphsUrl}items/documentformat_057>. 
                                 ?revista <http://w3id.org/roh/impactIndex> ?impactIndex.
                                 OPTIONAL{{?impactIndex <http://w3id.org/roh/impactSource> ?fuente. }} 
                                 ?impactIndex <http://w3id.org/roh/year> ?year.
@@ -823,10 +816,10 @@ namespace Hercules.MA.Journals
                 do
                 {
                     // Consulta sparql.
-                    string select = "SELECT * WHERE { SELECT ?revista ?impactIndex ?impactCategory ?year ?nombreCategoria ?posicion ?numCategoria ?cuartil FROM <http://gnoss.com/documentformat.owl> FROM <http://gnoss.com/referencesource.owl> FROM <http://gnoss.com/impactindexcategory.owl> ";
+                    string select = $@"SELECT * WHERE {{ SELECT ?revista ?impactIndex ?impactCategory ?year ?nombreCategoria ?posicion ?numCategoria ?cuartil FROM <{mResourceApi.GraphsUrl}documentformat.owl> FROM <{mResourceApi.GraphsUrl}referencesource.owl> FROM <{mResourceApi.GraphsUrl}impactindexcategory.owl> ";
                     string where = $@"WHERE {{
                                 ?revista a <http://w3id.org/roh/MainDocument>.
-                                ?revista <http://w3id.org/roh/format> <http://gnoss.com/items/documentformat_057>. 
+                                ?revista <http://w3id.org/roh/format> <{mResourceApi.GraphsUrl}items/documentformat_057>. 
                                 ?revista <http://w3id.org/roh/impactIndex> ?impactIndex.
                                 ?impactIndex <http://w3id.org/roh/year> ?year.
                                 ?impactIndex <http://w3id.org/roh/impactCategory> ?impactCategory. 
@@ -1138,7 +1131,7 @@ namespace Hercules.MA.Journals
                 revistaCargar.Bibo_issn = revista.issn;
                 revistaCargar.Bibo_eissn = revista.eissn;
                 revistaCargar.Bibo_editor = revista.publicador;
-                revistaCargar.IdRoh_format = "http://gnoss.com/items/documentformat_057";
+                revistaCargar.IdRoh_format = $@"{mResourceApi.GraphsUrl}items/documentformat_057";
                 revistaCargar.Roh_impactIndex = new List<MaindocumentOntology.ImpactIndex>();
                 foreach (IndiceImpacto indice in revista.indicesImpacto)
                 {
@@ -1146,13 +1139,13 @@ namespace Hercules.MA.Journals
                     switch (indice.fuente)
                     {
                         case "wos":
-                            indiceCargar.IdRoh_impactSource = "http://gnoss.com/items/referencesource_000";
+                            indiceCargar.IdRoh_impactSource = $@"{mResourceApi.GraphsUrl}items/referencesource_000";
                             break;
                         case "scopus":
-                            indiceCargar.IdRoh_impactSource = "http://gnoss.com/items/referencesource_010";
+                            indiceCargar.IdRoh_impactSource = $@"{mResourceApi.GraphsUrl}items/referencesource_010";
                             break;
                         case "inrecs":
-                            indiceCargar.IdRoh_impactSource = "http://gnoss.com/items/referencesource_020";
+                            indiceCargar.IdRoh_impactSource = $@"{mResourceApi.GraphsUrl}items/referencesource_020";
                             break;
                     }
                     indiceCargar.Roh_impactIndexInYear = indice.indiceImpacto;
