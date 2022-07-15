@@ -815,6 +815,10 @@ namespace Hercules.MA.GraphicEngine.Models
                     {
                         where.Append(item);
                     }
+                    if (!string.IsNullOrEmpty(itemGrafica.minus))
+                    {
+                        where.Append($@"MINUS {{ ?s {itemGrafica.minus} ?menos }}");
+                    }
                     if (filtroEspecial)
                     {
                         where.Append($@"FILTER(LANG(?aux) = 'es' OR LANG(?aux) = '' OR !isLiteral(?aux))");
