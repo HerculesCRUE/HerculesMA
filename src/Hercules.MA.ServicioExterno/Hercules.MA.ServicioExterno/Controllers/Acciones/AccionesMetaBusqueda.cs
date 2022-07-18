@@ -640,13 +640,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             int offset = 0;
                             while (true)
                             {
-                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?fecha ?description ";
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?fecha ?description ?search ";
                                 string where = $@"  where
                                             {{
                                                 ?id a 'offer'.
                                                 ?id schema:name ?title.
                                                 ?id schema:availability <http://gnoss.com/items/offerstate_003>.
                                                 OPTIONAL{{ ?id schema:description ?description}}
+                                                OPTIONAL{{ ?id roh:search ?search}}
                                                 OPTIONAL{{ ?id dct:issued ?fecha}}
                                             }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
 
@@ -668,12 +669,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 description = fila["description"].value;
                                             }
+                                            string search = "";
+                                            if (fila.ContainsKey("search"))
+                                            {
+                                                search = fila["search"].value;
+                                            }
                                             offer = new Offer()
                                             {
                                                 id = id,
                                                 title = title,
                                                 titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
                                                 descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
+                                                searchAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(search).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
                                                 persons = new HashSet<Person>()
                                             };
                                             offersTemp.Add(offer);
