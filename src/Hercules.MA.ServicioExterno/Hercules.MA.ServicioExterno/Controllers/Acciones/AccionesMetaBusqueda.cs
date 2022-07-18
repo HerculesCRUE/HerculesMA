@@ -895,18 +895,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             Dictionary<string, int> result = new Dictionary<string, int>();
 
-            //public static Dictionary<Guid, Person> personsAux = null;
-            //public static List<Publication> publications = null;
-            //public static List<ResearchObject> researchObjects = null;
-            //public static List<Group> groups = null;
-            //public static List<Project> projects = null;
-            //public static List<Person> persons = null;
-
             result.Add("persons", persons.Count);
             result.Add("documents", publications.Count);
             result.Add("researchObjects", researchObjects.Count);
             result.Add("groups", groups.Count);
             result.Add("projects", projects.Count);
+            result.Add("offers", offers.Count);
 
             return result;
 
