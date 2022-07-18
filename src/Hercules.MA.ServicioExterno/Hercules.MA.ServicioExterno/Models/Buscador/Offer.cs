@@ -9,6 +9,7 @@ namespace Hercules.MA.ServicioExterno.Models.Buscador
     public class Offer : ObjectSearch
     {
         public HashSet<string> descriptionAuxSearch { get; set; }
+        public HashSet<string> searchAuxSearch { get; set; }
         public HashSet<Person> persons { get; set; }
 
 
@@ -17,6 +18,7 @@ namespace Hercules.MA.ServicioExterno.Models.Buscador
             long respuestaPeso = 0;
             bool encontradoTitulo = SearchForAutocomplete(titleAuxSearch, pInput, pLastInput);
             bool encontradoDescripcion = SearchForAutocomplete(descriptionAuxSearch, pInput, pLastInput);
+            bool encontradoSearch = SearchForAutocomplete(searchAuxSearch, pInput, pLastInput);
             int numAutores = 0;
 
             foreach (Person person in persons)
@@ -36,6 +38,11 @@ namespace Hercules.MA.ServicioExterno.Models.Buscador
             if (encontradoDescripcion)
             {
                 respuestaPeso += 1000;
+            }
+
+            if (encontradoSearch)
+            {
+                respuestaPeso += 100;
             }
 
             respuestaPeso += numAutores;
