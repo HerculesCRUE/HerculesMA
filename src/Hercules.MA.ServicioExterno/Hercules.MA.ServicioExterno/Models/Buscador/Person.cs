@@ -8,26 +8,15 @@ namespace Hercules.MA.ServicioExterno.Models.Buscador
 {
     public class Person : ObjectSearch
     {
+        //Título-->1
+
         public bool searchable { get; set; }
-        
-        /**
-         * Método para buscar dentro de Person
-         */
-        public override long SearchAutocompletar(HashSet<string> pInput, string pLastInput)
-        {
-            long respuestaPeso = 0;
-            if (SearchForAutocomplete(titleAuxSearch, pInput, pLastInput))
-            {
-                respuestaPeso += 1;
-            }
-            return respuestaPeso;
-        }
 
-
-        public override bool SearchBuscador(HashSet<string> pInput, string pLastInput)
-        {            
-            return SearchForSearcher(titleAuxSearch, pInput, pLastInput);
-        }
+        public List<Publication> publications { get; set; }
+        public List<ResearchObject> researchObjects { get; set; }
+        public List<Project> projects { get; set; }
+        public List<Group> groups { get; set; }
+        public List<Offer> offers { get; set; }
     }
 
 }
