@@ -1274,7 +1274,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             Dictionary<string, int> result = new Dictionary<string, int>();
 
-            result.Add("persons", persons.Count);
+            result.Add("persons", persons.Where(x=>x.searchable).Count());
             result.Add("documents", publications.Count);
             result.Add("researchObjects", researchObjects.Count);
             result.Add("groups", groups.Count);
