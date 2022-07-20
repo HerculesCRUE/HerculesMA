@@ -51,47 +51,15 @@
           },
           {
             "nombre": {
-              "es": "Cuartil 1"
+              "es": "Cuartil"
             },
             "stack": "cuartil1",
-            "filtro": "roh:quartile=1",
+            "filtro": "roh:quartile",
+            "dividirDatos": true,
             "tipoDimension": "bar",
-            "color": "#45DCB4",
+            "color": "#7CBFE3",
             "yAxisID": "y1",
             "orden": 2
-          },
-          {
-            "nombre": {
-              "es": "Cuartil 2"
-            },
-            "stack": "cuartil1",
-            "filtro": "roh:quartile=2",
-            "tipoDimension": "bar",
-            "color": "#EAF112",
-            "yAxisID": "y1",
-            "orden": 3
-          },
-          {
-            "nombre": {
-              "es": "Cuartil 3"
-            },
-            "stack": "cuartil1",
-            "filtro": "roh:quartile=3",
-            "tipoDimension": "bar",
-            "color": "#DE921E",
-            "yAxisID": "y1",
-            "orden": 4
-          },
-          {
-            "nombre": {
-              "es": "Cuartil 4"
-            },
-            "stack": "cuartil1",
-            "filtro": "roh:quartile=4",
-            "tipoDimension": "bar",
-            "color": "#DC4545",
-            "yAxisID": "y1",
-            "orden": 5
           },
           {
             "nombre": {

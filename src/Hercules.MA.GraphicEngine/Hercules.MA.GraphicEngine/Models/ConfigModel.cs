@@ -74,6 +74,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public string color { get; set; }
         public string colorMaximo { get; set; }
         public string tipoDimension { get; set; }
+        public bool dividirDatos { get; set; }
         public string minus { get; set; }
         public bool exterior { get; set; }
         public string calculo { get; set; }
@@ -85,5 +86,28 @@ namespace Hercules.MA.GraphicEngine.Models
         public int numMaxNodos { get; set; }
         public string colorNodo { get; set; }
         public string colorLinea { get; set; }
+        public Dimension DeepCopy()
+        {
+            Dimension copia = new Dimension();
+            copia.nombre = new Dictionary<string, string>(this.nombre);
+            copia.filtro = this.filtro;
+            copia.limite = this.limite;
+            copia.color = this.color;
+            copia.colorMaximo = this.colorMaximo;
+            copia.tipoDimension = this.tipoDimension;
+            copia.dividirDatos = this.dividirDatos;
+            copia.minus = this.minus;
+            copia.exterior = this.exterior;
+            copia.calculo = this.calculo;
+            copia.stack = this.stack;
+            copia.anchura = this.anchura;
+            copia.yAxisID = this.yAxisID;
+            copia.xAxisID = this.xAxisID;
+            copia.orden = this.orden;
+            copia.numMaxNodos = this.numMaxNodos;
+            copia.colorNodo = this.colorNodo;
+            copia.colorLinea = this.colorLinea;
+            return copia;
+        }
     }
 }

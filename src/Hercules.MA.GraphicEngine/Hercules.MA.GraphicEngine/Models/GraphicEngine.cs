@@ -205,7 +205,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         }
                         else
                         {
-                            dicGraficasGrupos.Add(item.idGrupo, new List<Grafica>() {});
+                            dicGraficasGrupos.Add(item.idGrupo, new List<Grafica>() { });
                         }
                     }
                 }
@@ -264,7 +264,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
                 mTabTemplates.Add(tab);
             }
-            
+
             return true;
         }
 
@@ -886,7 +886,47 @@ namespace Hercules.MA.GraphicEngine.Models
                         }
                     }
                 }
-                resultadosDimension[itemGrafica] = listaTuplas;
+                if (itemGrafica.dividirDatos)
+                {
+                    HashSet<string> listaAux = new HashSet<string>();
+                    foreach (Tuple<string, string, float> tupla in listaTuplas)
+                    {
+                        listaAux.Add(tupla.Item2);
+                    }
+                    int ordenAux = itemGrafica.orden;
+                    foreach (string aux in listaAux.OrderBy(x => x))
+                    {
+                        Dimension itemAux = itemGrafica.DeepCopy();
+                        foreach (KeyValuePair<string, string> item in itemAux.nombre)
+                        {
+                            itemAux.nombre[item.Key] = item.Value + " " + aux;
+                            switch (aux)
+                            {
+                                case "1":
+                                    itemAux.color = "#45DCB4";
+                                    break;
+                                case "2":
+                                    itemAux.color = "#EAF112";
+                                    break;
+                                case "3":
+                                    itemAux.color = "#DE921E";
+                                    break;
+                                case "4":
+                                    itemAux.color = "#DC4545";
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        itemAux.orden = ordenAux;
+                        ordenAux++;
+                        resultadosDimension[itemAux] = listaTuplas.Where(x => x.Item2 == aux).ToList();
+                    }
+                }
+                else
+                {
+                    resultadosDimension[itemGrafica] = listaTuplas;
+                }
             });
 
             #region --- Cálculo de los valores del Eje X
@@ -1068,11 +1108,20 @@ namespace Hercules.MA.GraphicEngine.Models
                 dimensionesDataset[item.Key] = dataset;
             }
 
-            foreach (Dimension dim in pGrafica.config.dimensiones)
+            if (pGrafica.config.dimensiones.Any(x => x.dividirDatos))
             {
-                grafica.data.datasets.Add(dimensionesDataset[dim]);
+                foreach (Dimension dim in resultadosDimension.Keys.OrderBy(x => x.orden))
+                {
+                    grafica.data.datasets.Add(dimensionesDataset[dim]);
+                }
             }
-
+            else
+            {
+                foreach (Dimension dim in pGrafica.config.dimensiones)
+                {
+                    grafica.data.datasets.Add(dimensionesDataset[dim]);
+                }
+            }
             return grafica;
         }
 
