@@ -725,5 +725,39 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             return relationProjIDs;
         }
 
+
+
+        internal static bool GenerarNotificacion(ResourceApi mResourceApi, string idDDBB, string idPersona, string idPersonaSender, string texto)
+        {
+            ComplexOntologyResource recursoCargar = new ComplexOntologyResource();
+
+            // Notificación de fin de la carga
+            if (!string.IsNullOrEmpty(idPersona))
+            {
+                mResourceApi.ChangeOntoly("notification");
+                NotificationOntology.Notification notificacion = new NotificationOntology.Notification();
+                notificacion.IdRoh_owner = idPersona;
+                notificacion.IdRoh_trigger = idPersonaSender;
+                notificacion.Roh_text = texto;
+                notificacion.Roh_entity = idDDBB;
+                notificacion.Dct_issued = DateTime.Now;
+                notificacion.Roh_type = "edit";
+                recursoCargar = notificacion.ToGnossApiResource(mResourceApi);
+                int numIntentos = 0;
+                while (!recursoCargar.Uploaded)
+                {
+                    numIntentos++;
+                    if (numIntentos > 5)
+                    {
+                        break;
+                    }
+                    mResourceApi.LoadComplexSemanticResource(recursoCargar);
+                }
+            }
+
+            return recursoCargar.Uploaded;
+        }
+
+
     }
 }

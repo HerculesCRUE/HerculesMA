@@ -19,10 +19,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Borra una oferta
         /// </summary>
-        /// <param name="pIdOfferId">Id de la oferta a borrar.</param>
+        /// <param name="pIdOfferId">Id (Guid) de la oferta a borrar.</param>
         /// <returns>Un booleano si ha sido borrado.</returns>
         [HttpGet("BorrarOferta")]
-        public IActionResult BorrarOferta([Required] string pIdOfferId)
+        public IActionResult BorrarOferta([Required] Guid pIdOfferId)
         {
 
             bool borrado = false;
@@ -44,13 +44,14 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Cambiar el estado de una oferta
         /// </summary>
-        /// <param name="pIdOfferId">Id de la oferta a modificar.</param>
+        /// <param name="pIdOfferId">Id(GUID) de la oferta a modificar.</param>
         /// <param name="estado">Id del estado al que se quiere establecer.</param>
         /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo).</param>
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial.</param>
+        /// <param name="texto">Texto de la notificación.</param>
         /// <returns>String con el id del nuevo estado.</returns>
         [HttpPost("CambiarEstado")]
-        public IActionResult CambiarEstado([FromForm] string pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser)
+        public IActionResult CambiarEstado([FromForm] Guid pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser, [FromForm] string texto = "")
         {
 
             string cambiado = "";
@@ -58,7 +59,38 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 AccionesOferta accionCluster = new AccionesOferta();
-                cambiado = accionCluster.CambiarEstado(pIdOfferId, estado, estadoActual, pIdGnossUser);
+                cambiado = accionCluster.CambiarEstado(pIdOfferId, estado, estadoActual, pIdGnossUser, texto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(cambiado);
+        }
+
+        /// <summary>
+        /// Cambiar el estado de una oferta
+        /// </summary>
+        /// <param name="pIdOfferIds">Ids (array de GUIDs) de las ofertas a modificar.</param>
+        /// <param name="estado">Id del estado al que se quiere establecer.</param>
+        /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo).</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial.</param>
+        /// <param name="texto">Texto de la notificación.</param>
+        /// <returns>String con el id del nuevo estado.</returns>
+        [HttpPost("CambiarEstadoAll")]
+        public IActionResult CambiarEstadoAll([FromForm] Guid[] pIdOfferIds, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser, [FromForm] string texto = "")
+        {
+
+            bool cambiado = true;
+
+            try
+            {
+                AccionesOferta accionCluster = new AccionesOferta();
+                foreach (var pIdOfferId in pIdOfferIds)
+                {
+                    cambiado = cambiado && accionCluster.CambiarEstado(pIdOfferId, estado, estadoActual, pIdGnossUser, texto) != String.Empty;
+                }
             }
             catch (Exception)
             {
@@ -184,6 +216,28 @@ namespace Hercules.MA.ServicioExterno.Controllers
             {
                 AccionesOferta accionOferta = new AccionesOferta();
                 return Ok(accionOferta.SaveOffer(pIdGnossUser, oferta));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// Controlador para crear/actualizar los datos de la oferta 
+        /// </summary>
+        /// <param name="pIdGnossUser">Usuario de gnoss que realiza la acción.</param>
+        /// <param name="oferta">Objeto con la oferta tecnológica a crear/actualizar.</param>
+        /// <returns>Id de la oferta creada o modificada.</returns>
+        [HttpPost("ModificarTripleteUsuario")]
+        public IActionResult ModificarTripleteUsuario([FromForm] string idRecurso, [FromForm] string nuevoEstado, [FromForm] string estadoActual, [FromForm] string predicado, [FromForm] Guid pIdGnossUser)
+        {
+            try
+            {
+                AccionesOferta accionOferta = new AccionesOferta();
+                return Ok(true);
+                // return Ok(accionOferta.ModificarTripleteUsuario(idRecurso, nuevoEstado, estadoActual, predicado, pIdGnossUser));
             }
             catch (Exception)
             {
