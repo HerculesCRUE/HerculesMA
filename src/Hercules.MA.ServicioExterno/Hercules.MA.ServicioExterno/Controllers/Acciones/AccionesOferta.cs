@@ -43,7 +43,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo)</param>
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
         /// <returns>String con el id del nuevo estado.</returns>
-        internal string CambiarEstado(string idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser)
+        internal string CambiarEstado(Guid idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser, string texto)
         {
 
             // Obtener el id del usuario usando el id de la cuenta
@@ -56,8 +56,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
-            var userGnossId = string.Empty;
-            var isOtriManager = false;
+            string userGnossId = string.Empty;
+            bool isOtriManager = false;
             sparqlObject.results.bindings.ForEach(e =>
             {
                 userGnossId = e["s"].value;
@@ -74,7 +74,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
             // Modificar el estado y añadir un nuevo estado en el "historial"
-            if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && !string.IsNullOrEmpty(idRecurso))
+            if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && idRecurso != Guid.Empty)
             {
 
                 // Añadir cambio en el historial de la disponibilidad
@@ -83,7 +83,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 // Inserto un historial en la base de datos
                 // Obtengo el guid del recurso
-                Guid guid = mResourceApi.GetShortGuid(idRecurso);
+                // Guid guid = mResourceApi.GetShortGuid(idRecurso);
+                Guid guid = idRecurso;
                 // Inicio el diccionario con el triplete
                 Dictionary<Guid, List<TriplesToInclude>> triples = new() { { guid, new List<TriplesToInclude>() } };
                 // Creo el id del recurso auxiliar para guardarlo
@@ -134,6 +135,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
                 
+            }
+
+            // Enviar notificaciones
+            if (texto != "")
+            {
+
+                // Obtengo el recurso para conseguir el id del creador de la oferta
+                // string shortId = "http://gnoss/" + UtilidadesAPI.ObtenerIdCorto(mResourceApi, idRecurso).ToString().ToUpper();
+                Dictionary<Guid, string> longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso } , mResourceApi, "http://www.schema.org/Offer", "offer");
+                Offer oferta = LoadOffer(longsId[idRecurso], false);
+                bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], oferta.creatorId, userGnossId, texto);
             }
 
             return nuevoEstado;
@@ -507,8 +519,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// Método público para obtener los datos de un cluster
         /// </summary>
         /// <param name="pIdOfertaId">Identificador del cluster</param>
+        /// <param name="obtenerOther">Booleano opcional que le indica si se obtienen datos extras para la oferta</param>
         /// <returns>Diccionario con las listas de thesaurus.</returns>
-        internal Models.Offer.Offer LoadOffer(string pIdOfertaId)
+        internal Models.Offer.Offer LoadOffer(string pIdOfertaId, bool obtenerOther = true)
         {
 
             // Obtener datos del cluster
@@ -619,38 +632,42 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
             });
 
-
-            // Obtenemos los resúmenes de los investigadores y los añadimos al objeto de la oferta
-            try
+            if (obtenerOther)
             {
-                pDataOffer.researchers = GetUsersTeaser(pDataOffer.researchers.Values.Select(x => x.id).ToList());
-            } catch (Exception ext) { }
+                // Obtenemos los resúmenes de los investigadores y los añadimos al objeto de la oferta
+                try
+                {
+                    pDataOffer.researchers = GetUsersTeaser(pDataOffer.researchers.Values.Select(x => x.id).ToList());
+                }
+                catch (Exception ext) { }
 
 
-            // Obtenemos los resúmenes de los documentos y los añadimos al objeto de la oferta
-            try
-            {
-                pDataOffer.documents = GetDocumentsTeaser(pDataOffer.documents.Values.Select(x => x.id).ToList());
+                // Obtenemos los resúmenes de los documentos y los añadimos al objeto de la oferta
+                try
+                {
+                    pDataOffer.documents = GetDocumentsTeaser(pDataOffer.documents.Values.Select(x => x.id).ToList());
+                }
+                catch (Exception ext) { }
+
+
+
+                // Obtenemos los resúmenes de los projectos y los añadimos al objeto de la oferta
+                try
+                {
+                    pDataOffer.projects = GetProjectsTeaser(pDataOffer.projects.Values.Select(x => x.id).ToList());
+                }
+                catch (Exception ext) { }
+
+
+
+                // Obtenemos los resúmenes de las propiedades industriales intelectuales (PII) y los añadimos al objeto de la oferta
+                try
+                {
+                    pDataOffer.pii = GetPIITeaserTODO(pDataOffer.pii.Values.Select(x => x.id).ToList());
+                }
+                catch (Exception ext) { }
             }
-            catch (Exception ext) { }
-
-
-
-            // Obtenemos los resúmenes de los projectos y los añadimos al objeto de la oferta
-            try
-            {
-                pDataOffer.projects = GetProjectsTeaser(pDataOffer.projects.Values.Select(x => x.id).ToList());
-            }
-            catch (Exception ext) { }
-
-
-
-            // Obtenemos los resúmenes de las propiedades industriales intelectuales (PII) y los añadimos al objeto de la oferta
-            try
-            {
-                pDataOffer.pii = GetPIITeaserTODO(pDataOffer.pii.Values.Select(x => x.id).ToList());
-            }
-            catch (Exception ext) { }
+            
 
 
             return pDataOffer;
