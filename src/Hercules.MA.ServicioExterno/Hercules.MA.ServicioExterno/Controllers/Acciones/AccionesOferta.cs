@@ -474,10 +474,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pIdOfertaId">Identificador de la oferta</param>
         /// <returns>Diccionario con las listas de thesaurus.</returns>
-        public bool BorrarOferta(string pIdOfertaId)
+        public bool BorrarOferta(Guid pIdOfertaId)
         {
 
-            if (!string.IsNullOrEmpty(pIdOfertaId))
+            if (pIdOfertaId != Guid.Empty)
             {
                 // Carga los datos del Cluster
                 // Models.Offer.Offer OfferData = LoadOffer(pIdOfertaId);
@@ -487,24 +487,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 mResourceApi.ChangeOntoly("offer");
 
-                if (pIdOfertaId != null && pIdOfertaId != "")
+                try
                 {
-                    Guid resourceGuid = mResourceApi.GetShortGuid(pIdOfertaId);
+                    mResourceApi.CommunityShortName = mResourceApi.GetCommunityShortNameByResourceID(pIdOfertaId);
 
-                    try
-                    {
-                        mResourceApi.CommunityShortName = mResourceApi.GetCommunityShortNameByResourceID(resourceGuid);
-
-                        // Establece las entidades secundarias a borrar
-                        mResourceApi.DeleteSecondaryEntitiesList(ref urlSecondaryListEntities);
-                        // borra el recurso
-                        mResourceApi.PersistentDelete(resourceGuid);
-                    }
-                    catch (Exception e)
-                    {
-                        return false;
-                    }
-
+                    // Establece las entidades secundarias a borrar
+                    mResourceApi.DeleteSecondaryEntitiesList(ref urlSecondaryListEntities);
+                    // borra el recurso
+                    mResourceApi.PersistentDelete(pIdOfertaId);
+                }
+                catch (Exception e)
+                {
+                    return false;
                 }
             }
             else
