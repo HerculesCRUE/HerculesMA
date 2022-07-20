@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Hercules.MA.ServicioExterno.Models.Buscador
 {
-    public class Project : ObjectSearch
+    public class Offer : ObjectSearch
     {
         //Titulo-->10000
-        //Descripción-->1000
-        //Autor-->1        
+        //Search-->1000
+        //Autor-->1
     }
 
 }

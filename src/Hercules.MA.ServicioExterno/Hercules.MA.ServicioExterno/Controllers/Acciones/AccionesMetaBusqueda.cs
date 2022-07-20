@@ -22,15 +22,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
 
-        public static Dictionary<Guid, Person> personsAux = null;
         public static List<Publication> publications = null;
         public static List<ResearchObject> researchObjects = null;
         public static List<Group> groups = null;
         public static List<Project> projects = null;
         public static List<Person> persons = null;
+        public static List<Offer> offers = null;
 
-        public static ObjectSearch objSearch;
-        public static List<string> lastSearchs;
+        public static Dictionary<string, List<ObjectSearch.Property>> textSearch = new Dictionary<string, List<ObjectSearch.Property>>();
+
+
+
         #endregion
 
         /// <summary>
@@ -43,17 +45,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 while (true)
                 {
                     try
-                    {
-                        //Aquí se almacenan todas las personas (aunque no sean buscables) para utilizarlas como auxiliar en alguna de las otras búsquedas
-                        Dictionary<Guid, Person> personsAuxTemp = new Dictionary<Guid, Person>();
-
+                    { 
                         //Aquí se almacenan los objetos buscables
                         List<Publication> publicationsTemp = new List<Publication>();
                         List<ResearchObject> researchObjectsTemp = new List<ResearchObject>();
                         List<Group> groupsTemp = new List<Group>();
                         List<Project> projectsTemp = new List<Project>();
                         List<Person> personsTemp = new List<Person>();
+                        List<Offer> offersTemp = new List<Offer>();
 
+                        Dictionary<string, List<ObjectSearch.Property>> textSearchTemp = new Dictionary<string, List<ObjectSearch.Property>>();
 
                         #region CargarInvestigadores
                         {
@@ -89,15 +90,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                         {
                                             id = id,
                                             title = nombre,
-                                            titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(nombre).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                            searchable = isActive
+                                            properties = new List<ObjectSearch.Property>(),
+                                            searchable = isActive,
+                                            publications = new List<Publication>(),
+                                            researchObjects = new List<ResearchObject>(),
+                                            groups = new List<Group>(),
+                                            projects = new List<Project>(),
+                                            offers = new List<Offer>(),
+                                            order=nombre
                                         };
-                                        personsAuxTemp[id] = person;
 
-                                        if (person.searchable)
-                                        {
-                                            personsTemp.Add(person);
-                                        }
+                                        person.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(nombre).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 1, person));
+                                        personsTemp.Add(person);
                                     }
                                     if (resultadoQuery.results.bindings.Count < limit)
                                     {
@@ -110,7 +114,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                 }
                             }
                             persons = personsTemp;
-                            personsAux = personsAuxTemp;
                         }
                         #endregion
 
@@ -138,6 +141,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                                     {
                                         Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+                                        string fecha = "";
+                                        if(fila.ContainsKey("fecha"))
+                                        {
+                                            fecha = fila["fecha"].value;
+                                        }
 
                                         Publication publication = publicationsTemp.FirstOrDefault(x => x.id == id);
                                         if (publication == null)
@@ -152,11 +160,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 id = id,
                                                 title = title,
-                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                tagsAuxSearch = new List<HashSet<string>>(),
-                                                persons = new HashSet<Person>()
+                                                properties = new List<ObjectSearch.Property>(),
+                                                order=fecha
                                             };
+
+                                            publication.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 10000000, publication));
+                                            publication.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 1000, publication));
+
                                             publicationsTemp.Add(publication);
                                         }
                                     }
@@ -193,14 +203,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                                     {
                                         Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
-                                        Guid author =  new Guid(fila["author"].value.Replace("http://gnoss/", ""));                                        
+                                        Guid author = new Guid(fila["author"].value.Replace("http://gnoss/", ""));
 
                                         Publication publication = publicationsTemp.FirstOrDefault(x => x.id == id);
-                                        if (publication!=null)
+                                        if (publication != null)
                                         {
-                                            if (personsAuxTemp.ContainsKey(author))
+                                            Person person = personsTemp.FirstOrDefault(x => x.id == author);
+                                            if (person!=null)
                                             {
-                                                publication.persons.Add(personsAuxTemp[author]);
+                                                person.publications.Add(publication);
                                             }
                                         }
                                     }
@@ -241,7 +252,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                         string tag = fila["tag"].value;
                                         if (publication != null)
                                         {
-                                            publication.tagsAuxSearch.Add(new HashSet<string>(ObtenerTextoNormalizado(tag).Split(' ', StringSplitOptions.RemoveEmptyEntries)));
+                                            publication.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(tag).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 10000, publication));
                                         }
                                     }
                                     if (resultadoQuery.results.bindings.Count < limit)
@@ -283,6 +294,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                                     {
                                         Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+                                        string fecha = "";
+                                        if (fila.ContainsKey("fecha"))
+                                        {
+                                            fecha = fila["fecha"].value;
+                                        }
 
                                         ResearchObject researchObject = researchObjectsTemp.FirstOrDefault(x => x.id == id);
                                         if (researchObject == null)
@@ -297,11 +313,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 id = id,
                                                 title = title,
-                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                tagsAuxSearch=new List<HashSet<string>>(),
-                                                persons = new HashSet<Person>()
+                                                properties = new List<ObjectSearch.Property>(),
+                                                order=fecha,
                                             };
+                                            researchObject.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 10000000, researchObject));
+                                            researchObject.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 1000, researchObject));
+
                                             researchObjectsTemp.Add(researchObject);
                                         }
                                     }
@@ -338,14 +355,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                                     {
                                         Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
-                                        Guid author =  new Guid(fila["author"].value.Replace("http://gnoss/", ""));
+                                        Guid author = new Guid(fila["author"].value.Replace("http://gnoss/", ""));
 
                                         ResearchObject researchObject = researchObjectsTemp.FirstOrDefault(x => x.id == id);
-                                        if (researchObject!=null)
+                                        if (researchObject != null)
                                         {
-                                            if (personsAuxTemp.ContainsKey(author))
+                                            Person person = personsTemp.FirstOrDefault(x => x.id == author);
+                                            if (person != null)
                                             {
-                                                researchObject.persons.Add(personsAuxTemp[author]);
+                                                person.researchObjects.Add(researchObject);
                                             }
                                         }
                                     }
@@ -386,7 +404,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                         string tag = fila["tag"].value;
                                         if (researchObject != null)
                                         {
-                                            researchObject.tagsAuxSearch.Add(new HashSet<string>(ObtenerTextoNormalizado(tag).Split(' ', StringSplitOptions.RemoveEmptyEntries)));
+                                            researchObject.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(tag).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 10000, researchObject));
                                         }
                                     }
                                     if (resultadoQuery.results.bindings.Count < limit)
@@ -444,10 +462,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 id = id,
                                                 title = title,
-                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                persons = new HashSet<Person>()
+                                                properties = new List<ObjectSearch.Property>(),
+                                                order=title
                                             };
+
+                                            group.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 10000, group));
+                                            group.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 1000, group));
+
                                             groupsTemp.Add(group);
                                         }
                                     }
@@ -499,9 +520,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                         Group group = groupsTemp.FirstOrDefault(e => e.id == id);
                                         if (group != null)
                                         {
-                                            if (personsAuxTemp.ContainsKey(author))
+                                            Person person = personsTemp.FirstOrDefault(x => x.id == author);
+                                            if (person != null)
                                             {
-                                                group.persons.Add(personsAuxTemp[author]);
+                                                person.groups.Add(group);
                                             }
                                         }
                                     }
@@ -557,10 +579,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                             {
                                                 id = id,
                                                 title = title,
-                                                titleAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                descriptionAuxSearch = new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)),
-                                                persons = new HashSet<Person>()
+                                                properties = new List<ObjectSearch.Property>(),
+                                                order=title
                                             };
+
+                                            project.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 10000, project));
+                                            project.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(description).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 1000, project));
+
                                             projectsTemp.Add(project);
                                         }
                                     }
@@ -612,9 +637,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                         Project project = projectsTemp.FirstOrDefault(e => e.id == id);
                                         if (project != null)
                                         {
-                                            if (personsAuxTemp.ContainsKey(author))
+                                            Person person = personsTemp.FirstOrDefault(x => x.id == author);
+                                            if (person != null)
                                             {
-                                                project.persons.Add(personsAuxTemp[author]);
+                                                person.projects.Add(project);
                                             }
                                         }
                                     }
@@ -631,6 +657,209 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             projects = projectsTemp;
                         }
                         #endregion
+
+                        #region CargarOfertas
+                        {
+                            int limit = 10000;
+                            int offset = 0;
+                            while (true)
+                            {
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?title ?fecha ?search ";
+                                string where = $@"  where
+                                            {{
+                                                ?id a 'offer'.
+                                                ?id schema:name ?title.
+                                                ?id schema:availability <http://gnoss.com/items/offerstate_003>.
+                                                OPTIONAL{{ ?id roh:search ?search}}
+                                                OPTIONAL{{ ?id dct:issued ?fecha}}
+                                            }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
+
+                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                                {
+                                    offset += limit;
+                                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                                    {
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+                                        string fecha = "";
+                                        if (fila.ContainsKey("fecha"))
+                                        {
+                                            fecha = fila["fecha"].value;
+                                        }
+                                        Offer offer = offersTemp.FirstOrDefault(x => x.id == id);
+                                        if (offer == null)
+                                        {
+                                            string title = fila["title"].value;
+                                            string search = "";
+                                            if (fila.ContainsKey("search"))
+                                            {
+                                                search = fila["search"].value;
+                                            }
+                                            offer = new Offer()
+                                            {
+                                                id = id,
+                                                title = title,
+                                                properties = new List<ObjectSearch.Property>(),
+                                                order=fecha
+                                            };
+
+                                            offer.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(title).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 10000, offer));
+                                            offer.properties.Add(new ObjectSearch.Property(new HashSet<string>(ObtenerTextoNormalizado(search).Split(' ', StringSplitOptions.RemoveEmptyEntries)), 1000, offer));
+
+
+                                            offersTemp.Add(offer);
+                                        }
+                                    }
+                                    if (resultadoQuery.results.bindings.Count < limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                            limit = 10000;
+                            offset = 0;
+                            while (true)
+                            {
+                                string select = mPrefijos + "SELECT * WHERE { SELECT DISTINCT ?id ?author ";
+                                string where = $@"  where
+                                            {{
+                                                ?id a 'offer'.
+                                                ?id schema:availability <http://gnoss.com/items/offerstate_003>.
+                                                ?id roh:researchers ?author.
+                                            }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
+
+                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+
+                                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                                {
+                                    offset += limit;
+                                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                                    {
+                                        Guid id = new Guid(fila["id"].value.Replace("http://gnoss/", ""));
+                                        Guid author = new Guid(fila["author"].value.Replace("http://gnoss/", ""));
+
+                                        Offer offer = offersTemp.FirstOrDefault(x => x.id == id);
+                                        if (offer != null)
+                                        {
+                                            Person person = personsTemp.FirstOrDefault(x => x.id == author);
+                                            if (person != null)
+                                            {
+                                                person.offers.Add(offer);
+                                            }
+                                        }
+                                    }
+                                    if (resultadoQuery.results.bindings.Count < limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                            offers = offersTemp;
+                        }
+                        #endregion
+
+                        foreach (Person person in personsTemp)
+                        {
+                            foreach (ObjectSearch.Property prop in person.properties)
+                            {
+                                foreach (string text in prop.texts)
+                                {
+                                    if (!textSearchTemp.ContainsKey(text))
+                                    {
+                                        textSearchTemp[text] = new List<ObjectSearch.Property>();
+                                    }
+                                    textSearchTemp[text].Add(prop);
+                                }
+                            }
+                        }
+
+                        foreach (Publication publication in publicationsTemp)
+                        {
+                            foreach (ObjectSearch.Property prop in publication.properties)
+                            {
+                                foreach (string text in prop.texts)
+                                {
+                                    if (!textSearchTemp.ContainsKey(text))
+                                    {
+                                        textSearchTemp[text] = new List<ObjectSearch.Property>();
+                                    }
+                                    textSearchTemp[text].Add(prop);
+                                }
+                            }
+                        }
+
+                        foreach (ResearchObject researchObject in researchObjectsTemp)
+                        {
+                            foreach (ObjectSearch.Property prop in researchObject.properties)
+                            {
+                                foreach (string text in prop.texts)
+                                {
+                                    if (!textSearchTemp.ContainsKey(text))
+                                    {
+                                        textSearchTemp[text] = new List<ObjectSearch.Property>();
+                                    }
+                                    textSearchTemp[text].Add(prop);
+                                }
+                            }
+                        }
+
+                        foreach (Group group in groupsTemp)
+                        {
+                            foreach (ObjectSearch.Property prop in group.properties)
+                            {
+                                foreach (string text in prop.texts)
+                                {
+                                    if (!textSearchTemp.ContainsKey(text))
+                                    {
+                                        textSearchTemp[text] = new List<ObjectSearch.Property>();
+                                    }
+                                    textSearchTemp[text].Add(prop);
+                                }
+                            }
+                        }
+
+                        foreach (Project project in projectsTemp)
+                        {
+                            foreach (ObjectSearch.Property prop in project.properties)
+                            {
+                                foreach (string text in prop.texts)
+                                {
+                                    if (!textSearchTemp.ContainsKey(text))
+                                    {
+                                        textSearchTemp[text] = new List<ObjectSearch.Property>();
+                                    }
+                                    textSearchTemp[text].Add(prop);
+                                }
+                            }
+                        }
+
+                        foreach (Offer offer in offersTemp)
+                        {
+                            foreach (ObjectSearch.Property prop in offer.properties)
+                            {
+                                foreach (string text in prop.texts)
+                                {
+                                    if (!textSearchTemp.ContainsKey(text))
+                                    {
+                                        textSearchTemp[text] = new List<ObjectSearch.Property>();
+                                    }
+                                    textSearchTemp[text].Add(prop);
+                                }
+                            }
+                        }
+
+                        textSearch = textSearchTemp;
 
                         //TODO COnfigurable
                         Thread.Sleep(300000);
@@ -649,7 +878,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pStringBusqueda">string de búsqueda</param>
         /// <param name="pLang">Idioma</param>
-        public Dictionary<string,KeyValuePair<bool, List<ObjectSearch>>> Busqueda(string pStringBusqueda, string pLang)
+        public Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>> Busqueda(string pStringBusqueda, string pLang)
         {
             //TODO configurable
             int maxItems = 3;
@@ -676,78 +905,344 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             }
 
+            List<ObjectSearch.Property> propertiesAutocomplete = new List<ObjectSearch.Property>();
+            List<ObjectSearch.Property> propertiesSearch = new List<ObjectSearch.Property>();
+            foreach (string inputIn in inputs)
+            {
+                if (textSearch.ContainsKey(inputIn))
+                {
+                    List<ObjectSearch.Property> propertiesAux = textSearch[inputIn];
+                    if (propertiesAux.Count == 0)
+                    {
+                        propertiesAutocomplete = new List<ObjectSearch.Property>();
+                        propertiesSearch = new List<ObjectSearch.Property>();
+                        break;
+                    }
+                    else
+                    {
+                        if (propertiesAutocomplete.Count == 0)
+                        {
+                            propertiesAutocomplete = propertiesAux;
+                        }
+                        else
+                        {
+                            propertiesAutocomplete = propertiesAutocomplete.Intersect(propertiesAux).ToList();
+                        }
+                        if (propertiesSearch.Count == 0)
+                        {
+                            propertiesSearch = propertiesAux;
+                        }
+                        else
+                        {
+                            propertiesSearch = propertiesSearch.Intersect(propertiesAux).ToList();
+                        }
+                    }
+                }
+            }
+            if (!string.IsNullOrEmpty(lastInput))
+            {
+                if ((inputs.Count > 0 && propertiesAutocomplete.Count > 0) || inputs.Count == 0)
+                {
+                    if (propertiesAutocomplete.Count > 0)
+                    {
+                        propertiesAutocomplete = propertiesAutocomplete.Intersect(textSearch.Where(x => x.Key.StartsWith(lastInput)).ToList().SelectMany(x => x.Value)).ToList();
+                    }
+                    else
+                    {
+                        propertiesAutocomplete = textSearch.Where(x => x.Key.StartsWith(lastInput)).ToList().SelectMany(x => x.Value).ToList();
+                    }
+                }
+                if ((inputs.Count > 0 && propertiesSearch.Count > 0) || inputs.Count == 0)
+                {
+                    if (textSearch.ContainsKey(lastInput))
+                    {
+                        propertiesSearch = propertiesSearch.Intersect(textSearch[lastInput]).ToList();
+                    }
+                    else
+                    {
+                        propertiesSearch = new List<ObjectSearch.Property>();
+                    }
+
+                }
+            }
+
+
+            Dictionary<Person, int> personasFilter = new Dictionary<Person, int>();
+            Dictionary<Publication, int> publicacionesFilter = new Dictionary<Publication, int>();
+            Dictionary<ResearchObject, int> researchObjectsFilter = new Dictionary<ResearchObject, int>();
+            Dictionary<Group, int> groupsFilter = new Dictionary<Group, int>();
+            Dictionary<Project, int> projectsFilter = new Dictionary<Project, int>();
+            Dictionary<Offer, int> offersFilter = new Dictionary<Offer, int>();
+            bool personasSearch = false;
+            bool publicacionesSearch = false;
+            bool researchObjectsSearch = false;
+            bool groupsSearch = false;
+            bool projectsSearch = false;
+            bool offersSearch = false;
+
+            foreach (ObjectSearch.Property property in propertiesAutocomplete)
+            {
+                //Personas
+                if (property.owner is Person)
+                {
+                    Person item = (Person)property.owner;
+                    if (item.searchable)
+                    {
+                        if (!personasFilter.ContainsKey(item))
+                        {
+                            personasFilter.Add(item, 0);
+                        }
+                        personasFilter[item] += property.score;
+                    }
+                    if(item.publications.Count>0)
+                    {
+                        foreach(Publication publication in item.publications)
+                        {
+                            if (!publicacionesFilter.ContainsKey(publication))
+                            {
+                                publicacionesFilter.Add(publication, 0);
+                            }
+                            publicacionesFilter[publication] += property.score;
+                        }
+                    }
+                    if (item.researchObjects.Count > 0)
+                    {
+                        foreach (ResearchObject researchObject in item.researchObjects)
+                        {
+                            if (!researchObjectsFilter.ContainsKey(researchObject))
+                            {
+                                researchObjectsFilter.Add(researchObject, 0);
+                            }
+                            researchObjectsFilter[researchObject] += property.score;
+                        }
+                    }
+                    if (item.groups.Count > 0)
+                    {
+                        foreach (Group group in item.groups)
+                        {
+                            if (!groupsFilter.ContainsKey(group))
+                            {
+                                groupsFilter.Add(group, 0);
+                            }
+                            groupsFilter[group] += property.score;
+                        }
+                    }
+                    if (item.projects.Count > 0)
+                    {
+                        foreach (Project project in item.projects)
+                        {
+                            if (!projectsFilter.ContainsKey(project))
+                            {
+                                projectsFilter.Add(project, 0);
+                            }
+                            projectsFilter[project] += property.score;
+                        }
+                    }
+                    if (item.offers.Count > 0)
+                    {
+                        foreach (Offer offer in item.offers)
+                        {
+                            if (!offersFilter.ContainsKey(offer))
+                            {
+                                offersFilter.Add(offer, 0);
+                            }
+                            offersFilter[offer] += property.score;
+                        }
+                    }
+                }
+
+                //Publicaciones
+                if (property.owner is Publication)
+                {
+                    Publication item = (Publication)property.owner;
+                    if (!publicacionesFilter.ContainsKey(item))
+                    {
+                        publicacionesFilter.Add(item, 0);
+                    }
+                    publicacionesFilter[item] += property.score;
+                }
+
+                //ResearchObjects
+                if (property.owner is ResearchObject)
+                {
+                    ResearchObject item = (ResearchObject)property.owner;
+                    if (!researchObjectsFilter.ContainsKey(item))
+                    {
+                        researchObjectsFilter.Add(item, 0);
+                    }
+                    researchObjectsFilter[item] += property.score;
+                }
+
+                //Grupos                
+                if (property.owner is Group)
+                {
+                    Group item = (Group)property.owner;
+                    if (!groupsFilter.ContainsKey(item))
+                    {
+                        groupsFilter.Add(item, 0);
+                    }
+                    groupsFilter[item] += property.score;
+                }
+
+                //Proyectos
+                if (property.owner is Project)
+                {
+                    Project item = (Project)property.owner;
+                    if (!projectsFilter.ContainsKey(item))
+                    {
+                        projectsFilter.Add(item, 0);
+                    }
+                    projectsFilter[item] += property.score;
+                }
+
+                //Ofertas
+                if (property.owner is Offer)
+                {
+                    Offer item = (Offer)property.owner;
+                    if (!offersFilter.ContainsKey(item))
+                    {
+                        offersFilter.Add(item, 0);
+                    }
+                    offersFilter[item] += property.score;
+                }
+            }
+
+            foreach (ObjectSearch.Property property in propertiesSearch)
+            {
+                //Personas
+                if (property.owner is Person)
+                {
+                    if (((Person)property.owner).searchable)
+                    {
+                        personasSearch = true;
+                    }
+                    if (((Person)property.owner).publications.Count > 0)
+                    {
+                        publicacionesSearch = true;
+                    }
+                    if (((Person)property.owner).researchObjects.Count > 0)
+                    {
+                        researchObjectsSearch = true;
+                    }
+                    if (((Person)property.owner).groups.Count > 0)
+                    {
+                        groupsSearch = true;
+                    }
+                    if (((Person)property.owner).projects.Count > 0)
+                    {
+                        projectsSearch = true;
+                    }
+                    if (((Person)property.owner).offers.Count > 0)
+                    {
+                        offersSearch = true;
+                    }
+                }
+
+                //Publicaciones
+                if (property.owner is Publication)
+                {
+                    publicacionesSearch = true;
+                }
+
+                //ResearchObjects
+                if (property.owner is ResearchObject)
+                {
+                    researchObjectsSearch = true;
+                }
+
+                //Grupos
+                if (property.owner is Group)
+                {
+                    groupsSearch = true;
+                }
+
+                //Proyectos
+                if (property.owner is Project)
+                {
+                    projectsSearch = true;
+                }
+
+                //Ofertas
+                if (property.owner is Offer)
+                {
+                    offersSearch = true;
+                }
+            }
+
+            personasFilter = personasFilter.OrderByDescending(x => x.Value).ThenByDescending(x=>x.Key.order).ToDictionary(x => x.Key, x => x.Value);
+            publicacionesFilter = publicacionesFilter.OrderByDescending(x => x.Value).ThenByDescending(x => x.Key.order).ToDictionary(x => x.Key, x => x.Value);
+            researchObjectsFilter = researchObjectsFilter.OrderByDescending(x => x.Value).ThenByDescending(x => x.Key.order).ToDictionary(x => x.Key, x => x.Value);
+            groupsFilter = groupsFilter.OrderByDescending(x => x.Value).ThenByDescending(x => x.Key.order).ToDictionary(x => x.Key, x => x.Value);
+            projectsFilter = projectsFilter.OrderByDescending(x => x.Value).ThenByDescending(x => x.Key.order).ToDictionary(x => x.Key, x => x.Value);
+            offersFilter = offersFilter.OrderByDescending(x => x.Value).ThenByDescending(x => x.Key.order).ToDictionary(x => x.Key, x => x.Value);
 
 
             //Personas
-            if (persons != null)
             {
-                List<Person> personasFilter = persons.Select(person => new KeyValuePair<long, Person>(person.SearchAutocompletar(inputs, lastInput), person)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
-                bool searh = personasFilter.Exists(x => x.SearchBuscador(inputs, lastInput));                
                 int min = Math.Min(personasFilter.Count, maxItems);
                 List<ObjectSearch> lista = new List<ObjectSearch>();
-                foreach (Person person in personasFilter.GetRange(0, min))
+                foreach (Person item in personasFilter.Keys.ToList().GetRange(0, min))
                 {
-                    lista.Add(person);
+                    lista.Add(new Person() { title = item.title,id=item.id } );
                 }
-                respuesta["persona"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
+                respuesta["persona"] = new KeyValuePair<bool, List<ObjectSearch>>(personasSearch, lista);
             }
 
+
             //Publicaciones
-            if (publications != null)
             {
-                List<Publication> publicacionesFilter = publications.Select(publication => new KeyValuePair<long, Publication>(publication.SearchAutocompletar(inputs, lastInput), publication)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
-                bool searh = publicacionesFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
                 int min = Math.Min(publicacionesFilter.Count, maxItems);
                 List<ObjectSearch> lista = new List<ObjectSearch>();
-                foreach (Publication publicacion in publicacionesFilter.GetRange(0, min))
+                foreach (Publication item in publicacionesFilter.Keys.ToList().GetRange(0, min))
                 {
-                    lista.Add(publicacion);
+                    lista.Add(new Publication() { title = item.title, id = item.id });
                 }
-                respuesta["publicacion"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
+                respuesta["publicacion"] = new KeyValuePair<bool, List<ObjectSearch>>(publicacionesSearch, lista);
             }
 
             //ResearchObjects
-            if (researchObjects != null)
             {
-                List<ResearchObject> researchObjectsFilter = researchObjects.Select(researchObject => new KeyValuePair<long, ResearchObject>(researchObject.SearchAutocompletar(inputs, lastInput), researchObject)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
-                bool searh = researchObjectsFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
                 int min = Math.Min(researchObjectsFilter.Count, maxItems);
                 List<ObjectSearch> lista = new List<ObjectSearch>();
-                foreach (ResearchObject researchObj in researchObjectsFilter.GetRange(0, min))
+                foreach (ResearchObject item in researchObjectsFilter.Keys.ToList().GetRange(0, min))
                 {
-                    lista.Add(researchObj);
+                    lista.Add(new ResearchObject() { title = item.title, id = item.id });
                 }
-                respuesta["researchObject"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
+                respuesta["researchObject"] = new KeyValuePair<bool, List<ObjectSearch>>(researchObjectsSearch, lista);
             }
 
             //Grupos
-            if (groups != null)
             {
-                List<Group> groupsFilter = groups.Select(group => new KeyValuePair<long, Group>(group.SearchAutocompletar(inputs, lastInput), group)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
-                bool searh = groupsFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
                 int min = Math.Min(groupsFilter.Count, maxItems);
                 List<ObjectSearch> lista = new List<ObjectSearch>();
-                foreach (Group group in groupsFilter.GetRange(0, min))
+                foreach (Group item in groupsFilter.Keys.ToList().GetRange(0, min))
                 {
-                    lista.Add(group);
+                    lista.Add(new Group() { title = item.title, id = item.id });
                 }
-                respuesta["group"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
+                respuesta["group"] = new KeyValuePair<bool, List<ObjectSearch>>(groupsSearch, lista);
             }
 
             //Proyectos
-            if (projects != null)
             {
-                List<Project> projectFilter = projects.Select(project => new KeyValuePair<long, Project>(project.SearchAutocompletar(inputs, lastInput), project)).Where(x => x.Key > 0).OrderByDescending(x => x.Key).ToList().Select(x => x.Value).ToList();
-                bool searh = projectFilter.Exists(x => x.SearchBuscador(inputs, lastInput));
-                int min = Math.Min(projectFilter.Count, maxItems);
+                int min = Math.Min(projectsFilter.Count, maxItems);
                 List<ObjectSearch> lista = new List<ObjectSearch>();
-                foreach (Project project in projectFilter.GetRange(0, min))
+                foreach (Project item in projectsFilter.Keys.ToList().GetRange(0, min))
                 {
-                    lista.Add(project);
+                    lista.Add(new Project() { title = item.title, id = item.id });
                 }
-                respuesta["project"] = new KeyValuePair<bool, List<ObjectSearch>>(searh, lista);
+                respuesta["project"] = new KeyValuePair<bool, List<ObjectSearch>>(projectsSearch, lista);
             }
 
+            //Ofertas
+            {
+                int min = Math.Min(offersFilter.Count, maxItems);
+                List<ObjectSearch> lista = new List<ObjectSearch>();
+                foreach (Offer item in offersFilter.Keys.ToList().GetRange(0, min))
+                {
+                    lista.Add(new Offer() { title = item.title, id = item.id });
+                }
+                respuesta["offer"] = new KeyValuePair<bool, List<ObjectSearch>>(offersSearch, lista);
+            }
 
             List<Guid> ids = new List<Guid>();
             foreach (string key in respuesta.Keys)
@@ -779,18 +1274,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             Dictionary<string, int> result = new Dictionary<string, int>();
 
-            //public static Dictionary<Guid, Person> personsAux = null;
-            //public static List<Publication> publications = null;
-            //public static List<ResearchObject> researchObjects = null;
-            //public static List<Group> groups = null;
-            //public static List<Project> projects = null;
-            //public static List<Person> persons = null;
-
-            result.Add("persons", persons.Count);
+            result.Add("persons", persons.Where(x=>x.searchable).Count());
             result.Add("documents", publications.Count);
             result.Add("researchObjects", researchObjects.Count);
             result.Add("groups", groups.Count);
             result.Add("projects", projects.Count);
+            result.Add("offers", offers.Count);
 
             return result;
 
@@ -801,7 +1290,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             string normalizedString = pText.Normalize(NormalizationForm.FormD);
             StringBuilder sb = new StringBuilder();
             foreach (char charin in normalizedString)
-            {                
+            {
                 if (char.IsLetterOrDigit(charin) || charin == ' ')
                 {
                     sb.Append(charin);

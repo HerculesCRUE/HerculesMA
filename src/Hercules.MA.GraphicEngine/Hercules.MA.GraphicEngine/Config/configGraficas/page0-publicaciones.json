@@ -51,13 +51,59 @@
           },
           {
             "nombre": {
-              "es": "Total de publicaciones por año"
+              "es": "Cuartil 1"
             },
-            "filtro": "",
+            "stack": "cuartil1",
+            "filtro": "roh:quartile=1",
             "tipoDimension": "bar",
-            "color": "#BF4858",
+            "color": "#45DCB4",
             "yAxisID": "y1",
             "orden": 2
+          },
+          {
+            "nombre": {
+              "es": "Cuartil 2"
+            },
+            "stack": "cuartil1",
+            "filtro": "roh:quartile=2",
+            "tipoDimension": "bar",
+            "color": "#EAF112",
+            "yAxisID": "y1",
+            "orden": 3
+          },
+          {
+            "nombre": {
+              "es": "Cuartil 3"
+            },
+            "stack": "cuartil1",
+            "filtro": "roh:quartile=3",
+            "tipoDimension": "bar",
+            "color": "#DE921E",
+            "yAxisID": "y1",
+            "orden": 4
+          },
+          {
+            "nombre": {
+              "es": "Cuartil 4"
+            },
+            "stack": "cuartil1",
+            "filtro": "roh:quartile=4",
+            "tipoDimension": "bar",
+            "color": "#DC4545",
+            "yAxisID": "y1",
+            "orden": 5
+          },
+          {
+            "nombre": {
+              "es": "Sin cuartil"
+            },
+            "filtro": "",
+            "minus": "roh:quartile",
+            "stack": "cuartil1",
+            "tipoDimension": "bar",
+            "color": "#7CBFE3",
+            "yAxisID": "y1",
+            "orden": 6
           }
         ]
       }
@@ -94,16 +140,6 @@
         "dimensiones": [
           {
             "nombre": {
-              "es": "Total de publicaciones por año"
-            },
-            "filtro": "",
-            "tipoDimension": "bar",
-            "color": "#BF4858",
-            "yAxisID": "y1",
-            "orden": 1
-          },
-          {
-            "nombre": {
               "es": "Total de citas por año"
             },
             "filtro": "roh:citationCount",
@@ -111,6 +147,16 @@
             "tipoDimension": "bar",
             "color": "#817E80",
             "yAxisID": "y2",
+            "orden": 1
+          },
+          {
+            "nombre": {
+              "es": "Total de publicaciones por año"
+            },
+            "filtro": "",
+            "tipoDimension": "bar",
+            "color": "#BF4858",
+            "yAxisID": "y1",
             "orden": 2
           }
         ]
