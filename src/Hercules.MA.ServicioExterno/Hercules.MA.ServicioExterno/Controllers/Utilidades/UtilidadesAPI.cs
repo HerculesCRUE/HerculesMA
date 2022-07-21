@@ -8,6 +8,7 @@ using Gnoss.ApiWrapper;
 using System.Text;
 using System.Web;
 using Hercules.MA.ServicioExterno.Models;
+using Hercules.MA.ServicioExterno.Models.Cluster;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 {
@@ -756,6 +757,48 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             }
 
             return recursoCargar.Uploaded;
+        }
+
+
+        /// <summary>
+        /// Método privado para obtener los tesauros.
+        /// </summary>
+        /// <param name="mResourceApi">Objeto ResourceApi.</param>
+        /// <param name="pListaTesauros">Listado de thesaurus a obtener.</param>
+        /// <param name="lang">Idioma para las cargas multiidioma.</param>
+        /// <returns>Diccionario con las listas de thesaurus.</returns>
+        internal static Dictionary<string, List<ThesaurusItem>> GetTesauros(ResourceApi mResourceApi, List<string> pListaTesauros, string lang = null)
+        {
+            Dictionary<string, List<ThesaurusItem>> elementosTesauros = new Dictionary<string, List<ThesaurusItem>>();
+
+            foreach (string tesauro in pListaTesauros)
+            {
+                string langSelect = string.Empty;
+                if (lang != string.Empty) {
+                    langSelect = $@"FILTER( lang(?nombre) = '{lang}' OR lang(?nombre) = '')";
+                }
+
+                string select = "select distinct * ";
+                string where = @$"where {{
+                    ?s a <http://www.w3.org/2008/05/skos#Concept>.
+                    ?s <http://www.w3.org/2008/05/skos#prefLabel> ?nombre.
+                    ?s <http://purl.org/dc/elements/1.1/source> '{tesauro}'
+                    {langSelect} 
+                    OPTIONAL {{ ?s <http://www.w3.org/2008/05/skos#broader> ?padre }}
+                }} ORDER BY ?padre ?s ";
+                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "taxonomy");
+
+                List<ThesaurusItem> items = sparqlObject.results.bindings.Select(x => new ThesaurusItem()
+                {
+                    id = x["s"].value,
+                    name = x["nombre"].value,
+                    parentId = x.ContainsKey("padre") ? x["padre"].value : ""
+                }).ToList();
+
+                elementosTesauros.Add(tesauro, items);
+            }
+
+            return elementosTesauros;
         }
 
 

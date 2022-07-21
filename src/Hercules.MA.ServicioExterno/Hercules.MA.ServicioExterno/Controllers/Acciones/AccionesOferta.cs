@@ -16,6 +16,7 @@ using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
 using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags;
 using Microsoft.AspNetCore.Cors;
+using Hercules.MA.ServicioExterno.Models.Cluster;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
@@ -31,6 +32,34 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string[] listTagsNotForvidden = new string[] { "<ol>", "<li>", "<b>", "<i>", "<u>", "<ul>", "<strike>", "<blockquote>", "<div>", "<hr>", "</ol>", "</li>", "</b>", "</i>", "</u>", "</ul>", "</strike>", "</blockquote>", "</div>", "<br/>" };
         private static string[] listTagsAttrNotForvidden = new string[] { "style" };
+
+
+
+        /// <summary>
+        /// Método público que obtiene una lista de thesaurus.
+        /// </summary>
+        /// <param name="thesaurusTypes">Listado de thesaurus a obtener.</param>
+        /// <param name="lang">Idioma para las cargas multiidioma.</param>
+        /// <returns>Diccionario con las listas de thesaurus.</returns>
+        public Dictionary<string, List<ThesaurusItem>> GetListThesaurus(List<string> thesaurusTypes, string lang)
+        {
+
+            // List<string> thesaurusTypes = new List<string>() { "researcharea" };
+
+            try
+            {
+                if (thesaurusTypes == null)
+                {
+                    thesaurusTypes = new List<string>() { "researcharea" };
+                }
+            }
+            catch (Exception e) { throw new Exception("El texto que ha introducido no corresponde a un json válido"); }
+
+            //var thesaurus = GetTesauros(thesaurusTypes, lang);
+            var thesaurus = UtilidadesAPI.GetTesauros(mResourceApi, thesaurusTypes, lang);
+
+            return thesaurus;
+        }
 
 
         /// <summary>

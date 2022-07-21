@@ -50,7 +50,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
             catch (Exception e) { throw new Exception("El texto que ha introducido no corresponde a un json válido"); }
 
-            var thesaurus = GetTesauros(thesaurusTypes);
+            var thesaurus = UtilidadesAPI.GetTesauros(mResourceApi, thesaurusTypes);
 
             return thesaurus;
         }

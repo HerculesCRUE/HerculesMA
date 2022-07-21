@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Hercules.MA.ServicioExterno.Models.Cluster;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
@@ -15,6 +16,33 @@ namespace Hercules.MA.ServicioExterno.Controllers
     [EnableCors("_myAllowSpecificOrigins")]
     public class OfertasController : ControllerBase
     {
+
+
+
+        /// <summary>
+        /// Controlador para obtener los thesaurus usados las ofertas.
+        /// </summary>
+        /// <param name="listThesaurus">Elemento padre que define el thesaurus</param>
+        /// <param name="lang">Idioma para los thesaurus multiidioma </param>
+        /// <returns>Diccionario con los datos.</returns>
+        [HttpPost("GetThesaurus")]
+        [Produces("application/json")]
+        public IActionResult GetThesaurus([FromForm] List<string> listThesaurus, string lang = "es")
+        {
+            Dictionary<string, List<ThesaurusItem>> datosThesaurus = null;
+
+            try
+            {
+                AccionesOferta cluster = new AccionesOferta();
+                datosThesaurus = cluster.GetListThesaurus(listThesaurus, lang);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return Ok(datosThesaurus);
+        }
+
 
         /// <summary>
         /// Borra una oferta
