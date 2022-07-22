@@ -36,7 +36,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             listaData.Add(new DataUser() { nombre = "Token de FigShare", id = "tokenFigShare", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Usuario de GitHub", id = "usuarioGitHub", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Token de GitHub", id = "tokenGitHub", valor = string.Empty });
-            listaData.Add(new DataUser() { nombre = "Matching", id = "matching", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Matching", id = "useMatching", valor = string.Empty });
 
             string idGnossUser = $@"http://gnoss/{pIdGnossUser.ToUpper()}";
             SparqlObject resultadoQuery = null;
