@@ -44,14 +44,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?matching ");
+            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?useMatching ");
             where.Append("WHERE { ");
             where.Append($@"?s roh:gnossUser <{idGnossUser}>. ");
             where.Append($@"OPTIONAL{{?s roh:usuarioFigShare ?usuarioFigShare. }} ");
             where.Append($@"OPTIONAL{{?s roh:tokenFigShare ?tokenFigShare. }} ");
             where.Append($@"OPTIONAL{{?s roh:usuarioGitHub ?usuarioGitHub. }} ");
             where.Append($@"OPTIONAL{{?s roh:tokenGitHub ?tokenGitHub. }} ");
-            where.Append($@"OPTIONAL{{?s roh:useMatching ?matching. }} ");
+            where.Append($@"OPTIONAL{{?s roh:useMatching ?useMatching. }} ");
             where.Append("} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
@@ -113,13 +113,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
 
                     // Matching
-                    if (fila.ContainsKey("matching"))
+                    if (fila.ContainsKey("useMatching"))
                     {
                         foreach (DataUser userData in listaData)
                         {
-                            if (userData.id == "matching")
+                            if (userData.id == "useMatching")
                             {
-                                userData.valor = fila["matching"].value;
+                                userData.valor = fila["useMatching"].value;
                                 break;
                             }
                         }
