@@ -36,6 +36,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             listaData.Add(new DataUser() { nombre = "Token de FigShare", id = "tokenFigShare", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Usuario de GitHub", id = "usuarioGitHub", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Token de GitHub", id = "tokenGitHub", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Matching", id = "matching", valor = "false" });
 
             string idGnossUser = $@"http://gnoss/{pIdGnossUser.ToUpper()}";
             SparqlObject resultadoQuery = null;
@@ -43,13 +44,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ");
+            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?matching ");
             where.Append("WHERE { ");
             where.Append($@"?s roh:gnossUser <{idGnossUser}>. ");
             where.Append($@"OPTIONAL{{?s roh:usuarioFigShare ?usuarioFigShare. }} ");
             where.Append($@"OPTIONAL{{?s roh:tokenFigShare ?tokenFigShare. }} ");
             where.Append($@"OPTIONAL{{?s roh:usuarioGitHub ?usuarioGitHub. }} ");
             where.Append($@"OPTIONAL{{?s roh:tokenGitHub ?tokenGitHub. }} ");
+            where.Append($@"OPTIONAL{{?s roh:useMatching ?matching. }} ");
             where.Append("} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
@@ -105,6 +107,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             if (userData.id == "tokenGitHub")
                             {
                                 userData.valor = fila["tokenGitHub"].value;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Matching
+                    if (fila.ContainsKey("matching"))
+                    {
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "matching")
+                            {
+                                userData.valor = fila["matching"].value;
                                 break;
                             }
                         }
