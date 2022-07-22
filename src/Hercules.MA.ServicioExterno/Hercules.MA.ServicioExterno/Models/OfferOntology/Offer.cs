@@ -41,6 +41,10 @@ namespace OfferOntology
 		//public  List<Document> Roh_document { get; set;}
 		public List<string> IdsRoh_document { get; set;}
 
+		[RDFProperty("http://w3id.org/roh/groups")]
+		public List<Group> Roh_groups { get; set; }
+		public List<string> IdsRoh_groups { get; set; }
+
 		[RDFProperty("http://w3id.org/roh/project")]
 		//public  List<Project> Roh_project { get; set;}
 		public List<string> IdsRoh_project { get; set;}
@@ -53,6 +57,9 @@ namespace OfferOntology
 		//public  List<Patent> Roh_patents { get; set;}
 		public List<string> IdsRoh_patents { get; set;}
 
+		[RDFProperty("http://w3id.org/roh/search")]
+		public string Roh_search { get; set; }
+
 		[RDFProperty("http://vocab.data.gov/def/drm#origin")]
 		public  string Drm_origin { get; set;}
 
@@ -63,7 +70,10 @@ namespace OfferOntology
 		public  List<string> Vivo_freetextKeyword { get; set;}
 
 		[RDFProperty("http://w3id.org/roh/innovation")]
-		public  string Roh_innovation { get; set;}
+		public  string Roh_innovation { get; set; }
+
+		[RDFProperty("http://w3id.org/roh/advantagesBenefits")]
+		public string Roh_advantagesBenefits { get; set; }
 
 		[RDFProperty("http://w3id.org/roh/collaborationSought")]
 		public  string Roh_collaborationSought { get; set;}
@@ -115,14 +125,17 @@ namespace OfferOntology
 			base.GetProperties();
 			propList.Add(new ListStringOntologyProperty("roh:researchers", this.IdsRoh_researchers));
 			propList.Add(new ListStringOntologyProperty("roh:document", this.IdsRoh_document));
+			propList.Add(new ListStringOntologyProperty("roh:groups", this.IdsRoh_groups));
 			propList.Add(new ListStringOntologyProperty("roh:project", this.IdsRoh_project));
 			propList.Add(new ListStringOntologyProperty("roh:patents", this.IdsRoh_patents));
+			propList.Add(new StringOntologyProperty("roh:search", this.Roh_search));
 			propList.Add(new StringOntologyProperty("drm:origin", this.Drm_origin));
 			propList.Add(new ListStringOntologyProperty("roh:lineResearch", this.Roh_lineResearch));
 			propList.Add(new ListStringOntologyProperty("vivo:freetextKeyword", this.Vivo_freetextKeyword));
 			propList.Add(new StringOntologyProperty("roh:innovation", this.Roh_innovation));
 			propList.Add(new StringOntologyProperty("roh:collaborationSought", this.Roh_collaborationSought));
 			propList.Add(new StringOntologyProperty("roh:partnerType", this.Roh_partnerType));
+			propList.Add(new StringOntologyProperty("roh:advantagesBenefits", this.Roh_advantagesBenefits));
 			propList.Add(new StringOntologyProperty("qb:observation", this.Qb_observation));
 			propList.Add(new StringOntologyProperty("bibo:recipient", this.Bibo_recipient));
 			propList.Add(new DateOntologyProperty("dct:issued", this.Dct_issued));
