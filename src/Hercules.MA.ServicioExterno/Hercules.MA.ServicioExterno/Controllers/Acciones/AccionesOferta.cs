@@ -299,10 +299,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="ids">Ids de los investigadores</param>
         /// <returns>Diccionario con los datos necesarios para cada persona.</returns>
-        public List<string> LoadLineResearchs(string[] ids)
+        public Tuple<List<string>, List<string>> LoadLineResearchs(string[] ids)
         {
             //ID persona/ID perfil/score
-            List<string> respuesta = new();
+            List<string> lineResearchs = new();
+            List<string> grupos = new();
+            Tuple<List<string>, List<string>> respuesta;
 
             List<Guid> usersGUIDs = new();
             foreach (var id in ids)
@@ -321,7 +323,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
             string select = $@"{ mPrefijos }
-                        select distinct ?lineResearch";
+                        select distinct ?group ?lineResearch";
 
             string where = @$"where {{
 
@@ -340,12 +342,20 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 try
                 {
                     string lineResearch = fila["lineResearch"].value;
+                    string grupo = fila["group"].value;
 
-                    respuesta.Add(lineResearch);
+                    if (!lineResearchs.Contains(lineResearch))
+                    {
+                        lineResearchs.Add(lineResearch);
+                    }
+                    if (!grupos.Contains(grupo))
+                    {
+                        grupos.Add(grupo);
+                    }
                 }
                 catch (Exception e) { }
-
             }
+            respuesta = new Tuple<List<string>, List<string>>(lineResearchs, grupos);
 
             return respuesta;
         }
