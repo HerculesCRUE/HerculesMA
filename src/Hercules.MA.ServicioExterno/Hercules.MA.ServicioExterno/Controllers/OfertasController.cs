@@ -26,8 +26,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="lang">Idioma para los thesaurus multiidioma </param>
         /// <returns>Diccionario con los datos.</returns>
         [HttpPost("GetThesaurus")]
-        [Produces("application/json")]
-        public IActionResult GetThesaurus([FromForm] List<string> listThesaurus, string lang = "es")
+        public IActionResult GetThesaurus([FromForm] List<string> listThesaurus, [FromForm] string lang = "es")
         {
             Dictionary<string, List<ThesaurusItem>> datosThesaurus = null;
 
