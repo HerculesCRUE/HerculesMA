@@ -12,6 +12,9 @@ namespace Hercules.MA.ServicioExterno.Models.Offer
         public string state { get; set; }
         public string date { get; set; }
         public List<string> tags { get; set; }
+        public List<string> groups { get; set; }
+        public Dictionary<string, string> areaProcedencia { get; set; }
+        public Dictionary<string, string> sectorAplicacion { get; set; }
         public Dictionary<string, string> lineResearchs { get; set; }
         public Dictionary<Guid, UsersOffer> researchers { get; set; }
         public string matureState { get; set; }
@@ -26,6 +29,7 @@ namespace Hercules.MA.ServicioExterno.Models.Offer
         public string descripcion { get; set; }
         public string aplicaciones { get; set; }
         public string destinatarios { get; set; }
+        public string ventajasBeneficios { get; set; }
         public string origen { get; set; }
         public string innovacion { get; set; }
         public string socios { get; set; }
