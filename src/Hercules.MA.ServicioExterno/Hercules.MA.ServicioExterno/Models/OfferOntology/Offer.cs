@@ -72,6 +72,12 @@ namespace OfferOntology
 		[RDFProperty("http://w3id.org/roh/innovation")]
 		public  string Roh_innovation { get; set; }
 
+		[RDFProperty("http://w3id.org/roh/areaprocedencia")]
+		public List<CategoryPath> Roh_areaprocedencia { get; set; }
+
+		[RDFProperty("http://w3id.org/roh/sectoraplicacion")]
+		public List<CategoryPath> Roh_sectoraplicacion { get; set; }
+
 		[RDFProperty("http://w3id.org/roh/advantagesBenefits")]
 		public string Roh_advantagesBenefits { get; set; }
 
@@ -123,6 +129,12 @@ namespace OfferOntology
 		internal override void GetProperties()
 		{
 			base.GetProperties();
+
+
+
+			//cRsource.Roh_areaprocedencia = oferta.areaProcedencia.Keys.ToList();
+			//cRsource.Roh_sectoraplicacion = oferta.sectorAplicacion.Keys.ToList();
+
 			propList.Add(new ListStringOntologyProperty("roh:researchers", this.IdsRoh_researchers));
 			propList.Add(new ListStringOntologyProperty("roh:document", this.IdsRoh_document));
 			propList.Add(new ListStringOntologyProperty("roh:groups", this.IdsRoh_groups));
@@ -151,13 +163,37 @@ namespace OfferOntology
 		internal override void GetEntities()
 		{
 			base.GetEntities();
-			if(Roh_availabilityChangeEvent!=null){
-				foreach(AvailabilityChangeEvent prop in Roh_availabilityChangeEvent){
+			if (Roh_sectoraplicacion!=null)
+			{
+				foreach (CategoryPath prop in Roh_sectoraplicacion)
+				{
+					prop.GetProperties();
+					prop.GetEntities();
+					OntologyEntity entityCategoryPath = new OntologyEntity("http://w3id.org/roh/CategoryPath", "http://w3id.org/roh/CategoryPath", "roh:sectoraplicacion", prop.propList, prop.entList);
+					entList.Add(entityCategoryPath);
+					prop.Entity= entityCategoryPath;
+				}
+			}
+			if (Roh_availabilityChangeEvent!=null)
+			{
+				foreach (AvailabilityChangeEvent prop in Roh_availabilityChangeEvent)
+				{
 					prop.GetProperties();
 					prop.GetEntities();
 					OntologyEntity entityAvailabilityChangeEvent = new OntologyEntity("http://w3id.org/roh/AvailabilityChangeEvent", "http://w3id.org/roh/AvailabilityChangeEvent", "roh:availabilityChangeEvent", prop.propList, prop.entList);
-				entList.Add(entityAvailabilityChangeEvent);
-				prop.Entity= entityAvailabilityChangeEvent;
+					entList.Add(entityAvailabilityChangeEvent);
+					prop.Entity= entityAvailabilityChangeEvent;
+				}
+			}
+			if (Roh_areaprocedencia!=null)
+			{
+				foreach (CategoryPath prop in Roh_areaprocedencia)
+				{
+					prop.GetProperties();
+					prop.GetEntities();
+					OntologyEntity entityCategoryPath = new OntologyEntity("http://w3id.org/roh/CategoryPath", "http://w3id.org/roh/CategoryPath", "roh:areaprocedencia", prop.propList, prop.entList);
+					entList.Add(entityCategoryPath);
+					prop.Entity= entityCategoryPath;
 				}
 			}
 		} 

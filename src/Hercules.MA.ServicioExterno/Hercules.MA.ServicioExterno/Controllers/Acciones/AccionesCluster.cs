@@ -145,7 +145,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             {
                                 theUsersP = e.users.Select(x => relationIDs.ContainsKey(("http://gnoss.com/" + x.shortUserID)) ? relationIDs[("http://gnoss.com/" + x.shortUserID)] : "http://gnoss.com/" + x.shortUserID).ToList();
                             }
-                            var knowledge = e.terms.Select(term => new CategoryPath() { IdsRoh_categoryNode = new List<string>() { term } }).ToList();
+                            List<CategoryPath> knowledge = e.terms.Select(term => new CategoryPath() { IdsRoh_categoryNode = new List<string>() { term } }).ToList();
                             var clsp = new ClusterPerfil()
                             {
                                 Roh_title = e.name,

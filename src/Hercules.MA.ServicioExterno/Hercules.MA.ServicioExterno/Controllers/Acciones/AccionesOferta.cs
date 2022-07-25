@@ -2,7 +2,7 @@
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
 using Hercules.MA.ServicioExterno.Models.Offer;
-using ClusterOntology;
+// using OfferOntology.;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -750,14 +750,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             if (!string.IsNullOrEmpty(userGnossId))
             {
-                // Creando el objeto la oferta
-                // Creando las categorías
-                List<CategoryPath> categorias = new List<CategoryPath>();
-                categorias.Add(new CategoryPath() { IdsRoh_categoryNode = oferta.tags });
-
-                List<ClusterPerfil> listClusterPerfil = new();
-                // Creando los perfiles del cluster
-
+                
                 // Obtiene el ID largo de los investigadores
                 List<string> numMember = new();
                 Dictionary<Guid, string> relationIDs = new();
@@ -866,10 +859,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception e) {}
 
+                // Agregando las taxonomías
                 try
                 {
-                    //cRsource.Roh_areaprocedencia = oferta.areaProcedencia.Keys.ToList();
-                    //cRsource.Roh_sectoraplicacion = oferta.sectorAplicacion.Keys.ToList();
+                    List<OfferOntology.CategoryPath> areasprocedencia = new List<OfferOntology.CategoryPath>();
+                    areasprocedencia.Add(new OfferOntology.CategoryPath() { IdsRoh_categoryNode = oferta.areaProcedencia.Keys.ToList() });
+
+                    List<OfferOntology.CategoryPath> sectoresaplicacion = new List<OfferOntology.CategoryPath>();
+                    sectoresaplicacion.Add(new OfferOntology.CategoryPath() { IdsRoh_categoryNode = oferta.sectorAplicacion.Keys.ToList() });
+
+                    cRsource.Roh_areaprocedencia = areasprocedencia;
+                    cRsource.Roh_sectoraplicacion = sectoresaplicacion;
                 }
                 catch (Exception e) { }
 
@@ -1049,7 +1049,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
 
-            // Obtenemos todos los datos de los perfiles y Añadimos el perfil creado a los datos del cluster
+            // Obtenemos todos los datos de los perfiles y Añadimos el perfil creado a los datos de la oferta
             string select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
             string where = @$"where {{
                 ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
