@@ -223,7 +223,26 @@ namespace Hercules.MA.Journals
                 // Categorías.
                 if (!string.IsNullOrEmpty(fila["Scopus Sub-Subject Area"].ToString()) && !string.IsNullOrEmpty(fila["SJR"].ToString()))
                 {
-                    revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "scopus").categorias.Add(CrearCategoriaScopus(fila, pAnyo));
+                    HashSet<Categoria> categorias = revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "scopus").categorias;
+                    Categoria categoria = CrearCategoriaScopus(fila, pAnyo);
+
+                    if (!categorias.Any(x => x.nomCategoria == categoria.nomCategoria))
+                    {
+                        revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "scopus").categorias.Add(categoria);
+                    }
+                    else
+                    {
+                        Categoria categoriaCargada = categorias.First(x => x.nomCategoria == categoria.nomCategoria);
+                        float rangoNuevo = (float)categoria.posicionPublicacion / (float)categoria.numCategoria;
+                        float rangoCargado = (float)categoriaCargada.posicionPublicacion / (float)categoriaCargada.numCategoria;
+
+                        if ((rangoNuevo < rangoCargado) || (rangoNuevo == rangoCargado && categoria.numCategoria > categoriaCargada.numCategoria))
+                        {
+                            categorias.Remove(categoriaCargada);
+                            categorias.Add(categoria);
+                            revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "scopus").categorias = categorias;
+                        }
+                    }
                 }
             }
 
@@ -323,7 +342,26 @@ namespace Hercules.MA.Journals
                 // Categorías.
                 if (!string.IsNullOrEmpty(fila["CATEGORY_DESCRIPTION"].ToString()) && !string.IsNullOrEmpty(fila["IMPACT_FACTOR"].ToString()))
                 {
-                    revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "wos").categorias.Add(CrearCategoriaWoS(fila, pAnyo));
+                    HashSet<Categoria> categorias = revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "wos").categorias;
+                    Categoria categoria = CrearCategoriaWoS(fila, pAnyo);
+
+                    if (!categorias.Any(x => x.nomCategoria == categoria.nomCategoria))
+                    {
+                        revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "wos").categorias.Add(categoria);
+                    }
+                    else
+                    {
+                        Categoria categoriaCargada = categorias.First(x => x.nomCategoria == categoria.nomCategoria);
+                        float rangoNuevo = (float)categoria.posicionPublicacion / (float)categoria.numCategoria;
+                        float rangoCargado = (float)categoriaCargada.posicionPublicacion / (float)categoriaCargada.numCategoria;
+
+                        if ((rangoNuevo < rangoCargado) || (rangoNuevo == rangoCargado && categoria.numCategoria > categoriaCargada.numCategoria))
+                        {
+                            categorias.Remove(categoriaCargada);
+                            categorias.Add(categoria);
+                            revista.indicesImpacto.First(x => x.anyo == pAnyo && x.fuente == "wos").categorias = categorias;
+                        }
+                    }
                 }
             }
 
