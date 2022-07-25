@@ -38,7 +38,8 @@ namespace Hercules.MA.GraphicEngine.Models
 
     public class Config
     {
-        public bool datosNodos { get; set; }        
+        public bool datosNodos { get; set; }
+        public int numMaxNodos { get; set; }
         public bool orientacionVertical { get; set; }
         public string ejeX { get; set; }
         public string reciproco { get; set; }

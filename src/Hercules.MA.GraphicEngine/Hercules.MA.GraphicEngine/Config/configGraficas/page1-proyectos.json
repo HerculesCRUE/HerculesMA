@@ -363,6 +363,7 @@
       "anchura": 12,
       "config": {
         "datosNodos": true,
+        "numMaxNodos": 30,
         "abreviar": true,
         "orientacionVertical": false,
         "ejeX": "",

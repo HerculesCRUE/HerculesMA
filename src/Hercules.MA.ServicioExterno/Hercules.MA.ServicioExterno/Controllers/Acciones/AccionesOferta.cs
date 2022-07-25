@@ -2,7 +2,7 @@
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
 using Hercules.MA.ServicioExterno.Models.Offer;
-using ClusterOntology;
+// using OfferOntology.;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -552,9 +552,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// Método público para obtener los datos de un cluster
         /// </summary>
         /// <param name="pIdOfertaId">Identificador del cluster</param>
-        /// <param name="obtenerOther">Booleano opcional que le indica si se obtienen datos extras para la oferta</param>
+        /// <param name="obtenerTeaser">Booleano opcional que le indica si se obtienen datos extras para la oferta</param>
         /// <returns>Diccionario con las listas de thesaurus.</returns>
-        internal Models.Offer.Offer LoadOffer(string pIdOfertaId, bool obtenerOther = true)
+        internal Models.Offer.Offer LoadOffer(string pIdOfertaId, bool obtenerTeaser = true)
         {
 
             // Obtener datos del cluster
@@ -570,6 +570,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Models.Offer.Offer pDataOffer = new();
             pDataOffer.lineResearchs = new();
             pDataOffer.tags = new();
+            pDataOffer.areaProcedencia = new();
+            pDataOffer.groups = new();
+            pDataOffer.sectorAplicacion = new();
             pDataOffer.objectFieldsHtml = new();
             pDataOffer.researchers = new();
             pDataOffer.documents = new();
@@ -619,8 +622,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     case "http://w3id.org/roh/lineResearch":
                         pDataOffer.lineResearchs.Add(e["o"].value, e["o"].value);
                         break;
+                    case "http://w3id.org/roh/groups":
+                        pDataOffer.groups.Add(e["o"].value);
+                        break;
                     case "http://vivoweb.org/ontology/core#freetextKeyword":
                         pDataOffer.tags.Add(e["o"].value);
+                        break;
+                    case "http://w3id.org/roh/areaprocedencia":
+                        pDataOffer.areaProcedencia.Add(e["o"].value, e["o"].value);
+                        break;
+                    case "http://w3id.org/roh/sectoraplicacion":
+                        pDataOffer.sectorAplicacion.Add(e["o"].value, e["o"].value);
                         break;
                     case "http://w3id.org/roh/innovation":
                         pDataOffer.objectFieldsHtml.innovacion = e["o"].value;
@@ -650,6 +662,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     case "http://w3id.org/roh/application":
                         pDataOffer.objectFieldsHtml.aplicaciones = e["o"].value;
                         break;
+                    case "http://w3id.org/roh/advantagesBenefits":
+                        pDataOffer.objectFieldsHtml.ventajasBeneficios = e["o"].value;
+                        break;
                     case "http://www.schema.org/availability":
                         pDataOffer.state = e["o"].value;
                         break;
@@ -665,7 +680,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
             });
 
-            if (obtenerOther)
+            if (obtenerTeaser)
             {
                 // Obtenemos los resúmenes de los investigadores y los añadimos al objeto de la oferta
                 try
@@ -735,14 +750,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             if (!string.IsNullOrEmpty(userGnossId))
             {
-                // Creando el objeto la oferta
-                // Creando las categorías
-                List<CategoryPath> categorias = new List<CategoryPath>();
-                categorias.Add(new CategoryPath() { IdsRoh_categoryNode = oferta.tags });
-
-                List<ClusterPerfil> listClusterPerfil = new();
-                // Creando los perfiles del cluster
-
+                
                 // Obtiene el ID largo de los investigadores
                 List<string> numMember = new();
                 Dictionary<Guid, string> relationIDs = new();
@@ -827,8 +835,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 cRsource.Qb_observation = oferta.objectFieldsHtml.observaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.observaciones, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
                 cRsource.Roh_application = oferta.objectFieldsHtml.aplicaciones != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.aplicaciones, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
                 cRsource.Bibo_recipient = oferta.objectFieldsHtml.destinatarios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.destinatarios, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+                cRsource.Roh_advantagesBenefits = oferta.objectFieldsHtml.ventajasBeneficios != null ? CleanHTML.StripTagsCharArray(oferta.objectFieldsHtml.ventajasBeneficios, listTagsNotForvidden, listTagsAttrNotForvidden) : "";
+
+                // Generar campo de búsqueda (Sin html)
+                cRsource.Roh_search = cRsource.Schema_description + ' ' + cRsource.Roh_innovation + ' ' + cRsource.Drm_origin + ' ' + cRsource.Roh_partnerType + ' ' + cRsource.Roh_collaborationSought + ' ' + cRsource.Qb_observation + ' ' + cRsource.Roh_application + ' ' + cRsource.Bibo_recipient + ' ' + cRsource.Roh_advantagesBenefits;
+                cRsource.Roh_search = CleanHTML.StripTagsCharArray(cRsource.Roh_search, new string[0], new string[0]);
+
                 // Selectores de los estados de madurez y el sector
-                cRsource.IdRoh_framingSector = oferta.framingSector != null ? oferta.framingSector : null;
+                // cRsource.IdRoh_framingSector = oferta.framingSector != null ? oferta.framingSector : null;
                 cRsource.IdBibo_status = oferta.matureState != null ? oferta.matureState : null;
                 // Añadir evento de creación
                 cRsource.Roh_availabilityChangeEvent = new();
@@ -845,10 +859,31 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception e) {}
 
+                // Agregando las taxonomías
+                try
+                {
+                    List<OfferOntology.CategoryPath> areasprocedencia = new List<OfferOntology.CategoryPath>();
+                    areasprocedencia.Add(new OfferOntology.CategoryPath() { IdsRoh_categoryNode = oferta.areaProcedencia.Keys.ToList() });
+
+                    List<OfferOntology.CategoryPath> sectoresaplicacion = new List<OfferOntology.CategoryPath>();
+                    sectoresaplicacion.Add(new OfferOntology.CategoryPath() { IdsRoh_categoryNode = oferta.sectorAplicacion.Keys.ToList() });
+
+                    cRsource.Roh_areaprocedencia = areasprocedencia;
+                    cRsource.Roh_sectoraplicacion = sectoresaplicacion;
+                }
+                catch (Exception e) { }
+
                 // Añadir los investigadores de la oferta
                 try
                 {
                     cRsource.IdsRoh_researchers =  relationIDs.Values.ToList();
+                }
+                catch (Exception e) { }
+
+                // Añadir los grupos de la oferta
+                try
+                {
+                    cRsource.IdsRoh_groups =  oferta.groups;
                 }
                 catch (Exception e) { }
 
@@ -1014,7 +1049,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
 
-            // Obtenemos todos los datos de los perfiles y Añadimos el perfil creado a los datos del cluster
+            // Obtenemos todos los datos de los perfiles y Añadimos el perfil creado a los datos de la oferta
             string select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
             string where = @$"where {{
                 ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
