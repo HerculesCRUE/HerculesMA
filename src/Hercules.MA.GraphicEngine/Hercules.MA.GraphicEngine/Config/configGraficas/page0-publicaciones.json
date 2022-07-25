@@ -195,7 +195,6 @@
       "nombre": {
         "es": "Relaciones entre las áreas temáticas de las publicaciones"
       },
-      "isPrivate": true,
       "tipo": "Nodos",
       "propCategoryPath": "roh:hasKnowledgeArea",
       "idGrupo": "grupo3",
@@ -225,6 +224,7 @@
       "anchura": 12,
       "config": {
         "datosNodos": true,
+        "numMaxNodos": 50,
         "abreviar": true,
         "orientacionVertical": false,
         "ejeX": "",

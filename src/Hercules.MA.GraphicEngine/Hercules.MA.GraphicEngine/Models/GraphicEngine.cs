@@ -654,7 +654,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
                 if (pNodos)
                 {
-                    //Nodos            
+                    //Nodos
                     Dictionary<string, string> dicNodos = new Dictionary<string, string>();
 
                     //Relaciones
@@ -721,8 +721,8 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
 
                     // Creamos los nodos y las relaciones en función de pNumAreas.
-                    int pNumAreas = pGrafica.config.dimensiones.FirstOrDefault().numMaxNodos;
-
+                    int pNumAreas = pGrafica.config.numMaxNodos;
+                    
                     Dictionary<string, int> numRelaciones = new Dictionary<string, int>();
                     foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
                     {
@@ -745,7 +745,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
 
                     List<string> itemsSeleccionados = numRelaciones.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value).Keys.Distinct().ToList();
-                    if (itemsSeleccionados.Count() > pNumAreas)
+                    if (itemsSeleccionados.Count() > pNumAreas && pNumAreas != 0)
                     {
                         itemsSeleccionados = itemsSeleccionados.GetRange(0, pNumAreas);
                     }
@@ -1330,7 +1330,11 @@ namespace Hercules.MA.GraphicEngine.Models
                         }
                     }
                     List<string> itemsSeleccionados = scoreNodes.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value).Keys.Distinct().ToList();
-
+                    int pNumAreas = pGrafica.config.numMaxNodos;
+                    if (itemsSeleccionados.Count() > pNumAreas && pNumAreas != 0)
+                    {
+                        itemsSeleccionados = itemsSeleccionados.GetRange(0, pNumAreas);
+                    }
                     // Recuperamos los nombres de categorías y creamos los nodos.
                     select = new StringBuilder();
                     where = new StringBuilder();
