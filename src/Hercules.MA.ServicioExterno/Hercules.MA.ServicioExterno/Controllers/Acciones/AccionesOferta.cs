@@ -8,13 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Hercules.MA.ServicioExterno.Models.Offer.Offer;
-using Hercules.MA.ServicioExterno.Models;
-using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
-using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags;
 using Microsoft.AspNetCore.Cors;
 using Hercules.MA.ServicioExterno.Models.Cluster;
 
@@ -687,7 +681,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 var tmp = UtilidadesAPI.LoadCurrentTerms(mResourceApi, pDataOffer.areaProcedencia.Values.ToList(), "offer");
                 pDataOffer.areaProcedencia = new();
-                tmp.ForEach(e => pDataOffer.areaProcedencia.Add(e, e));
+                tmp.ForEach(e => pDataOffer.areaProcedencia.TryAdd(e, e));
             }
 
 
@@ -696,7 +690,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 var tmp = UtilidadesAPI.LoadCurrentTerms(mResourceApi, pDataOffer.sectorAplicacion.Values.ToList(), "offer");
                 pDataOffer.sectorAplicacion = new();
-                tmp.ForEach(e => pDataOffer.sectorAplicacion.Add(e, e));
+                tmp.ForEach(e => pDataOffer.sectorAplicacion.TryAdd(e, e));
             }
 
 
@@ -882,11 +876,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Agregando las taxonomías
                 try
                 {
-                    List<OfferOntology.CategoryPath> areasprocedencia = new List<OfferOntology.CategoryPath>();
-                    areasprocedencia.Add(new OfferOntology.CategoryPath() { IdsRoh_categoryNode = oferta.areaProcedencia.Keys.ToList() });
 
+                    // Obtenemos el listado de "padres" del teshauro
+                    List<List<string>> resultsAP = GetParentTeshaurusParents(oferta.areaProcedencia.Keys.ToList());
+                    // Añadimos los objetos de las taxonomías correctos
+                    List<OfferOntology.CategoryPath> areasprocedencia = new List<OfferOntology.CategoryPath>();
+                    foreach (var res in resultsAP)
+                    {
+                        areasprocedencia.Add(new OfferOntology.CategoryPath() { IdsRoh_categoryNode = res });
+                    }
+
+
+                    // Obtenemos el listado de "padres" del teshauro
+                    List<List<string>> resultsSA = GetParentTeshaurusParents(oferta.sectorAplicacion.Keys.ToList());
+                    // Añadimos los objetos de las taxonomías correctos
                     List<OfferOntology.CategoryPath> sectoresaplicacion = new List<OfferOntology.CategoryPath>();
-                    sectoresaplicacion.Add(new OfferOntology.CategoryPath() { IdsRoh_categoryNode = oferta.sectorAplicacion.Keys.ToList() });
+                    foreach (var res in resultsSA)
+                    {
+                        sectoresaplicacion.Add(new OfferOntology.CategoryPath() { IdsRoh_categoryNode = res });
+                    }
 
                     cRsource.Roh_areaprocedencia = areasprocedencia;
                     cRsource.Roh_sectoraplicacion = sectoresaplicacion;
@@ -1479,6 +1487,50 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
+        private List<List<string>> GetParentTeshaurusParents (List<string> tesauro)
+        {
+
+            List<List<string>> resultsAP = new List<List<string>>();
+
+            var finalIds = tesauro;
+            foreach (var finalId in finalIds)
+            {
+                List<string> localRes = new();
+                List<List<string>> ids = new();
+
+                try
+                {
+
+                    var idCutted = finalId.Split('_');
+                    var item = idCutted[1].Split('.');
+                    var lengthItem = item.Count();
+
+                    var lastItems = item.TakeLast(lengthItem - 1);
+
+                    for (int i = 0; i < lengthItem; i++)
+                    {
+                        ids.Add(item.Take(i + 1).ToList());
+
+                        for (int j = 1; j < lengthItem - i; j++)
+                        {
+                            ids[i].Add("0");
+                        }
+
+                        localRes.Add(idCutted[0] + '_' + String.Join('.', ids[i]));
+                    }
+                    resultsAP.Add(localRes.Distinct().ToList());
+
+
+                }
+                catch (Exception e) { }
+
+
+            }
+
+            return resultsAP;
+
+
+        }
 
     }
 }

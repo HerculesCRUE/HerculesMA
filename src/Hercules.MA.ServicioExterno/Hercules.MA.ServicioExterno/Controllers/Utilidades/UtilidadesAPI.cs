@@ -805,17 +805,23 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         /// <summary>
         /// Método privado para obtener las taxonomías de un 'CategoryPath'.
         /// </summary>
+        /// <param name="mResourceApi">Objeto del ResourceApi necesario.</param>
         /// <param name="terms">Listado de la categoría a obtener.</param>
+        /// <param name="ontology">Ontología donde se encuentra el item.</param>
         /// <returns>listado de las categorías.</returns>
         internal static List<string> LoadCurrentTerms(ResourceApi mResourceApi, List<string> terms, string ontology)
         {
 
             string termsTxt = String.Join(',', terms.Select(e => "<" + e + ">"));
 
-            string select = "select ?o";
+            string select = "select ?o FROM <http://gnoss.com/taxonomy.owl>";
             string where = @$"where {{
                 ?s a <http://w3id.org/roh/CategoryPath>.
                 ?s <http://w3id.org/roh/categoryNode> ?o.
+                MINUS
+                {{
+                    ?o <http://www.w3.org/2008/05/skos#narrower> ?hijos
+                }}
                 FILTER(?s IN ({termsTxt}))
             }}";
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, ontology);
