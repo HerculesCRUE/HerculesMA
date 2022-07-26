@@ -224,7 +224,7 @@
       "anchura": 12,
       "config": {
         "datosNodos": true,
-        "numMaxNodos": 50,
+        "numMaxNodos": 35,
         "abreviar": true,
         "orientacionVertical": false,
         "ejeX": "",

@@ -469,12 +469,12 @@ namespace Hercules.MA.GraphicEngine.Models
                     if (pGrafica.config.orientacionVertical)
                     {
                         ControlarExcepcionesBarrasX(pGrafica);
-                        return CrearGraficaBarras(pGrafica, pFiltroBase, pFiltroFacetas, pLang, pListaDates, pGrafica.config.datosNodos);
+                        return CrearGraficaBarrasVertical(pGrafica, pFiltroBase, pFiltroFacetas, pLang, pListaDates, pGrafica.config.datosNodos);
                     }
                     else
                     {
                         ControlarExcepcionesBarrasY(pGrafica);
-                        return CrearGraficaBarrasY(pGrafica, pFiltroBase, pFiltroFacetas, pLang, pListaDates, pGrafica.config.datosNodos);
+                        return CrearGraficaBarrasHorizontal(pGrafica, pFiltroBase, pFiltroFacetas, pLang, pListaDates, pGrafica.config.datosNodos);
                     }
                 case EnumGraficas.Circular:
                     ControlarExcepcionesCircular(pGrafica);
@@ -494,7 +494,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pFiltroFacetas">Filtros de las facetas.</param>
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
-        public static GraficaBarras CrearGraficaBarras(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pNodos)
+        public static GraficaBarras CrearGraficaBarrasVertical(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pNodos)
         {
             // Objeto a devolver.
             GraficaBarras grafica = new GraficaBarras();
@@ -1133,7 +1133,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pFiltroFacetas">Filtros de las facetas.</param>
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
-        public static GraficaBarrasY CrearGraficaBarrasY(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pNodos)
+        public static GraficaBarrasY CrearGraficaBarrasHorizontal(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pNodos)
         {
             // Objeto a devolver.
             GraficaBarrasY grafica = new GraficaBarrasY();
