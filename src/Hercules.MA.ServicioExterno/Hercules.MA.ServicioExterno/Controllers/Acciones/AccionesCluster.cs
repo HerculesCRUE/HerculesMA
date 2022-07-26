@@ -328,7 +328,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtenemos todos los datos de las areas temáticas
             if (pDataCluster.terms.Count > 0)
             {
-                pDataCluster.terms = LoadCurrentTerms(pDataCluster.terms);
+                pDataCluster.terms = UtilidadesAPI.LoadCurrentTerms(mResourceApi , pDataCluster.terms, "cluster");
             }
 
 

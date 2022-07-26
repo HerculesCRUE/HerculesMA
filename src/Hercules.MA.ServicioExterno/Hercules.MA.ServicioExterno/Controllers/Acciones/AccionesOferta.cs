@@ -680,6 +680,26 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
             });
 
+
+
+            // Obtenemos todos los datos de las areas temáticas
+            if (pDataOffer.areaProcedencia.Count > 0)
+            {
+                var tmp = UtilidadesAPI.LoadCurrentTerms(mResourceApi, pDataOffer.areaProcedencia.Values.ToList(), "offer");
+                pDataOffer.areaProcedencia = new();
+                tmp.ForEach(e => pDataOffer.areaProcedencia.Add(e, e));
+            }
+
+
+            // Obtenemos todos los datos de los sectores de aplicación
+            if (pDataOffer.sectorAplicacion.Count > 0)
+            {
+                var tmp = UtilidadesAPI.LoadCurrentTerms(mResourceApi, pDataOffer.sectorAplicacion.Values.ToList(), "offer");
+                pDataOffer.sectorAplicacion = new();
+                tmp.ForEach(e => pDataOffer.sectorAplicacion.Add(e, e));
+            }
+
+
             if (obtenerTeaser)
             {
                 // Obtenemos los resúmenes de los investigadores y los añadimos al objeto de la oferta

@@ -802,5 +802,35 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         }
 
 
+        /// <summary>
+        /// Método privado para obtener las taxonomías de un 'CategoryPath'.
+        /// </summary>
+        /// <param name="terms">Listado de la categoría a obtener.</param>
+        /// <returns>listado de las categorías.</returns>
+        internal static List<string> LoadCurrentTerms(ResourceApi mResourceApi, List<string> terms, string ontology)
+        {
+
+            string termsTxt = String.Join(',', terms.Select(e => "<" + e + ">"));
+
+            string select = "select ?o";
+            string where = @$"where {{
+                ?s a <http://w3id.org/roh/CategoryPath>.
+                ?s <http://w3id.org/roh/categoryNode> ?o.
+                FILTER(?s IN ({termsTxt}))
+            }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, ontology);
+
+            List<string> termsRes = new();
+
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                termsRes.Add(e["o"].value);
+            });
+
+            return termsRes;
+        }
+
+
+
     }
 }
