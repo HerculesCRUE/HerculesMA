@@ -171,6 +171,35 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], oferta.creatorId, userGnossId, texto);
             }
 
+
+            // Avisamos al gestor otri
+            if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_002")
+            {
+
+                // Obtengo el recurso para conseguir el id del creador de la oferta
+                // string shortId = "http://gnoss/" + UtilidadesAPI.ObtenerIdCorto(mResourceApi, idRecurso).ToString().ToUpper();
+                Dictionary<Guid, string> longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                Offer oferta = LoadOffer(longsId[idRecurso], false);
+
+                // Obtengo los usuarios otri disponibles para el usuario creador de la oferta, y les aviso de que ya pueden activarla
+                GetOtriId(oferta.creatorId).ForEach(idOtri =>
+                {
+                    bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, oferta.creatorId, idOtri, userGnossId, "Hay una nueva oferta tecnológica disponible");
+                });
+            }
+
+
+            // Avisamos al investigador creador de la oferta
+            if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
+            {
+                // Obtengo el recurso para conseguir el id del creador de la oferta
+                // string shortId = "http://gnoss/" + UtilidadesAPI.ObtenerIdCorto(mResourceApi, idRecurso).ToString().ToUpper();
+                Dictionary<Guid, string> longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                Offer oferta = LoadOffer(longsId[idRecurso], false);
+                bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, oferta.creatorId, longsId[idRecurso], userGnossId, "La oferta tecnológica ha sido aprobada");
+
+            }
+
             return nuevoEstado;
 
             //if (uploadedR)
@@ -1410,7 +1439,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="nuevoEstado">Id del estado al que se quiere establecer</param>
         /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo)</param>
         /// <param name="predicado">Predicado a modificar</param>
-        /// <param name="ontology">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
         /// <returns>String con el id del nuevo estado.</returns>
         internal string ModificarTripleteUsuario(string idRecurso, string nuevoEstado, string estadoActual, string predicado, Guid pIdGnossUser)
         {
@@ -1487,6 +1516,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
+        /// <summary>
+        /// Método privado que obtiene los ids de las categorías superiores.
+        /// </summary>
+        /// <param name="tesauro">Listado de los tesauros sobre los que se necesita obtener los padres</param>
+        /// <returns>Listados con los ids de los tesauros agrupados por "padres" e "hijos".</returns>
         private List<List<string>> GetParentTeshaurusParents (List<string> tesauro)
         {
 
@@ -1528,6 +1562,58 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
             return resultsAP;
+
+
+        }
+
+
+        /// <summary>
+        /// Método que comprueba si el usuario actual tiene permiso para realizar la modificación del recurso o no.
+        /// </summary>
+        /// <param name="longUserId">Id del usuario actual</param>
+        /// <param name="oldPermission">Permiso antigüo</param>
+        /// <param name="newPermission">Nuevo permiso</param>
+        /// <returns>Retorna un booleano indicando si puede o no ser actualizado.</returns>
+        private bool CheckUpdateOffer (string longUserId, string oldPermission, string newPermission)
+        {
+
+            return false;
+        }
+
+        /// <summary>
+        /// Método que obtiene el listado de usuarios otri disponibles para el usuario en cuestión.
+        /// </summary>
+        /// <param name="longId">Id del usuario actual</param>
+        /// <returns>Retorna un listado de ids con los usuarios otri.</returns>
+        private List<string> GetOtriId (string longId)
+        {
+            string select = "SELECT DISTINCT ?otriUser " +
+                "FROM <http://gnoss.com/organization.owl> " +
+                "FROM <http://gnoss.com/offer.owl> ";
+
+            string where = @$"where {{
+                    ?otriUser a <http://xmlns.com/foaf/0.1/Person>.
+                    ?otriUser <http://w3id.org/roh/isOtriManager> 'true'.
+	                ?otriUser <http://w3id.org/roh/hasRole> ?hasrole.
+	                ?creatorUser <http://w3id.org/roh/hasRole> ?hasrole.
+	                ?s <http://www.schema.org/offeredBy> ?creatorUser.
+	                ?s a <http://www.schema.org/Offer>.
+                    FILTER (?creatorUser = <{longId}>)
+                }}";
+
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            List<string> users = new();
+
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                try
+                {
+                    users.Add(e["otriUser"].value);
+                }
+                catch (Exception exc) { }
+            });
+
+            return users;
 
 
         }
