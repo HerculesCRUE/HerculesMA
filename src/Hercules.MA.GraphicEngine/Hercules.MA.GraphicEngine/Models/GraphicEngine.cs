@@ -168,7 +168,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pGraphicName">Nuevo nombre de la gráfica.</param>
         /// <param name="pGraphicOrder">Nuevo orden de la gráfica.</param>
         /// <param name="pGraphicWidth">Nuevo ancho de la gráfica.</param>
-        public static bool EditarConfig(string pLang, string pUserId, string pGraphicId, string pPageId, string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0)
+        public static bool EditarConfig(string pLang, string pUserId, string pGraphicId, string pPageId, string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0, string pBlockId = "")
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
@@ -183,11 +183,16 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 grafica.nombre[pLang] = pGraphicName;
             }
+            if (!string.IsNullOrEmpty(pBlockId))
+            {
+                grafica = configModel.graficas.Where(x => x.identificador == pBlockId).FirstOrDefault();
+            }
             // Edito la anchura de la gráfica.
             if (pGraphicWidth != 0)
             {
                 grafica.anchura = pGraphicWidth;
             }
+
             // Edito el orden de la gráfica.
             if (pGraphicOrder != 0)
             {
@@ -264,7 +269,10 @@ namespace Hercules.MA.GraphicEngine.Models
                 ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
                 mTabTemplates.Add(tab);
             }
-
+            if (!string.IsNullOrEmpty(pBlockId))
+            {
+                EditarConfig(pLang, pUserId, pGraphicId, pPageId, pGraphicName);
+            }
             return true;
         }
 
