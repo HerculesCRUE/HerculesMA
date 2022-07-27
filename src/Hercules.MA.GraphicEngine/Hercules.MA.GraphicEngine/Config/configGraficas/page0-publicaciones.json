@@ -8,7 +8,6 @@
   "identificador": "pagina1",
   "graficas": [
     {
-      "isPrivate": true,
       "identificador": "grafica1",
       "nombre": {
         "es": "Número de publicaciones y citas por año"
@@ -162,7 +161,6 @@
       "nombre": {
         "es": "Número de publicaciones por tipo de actividad científica"
       },
-      "isPrivate": true,
       "tipo": "Barras",
       "anchura": 12,
       "config": {
@@ -251,7 +249,6 @@
       }
     },
     {
-      "isPrivate": true,
       "identificador": "grafica7",
       "nombre": {
         "es": "Número de publicaciones por grupo"
@@ -446,73 +443,6 @@
             "color": "#BF4858",
             "yAxisID": "y1",
             "orden": 1
-          }
-        ]
-      }
-    },
-    {
-      "identificador": "grafica2222",
-      "nombre": {
-        "es": "test"
-      },
-      "tipo": "Barras",
-      "anchura": 23,
-      "config": {
-        "orientacionVertical": false,
-        "ejeX": "roh:year",
-        "orderDesc": false,
-        "rellenarEjeX": true,
-        "xAxisPrint": [
-          {
-            "xAxisID": "x1",
-            "posicion": "top",
-            "nombreEje": {
-              "es": "Nº de publicaciones"
-            }
-          },
-          {
-            "xAxisID": "x2",
-            "posicion": "bottom",
-            "nombreEje": {
-              "es": "Nº de citas"
-            }
-          }
-        ],
-        "dimensiones": [
-          {
-            "nombre": {
-              "es": "Total de citas por año"
-            },
-            "filtro": "roh:citationCount",
-            "calculo": "SUM",
-            "tipoDimension": "line",
-            "color": "#817E80",
-            "xAxisID": "x2",
-            "orden": 1
-          },
-          {
-            "nombre": {
-              "es": "Cuartil"
-            },
-            "stack": "cuartil1",
-            "filtro": "roh:quartile",
-            "dividirDatos": true,
-            "tipoDimension": "bar",
-            "color": "#7CBFE3",
-            "xAxisID": "x1",
-            "orden": 2
-          },
-          {
-            "nombre": {
-              "es": "Sin cuartil"
-            },
-            "filtro": "",
-            "minus": "roh:quartile",
-            "stack": "cuartil1",
-            "tipoDimension": "bar",
-            "color": "#7CBFE3",
-            "xAxisID": "x1",
-            "orden": 6
           }
         ]
       }
