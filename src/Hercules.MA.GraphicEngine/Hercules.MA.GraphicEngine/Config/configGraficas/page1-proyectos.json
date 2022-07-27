@@ -330,6 +330,7 @@
       }
     },
     {
+      "isPrivate": true,
       "identificador": "grafica10",
       "nombre": {
         "es": "Relaciones entre las áreas temáticas de los proyectos"
@@ -353,6 +354,7 @@
       }
     },
     {
+      "isPrivate": true,
       "identificador": "grafica11",
       "nombre": {
         "es": "Áreas temáticas de los proyectos"

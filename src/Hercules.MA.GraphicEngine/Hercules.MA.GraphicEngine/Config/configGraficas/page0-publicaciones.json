@@ -8,7 +8,6 @@
   "identificador": "pagina1",
   "graficas": [
     {
-      "isPrivate": true,
       "identificador": "grafica1",
       "nombre": {
         "es": "Número de publicaciones y citas por año"
@@ -162,7 +161,6 @@
       "nombre": {
         "es": "Número de publicaciones por tipo de actividad científica"
       },
-      "isPrivate": true,
       "tipo": "Barras",
       "anchura": 12,
       "config": {
@@ -251,7 +249,6 @@
       }
     },
     {
-      "isPrivate": true,
       "identificador": "grafica7",
       "nombre": {
         "es": "Número de publicaciones por grupo"
@@ -451,6 +448,7 @@
       }
     },
     {
+      "isPrivate": true,
       "identificador": "grafica2222",
       "nombre": {
         "es": "test"
