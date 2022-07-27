@@ -49,6 +49,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             {
                 AccionesRedesUsuario accionDocumento = new AccionesRedesUsuario();
                 accionDocumento.SetDataRedesUsuario(pIdGnossUser, pDataUser);
+
             }
             catch (Exception)
             {
