@@ -27,7 +27,30 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string[] listTagsNotForvidden = new string[] { "<ol>", "<li>", "<b>", "<i>", "<u>", "<ul>", "<strike>", "<blockquote>", "<div>", "<hr>", "</ol>", "</li>", "</b>", "</i>", "</u>", "</ul>", "</strike>", "</blockquote>", "</div>", "<br/>" };
         private static string[] listTagsAttrNotForvidden = new string[] { "style" };
 
+        private enum TipoUser
+        {
+            ip,
+            isOtriManager,
+            actUser,
+            otro
+        }
+        
+        private enum Estado
+        {
+            Borrador,
+            Revision,
+            Validada,
+            Denegada,
+            Archivada,
+        }
 
+        private enum Accion
+        {
+            Editar,
+            Borrar,
+            CambiarEstado,
+        }
+        #endregion
 
         /// <summary>
         /// Método público que obtiene una lista de thesaurus.
@@ -65,9 +88,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="nuevoEstado">Id del estado al que se quiere establecer</param>
         /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo)</param>
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
+        /// <param name="texto">String con el texto personalizado para la notificación</param>
         /// <returns>String con el id del nuevo estado.</returns>
         internal string CambiarEstado(Guid idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser, string texto)
         {
+
+            Dictionary<Guid, string> longsId = null;
+            Offer oferta = null;
 
             // Obtener el id del usuario usando el id de la cuenta
             string select = "select ?s ?isOtriManager";
@@ -90,15 +117,28 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 } catch (Exception exc) { }
             });
 
-
             if (!isOtriManager && nuevoEstado != "http://gnoss.com/items/offerstate_001" && nuevoEstado != "http://gnoss.com/items/offerstate_002")
             {
                 throw new Exception("Error al intentar modificar el estado, no tienes permiso para cambiar a este estado");
             }
 
+
             // Modificar el estado y añadir un nuevo estado en el "historial"
             if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && idRecurso != Guid.Empty)
             {
+
+
+                // Obtengo el recurso al que pretendo modificar el estado
+                // Es necesario para las notificaciones y para comprobar si tengo o no permisos
+                // Obtengo el recurso para conseguir el id del creador de la oferta
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                oferta = LoadOffer(longsId[idRecurso], false);
+
+                // Compruebo si se tiene permisos para realizar la actualización de la oferta
+                if (!CheckUpdateOffer(userGnossId, oferta.creatorId, Accion.CambiarEstado, estadoActual, nuevoEstado))
+                {
+                    throw new Exception("Error al intentar modificar el estado, no tienes permiso para cambiar a este estado");
+                }
 
                 // Añadir cambio en el historial de la disponibilidad
                 // Comprueba si el id del recuro no está vacío
@@ -157,61 +197,38 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 catch (Exception e) { throw; }
 
 
-                
-            }
-
-            // Enviar notificaciones
-            if (texto != "")
-            {
-
-                // Obtengo el recurso para conseguir el id del creador de la oferta
-                // string shortId = "http://gnoss/" + UtilidadesAPI.ObtenerIdCorto(mResourceApi, idRecurso).ToString().ToUpper();
-                Dictionary<Guid, string> longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso } , mResourceApi, "http://www.schema.org/Offer", "offer");
-                Offer oferta = LoadOffer(longsId[idRecurso], false);
-                bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], oferta.creatorId, userGnossId, texto);
-            }
-
-
-            // Avisamos al gestor otri
-            if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_002")
-            {
-
-                // Obtengo el recurso para conseguir el id del creador de la oferta
-                // string shortId = "http://gnoss/" + UtilidadesAPI.ObtenerIdCorto(mResourceApi, idRecurso).ToString().ToUpper();
-                Dictionary<Guid, string> longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso }, mResourceApi, "http://www.schema.org/Offer", "offer");
-                Offer oferta = LoadOffer(longsId[idRecurso], false);
-
-                // Obtengo los usuarios otri disponibles para el usuario creador de la oferta, y les aviso de que ya pueden activarla
-                GetOtriId(oferta.creatorId).ForEach(idOtri =>
+                // ENVIAMOS LAS NOTIFICACIONES
                 {
-                    bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, oferta.creatorId, idOtri, userGnossId, "Hay una nueva oferta tecnológica disponible");
-                });
-            }
+                    // Enviamos las notifiaciones que implican texto al creador de la oferta
+                    if (texto != "" && longsId != null && oferta != null)
+                    {
+                        texto = (nuevoEstado != estadoActual) ? "Nuevo estado de la oferta " + getEstado(nuevoEstado).ToString() + " " + texto : "Tienes un mensaje: " + texto;
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, oferta.creatorId, "editOferta", texto);
+                    }
 
+                    // Avisamos al gestor otri de que hay nuevas ofertas disponibles para validar
+                    if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_002")
+                    {
 
-            // Avisamos al investigador creador de la oferta
-            if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
-            {
-                // Obtengo el recurso para conseguir el id del creador de la oferta
-                // string shortId = "http://gnoss/" + UtilidadesAPI.ObtenerIdCorto(mResourceApi, idRecurso).ToString().ToUpper();
-                Dictionary<Guid, string> longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso }, mResourceApi, "http://www.schema.org/Offer", "offer");
-                Offer oferta = LoadOffer(longsId[idRecurso], false);
-                bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, oferta.creatorId, longsId[idRecurso], userGnossId, "La oferta tecnológica ha sido aprobada");
+                        // Obtengo los usuarios otri disponibles para el usuario creador de la oferta, y les aviso de que ya pueden activarla
+                        GetOtriId(oferta.creatorId).ForEach(idOtri =>
+                        {
+                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
+                        });
+                    }
+
+                    // Avisamos al investigador creador de la oferta
+                    if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
+                    {
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido aprobada");
+                    }
+                }
 
             }
 
             return nuevoEstado;
-
-            //if (uploadedR)
-            //{
-            //    return idRecurso;
-            //}
-            //else
-            //{
-            //    throw new Exception("Recurso no actualizado");
-            //}
         }
-        #endregion
+
 
 
 
@@ -316,7 +333,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
 
-
         /// <summary>
         /// Método público para cargar los investigadores del grupo al que pertenece el usuario
         /// </summary>
@@ -384,8 +400,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
-
-
         /// <summary>
         /// Método público para cargar los matureStates
         /// </summary>
@@ -432,8 +446,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             return respuesta;
         }
-
-
 
 
         /// <summary>
@@ -529,8 +541,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
 
-
-
         /// <summary>
         /// Método público para eliminar una oferta tecnológica
         /// </summary>
@@ -579,6 +589,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Diccionario con las listas de thesaurus.</returns>
         internal Models.Offer.Offer LoadOffer(string pIdOfertaId, bool obtenerTeaser = true)
         {
+            // Obtengo el ID largo si el ID es un GUID
+            Guid guid = Guid.Empty; 
+            if (Guid.TryParse(pIdOfertaId, out guid))
+            {
+                var longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                pIdOfertaId = longsId[guid];
+            }
+
 
             // Obtener datos del cluster
             string select = "select ?p ?o ";
@@ -768,7 +786,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <summary>
         /// Controlador para guardar los datos de la oferta 
         /// </summary>
-        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
+        /// <param name="pIdGnossUser">Usuario de gnoss (GUID).</param>
         /// <param name="oferta">Objeto con la oferta tecnológica a añadir / modificar.</param>
         /// <returns>Id de la oferta creada o modificada.</returns>
         public string SaveOffer(string pIdGnossUser, Offer oferta)
@@ -996,10 +1014,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 if (idRecurso != null && idRecurso != "")
                 {
 
+                    string creatorId = "";
+
                     // Si es una actualización, hay que recuperar los cambios anteriores del evento
-                    select = "SELECT distinct ?s ?roleOf ?validFrom ?availability \n";
-                    select += "FROM <http://gnoss.com/offer.owl> FROM<http://gnoss.com/person.owl> FROM<http://gnoss.com/offerstate.owl>";
+                    select = "SELECT distinct ?s ?creatorId ?roleOf ?validFrom ?availability \n";
+                    select += "FROM <http://gnoss.com/offer.owl> FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/offerstate.owl>";
                     where = @$"where {{
+                            ?offer <http://www.schema.org/offeredBy> ?creatorId.
                             ?offer <http://w3id.org/roh/availabilityChangeEvent> ?s.
                             ?s <http://w3id.org/roh/roleOf> ?roleOf.
                             ?s <http://www.schema.org/validFrom> ?validFrom.
@@ -1022,6 +1043,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                 DateObject = DateTime.ParseExact(e["validFrom"].value, "yyyyMMddHHmmss", null);
                             } catch (Exception exc) { }
 
+                            creatorId = e["creatorId"].value;
+
                             cRsource.Roh_availabilityChangeEvent.Add(new OfferOntology.AvailabilityChangeEvent()
                             {
                                 GNOSSID = e["s"].value,
@@ -1032,6 +1055,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         });
                     }
                     catch (Exception e) { }
+
+
+                    // Compruebo si se tiene permisos para realizar la actualización de la oferta
+                    if (!CheckUpdateOffer(userGnossId, creatorId, Accion.Editar))
+                    {
+                        throw new Exception("Error al intentar modificar el estado, no tienes permiso para cambiar a este estado");
+                    }
 
 
                     string[] recursoSplit = idRecurso.Split('_');
@@ -1568,14 +1598,114 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         /// <summary>
-        /// Método que comprueba si el usuario actual tiene permiso para realizar la modificación del recurso o no.
+        /// Método que comprueba si el usuario actual tiene permiso para realizar la modificación del recurso (Sea cambiar el estado, editar el recurso en si, o borrarlo) o no.
         /// </summary>
         /// <param name="longUserId">Id del usuario actual</param>
-        /// <param name="oldPermission">Permiso antigüo</param>
-        /// <param name="newPermission">Nuevo permiso</param>
+        /// <param name="ownUserId">Id del usuario creador de la oferta</param>
+        /// <param name="accion">Tipo de acción</param>
+        /// <param name="strOldState">Permiso antigüo</param>
+        /// <param name="strNewState">Nuevo permiso</param>
         /// <returns>Retorna un booleano indicando si puede o no ser actualizado.</returns>
-        private bool CheckUpdateOffer (string longUserId, string oldPermission, string newPermission)
+        private bool CheckUpdateOffer (string longUserId, string ownUserId, Accion accion, string strOldState = "", string strNewState = "")
         {
+
+            bool isOwnUser = longUserId == ownUserId;
+            bool isOtriManager = GetOtriId(ownUserId).Contains(longUserId);
+            bool isIp = checkIsIp(longUserId, ownUserId);
+
+
+            // Obtiene los estados
+            var estadoAct = Estado.Borrador;
+            var estadoNuevo = Estado.Borrador;
+
+            if (strOldState != "" && strNewState != "")
+            {
+                estadoAct = getEstado(strOldState);
+                estadoNuevo = getEstado(strNewState);
+            }
+
+            // Comprueba los permisos dependiendo del tipo de usuario que es y de las acciones que se piden
+            switch (accion)
+            {
+                case Accion.Editar:
+
+                    if (isOwnUser || isOtriManager || isIp)
+                    {
+                        return true;
+                    }
+
+                    break;
+
+
+                case Accion.CambiarEstado:
+
+
+                    switch (estadoAct)
+                    {
+                        case Estado.Borrador:
+                            // Es el creador de la oferta
+                            // Puede pasar la oferta a revisión
+                            if (isOwnUser && estadoNuevo == Estado.Revision)
+                            {
+                                return true;
+                            }
+
+                            break;
+
+                        case Estado.Revision:
+                            // Es el creador de la oferta
+                            // Puede pasar la oferta a borrador
+                            if ((isOwnUser || isOtriManager) && estadoNuevo == Estado.Borrador)
+                            {
+                                return true;
+                            }
+
+                            // Es el gestor otri
+                            // Puede pasar la oferta a borrador
+                            if (isOtriManager && (estadoNuevo == Estado.Validada || estadoNuevo == Estado.Denegada))
+                            {
+                                return true;
+                            }
+
+                            break;
+
+                        case Estado.Validada:
+
+                            if (isOtriManager && (estadoNuevo == Estado.Archivada || estadoNuevo == Estado.Borrador))
+                            {
+                                return true;
+                            }
+
+                            break;
+
+                        case Estado.Denegada:
+                            if (isOwnUser && estadoNuevo == Estado.Borrador)
+                            {
+                                return true;
+
+                            }
+                            if (isOtriManager && estadoNuevo == Estado.Archivada)
+                            {
+                                return true;
+                            }
+
+                            break;
+                    }
+
+
+                    break;
+
+
+                case Accion.Borrar:
+
+                    if ((isOwnUser || isOtriManager || isIp) && (estadoAct.Equals(Estado.Borrador) || estadoAct.Equals(Estado.Revision)))
+                    {
+                        return true;
+                    }
+
+                    break;
+
+            }
 
             return false;
         }
@@ -1618,5 +1748,142 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
         }
 
+        private bool mostrar(string estadoStr, TipoUser tipoUser)
+        {
+            var estado = getEstado(estadoStr);
+
+            switch (tipoUser)
+            {
+                case TipoUser.ip:
+                    switch (estado)
+                    {
+                        case Estado.Archivada:
+                            return false;
+                            break;
+                        default:
+                            return true;
+                            break;
+                    }
+                    break;
+
+                case TipoUser.isOtriManager:
+
+                    switch (estado)
+                    {
+                        case Estado.Borrador:
+                            return false;
+                            break;
+                        case Estado.Archivada:
+                            return false;
+                            break;
+                        default:
+                            return true;
+                            break;
+                    }
+                    break;
+
+                case TipoUser.actUser:
+                    switch (estado)
+                    {
+                        case Estado.Archivada:
+                            return false;
+                            break;
+                        default:
+                            return true;
+                            break;
+                    }
+                    break;
+
+                default:
+                    switch (estado)
+                    {
+                        case Estado.Archivada:
+                            return false;
+                            break;
+                        default:
+                            return true;
+                            break;
+                    }
+                    break;
+            }
+        }
+
+
+        /// <summary>
+        /// Método que transforma un string en un objeto enum de estados.
+        /// </summary>
+        /// <param name="estado">String con el estado</param>
+        /// <returns>Retorna un el estado.</returns>
+        private Estado getEstado(string estado)
+        {
+            switch (estado)
+            {
+                case "http://gnoss.com/items/offerstate_001":
+                    return Estado.Borrador;
+                    break;
+
+                case "http://gnoss.com/items/offerstate_002":
+                    return Estado.Revision;
+                    break;
+
+
+                case "http://gnoss.com/items/offerstate_003":
+                    return Estado.Validada;
+                    break;
+
+
+                case "http://gnoss.com/items/offerstate_004":
+                    return Estado.Denegada;
+                    break;
+
+
+                case "http://gnoss.com/items/offerstate_005":
+                    return Estado.Archivada;
+                    break;
+
+                default:
+                    return Estado.Borrador;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Método que comprueba si un usuario es investigador principal (IP) de otro.
+        /// </summary>
+        /// <param name="longIdCurrentUser">Id largo del usuario que debería ser IP</param>
+        /// <param name="longIdOwnUser">Id largo del otro usuario (Propiamente el creador de la oferta)</param>
+        /// <returns>Retorna un booleano si el primer usuario es IP.</returns>
+        private bool checkIsIp (string longIdCurrentUser, string longIdOwnUser)
+        {
+            string select = @$" SELECT distinct ?isIp";
+            string where = @$" 
+                WHERE {{
+                    ?ownUser a <http://xmlns.com/foaf/0.1/Person>.
+                    ?actUser a <http://xmlns.com/foaf/0.1/Person>.
+
+			        ?actUser <http://w3id.org/roh/isIPGroupActually> 'true'.
+			        ?actUser <http://w3id.org/roh/isIPGroupActually> ?isIp.
+
+			        ?actUser <http://vivoweb.org/ontology/core#relates> ?group.
+			        ?ownUser <http://vivoweb.org/ontology/core#relates> ?group.
+
+                    Filter (?ownUser = <{longIdOwnUser}>).
+                    Filter (?actUser = <{longIdCurrentUser}>).
+		        }}";
+
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            bool isIp = false;
+
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                try
+                {
+                    bool.TryParse(e["isIp"].value, out isIp);
+                }
+                catch (Exception exc) { }
+            });
+
+            return isIp;
+        }
     }
 }
