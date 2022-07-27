@@ -1273,13 +1273,21 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         public Dictionary<string, int> GetNumItems()
         {
             Dictionary<string, int> result = new Dictionary<string, int>();
-
-            result.Add("persons", persons.Where(x=>x.searchable).Count());
-            result.Add("documents", publications.Count);
-            result.Add("researchObjects", researchObjects.Count);
-            result.Add("groups", groups.Count);
-            result.Add("projects", projects.Count);
-            result.Add("offers", offers.Count);
+            result["persons"] = 0;
+            result["documents"] = 0;
+            result["researchObjects"] = 0;
+            result["groups"] = 0;
+            result["projects"] = 0;
+            result["offers"] = 0;
+            if (persons != null && publications != null && researchObjects != null && groups != null && projects != null && offers != null)
+            {
+                result.Add("persons", persons.Where(x => x.searchable).Count());
+                result.Add("documents", publications.Count);
+                result.Add("researchObjects", researchObjects.Count);
+                result.Add("groups", groups.Count);
+                result.Add("projects", projects.Count);
+                result.Add("offers", offers.Count);
+            }
 
             return result;
 
