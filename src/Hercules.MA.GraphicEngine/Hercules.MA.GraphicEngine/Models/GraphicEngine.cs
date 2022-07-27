@@ -168,7 +168,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pGraphicName">Nuevo nombre de la gráfica.</param>
         /// <param name="pGraphicOrder">Nuevo orden de la gráfica.</param>
         /// <param name="pGraphicWidth">Nuevo ancho de la gráfica.</param>
-        public static bool EditarConfig(string pLang, string pUserId, string pGraphicId, string pPageId, string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0)
+        public static bool EditarConfig(string pLang, string pUserId, string pGraphicId, string pPageId, string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0, string pBlockId = "")
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
@@ -183,11 +183,16 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 grafica.nombre[pLang] = pGraphicName;
             }
+            if (!string.IsNullOrEmpty(pBlockId))
+            {
+                grafica = configModel.graficas.Where(x => x.identificador == pBlockId).FirstOrDefault();
+            }
             // Edito la anchura de la gráfica.
             if (pGraphicWidth != 0)
             {
                 grafica.anchura = pGraphicWidth;
             }
+
             // Edito el orden de la gráfica.
             if (pGraphicOrder != 0)
             {
@@ -264,7 +269,10 @@ namespace Hercules.MA.GraphicEngine.Models
                 ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
                 mTabTemplates.Add(tab);
             }
-
+            if (!string.IsNullOrEmpty(pBlockId))
+            {
+                EditarConfig(pLang, pUserId, pGraphicId, pPageId, pGraphicName);
+            }
             return true;
         }
 
@@ -1451,7 +1459,47 @@ namespace Hercules.MA.GraphicEngine.Models
                             }
                         }
                     }
-                    resultadosDimension[itemGrafica] = listaTuplas;
+                    if (itemGrafica.dividirDatos)
+                    {
+                        HashSet<string> listaAux = new HashSet<string>();
+                        foreach (Tuple<string, string, float> tupla in listaTuplas)
+                        {
+                            listaAux.Add(tupla.Item2);
+                        }
+                        int ordenAux = itemGrafica.orden;
+                        foreach (string aux in listaAux.OrderBy(x => x))
+                        {
+                            Dimension itemAux = itemGrafica.DeepCopy();
+                            foreach (KeyValuePair<string, string> item in itemAux.nombre)
+                            {
+                                itemAux.nombre[item.Key] = item.Value + " " + aux;
+                                switch (aux)
+                                {
+                                    case "1":
+                                        itemAux.color = "#45DCB4";
+                                        break;
+                                    case "2":
+                                        itemAux.color = "#EAF112";
+                                        break;
+                                    case "3":
+                                        itemAux.color = "#DE921E";
+                                        break;
+                                    case "4":
+                                        itemAux.color = "#DC4545";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            itemAux.orden = ordenAux;
+                            ordenAux++;
+                            resultadosDimension[itemAux] = listaTuplas.Where(x => x.Item2 == aux).ToList();
+                        }
+                    }
+                    else
+                    {
+                        resultadosDimension[itemGrafica] = listaTuplas;
+                    }
                 }
             });
 
@@ -1634,11 +1682,20 @@ namespace Hercules.MA.GraphicEngine.Models
                 dimensionesDataset[item.Key] = dataset;
             }
 
-            foreach (Dimension dim in pGrafica.config.dimensiones)
+            if (pGrafica.config.dimensiones.Any(x => x.dividirDatos))
             {
-                grafica.data.datasets.Add(dimensionesDataset[dim]);
+                foreach (Dimension dim in resultadosDimension.Keys.OrderBy(x => x.orden))
+                {
+                    grafica.data.datasets.Add(dimensionesDataset[dim]);
+                }
             }
-
+            else
+            {
+                foreach (Dimension dim in pGrafica.config.dimensiones)
+                {
+                    grafica.data.datasets.Add(dimensionesDataset[dim]);
+                }
+            }
             return grafica;
         }
 
