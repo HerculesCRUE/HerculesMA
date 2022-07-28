@@ -727,7 +727,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         }
 
 
-
+        /// <summary>
+        /// Método estático para generar notificaciones a los diferentes usuarios
+        /// </summary>
+        /// <param name="mResourceApi">Objeto ResourceApi.</param>
+        /// <param name="idDDBB">Id del recurso sobre el que la notificación es generada.</param>
+        /// <param name="idPersonaFrom">Id del usuario que genera la notificación.</param>
+        /// <param name="idPersonaTo">Id del usuario que recibe la notificación.</param>
+        /// <param name="tipo">String con el tipo de notificación generada (relacionada con los literales). Por defecto 'editOferta'</param>
+        /// <param name="texto">Texto generado para la notificación, por defecto está vacío.</param>
+        /// <returns>Diccionario con las listas de thesaurus.</returns>
         internal static bool GenerarNotificacion(ResourceApi mResourceApi, string idDDBB, string idPersonaFrom, string idPersonaTo, string tipo = "editOferta", string texto = "")
         {
             ComplexOntologyResource recursoCargar = new ComplexOntologyResource();
@@ -761,7 +770,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
 
         /// <summary>
-        /// Método privado para obtener los tesauros.
+        /// Método estático para obtener los tesauros.
         /// </summary>
         /// <param name="mResourceApi">Objeto ResourceApi.</param>
         /// <param name="pListaTesauros">Listado de thesaurus a obtener.</param>
@@ -803,7 +812,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
 
         /// <summary>
-        /// Método privado para obtener las taxonomías de un 'CategoryPath'.
+        /// Método estático para obtener las taxonomías de un 'CategoryPath'.
         /// </summary>
         /// <param name="mResourceApi">Objeto del ResourceApi necesario.</param>
         /// <param name="terms">Listado de la categoría a obtener.</param>
@@ -834,6 +843,34 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             });
 
             return termsRes;
+        }
+
+        /// <summary>
+        /// Método privado para obtener las taxonomías de un 'CategoryPath'.
+        /// </summary>
+        /// <param name="mResourceApi">Objeto del ResourceApi necesario.</param>
+        /// <param name="terms">Listado de la categoría a obtener.</param>
+        /// <param name="ontology">Ontología donde se encuentra el item.</param>
+        /// <returns>listado de las categorías.</returns>
+        internal static string GetResearcherIdByGnossUser(ResourceApi mResourceApi, Guid pIdGnossUser)
+        {
+
+            // Obtener el id del usuario usando el id de la cuenta
+            string select = "select ?s ";
+            string where = @$"where {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            string userGnossId = string.Empty;
+            
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                userGnossId = e["s"].value;
+            });
+
+            return userGnossId;
         }
 
 

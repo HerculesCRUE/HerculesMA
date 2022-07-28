@@ -230,8 +230,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
-
-
         /// <summary>
         /// Método público para cargar los investigadores del grupo al que pertenece el usuario
         /// </summary>
@@ -545,28 +543,74 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// Método público para eliminar una oferta tecnológica
         /// </summary>
         /// <param name="pIdOfertaId">Identificador de la oferta</param>
+        /// <param name="pIdGnossUser">Identificador del usuario que borra el recurso</param>
         /// <returns>Diccionario con las listas de thesaurus.</returns>
-        public bool BorrarOferta(Guid pIdOfertaId)
+        public bool BorrarOferta(string pIdOfertaId, Guid pIdGnossUser)
         {
 
-            if (pIdOfertaId != Guid.Empty)
+            if (pIdOfertaId != string.Empty && pIdGnossUser != Guid.Empty)
             {
-                // Carga los datos del Cluster
-                // Models.Offer.Offer OfferData = LoadOffer(pIdOfertaId);
 
+                // Guid del usuario logueado que realiza la acción
+                Guid pIdGnossUserGuid;
+
+                // Determino si el ID de la oferta es el ID largo o un guid
+                // Si el id pasado por parámetro es un Guid, lo parseo y obtengo el id largo
+                // Si en cambio el ID es un id largo, obtengo el id corto
+                if (Guid.TryParse(pIdOfertaId, out pIdGnossUserGuid))
+                {
+                    Dictionary<Guid, string> longIdsResources = UtilidadesAPI.GetLongIds(new List<Guid>() { pIdGnossUserGuid }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                    pIdOfertaId = longIdsResources[pIdGnossUserGuid];
+                }
+                else
+                {
+                    // Obtengo el id corto del id largo pasado
+                    pIdGnossUserGuid = UtilidadesAPI.ObtenerIdCorto(mResourceApi, pIdOfertaId);
+                }
+
+                // Compruebo si el usuario tiene permisos 
+                {
+                    // Obtengo el usuario creador de la oferta
+                    string creatorId = "";
+                    string select = "SELECT distinct ?creatorId \n";
+                    string where = @$"where {{
+                            ?s <http://www.schema.org/offeredBy> ?creatorId.
+	                        FILTER(?s = <{pIdOfertaId}>)
+                        }}";
+                    try
+                    {
+                        SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offer");
+                        sparqlObject.results.bindings.ForEach(e =>
+                        {
+                            creatorId = e["creatorId"].value;
+                        });
+                    }
+                    catch (Exception e) { }
+
+
+                    // Obtengo el id del investigador relacionado con el usuario logueado que está intentando hacer la acción actual
+                    string actUserId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
+                    // Compruebo si este usuario tiene permisos para hacer la acción actual
+                    if (!CheckUpdateOffer(actUserId, creatorId, Accion.Borrar))
+                    {
+                        throw new Exception("Error al intentar borrar el estado, no tienes permiso para borrar este recurso");
+                    }
+                }
+
+
+                // Inicio el proceso de borrado
                 // Establezco las entidades secundarias a borrar
-                List<string> urlSecondaryListEntities = new() { "http://w3id.org/roh/availabilityChangeEvent" };
-
+                List<string> urlSecondaryListEntities = new() { "http://w3id.org/roh/availabilityChangeEvent", "http://w3id.org/roh/areaprocedencia", "http://w3id.org/roh/sectoraplicacion" };
+                // Establezco el ámbito a borrar
                 mResourceApi.ChangeOntoly("offer");
-
                 try
                 {
-                    mResourceApi.CommunityShortName = mResourceApi.GetCommunityShortNameByResourceID(pIdOfertaId);
+                    mResourceApi.CommunityShortName = mResourceApi.GetCommunityShortNameByResourceID(pIdGnossUserGuid);
 
                     // Establece las entidades secundarias a borrar
                     mResourceApi.DeleteSecondaryEntitiesList(ref urlSecondaryListEntities);
                     // borra el recurso
-                    mResourceApi.PersistentDelete(pIdOfertaId);
+                    mResourceApi.PersistentDelete(pIdGnossUserGuid);
                 }
                 catch (Exception e)
                 {
@@ -789,25 +833,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pIdGnossUser">Usuario de gnoss (GUID).</param>
         /// <param name="oferta">Objeto con la oferta tecnológica a añadir / modificar.</param>
         /// <returns>Id de la oferta creada o modificada.</returns>
-        public string SaveOffer(string pIdGnossUser, Offer oferta)
+        public string SaveOffer(Guid pIdGnossUser, Offer oferta)
         {
             string idRecurso = oferta.entityID;
             int MAX_INTENTOS = 10;
             bool uploadedR = false;
 
+            string select = "";
+            string where = "";
+            SparqlObject sparqlObject = null;
+
             // Obtener el id del usuario usando el id de la cuenta
-            string select = "select ?s ";
-            string where = @$"where {{
-                    ?s a <http://xmlns.com/foaf/0.1/Person>.
-                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
-                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToUpper()}>)
-                }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
-            var userGnossId = string.Empty;
-            sparqlObject.results.bindings.ForEach(e =>
-            {
-                userGnossId = e["s"].value;
-            });
+            string userGnossId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
 
             if (!string.IsNullOrEmpty(userGnossId))
             {

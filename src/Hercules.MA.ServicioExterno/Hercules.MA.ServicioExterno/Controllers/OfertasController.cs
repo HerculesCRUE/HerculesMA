@@ -47,9 +47,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// Borra una oferta
         /// </summary>
         /// <param name="pIdOfferId">Id (Guid) de la oferta a borrar.</param>
+        /// <param name="pIdGnossUser">Id del usuario que realiza la acción.</param>
         /// <returns>Un booleano si ha sido borrado.</returns>
-        [HttpGet("BorrarOferta")]
-        public IActionResult BorrarOferta([Required] Guid pIdOfferId)
+        [HttpPost("BorrarOferta")]
+        public IActionResult BorrarOferta([FromForm] string pIdOfferId, [FromForm] Guid pIdGnossUser)
         {
 
             bool borrado = false;
@@ -57,7 +58,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 AccionesOferta accionCluster = new AccionesOferta();
-                borrado = accionCluster.BorrarOferta(pIdOfferId);
+                borrado = accionCluster.BorrarOferta(pIdOfferId, pIdGnossUser);
             }
             catch (Exception)
             {
@@ -237,7 +238,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <returns>Id de la oferta creada o modificada.</returns>
         [HttpPost("SaveOffer")]
         [Produces("application/json")]
-        public IActionResult SaveOffer([FromForm] string pIdGnossUser, [FromForm] Offer oferta)
+        public IActionResult SaveOffer([FromForm] Guid pIdGnossUser, [FromForm] Offer oferta)
         {
             try
             {
