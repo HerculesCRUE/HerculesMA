@@ -880,7 +880,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pLang">Idioma</param>
         public Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>> Busqueda(string pStringBusqueda, string pLang)
         {
-            //TODO configurable
             int maxItems = 3;
             Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>> respuesta = new Dictionary<string, KeyValuePair<bool, List<ObjectSearch>>>();
 
@@ -953,10 +952,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                 }
                 if ((inputs.Count > 0 && propertiesSearch.Count > 0) || inputs.Count == 0)
-                {
+                {                    
                     if (textSearch.ContainsKey(lastInput))
                     {
-                        propertiesSearch = propertiesSearch.Intersect(textSearch[lastInput]).ToList();
+                        if (inputs.Count == 0)
+                        {
+                            propertiesSearch = textSearch[lastInput].ToList();
+                        }
+                        else
+                        {
+                            propertiesSearch = propertiesSearch.Intersect(textSearch[lastInput]).ToList();
+                        }
                     }
                     else
                     {
