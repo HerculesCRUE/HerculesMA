@@ -728,21 +728,21 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
 
 
-        internal static bool GenerarNotificacion(ResourceApi mResourceApi, string idDDBB, string idPersonaFrom, string idPersonaTo, string texto = "")
+        internal static bool GenerarNotificacion(ResourceApi mResourceApi, string idDDBB, string idPersonaFrom, string idPersonaTo, string tipo = "editOferta", string texto = "")
         {
             ComplexOntologyResource recursoCargar = new ComplexOntologyResource();
 
             // Notificación de fin de la carga
-            if (!string.IsNullOrEmpty(idPersonaFrom))
+            if (!string.IsNullOrEmpty(idPersonaTo))
             {
                 mResourceApi.ChangeOntoly("notification");
                 NotificationOntology.Notification notificacion = new NotificationOntology.Notification();
-                notificacion.IdRoh_owner = idPersonaFrom;
-                notificacion.IdRoh_trigger = idPersonaTo;
+                notificacion.IdRoh_owner = idPersonaTo;
+                notificacion.IdRoh_trigger = idPersonaFrom;
                 notificacion.Roh_text = texto;
                 notificacion.Roh_entity = idDDBB;
                 notificacion.Dct_issued = DateTime.Now;
-                notificacion.Roh_type = "edit";
+                notificacion.Roh_type = tipo;
                 recursoCargar = notificacion.ToGnossApiResource(mResourceApi);
                 int numIntentos = 0;
                 while (!recursoCargar.Uploaded)
