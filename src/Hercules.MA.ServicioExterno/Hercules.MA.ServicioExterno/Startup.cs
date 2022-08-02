@@ -33,8 +33,10 @@ namespace Hercules.MA.ServicioExterno
                 options.AddPolicy(name: "_myAllowSpecificOrigins",
                                   builder =>
                                   {
-                                      builder.AllowAnyOrigin();
+                                      builder.SetIsOriginAllowed(ComprobarDominioEnBD);
+                                      builder.AllowAnyHeader();
                                       builder.AllowAnyMethod();
+                                      builder.AllowCredentials();
                                   });
             });
 
@@ -70,6 +72,11 @@ namespace Hercules.MA.ServicioExterno
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private bool ComprobarDominioEnBD(string dominio)
+        {
+            return true;
         }
     }
 }
