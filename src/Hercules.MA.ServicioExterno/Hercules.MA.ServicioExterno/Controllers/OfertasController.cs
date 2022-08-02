@@ -79,7 +79,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="texto">Texto de la notificación.</param>
         /// <returns>String con el id del nuevo estado.</returns>
         [HttpPost("CambiarEstado")]
-        public IActionResult CambiarEstado([FromForm] Guid pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser, [FromForm] string texto = "")
+        public IActionResult CambiarEstado([FromForm] string pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser, [FromForm] string texto = "")
         {
 
             string cambiado = "";
@@ -117,7 +117,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 AccionesOferta accionCluster = new AccionesOferta();
                 foreach (var pIdOfferId in pIdOfferIds)
                 {
-                    cambiado = cambiado && accionCluster.CambiarEstado(pIdOfferId, estado, estadoActual, pIdGnossUser, texto) != String.Empty;
+                    cambiado = cambiado && accionCluster.CambiarEstado(pIdOfferId.ToString(), estado, estadoActual, pIdGnossUser, texto) != String.Empty;
                 }
             }
             catch (Exception)

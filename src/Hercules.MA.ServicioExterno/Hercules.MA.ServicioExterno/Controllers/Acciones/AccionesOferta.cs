@@ -90,10 +90,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
         /// <param name="texto">String con el texto personalizado para la notificación</param>
         /// <returns>String con el id del nuevo estado.</returns>
-        internal string CambiarEstado(Guid idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser, string texto)
+        internal string CambiarEstado(string idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser, string texto)
         {
 
-            Dictionary<Guid, string> longsId = null;
+            // Obtengo el id de la oferta si es Guid
+            Guid guid = Guid.Empty;
+            Dictionary<Guid, string> longsId = new();
+            if (Guid.TryParse(idRecurso, out guid))
+            {
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                idRecurso = longsId[guid];
+            }
+
             Offer oferta = null;
 
             // Obtener el id del usuario usando el id de la cuenta
@@ -124,15 +132,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
             // Modificar el estado y añadir un nuevo estado en el "historial"
-            if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && idRecurso != Guid.Empty)
+            if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && guid != Guid.Empty)
             {
 
 
                 // Obtengo el recurso al que pretendo modificar el estado
                 // Es necesario para las notificaciones y para comprobar si tengo o no permisos
                 // Obtengo el recurso para conseguir el id del creador de la oferta
-                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso }, mResourceApi, "http://www.schema.org/Offer", "offer");
-                oferta = LoadOffer(longsId[idRecurso], false);
+                oferta = LoadOffer(longsId[guid], false);
 
                 // Compruebo si se tiene permisos para realizar la actualización de la oferta
                 if (!CheckUpdateOffer(userGnossId, oferta.creatorId, Accion.CambiarEstado, estadoActual, nuevoEstado))
@@ -146,8 +153,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 // Inserto un historial en la base de datos
                 // Obtengo el guid del recurso
-                // Guid guid = mResourceApi.GetShortGuid(idRecurso);
-                Guid guid = idRecurso;
                 // Inicio el diccionario con el triplete
                 Dictionary<Guid, List<TriplesToInclude>> triples = new() { { guid, new List<TriplesToInclude>() } };
                 // Creo el id del recurso auxiliar para guardarlo
@@ -203,7 +208,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     if (texto != "" && longsId != null && oferta != null)
                     {
                         texto = (nuevoEstado != estadoActual) ? "Nuevo estado de la oferta " + getEstado(nuevoEstado).ToString() + " " + texto : "Tienes un mensaje: " + texto;
-                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, oferta.creatorId, "editOferta", texto);
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[guid], userGnossId, oferta.creatorId, "editOferta", texto);
                     }
 
                     // Avisamos al gestor otri de que hay nuevas ofertas disponibles para validar
@@ -213,14 +218,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         // Obtengo los usuarios otri disponibles para el usuario creador de la oferta, y les aviso de que ya pueden activarla
                         GetOtriId(oferta.creatorId).ForEach(idOtri =>
                         {
-                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
+                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[guid], userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
                         });
                     }
 
                     // Avisamos al investigador creador de la oferta
                     if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
                     {
-                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido aprobada");
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido aprobada");
                     }
                 }
 
