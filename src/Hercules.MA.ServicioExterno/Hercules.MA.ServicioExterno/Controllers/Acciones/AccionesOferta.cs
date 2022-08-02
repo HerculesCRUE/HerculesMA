@@ -1794,7 +1794,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                             // Es el gestor otri o el IP
                             // Mensaje de mejora
-                            if ((isOwnUser || isIp) && estadoNuevo == Estado.Revision)
+                            if ((isOtriManager || isIp) && estadoNuevo == Estado.Revision)
                             {
                                 return true;
                             }
