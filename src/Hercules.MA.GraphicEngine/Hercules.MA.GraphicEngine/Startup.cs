@@ -33,8 +33,10 @@ namespace Hercules.MA.GraphicEngine
                 options.AddPolicy(name: "_myAllowSpecificOrigins",
                                   builder =>
                                   {
-                                      builder.AllowAnyOrigin();
+                                      builder.SetIsOriginAllowed(ComprobarDominioEnBD);
+                                      builder.AllowAnyHeader();
                                       builder.AllowAnyMethod();
+                                      builder.AllowCredentials();
                                   });
             });
 
@@ -82,6 +84,11 @@ namespace Hercules.MA.GraphicEngine
                       });
             });
             app.UseSwaggerUI(c => c.SwaggerEndpoint("v1/swagger.json", "Hercules.MA.GraphicEngine"));
+        }
+
+        private bool ComprobarDominioEnBD(string dominio)
+        {
+            return true;
         }
     }
 }
