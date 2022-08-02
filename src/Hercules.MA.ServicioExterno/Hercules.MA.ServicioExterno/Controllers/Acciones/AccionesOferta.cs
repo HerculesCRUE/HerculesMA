@@ -1586,7 +1586,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         /// <summary>
-        /// Método que lista el perfil de usuarios al que pertenece el usuario actual.
+        /// Método que lista el perfil de usuarios al que pertenece el usuario actual respecto a una oferta tecnológica dada.
         /// </summary>
         /// <param name="pIdOfertaId">Id (Long Id) de la oferta</param>
         /// <param name="pIdGnossUser">Id del usuario actual</param>
