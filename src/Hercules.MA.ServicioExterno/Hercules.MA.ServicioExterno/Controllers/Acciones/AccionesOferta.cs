@@ -1639,17 +1639,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
                 // Añade cada perfil de usuario al diccionario indicando si el usuario actual pertenece al mismo
-                perfiles.Add("isOwnUser", isOwnUser);
-                perfiles.Add("isOtriManager", isOtriManager);
-                perfiles.Add("isIp", isIp);
+                perfiles.Add("own", isOwnUser);
+                perfiles.Add("otri", isOtriManager);
+                perfiles.Add("ip", isIp);
 
             }
             else
             {
                 // Añade los perfiles de usuario como "false" 
-                perfiles.Add("isOwnUser", false);
-                perfiles.Add("isOtriManager", false);
-                perfiles.Add("isIp", false);
+                perfiles.Add("own", false);
+                perfiles.Add("otri", false);
+                perfiles.Add("ip", false);
             }
 
             // Devuelvo el diccionario con los perfiles resultantes
