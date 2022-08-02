@@ -67,7 +67,7 @@ namespace Hercules.MA.ServicioExterno
                         new OpenApiServer { Url = $"/" }
                       });
             });
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("v1/swagger.json", "EditorCV v1"));
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("v1/swagger.json", "Servicio externo v1"));
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
