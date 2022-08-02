@@ -1583,6 +1583,81 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
+
+
+        /// <summary>
+        /// Método que lista el perfil de usuarios al que pertenece el usuario actual.
+        /// </summary>
+        /// <param name="pIdOfertaId">Id (Long Id) de la oferta</param>
+        /// <param name="pIdGnossUser">Id del usuario actual</param>
+        /// <returns>Retorna un diccionario con la relación entre cada perfil de usuario y un bool indicando si el usuario pertenece al mismo.</returns>
+        public Dictionary<string, bool> CheckUpdateActionsOffer(string pIdOfertaId, Guid pIdGnossUser)
+        {
+
+            // Obtengo el id de la oferta si es Guid
+            Guid guidOferta = Guid.Empty;
+            if (Guid.TryParse(pIdOfertaId, out guidOferta))
+            {
+                var longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidOferta }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                pIdOfertaId = longsId[guidOferta];
+            }
+
+            // Obtengo el id del investigador del usuario conectado
+            string longUserId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
+
+            // Variables
+            string ownUserId = "";
+            Dictionary<string, bool> perfiles = new();
+
+
+            // Obtengo el id del investigador creador de la oferta
+            {
+                string select = "SELECT distinct ?creatorId \n";
+                string where = @$"where {{
+                            ?s <http://www.schema.org/offeredBy> ?creatorId.
+	                        FILTER(?s = <{pIdOfertaId}>)
+                        }}";
+                try
+                {
+                    SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offer");
+                    sparqlObject.results.bindings.ForEach(e =>
+                    {
+                        ownUserId = e["creatorId"].value;
+                    });
+                }
+                catch (Exception e) { }
+
+            }
+
+
+            // Compruebo si el usuario tiene permisos 
+            if (ownUserId != string.Empty)
+            {
+                bool isOwnUser = longUserId == ownUserId;
+                bool isOtriManager = GetOtriId(ownUserId).Contains(longUserId);
+                bool isIp = checkIsIp(longUserId, ownUserId);
+
+
+                // Añade cada perfil de usuario al diccionario indicando si el usuario actual pertenece al mismo
+                perfiles.Add("isOwnUser", isOwnUser);
+                perfiles.Add("isOtriManager", isOtriManager);
+                perfiles.Add("isIp", isIp);
+
+            }
+            else
+            {
+                // Añade los perfiles de usuario como "false" 
+                perfiles.Add("isOwnUser", false);
+                perfiles.Add("isOtriManager", false);
+                perfiles.Add("isIp", false);
+            }
+
+            // Devuelvo el diccionario con los perfiles resultantes
+            return perfiles;
+        }
+
+
+
         /// <summary>
         /// Método privado que obtiene los ids de las categorías superiores.
         /// </summary>
@@ -1746,6 +1821,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             return false;
         }
+
+
 
         /// <summary>
         /// Método que obtiene el listado de usuarios otri disponibles para el usuario en cuestión.

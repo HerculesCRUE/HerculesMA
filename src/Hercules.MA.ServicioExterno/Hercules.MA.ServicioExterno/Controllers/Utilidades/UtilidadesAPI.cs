@@ -846,12 +846,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         }
 
         /// <summary>
-        /// Método privado para obtener las taxonomías de un 'CategoryPath'.
+        /// Método que obtiene el id investigador del usuario logueado
         /// </summary>
         /// <param name="mResourceApi">Objeto del ResourceApi necesario.</param>
-        /// <param name="terms">Listado de la categoría a obtener.</param>
-        /// <param name="ontology">Ontología donde se encuentra el item.</param>
-        /// <returns>listado de las categorías.</returns>
+        /// <param name="pIdGnossUser">Id corto del usuario.</param>
+        /// <returns>listado del usuario investigador.</returns>
         internal static string GetResearcherIdByGnossUser(ResourceApi mResourceApi, Guid pIdGnossUser)
         {
 

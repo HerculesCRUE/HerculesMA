@@ -274,5 +274,29 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
 
+
+
+        /// <summary>
+        /// Controlador para crear/actualizar los datos de la oferta 
+        /// </summary>
+        /// <param name="pIdOfertaId">Usuario de gnoss que realiza la acción.</param>
+        /// <param name="longUserId">Objeto con la oferta tecnológica a crear/actualizar.</param>
+        /// <returns>Id de la oferta creada o modificada.</returns>
+        [HttpPost("GetUserProfileInOffer")]
+        public IActionResult GetUserProfileInOffer([FromForm] string pIdOfertaId, [FromForm] Guid longUserId)
+        {
+            try
+            {
+                AccionesOferta accionOferta = new AccionesOferta();
+                // return Ok(true);
+                return Ok(accionOferta.CheckUpdateActionsOffer(pIdOfertaId, longUserId));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
     }
 }
