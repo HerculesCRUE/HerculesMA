@@ -16,6 +16,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         public FuentesExternasController(ConfigService pConfig)
         {
             _Configuracion = pConfig;
+
         }
 
         [HttpGet("InsertToQueue")]
