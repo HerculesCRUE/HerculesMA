@@ -90,10 +90,21 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
         /// <param name="texto">String con el texto personalizado para la notificación</param>
         /// <returns>String con el id del nuevo estado.</returns>
-        internal string CambiarEstado(Guid idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser, string texto)
+        internal string CambiarEstado(string idRecurso, string nuevoEstado, string estadoActual , Guid pIdGnossUser, string texto)
         {
 
-            Dictionary<Guid, string> longsId = null;
+            // Obtengo el id de la oferta si es Guid
+            Guid guid = Guid.Empty;
+            Dictionary<Guid, string> longsId = new();
+            if (Guid.TryParse(idRecurso, out guid))
+            {
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                idRecurso = longsId[guid];
+            } else
+            {
+                guid= mResourceApi.GetShortGuid(idRecurso);
+            }
+
             Offer oferta = null;
 
             // Obtener el id del usuario usando el id de la cuenta
@@ -124,15 +135,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
             // Modificar el estado y añadir un nuevo estado en el "historial"
-            if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && idRecurso != Guid.Empty)
+            if (!string.IsNullOrEmpty(userGnossId) && !string.IsNullOrEmpty(nuevoEstado) && guid != Guid.Empty)
             {
 
 
                 // Obtengo el recurso al que pretendo modificar el estado
                 // Es necesario para las notificaciones y para comprobar si tengo o no permisos
                 // Obtengo el recurso para conseguir el id del creador de la oferta
-                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { idRecurso }, mResourceApi, "http://www.schema.org/Offer", "offer");
-                oferta = LoadOffer(longsId[idRecurso], false);
+                oferta = LoadOffer(idRecurso, false);
 
                 // Compruebo si se tiene permisos para realizar la actualización de la oferta
                 if (!CheckUpdateOffer(userGnossId, oferta.creatorId, Accion.CambiarEstado, estadoActual, nuevoEstado))
@@ -146,8 +156,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 // Inserto un historial en la base de datos
                 // Obtengo el guid del recurso
-                // Guid guid = mResourceApi.GetShortGuid(idRecurso);
-                Guid guid = idRecurso;
                 // Inicio el diccionario con el triplete
                 Dictionary<Guid, List<TriplesToInclude>> triples = new() { { guid, new List<TriplesToInclude>() } };
                 // Creo el id del recurso auxiliar para guardarlo
@@ -203,7 +211,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     if (texto != "" && longsId != null && oferta != null)
                     {
                         texto = (nuevoEstado != estadoActual) ? "Nuevo estado de la oferta " + getEstado(nuevoEstado).ToString() + " " + texto : "Tienes un mensaje: " + texto;
-                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, oferta.creatorId, "editOferta", texto);
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", texto);
                     }
 
                     // Avisamos al gestor otri de que hay nuevas ofertas disponibles para validar
@@ -213,14 +221,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         // Obtengo los usuarios otri disponibles para el usuario creador de la oferta, y les aviso de que ya pueden activarla
                         GetOtriId(oferta.creatorId).ForEach(idOtri =>
                         {
-                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
+                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
                         });
                     }
 
                     // Avisamos al investigador creador de la oferta
                     if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
                     {
-                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[idRecurso], userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido aprobada");
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido aprobada");
                     }
                 }
 
@@ -1583,6 +1591,81 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
+
+
+        /// <summary>
+        /// Método que lista el perfil de usuarios al que pertenece el usuario actual respecto a una oferta tecnológica dada.
+        /// </summary>
+        /// <param name="pIdOfertaId">Id (Long Id) de la oferta</param>
+        /// <param name="pIdGnossUser">Id del usuario actual</param>
+        /// <returns>Retorna un diccionario con la relación entre cada perfil de usuario y un bool indicando si el usuario pertenece al mismo.</returns>
+        public Dictionary<string, bool> CheckUpdateActionsOffer(string pIdOfertaId, Guid pIdGnossUser)
+        {
+
+            // Obtengo el id de la oferta si es Guid
+            Guid guidOferta = Guid.Empty;
+            if (Guid.TryParse(pIdOfertaId, out guidOferta))
+            {
+                var longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidOferta }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                pIdOfertaId = longsId[guidOferta];
+            }
+
+            // Obtengo el id del investigador del usuario conectado
+            string longUserId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
+
+            // Variables
+            string ownUserId = "";
+            Dictionary<string, bool> perfiles = new();
+
+
+            // Obtengo el id del investigador creador de la oferta
+            {
+                string select = "SELECT distinct ?creatorId \n";
+                string where = @$"where {{
+                            ?s <http://www.schema.org/offeredBy> ?creatorId.
+	                        FILTER(?s = <{pIdOfertaId}>)
+                        }}";
+                try
+                {
+                    SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offer");
+                    sparqlObject.results.bindings.ForEach(e =>
+                    {
+                        ownUserId = e["creatorId"].value;
+                    });
+                }
+                catch (Exception e) { }
+
+            }
+
+
+            // Compruebo si el usuario tiene permisos 
+            if (ownUserId != string.Empty)
+            {
+                bool isOwnUser = longUserId == ownUserId;
+                bool isOtriManager = GetOtriId(ownUserId).Contains(longUserId);
+                bool isIp = checkIsIp(longUserId, ownUserId);
+
+
+                // Añade cada perfil de usuario al diccionario indicando si el usuario actual pertenece al mismo
+                perfiles.Add("own", isOwnUser);
+                perfiles.Add("otri", isOtriManager);
+                perfiles.Add("ip", isIp);
+
+            }
+            else
+            {
+                // Añade los perfiles de usuario como "false" 
+                perfiles.Add("own", false);
+                perfiles.Add("otri", false);
+                perfiles.Add("ip", false);
+            }
+
+            // Devuelvo el diccionario con los perfiles resultantes
+            return perfiles;
+        }
+
+
+
         /// <summary>
         /// Método privado que obtiene los ids de las categorías superiores.
         /// </summary>
@@ -1746,6 +1829,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             return false;
         }
+
+
 
         /// <summary>
         /// Método que obtiene el listado de usuarios otri disponibles para el usuario en cuestión.

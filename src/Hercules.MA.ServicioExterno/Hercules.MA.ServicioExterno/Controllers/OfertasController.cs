@@ -79,7 +79,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="texto">Texto de la notificación.</param>
         /// <returns>String con el id del nuevo estado.</returns>
         [HttpPost("CambiarEstado")]
-        public IActionResult CambiarEstado([FromForm] Guid pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser, [FromForm] string texto = "")
+        public IActionResult CambiarEstado([FromForm] string pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser, [FromForm] string texto = "")
         {
 
             string cambiado = "";
@@ -117,7 +117,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 AccionesOferta accionCluster = new AccionesOferta();
                 foreach (var pIdOfferId in pIdOfferIds)
                 {
-                    cambiado = cambiado && accionCluster.CambiarEstado(pIdOfferId, estado, estadoActual, pIdGnossUser, texto) != String.Empty;
+                    cambiado = cambiado && accionCluster.CambiarEstado(pIdOfferId.ToString(), estado, estadoActual, pIdGnossUser, texto) != String.Empty;
                 }
             }
             catch (Exception)
@@ -255,9 +255,12 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Controlador para crear/actualizar los datos de la oferta 
         /// </summary>
-        /// <param name="pIdGnossUser">Usuario de gnoss que realiza la acción.</param>
-        /// <param name="oferta">Objeto con la oferta tecnológica a crear/actualizar.</param>
-        /// <returns>Id de la oferta creada o modificada.</returns>
+        /// <param name="idRecurso">.</param>
+        /// <param name="nuevoEstado">.</param
+        /// <param name="estadoActual">.</param>
+        /// <param name="predicado">.</param>
+        /// <param name="pIdGnossUser">.</param>
+        /// <returns></returns>
         [HttpPost("ModificarTripleteUsuario")]
         public IActionResult ModificarTripleteUsuario([FromForm] string idRecurso, [FromForm] string nuevoEstado, [FromForm] string estadoActual, [FromForm] string predicado, [FromForm] Guid pIdGnossUser)
         {
@@ -266,6 +269,30 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 AccionesOferta accionOferta = new AccionesOferta();
                 return Ok(true);
                 // return Ok(accionOferta.ModificarTripleteUsuario(idRecurso, nuevoEstado, estadoActual, predicado, pIdGnossUser));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
+
+        /// <summary>
+        /// Controlador que lista el perfil de usuarios al que pertenece el usuario actual respecto a una oferta tecnológica dada 
+        /// </summary>
+        /// <param name="pIdOfertaId">Id de la oferta tecnológica.</param>
+        /// <param name="userId">Usuario de gnoss que realiza la acción.</param>
+        /// <returns>Objeto json.</returns>
+        [HttpPost("GetUserProfileInOffer")]
+        public IActionResult GetUserProfileInOffer([FromForm] string pIdOfertaId, [FromForm] Guid userId)
+        {
+            try
+            {
+                AccionesOferta accionOferta = new AccionesOferta();
+                // return Ok(true);
+                return Ok(accionOferta.CheckUpdateActionsOffer(pIdOfertaId, userId));
             }
             catch (Exception)
             {
