@@ -150,59 +150,64 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     throw new Exception("Error al intentar modificar el estado, no tienes permiso para cambiar a este estado");
                 }
 
-                // Añadir cambio en el historial de la disponibilidad
-                // Comprueba si el id del recuro no está vacío
-                mResourceApi.ChangeOntoly("offer");
 
-                // Inserto un historial en la base de datos
-                // Obtengo el guid del recurso
-                // Inicio el diccionario con el triplete
-                Dictionary<Guid, List<TriplesToInclude>> triples = new() { { guid, new List<TriplesToInclude>() } };
-                // Creo el id del recurso auxiliar para guardarlo
-                string idAux = mResourceApi.GraphsUrl + "items/AvailabilityChangeEvent_" + guid.ToString().ToLower() + "_" + Guid.NewGuid().ToString().ToLower();
-
-                // Creo los tripletes
-                TriplesToInclude t1 = new();
-                t1.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://w3id.org/roh/roleOf";
-                t1.NewValue = idAux + "|" + userGnossId;
-                triples[guid].Add(t1);
-                TriplesToInclude t2 = new();
-                t2.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://www.schema.org/availability";
-                t2.NewValue = idAux + "|" + nuevoEstado;
-                triples[guid].Add(t2);
-                TriplesToInclude t3 = new();
-                t3.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://www.schema.org/validFrom";
-                t3.NewValue = idAux + "|" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-                triples[guid].Add(t3);
-
-                try
+                if (nuevoEstado != estadoActual)
                 {
-                    // Guardo los tripletes
-                    var resultado = mResourceApi.InsertPropertiesLoadedResources(triples);
-                } catch (Exception e)
-                {
-                    throw;
+                    // Añadir cambio en el historial de la disponibilidad
+                    // Comprueba si el id del recuro no está vacío
+                    mResourceApi.ChangeOntoly("offer");
+
+                    // Inserto un historial en la base de datos
+                    // Obtengo el guid del recurso
+                    // Inicio el diccionario con el triplete
+                    Dictionary<Guid, List<TriplesToInclude>> triples = new() { { guid, new List<TriplesToInclude>() } };
+                    // Creo el id del recurso auxiliar para guardarlo
+                    string idAux = mResourceApi.GraphsUrl + "items/AvailabilityChangeEvent_" + guid.ToString().ToLower() + "_" + Guid.NewGuid().ToString().ToLower();
+
+                    // Creo los tripletes
+                    TriplesToInclude t1 = new();
+                    t1.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://w3id.org/roh/roleOf";
+                    t1.NewValue = idAux + "|" + userGnossId;
+                    triples[guid].Add(t1);
+                    TriplesToInclude t2 = new();
+                    t2.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://www.schema.org/availability";
+                    t2.NewValue = idAux + "|" + nuevoEstado;
+                    triples[guid].Add(t2);
+                    TriplesToInclude t3 = new();
+                    t3.Predicate = "http://w3id.org/roh/availabilityChangeEvent|http://www.schema.org/validFrom";
+                    t3.NewValue = idAux + "|" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                    triples[guid].Add(t3);
+
+                    try
+                    {
+                        // Guardo los tripletes
+                        var resultado = mResourceApi.InsertPropertiesLoadedResources(triples);
+                    }
+                    catch (Exception e)
+                    {
+                        throw;
+                    }
+
+                    // Modifico el estado
+                    try
+                    {
+                        Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
+                        List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+
+
+                        // Modificación (Triples).
+                        TriplesToModify triple = new TriplesToModify();
+                        triple.Predicate = "http://www.schema.org/availability";
+                        triple.NewValue = nuevoEstado;
+                        triple.OldValue = estadoActual;
+                        listaTriplesModificacion.Add(triple);
+
+                        // Modificación.
+                        dicModificacion.Add(guid, listaTriplesModificacion);
+                        mResourceApi.ModifyPropertiesLoadedResources(dicModificacion);
+                    }
+                    catch (Exception e) { throw; }
                 }
-
-                // Modifico el estado
-                try
-                {
-                    Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-                    List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
-
-
-                    // Modificación (Triples).
-                    TriplesToModify triple = new TriplesToModify();
-                    triple.Predicate = "http://www.schema.org/availability";
-                    triple.NewValue = nuevoEstado;
-                    triple.OldValue = estadoActual;
-                    listaTriplesModificacion.Add(triple);
-
-                    // Modificación.
-                    dicModificacion.Add(guid, listaTriplesModificacion);
-                    mResourceApi.ModifyPropertiesLoadedResources(dicModificacion);
-                }
-                catch (Exception e) { throw; }
 
 
                 // ENVIAMOS LAS NOTIFICACIONES
@@ -215,7 +220,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
 
                     // Avisamos al gestor otri de que hay nuevas ofertas disponibles para validar
-                    if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_002")
+                    else if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_002")
                     {
 
                         // Obtengo los usuarios otri disponibles para el usuario creador de la oferta, y les aviso de que ya pueden activarla
@@ -226,7 +231,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
 
                     // Avisamos al investigador creador de la oferta
-                    if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
+                    else if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
                     {
                         bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido aprobada");
                     }
@@ -1783,6 +1788,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             // Es el gestor otri
                             // Puede pasar la oferta a borrador
                             if (isOtriManager && (estadoNuevo == Estado.Validada || estadoNuevo == Estado.Denegada))
+                            {
+                                return true;
+                            }
+
+                            // Es el gestor otri o el IP
+                            // Mensaje de mejora
+                            if ((isOwnUser || isIp) && estadoNuevo == Estado.Revision)
                             {
                                 return true;
                             }
