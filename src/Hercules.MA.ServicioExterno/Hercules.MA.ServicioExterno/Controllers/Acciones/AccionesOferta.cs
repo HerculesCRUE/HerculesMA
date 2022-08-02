@@ -100,6 +100,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceApi, "http://www.schema.org/Offer", "offer");
                 idRecurso = longsId[guid];
+            } else
+            {
+                guid= mResourceApi.GetShortGuid(idRecurso);
             }
 
             Offer oferta = null;
@@ -139,7 +142,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Obtengo el recurso al que pretendo modificar el estado
                 // Es necesario para las notificaciones y para comprobar si tengo o no permisos
                 // Obtengo el recurso para conseguir el id del creador de la oferta
-                oferta = LoadOffer(longsId[guid], false);
+                oferta = LoadOffer(idRecurso, false);
 
                 // Compruebo si se tiene permisos para realizar la actualización de la oferta
                 if (!CheckUpdateOffer(userGnossId, oferta.creatorId, Accion.CambiarEstado, estadoActual, nuevoEstado))
@@ -208,7 +211,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     if (texto != "" && longsId != null && oferta != null)
                     {
                         texto = (nuevoEstado != estadoActual) ? "Nuevo estado de la oferta " + getEstado(nuevoEstado).ToString() + " " + texto : "Tienes un mensaje: " + texto;
-                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[guid], userGnossId, oferta.creatorId, "editOferta", texto);
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", texto);
                     }
 
                     // Avisamos al gestor otri de que hay nuevas ofertas disponibles para validar
@@ -218,7 +221,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         // Obtengo los usuarios otri disponibles para el usuario creador de la oferta, y les aviso de que ya pueden activarla
                         GetOtriId(oferta.creatorId).ForEach(idOtri =>
                         {
-                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, longsId[guid], userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
+                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
                         });
                     }
 
