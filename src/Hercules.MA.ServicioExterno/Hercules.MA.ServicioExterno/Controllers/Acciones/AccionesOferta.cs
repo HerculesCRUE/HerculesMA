@@ -233,7 +233,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     // Avisamos al investigador creador de la oferta
                     else if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
                     {
-                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido aprobada");
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido validada");
                     }
                 }
 
