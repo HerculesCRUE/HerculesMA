@@ -75,6 +75,7 @@ namespace AnnotationOntology
 		{
 			ComplexOntologyResource resource = new ComplexOntologyResource();
 			Ontology ontology = null;
+			GetEntities();
 			GetProperties();
 			if (idrecurso.Equals(Guid.Empty) && idarticulo.Equals(Guid.Empty))
 			{
