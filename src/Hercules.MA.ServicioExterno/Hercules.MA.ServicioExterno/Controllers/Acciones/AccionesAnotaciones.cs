@@ -154,11 +154,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             if (!string.IsNullOrEmpty(userGnossId))
             {
 
-
-
-
-                // Registrar cambio en la disponibilidad
-
                 // creando los cluster
                 Annotation cRsource = new();
 
