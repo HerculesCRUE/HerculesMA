@@ -53,7 +53,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// "http://w3id.org/roh/ResearchObject", "researchobject"
         /// </summary>
         /// <param name="idRO">Id del RO</param>
-        /// <param name="idUser">Id del usuario </param>
+        /// <param name="idUser">Id (GUID) del usuario </param>
         /// <param name="rdfType">rdfType de la ontología </param>
         /// <param name="ontology">Nombre de la ontología </param>
         /// <param name="texto">Texto de la anotación</param>
@@ -67,7 +67,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 AccionesAnotaciones annotations = new AccionesAnotaciones();
-                anotacionesId = annotations.CreateNewAnnotation(idRO, idUser, rdfType, ontology, texto);
+                anotacionesId = annotations.CreateNewAnnotation(idRO, idUser, rdfType, ontology, texto, idAnnotation);
             }
             catch (Exception)
             {
