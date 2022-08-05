@@ -30,7 +30,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpPost("GetOwnAnnotationsInRO")]
         public IActionResult GetOwnAnnotationsInRO([FromForm] string idRO, [FromForm] string idUser, [FromForm] string rdfType, [FromForm] string ontology)
         {
-            Dictionary<string, string> anotaciones;
+            List<Dictionary<string, string>> anotaciones;
 
             try
             {

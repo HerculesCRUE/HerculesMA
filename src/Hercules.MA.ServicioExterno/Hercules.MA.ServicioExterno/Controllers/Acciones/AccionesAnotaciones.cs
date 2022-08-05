@@ -25,10 +25,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string COLOR_GRAFICAS_HORIZONTAL = "#6cafe3"; //#1177ff
         #endregion
 
-        public Dictionary<string, string> GetOwnAnnotationsInRO(string idRO, string idUser, string rdfType, string ontology)
+        public List<Dictionary<string, string>> GetOwnAnnotationsInRO(string idRO, string idUser, string rdfType, string ontology)
         {
 
-            //Dictionary<string, string> typesRO = new Dictionary<string, string>();
+            List<Dictionary<string, string>> typesRO = new();
+
             // "http://purl.org/ontology/bibo/Document", "document"
             // "http://w3id.org/roh/ResearchObject", "researchobject"
             //typesRO.Add("document", "http://purl.org/ontology/bibo/Document");
@@ -52,48 +53,52 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtengo el id del usuario si es Guid
             Guid guidUser = Guid.Empty;
             Dictionary<Guid, string> longsIdUs = new();
-            if (Guid.TryParse(idUser, out guidUser))
-            {
-                longsIdUs = UtilidadesAPI.GetLongIds(new List<Guid>() { guidUser }, mResourceApi, "http://xmlns.com/foaf/0.1/Person", "person");
-                idUser = longsIdUs[guidUser];
-            }
-            else
+            if (!Guid.TryParse(idUser, out guidUser))
             {
                 guidUser = mResourceApi.GetShortGuid(idUser);
             }
 
 
+            // Obtener el id del usuario usando el id de la cuenta
+            string userGnossId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, guidUser);
+
+
+
 
             // Obtenemos todos los datos de los perfiles y Añadimos el perfil creado a los datos de la oferta
-            string select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
+            string select = "select distinct ?s ?date ?texto FROM <http://gnoss.com/annotation.owl>";
+
+            //string filterRO = "";
+            //switch (ontology)
+            //{
+            //    case "document":
+            //        filterRO = @$"
+            //            ?s <http://w3id.org/roh/document> ?document.
+            //            FILTER(?document = <{idRO}>)) ";
+            //        break;
+
+            //    case "researchobject":
+            //        filterRO = @$"
+            //            ?s <http://w3id.org/roh/researchobject> ?ro.
+            //            FILTER(?ro = <{idRO}>)) ";
+            //        break;
+            //}
+
             string where = @$"where {{
-                ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
-                OPTIONAL {{
-                    ?doc a <http://purl.org/ontology/bibo/Document>.
-                    ?doc <http://w3id.org/roh/isValidated> 'true'.
-                    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
-                    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
-                }}
-                OPTIONAL {{
-                    ?proj a <http://vivoweb.org/ontology/core#Project>.
-                    ?proj <http://w3id.org/roh/isValidated> 'true'.
-                    ?proj <http://vivoweb.org/ontology/core#relates> ?listprojauth.
-                    ?listprojauth <http://w3id.org/roh/roleOf> ?memberPerfil.
-                    ?listprojauth <http://w3id.org/roh/isIP> 'true'.
-                }}
-                OPTIONAL {{
-                    ?memberPerfil <http://w3id.org/roh/hasPosition> ?hasPosition.
-                }}
-                OPTIONAL {{
-                    ?memberPerfil <http://vivoweb.org/ontology/core#departmentOrSchool> ?dept.
-                    ?dept <http://purl.org/dc/elements/1.1/title> ?departamento
-                }}
-                OPTIONAL {{
-                    ?memberPerfil <http://w3id.org/roh/hasRole> ?org.
-                    ?org <http://w3id.org/roh/title> ?tituloOrg
-                }}
-                FILTER(?memberPerfil = {idRO}))
-            }}";
+
+                ?s a <http://w3id.org/roh/Annotation>.
+                ?s <http://w3id.org/roh/text> ?text.
+                ?s <http://w3id.org/roh/dateIssued> ?date.
+
+                # Filtra por el RO
+                ?s ?roRfType ?ro.
+                FILTER (?roRfType in (<http://w3id.org/roh/document>, <http://w3id.org/roh/researchobject>))
+                FILTER(?ro = <{idRO}>)
+
+                # Filtra por el usuario actual 
+                ?s <http://w3id.org/roh/owner> ?user.
+                FILTER(?user = <{userGnossId}>)
+            }} ORDER BY DESC(?date)";
 
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
 
@@ -102,7 +107,28 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 try
                 {
-                    var id = e["memberPerfil"].value;
+                    // Cargamos las variables
+                    var id = e["s"].value;
+                    var texto = e["texto"].value;
+
+                    // Cargamos la fecha
+                    DateTime fechaDate = DateTime.UtcNow;
+                    var fecha = DateTime.UtcNow.ToString("g");
+                    try
+                    {
+                        fechaDate = DateTime.ParseExact(e["date"].value, "yyyyMMddHHmmss", null);
+                        fecha = fechaDate.ToString("g");
+                    }
+                    catch (Exception exc) { }
+                    
+                    // Creamos el diccionario
+                    Dictionary<string, string> longs = new Dictionary<string, string>();
+                    longs.Add("id", id);
+                    longs.Add("fecha", fecha);
+                    longs.Add("texto", texto);
+
+                    // Añadimos el diccionario al listado
+                    typesRO.Add(longs);
 
                 }
                 catch (Exception ext) { new Exception("Ha habido un error al procesar los datos de los usuarios:" + ext.Message); }
@@ -111,7 +137,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
 
-            return new Dictionary<string, string>();
+            return typesRO;
         }
 
 
