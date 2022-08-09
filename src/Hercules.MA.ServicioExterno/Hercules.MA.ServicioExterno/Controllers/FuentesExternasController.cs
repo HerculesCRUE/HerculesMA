@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -97,13 +98,15 @@ namespace Hercules.MA.ServicioExterno.Controllers
                     List<string> listaDatos = new List<string>() { pDoi, pNombreCompletoAutor, pOrcid };
                     rabbitMQService.PublishMessage(listaDatos, _Configuracion.GetDoiQueueRabbit());
                 }
+
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Log.Error($"{DateTime.Now} - {ex.Message}\n{ex.StackTrace}\n");
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>
