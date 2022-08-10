@@ -96,14 +96,17 @@ namespace Hercules.MA.ServicioExterno.Controllers
                     // Inserción a la cola.
                     List<string> listaDatos = new List<string>() { pDoi, pNombreCompletoAutor, pOrcid };
                     rabbitMQService.PublishMessage(listaDatos, _Configuracion.GetDoiQueueRabbit());
+
+                    return true;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                string s = e.Message;
                 throw;
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>
