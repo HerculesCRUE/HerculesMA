@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -99,11 +100,12 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
                     return true;
                 }
+
+                return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                string s = e.Message;
-                throw;
+                Log.Error($"{DateTime.Now} - {ex.Message}\n{ex.StackTrace}\n");
             }
 
             return false;
