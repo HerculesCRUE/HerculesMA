@@ -36,11 +36,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             listaData.Add(new DataUser() { nombre = "Token de FigShare", id = "tokenFigShare", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Usuario de GitHub", id = "usuarioGitHub", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Token de GitHub", id = "tokenGitHub", valor = string.Empty });
-            listaData.Add(new DataUser() { nombre = "Matching", id = "useMatching", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "ORCID", id = "orcid", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Wos ID", id = "researcherId", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Scopus ID", id = "scopusId", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Semantic Scholar ID", id = "semanticScholarId", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Matching", id = "useMatching", valor = string.Empty });
 
             string idGnossUser = $@"http://gnoss/{pIdGnossUser.ToUpper()}";
             SparqlObject resultadoQuery = null;
@@ -48,18 +48,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?useMatching ?orcid ?wosId ?scopusId ?semanticScholarId");
+            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?orcid ?researcherId ?scopusId ?semanticScholarId ?useMatching");
             where.Append("WHERE { ");
             where.Append($@"?s roh:gnossUser <{idGnossUser}>. ");
             where.Append($@"OPTIONAL{{?s roh:usuarioFigShare ?usuarioFigShare. }} ");
             where.Append($@"OPTIONAL{{?s roh:tokenFigShare ?tokenFigShare. }} ");
             where.Append($@"OPTIONAL{{?s roh:usuarioGitHub ?usuarioGitHub. }} ");
             where.Append($@"OPTIONAL{{?s roh:tokenGitHub ?tokenGitHub. }} ");
-            where.Append($@"OPTIONAL{{?s roh:useMatching ?useMatching. }} ");
             where.Append($@"OPTIONAL{{?s roh:ORCID ?orcid. }} ");
             where.Append($@"OPTIONAL{{?s vivo:researcherId ?researcherId. }} ");
             where.Append($@"OPTIONAL{{?s vivo:scopusId ?scopusId. }} ");
             where.Append($@"OPTIONAL{{?s roh:semanticScholarId ?semanticScholarId. }} ");
+            where.Append($@"OPTIONAL{{?s roh:useMatching ?useMatching. }} ");
             where.Append("} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
