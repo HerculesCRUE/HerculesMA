@@ -48,9 +48,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?orcid ?researcherId ?scopusId ?semanticScholarId ?useMatching");
+            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?orcid ?orcidCV ?researcherId ?researcherIdCV ?scopusId ?scopusIdCV ?semanticScholarId ?useMatching FROM <http://gnoss.com/curriculumvitae.owl>");
             where.Append("WHERE { ");
             where.Append($@"?s roh:gnossUser <{idGnossUser}>. ");
+            where.Append($@"?c roh:cvOf ?s. ");
+            where.Append($@"?c roh:personalData ?personalData.");
             where.Append($@"OPTIONAL{{?s roh:usuarioFigShare ?usuarioFigShare. }} ");
             where.Append($@"OPTIONAL{{?s roh:tokenFigShare ?tokenFigShare. }} ");
             where.Append($@"OPTIONAL{{?s roh:usuarioGitHub ?usuarioGitHub. }} ");
@@ -58,6 +60,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"OPTIONAL{{?s roh:ORCID ?orcid. }} ");
             where.Append($@"OPTIONAL{{?s vivo:researcherId ?researcherId. }} ");
             where.Append($@"OPTIONAL{{?s vivo:scopusId ?scopusId. }} ");
+            where.Append($@"OPTIONAL{{?personalData vivo:researcherId ?researcherIdCV. }} ");
+            where.Append($@"OPTIONAL{{?personalData roh:ORCID ?orcidCV. }} ");
+            where.Append($@"OPTIONAL{{?personalData vivo:scopusId ?scopusIdCV. }} ");
             where.Append($@"OPTIONAL{{?s roh:semanticScholarId ?semanticScholarId. }} ");
             where.Append($@"OPTIONAL{{?s roh:useMatching ?useMatching. }} ");
             where.Append("} ");
@@ -132,7 +137,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             }
                         }
                     }
-
+                    else if (fila.ContainsKey("orcidCV"))
+                    {
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "orcid")
+                            {
+                                userData.valor = fila["orcidCV"].value;
+                                break;
+                            }
+                        }
+                    }
+                    
                     // Researcher ID
                     if (fila.ContainsKey("researcherId"))
                     {
@@ -145,7 +161,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             }
                         }
                     }
-
+                    else if (fila.ContainsKey("researcherIdCV"))
+                    {
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "researcherId")
+                            {
+                                userData.valor = fila["researcherIdCV"].value;
+                                break;
+                            }
+                        }
+                    }
+                    
                     // Scopus ID
                     if (fila.ContainsKey("scopusId"))
                     {
@@ -158,7 +185,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             }
                         }
                     }
-
+                    else if (fila.ContainsKey("scopusIdCV"))
+                    {
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "scopusId")
+                            {
+                                userData.valor = fila["scopusIdCV"].value;
+                                break;
+                            }
+                        }
+                    }
+                    
                     // Semantic Scholar ID
                     if (fila.ContainsKey("semanticScholarId"))
                     {
