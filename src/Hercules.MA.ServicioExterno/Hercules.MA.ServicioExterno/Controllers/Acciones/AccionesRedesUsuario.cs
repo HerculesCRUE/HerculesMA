@@ -37,6 +37,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             listaData.Add(new DataUser() { nombre = "Usuario de GitHub", id = "usuarioGitHub", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Token de GitHub", id = "tokenGitHub", valor = string.Empty });
             listaData.Add(new DataUser() { nombre = "Matching", id = "useMatching", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "ORCID", id = "orcid", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Wos ID", id = "researcherId", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Scopus ID", id = "scopusId", valor = string.Empty });
+            listaData.Add(new DataUser() { nombre = "Semantic Scholar ID", id = "semanticScholarId", valor = string.Empty });
 
             string idGnossUser = $@"http://gnoss/{pIdGnossUser.ToUpper()}";
             SparqlObject resultadoQuery = null;
@@ -44,7 +48,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?useMatching ");
+            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?useMatching ?orcid ?wosId ?scopusId ?semanticScholarId");
             where.Append("WHERE { ");
             where.Append($@"?s roh:gnossUser <{idGnossUser}>. ");
             where.Append($@"OPTIONAL{{?s roh:usuarioFigShare ?usuarioFigShare. }} ");
@@ -52,6 +56,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"OPTIONAL{{?s roh:usuarioGitHub ?usuarioGitHub. }} ");
             where.Append($@"OPTIONAL{{?s roh:tokenGitHub ?tokenGitHub. }} ");
             where.Append($@"OPTIONAL{{?s roh:useMatching ?useMatching. }} ");
+            where.Append($@"OPTIONAL{{?s roh:ORCID ?orcid. }} ");
+            where.Append($@"OPTIONAL{{?s vivo:researcherId ?researcherId. }} ");
+            where.Append($@"OPTIONAL{{?s vivo:scopusId ?scopusId. }} ");
+            where.Append($@"OPTIONAL{{?s roh:semanticScholarId ?semanticScholarId. }} ");
             where.Append("} ");
 
             resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
@@ -107,6 +115,58 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             if (userData.id == "tokenGitHub")
                             {
                                 userData.valor = fila["tokenGitHub"].value;
+                                break;
+                            }
+                        }
+                    }
+
+                    // ORCID
+                    if (fila.ContainsKey("orcid"))
+                    {
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "orcid")
+                            {
+                                userData.valor = fila["orcid"].value;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Researcher ID
+                    if (fila.ContainsKey("researcherId"))
+                    {
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "researcherId")
+                            {
+                                userData.valor = fila["researcherId"].value;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Scopus ID
+                    if (fila.ContainsKey("scopusId"))
+                    {
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "scopusId")
+                            {
+                                userData.valor = fila["scopusId"].value;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Semantic Scholar ID
+                    if (fila.ContainsKey("semanticScholarId"))
+                    {
+                        foreach (DataUser userData in listaData)
+                        {
+                            if (userData.id == "semanticScholarId")
+                            {
+                                userData.valor = fila["semanticScholarId"].value;
                                 break;
                             }
                         }
