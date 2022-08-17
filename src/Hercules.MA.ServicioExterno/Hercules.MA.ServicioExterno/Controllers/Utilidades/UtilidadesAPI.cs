@@ -392,7 +392,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                 {
                                     string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                                     filtro.Append($@"{pVarAnterior} ");
-                                    filtro.Append($@"{parteFiltro} ");
+                                    filtro.Append($@"?{parteFiltro} ");
                                     filtro.Append($@"{varActual}. ");
                                     pVarAnterior = varActual;
                                     pAux++;
@@ -409,7 +409,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                     {
                                         string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                                         filtro.Append($@"{pVarAnterior} ");
-                                        filtro.Append($@"{parteFiltro} ");
+                                        filtro.Append($@"?{parteFiltro} ");
                                         filtro.Append($@"{varActual}. ");
                                         pVarAnterior = varActual;
                                         pAux++;
@@ -418,14 +418,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                     {
                                         string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                                         filtro.Append($@"{pVarAnterior} ");
-                                        filtro.Append($@"{parteFiltro} ");
+                                        filtro.Append($@"?{parteFiltro} ");
                                         filtro.Append($@"{varInicial}. ");
                                         pAux++;
                                     }
                                     else
                                     {
                                         filtro.Append($@"{pVarAnteriorAux} ");
-                                        filtro.Append($@"{parteFiltro} ");
+                                        filtro.Append($@"?{parteFiltro} ");
                                         //filtro.Append($@"'{HttpUtility.UrlDecode(item.Value[0])}'. ");
                                         filtro.Append($@"'{HttpUtility.UrlDecode(valorFiltroIn)}'. ");
                                     }
