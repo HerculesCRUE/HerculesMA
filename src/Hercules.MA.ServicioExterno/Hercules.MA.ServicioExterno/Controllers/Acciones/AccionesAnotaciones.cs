@@ -87,7 +87,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             string where = @$"where {{
 
                 ?s a <http://w3id.org/roh/Annotation>.
-                ?s <http://w3id.org/roh/text> ?text.
+                ?s <http://w3id.org/roh/text> ?texto.
                 ?s <http://w3id.org/roh/dateIssued> ?date.
 
                 # Filtra por el RO
