@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -76,7 +77,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         [HttpGet("InsertDoiToQueue")]
-        public bool InsertDoiToQueueFuentesExternas(string pDoi, string pNombreCompletoAutor, string pOrcid)
+        public bool InsertDoiToQueueFuentesExternas([Required] string pDoi, [Required] string pNombreCompletoAutor, [Required] string pOrcid)
         {
             try
             {
