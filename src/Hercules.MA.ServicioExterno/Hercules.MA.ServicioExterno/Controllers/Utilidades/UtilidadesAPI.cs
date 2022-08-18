@@ -390,9 +390,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             {
                                 foreach (string parteFiltro in item.Key.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries))
                                 {
+                              
                                     string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                                     filtro.Append($@"{pVarAnterior} ");
-                                    filtro.Append($@"?{parteFiltro} ");
+                                    filtro.Append($@"{parteFiltro} ");
                                     filtro.Append($@"{varActual}. ");
                                     pVarAnterior = varActual;
                                     pAux++;
@@ -409,7 +410,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                     {
                                         string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                                         filtro.Append($@"{pVarAnterior} ");
-                                        filtro.Append($@"?{parteFiltro} ");
+                                        filtro.Append($@"{parteFiltro} ");
                                         filtro.Append($@"{varActual}. ");
                                         pVarAnterior = varActual;
                                         pAux++;
@@ -418,14 +419,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                     {
                                         string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                                         filtro.Append($@"{pVarAnterior} ");
-                                        filtro.Append($@"?{parteFiltro} ");
+                                        filtro.Append($@"{parteFiltro} ");
                                         filtro.Append($@"{varInicial}. ");
                                         pAux++;
                                     }
                                     else
                                     {
                                         filtro.Append($@"{pVarAnteriorAux} ");
-                                        filtro.Append($@"?{parteFiltro} ");
+                                        filtro.Append($@"{parteFiltro} ");
                                         //filtro.Append($@"'{HttpUtility.UrlDecode(item.Value[0])}'. ");
                                         filtro.Append($@"'{HttpUtility.UrlDecode(valorFiltroIn)}'. ");
                                     }
@@ -494,8 +495,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                         valorFiltro += $@",'{valorFiltroIn}'";
                                     }
                                 }
-                                //}
-
                                 if (valorFiltro.Length > 0)
                                 {
                                     valorFiltro = valorFiltro.Substring(1);
@@ -503,8 +502,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                                 if (!filtrosReciprocos.ContainsKey(item.Key))
                                 {
-                                    //filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro.Replace("+", "%2B")).ToLower()})) ");
-                                    StringBuilder expresion = new StringBuilder();
+                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro.Replace("+", "%2B")).ToLower()})) ");
+                                   /* StringBuilder expresion = new StringBuilder();
                                     foreach (char c in HttpUtility.UrlDecode(valorFiltro).ToLower().ToCharArray())
                                     {
                                         if (c.Equals('a') || c.Equals('á'))
@@ -534,7 +533,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                         
                                     }
                                     string a = expresion.ToString();
-                                    filtro.Append($@"FILTER REGEX({pVarAnterior},{a},{"\"i\""}) ");
+                                    filtro.Append($@"FILTER REGEX({pVarAnterior},{a},{"\"i\""}) ");*/
                                 }
                             }
                             pVarAnterior = varInicial;
