@@ -126,6 +126,18 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
         /// <summary>
         /// Este método obtiene el texto de la cita en función de la publicación y el formato de cita indicado.
+        /// 
+        /// Hay muchos estilos/formatos para citar y solo están contemplados 6.
+        /// 
+        ///     - APA: autor, autor & autor. (año). título. revista, volumen. doi
+        ///     - BibTeX: @article{autor_autor_año, title={titulo}, volume={volumen}, ISSN={issn}, DOI={doi}, journal={revista}, publisher={editorial}, author={autor and autor and autor}, year={año} }
+        ///     - Chicago: autor, autor and autor. “titulo” revista volumen (año). doi:doi.
+        ///     - CSE: 1. autor, autor, autor, titulo volumen (año), doi:doi
+        ///     - IEEE: [1]autor, autor and autor “titulo”, revista, vol. volumen, año.
+        ///     - MLA: autor et al. “titulo” revista volumen (año): paginaInicial-paginaFinal
+        ///     
+        /// 
+        /// 
         /// </summary>
         /// <param name="pIdRecurso"></param>
         /// <param name="pFormato"></param>
@@ -252,7 +264,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                         texto = $"{textoAutor}. “{titulo}” {revista} {volumen} ({anio}). doi:{doi}.";
                         break;
                     case "CSE":
-                        texto = $"1. {string.Join(',', autores)}, {titulo} {volumen} ({anio}), doi:{doi}";
+                        texto = $"1. {string.Join(", ", autores)}, {titulo} {volumen} ({anio}), doi:{doi}";
                         break;
                     case "IEEE":
                         textoAutor = "";
@@ -274,7 +286,11 @@ namespace Hercules.MA.ServicioExterno.Controllers
                         texto = $"[1]{textoAutor}, “{titulo},” {revista}, vol. {volumen}, {anio}.";
                         break;
                     case "MLA":
-                        texto = $"{autores[0]} et al. “{titulo}” {revista} {volumen} ({anio}): {paginas}";
+                        if (!string.IsNullOrEmpty(paginas))
+                        {
+                            paginas = ": " + paginas;
+                        }
+                        texto = $"{autores[0]} et al. “{titulo}” {revista} {volumen} ({anio}){paginas}";
                         break;
                 }
 
