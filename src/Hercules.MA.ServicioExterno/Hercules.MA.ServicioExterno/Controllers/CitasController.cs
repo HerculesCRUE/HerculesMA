@@ -28,9 +28,11 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("GetQuoteDownload")]
         public ActionResult GetQuoteDownload(string pIdRecurso, string pFormato)
         {
-            string select = "SELECT DISTINCT ?titulo ?autores ?anio ?revista ?publisher ?issn ?volumen ?doi ?paginaInicio ?paginaFin FROM <http://gnoss.com/maindocument.owl>";
-            string where =
-            $@"WHERE {{
+            try
+            {
+                string select = "SELECT DISTINCT ?titulo ?autores ?anio ?revista ?publisher ?issn ?volumen ?doi ?paginaInicio ?paginaFin FROM <http://gnoss.com/maindocument.owl>";
+                string where =
+                $@"WHERE {{
                 ?s <http://w3id.org/roh/title> ?titulo FILTER(?s=<{pIdRecurso}>).
                 ?s <http://purl.org/ontology/bibo/authorList> ?autoresAux.
                 ?autoresAux <http://xmlns.com/foaf/0.1/nick> ?autores.
@@ -44,77 +46,82 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
-            string titulo = string.Empty;
-            List<string> autores = new List<string>();
-            string anio = string.Empty;
-            string revista = string.Empty;
-            string publisher = string.Empty;
-            string issn = string.Empty;
-            string volumen = string.Empty;
-            string doi = string.Empty;
-            string paginas = string.Empty;
-            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
-            {
-                if (autores.Count == 0)
+                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
+                string titulo = string.Empty;
+                List<string> autores = new List<string>();
+                string anio = string.Empty;
+                string revista = string.Empty;
+                string publisher = string.Empty;
+                string issn = string.Empty;
+                string volumen = string.Empty;
+                string doi = string.Empty;
+                string paginas = string.Empty;
+                foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
                 {
-                    // Título
-                    titulo = fila["titulo"].value;
-                    // Año
-                    if (fila.ContainsKey("anio"))
+                    if (autores.Count == 0)
                     {
-                        anio = fila["anio"].value;
+                        // Título
+                        titulo = fila["titulo"].value;
+                        // Año
+                        if (fila.ContainsKey("anio"))
+                        {
+                            anio = fila["anio"].value;
+                        }
+                        // Revista
+                        if (fila.ContainsKey("revista"))
+                        {
+                            revista = fila["revista"].value;
+                        }
+                        // Publisher
+                        if (fila.ContainsKey("publisher"))
+                        {
+                            publisher = fila["publisher"].value;
+                        }
+                        // ISSN
+                        if (fila.ContainsKey("issn"))
+                        {
+                            issn = fila["issn"].value;
+                        }
+                        // Volumen
+                        if (fila.ContainsKey("volumen"))
+                        {
+                            volumen = fila["volumen"].value;
+                        }
+                        // DOI
+                        if (fila.ContainsKey("doi"))
+                        {
+                            doi = fila["doi"].value;
+                        }
+                        // Pagina Inicio
+                        if (fila.ContainsKey("paginaInicio") && fila.ContainsKey("paginaFin"))
+                        {
+                            paginas = fila["paginaInicio"].value + "-" + fila["paginaFin"].value;
+                        }
                     }
-                    // Revista
-                    if (fila.ContainsKey("revista"))
-                    {
-                        revista = fila["revista"].value;
-                    }
-                    // Publisher
-                    if (fila.ContainsKey("publisher"))
-                    {
-                        publisher = fila["publisher"].value;
-                    }
-                    // ISSN
-                    if (fila.ContainsKey("issn"))
-                    {
-                        issn = fila["issn"].value;
-                    }
-                    // Volumen
-                    if (fila.ContainsKey("volumen"))
-                    {
-                        volumen = fila["volumen"].value;
-                    }
-                    // DOI
-                    if (fila.ContainsKey("doi"))
-                    {
-                        doi = fila["doi"].value;
-                    }
-                    // Pagina Inicio
-                    if (fila.ContainsKey("paginaInicio") && fila.ContainsKey("paginaFin"))
-                    {
-                        paginas = fila["paginaInicio"].value + "-" + fila["paginaFin"].value;
-                    }
+                    // Autores
+                    autores.Add(fila["autores"].value);
                 }
-                // Autores
-                autores.Add(fila["autores"].value);
+                string texto = "";
+                switch (pFormato)
+                {
+                    case "BIBTEX":
+                        texto = "@article{" + string.Join('_', autores) + "_" + anio + ", title={" + titulo + "}, volume={" + volumen + "}, ISSN={" + issn + "}, DOI={" + doi + "}, journal={" + revista + "}, publisher={" + publisher + "}, author={" + string.Join(" and ", autores) + "}, year={" + anio + "} }";
+                        return File(Encoding.Latin1.GetBytes(texto), "application/BIB", "bibtex.bib");
+                    case "REFMAN":
+                        string textoPaginas = "";
+                        if (!string.IsNullOrEmpty(paginas))
+                        {
+                            textoPaginas = "\nSP  - " + paginas.Split('-')[0] + "\nEP  - " + paginas.Split('-')[1];
+                        }
+                        texto = "TY  - JOUR\nAU  - " + string.Join("\nAU  - ", autores) + "\nDA  - " + anio + "\nPY  - " + anio + "\nDO  - " + doi + "\nSN  - " + issn + textoPaginas + "\nT2  - " + revista + "\nT1  - " + titulo + "\nVL  - " + volumen + "\nER  - ";
+                        return File(Encoding.Latin1.GetBytes(texto), "application/RIS", "refman.ris");
+                }
+                return null;
             }
-            string texto = "";
-            switch (pFormato)
+            catch (Exception)
             {
-                case "BIBTEX":
-                    texto = "@article{" + string.Join('_', autores) + "_" + anio + ", title={" + titulo + "}, volume={" + volumen + "}, ISSN={" + issn + "}, DOI={" + doi + "}, journal={" + revista + "}, publisher={" + publisher + "}, author={" + string.Join(" and ", autores) + "}, year={" + anio + "} }";
-                    return File(Encoding.Latin1.GetBytes(texto), "application/BIB", "bibtex.bib");
-                case "REFMAN":
-                    string textoPaginas = "";
-                    if (!string.IsNullOrEmpty(paginas))
-                    {
-                        textoPaginas = "\nSP  - " + paginas.Split('-')[0] + "\nEP  - " + paginas.Split('-')[1];
-                    }
-                    texto = "TY  - JOUR\nAU  - " + string.Join("\nAU  - ", autores) + "\nDA  - " + anio + "\nPY  - " + anio + "\nDO  - " + doi + "\nSN  - " + issn + textoPaginas + "\nT2  - " + revista + "\nT1  - " + titulo + "\nVL  - " + volumen + "\nER  - ";
-                    return File(Encoding.Latin1.GetBytes(texto), "application/RIS", "refman.ris");
+                return null;
             }
-            return null;
         }
 
         /// <summary>
@@ -126,9 +133,11 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("GetQuoteText")]
         public string GetQuoteText(string pIdRecurso, string pFormato)
         {
-            string select = "SELECT DISTINCT ?titulo ?autores ?anio ?revista ?publisher ?issn ?volumen ?doi ?paginaInicio ?paginaFin FROM <http://gnoss.com/maindocument.owl>";
-            string where = 
-            $@"WHERE {{
+            try
+            {
+                string select = "SELECT DISTINCT ?titulo ?autores ?anio ?revista ?publisher ?issn ?volumen ?doi ?paginaInicio ?paginaFin FROM <http://gnoss.com/maindocument.owl>";
+                string where =
+                $@"WHERE {{
                 ?s <http://w3id.org/roh/title> ?titulo FILTER(?s=<{pIdRecurso}>).
                 ?s <http://purl.org/ontology/bibo/authorList> ?autoresAux.
                 ?autoresAux <http://xmlns.com/foaf/0.1/nick> ?autores.
@@ -142,133 +151,139 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
-            string titulo = string.Empty;
-            List<string> autores = new List<string>();
-            string anio = string.Empty;
-            string revista = string.Empty;
-            string publisher = string.Empty;
-            string issn = string.Empty;
-            string volumen = string.Empty;
-            string doi = string.Empty;
-            string paginas = string.Empty;
-            foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
-            {
-                if (autores.Count == 0)
+                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
+                string titulo = string.Empty;
+                List<string> autores = new List<string>();
+                string anio = string.Empty;
+                string revista = string.Empty;
+                string publisher = string.Empty;
+                string issn = string.Empty;
+                string volumen = string.Empty;
+                string doi = string.Empty;
+                string paginas = string.Empty;
+                foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
                 {
-                    // Título
-                    titulo = fila["titulo"].value;
-                    // Año
-                    if (fila.ContainsKey("anio"))
+                    if (autores.Count == 0)
                     {
-                        anio = fila["anio"].value;
+                        // Título
+                        titulo = fila["titulo"].value;
+                        // Año
+                        if (fila.ContainsKey("anio"))
+                        {
+                            anio = fila["anio"].value;
+                        }
+                        // Revista
+                        if (fila.ContainsKey("revista"))
+                        {
+                            revista = fila["revista"].value;
+                        }
+                        // Publisher
+                        if (fila.ContainsKey("publisher"))
+                        {
+                            publisher = fila["publisher"].value;
+                        }
+                        // ISSN
+                        if (fila.ContainsKey("issn"))
+                        {
+                            issn = fila["issn"].value;
+                        }
+                        // Volumen
+                        if (fila.ContainsKey("volumen"))
+                        {
+                            volumen = fila["volumen"].value;
+                        }
+                        // DOI
+                        if (fila.ContainsKey("doi"))
+                        {
+                            doi = fila["doi"].value;
+                        }
+                        // Pagina Inicio
+                        if (fila.ContainsKey("paginaInicio") && fila.ContainsKey("paginaFin"))
+                        {
+                            paginas = fila["paginaInicio"].value + "-" + fila["paginaFin"].value;
+                        }
                     }
-                    // Revista
-                    if (fila.ContainsKey("revista"))
-                    {
-                        revista = fila["revista"].value;
-                    }
-                    // Publisher
-                    if (fila.ContainsKey("publisher"))
-                    {
-                        publisher = fila["publisher"].value;
-                    }
-                    // ISSN
-                    if (fila.ContainsKey("issn"))
-                    {
-                        issn = fila["issn"].value;
-                    }
-                    // Volumen
-                    if (fila.ContainsKey("volumen"))
-                    {
-                        volumen = fila["volumen"].value;
-                    }
-                    // DOI
-                    if (fila.ContainsKey("doi"))
-                    {
-                        doi = fila["doi"].value;
-                    }
-                    // Pagina Inicio
-                    if (fila.ContainsKey("paginaInicio") && fila.ContainsKey("paginaFin"))
-                    {
-                        paginas = fila["paginaInicio"].value + "-" + fila["paginaFin"].value;
-                    }
+                    // Autores
+                    autores.Add(fila["autores"].value);
                 }
-                // Autores
-                autores.Add(fila["autores"].value);
+                string texto = "";
+                string textoAutor = "";
+                switch (pFormato)
+                {
+                    case "APA":
+                        textoAutor = "";
+                        for (int i = 0; i < autores.Count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                if (i == autores.Count - 1)
+                                {
+                                    textoAutor += " & ";
+                                }
+                                else
+                                {
+                                    textoAutor += ", ";
+                                }
+                            }
+                            textoAutor += autores[i];
+                        }
+                        texto = $"{textoAutor}. ({anio}). {titulo}. {revista}, {volumen}. https://doi.org/{doi}";
+                        break;
+                    case "BIBTEX":
+                        texto = "@article{" + string.Join('_', autores) + "_" + anio + ", title={" + titulo + "}, volume={" + volumen + "}, ISSN={" + issn + "}, DOI={" + doi + "}, journal={" + revista + "}, publisher={" + publisher + "}, author={" + string.Join(" and ", autores) + "}, year={" + anio + "} }";
+                        break;
+                    case "CHICAGO":
+                        textoAutor = "";
+                        for (int i = 0; i < autores.Count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                if (i == autores.Count - 1)
+                                {
+                                    textoAutor += " and ";
+                                }
+                                else
+                                {
+                                    textoAutor += ", ";
+                                }
+                            }
+                            textoAutor += autores[i];
+                        }
+                        texto = $"{textoAutor}. “{titulo}” {revista} {volumen} ({anio}). doi:{doi}.";
+                        break;
+                    case "CSE":
+                        texto = $"1. {string.Join(',', autores)}, {titulo} {volumen} ({anio}), doi:{doi}";
+                        break;
+                    case "IEEE":
+                        textoAutor = "";
+                        for (int i = 0; i < autores.Count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                if (i == autores.Count - 1)
+                                {
+                                    textoAutor += " and ";
+                                }
+                                else
+                                {
+                                    textoAutor += ", ";
+                                }
+                            }
+                            textoAutor += autores[i];
+                        }
+                        texto = $"[1]{textoAutor}, “{titulo},” {revista}, vol. {volumen}, {anio}.";
+                        break;
+                    case "MLA":
+                        texto = $"{autores[0]} et al. “{titulo}” {revista} {volumen} ({anio}): {paginas}";
+                        break;
+                }
+
+                return texto;
             }
-            string texto = "";
-            string textoAutor = "";
-            switch (pFormato)
+            catch (Exception)
             {
-                case "APA":
-                    textoAutor = "";
-                    for (int i = 0; i < autores.Count; i++)
-                    {
-                        if (i > 0)
-                        {
-                            if (i == autores.Count - 1)
-                            {
-                                textoAutor += " & ";
-                            }
-                            else
-                            {
-                                textoAutor += ", ";
-                            }
-                        }
-                        textoAutor += autores[i];
-                    }
-                    texto = $"{textoAutor}. ({anio}). {titulo}. {revista}, {volumen}. https://doi.org/{doi}";
-                    break;
-                case "BIBTEX":
-                    texto = "@article{" + string.Join('_', autores) + "_" + anio + ", title={" + titulo + "}, volume={" + volumen + "}, ISSN={" + issn + "}, DOI={" + doi + "}, journal={" + revista + "}, publisher={" + publisher + "}, author={" + string.Join(" and ", autores) + "}, year={" + anio + "} }";
-                    break;
-                case "CHICAGO":
-                    textoAutor = "";
-                    for (int i = 0; i < autores.Count; i++)
-                    {
-                        if (i > 0)
-                        {
-                            if (i == autores.Count - 1)
-                            {
-                                textoAutor += " and ";
-                            }
-                            else
-                            {
-                                textoAutor += ", ";
-                            }
-                        }
-                        textoAutor += autores[i];
-                    }
-                    texto = $"{textoAutor}. “{titulo}” {revista} {volumen} ({anio}). doi:{doi}.";
-                    break;
-                case "CSE":
-                    texto = $"1. {string.Join(',', autores)}, {titulo} {volumen} ({anio}), doi:{doi}";
-                    break;
-                case "IEEE":
-                    textoAutor = "";
-                    for (int i = 0; i < autores.Count; i++)
-                    {
-                        if (i > 0)
-                        {
-                            if (i == autores.Count - 1)
-                            {
-                                textoAutor += " and ";
-                            }
-                            else
-                            {
-                                textoAutor += ", ";
-                            }
-                        }
-                        textoAutor += autores[i];
-                    }
-                    texto = $"[1]{textoAutor}, “{titulo},” {revista}, vol. {volumen}, {anio}.";
-                    break;
-                case "MLA":
-                    texto = $"{autores[0]} et al. “{titulo}” {revista} {volumen} ({anio}): {paginas}";
-                    break;
+                return null;
             }
-            return texto;
         }
     }
 }
