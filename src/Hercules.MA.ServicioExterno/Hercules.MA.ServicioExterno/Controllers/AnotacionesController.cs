@@ -74,7 +74,13 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 throw;
             }
             return Ok(anotacionesId);
-        }
+        } 
+
+        /// <summary>
+        /// Metodo para eliminar una anotacion 
+        /// </summary>
+        /// <param name="idAnnotation">Id de la anotacion a eliminar</param>
+        /// <returns></returns>
         [HttpPost("DeleteAnnotation")]
         public IActionResult DeleteAnnotation([FromForm] string idAnnotation)
         {
