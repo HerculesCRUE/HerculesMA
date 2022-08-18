@@ -503,7 +503,38 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                                 if (!filtrosReciprocos.ContainsKey(item.Key))
                                 {
-                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro.Replace("+", "%2B"))})) ");
+                                    //filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro.Replace("+", "%2B")).ToLower()})) ");
+                                    StringBuilder expresion = new StringBuilder();
+                                    foreach (char c in valorFiltro.ToLower().ToCharArray())
+                                    {
+                                        if (c.Equals('a') || c.Equals('á'))
+                                        {
+                                            expresion.Append("(a|á)");
+                                        }
+                                        else if (c.Equals('e') || c.Equals('é'))
+                                        {
+                                            expresion.Append("(e|é)");
+                                        }
+                                        else if (c.Equals('i') || c.Equals('í'))
+                                        {
+                                            expresion.Append("(i|í)");
+                                        }
+                                        else if (c.Equals('o') || c.Equals('ó'))
+                                        {
+                                            expresion.Append("(o|ó)");
+                                        }
+                                        else if (c.Equals('u') || c.Equals('ú'))
+                                        {
+                                            expresion.Append("(u|ú)");
+                                        }
+                                        else
+                                        {
+                                            expresion.Append(c);
+                                        }
+                                        
+                                    }
+                                    string a = expresion.ToString();
+                                    filtro.Append($@"FILTER REGEX({pVarAnterior},{a},{"\"i\""}) ");
                                 }
                             }
                             pVarAnterior = varInicial;
