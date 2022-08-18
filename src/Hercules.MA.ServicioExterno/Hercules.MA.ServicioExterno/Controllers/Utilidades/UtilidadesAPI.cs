@@ -505,7 +505,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                                 {
                                     //filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro.Replace("+", "%2B")).ToLower()})) ");
                                     StringBuilder expresion = new StringBuilder();
-                                    foreach (char c in valorFiltro.ToLower().ToCharArray())
+                                    foreach (char c in HttpUtility.UrlDecode(valorFiltro).ToLower().ToCharArray())
                                     {
                                         if (c.Equals('a') || c.Equals('á'))
                                         {
