@@ -260,5 +260,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         }
+
+        public bool DeleteAnnotation(string idAnnotation)
+        {
+            // Obtengo el id del RO si es Guid
+            Guid guidAnnotation;
+            guidAnnotation = mResourceApi.GetShortGuid(idAnnotation);
+            return mResourceApi.PersistentDelete(guidAnnotation);
+        }
+
     }
+
 }

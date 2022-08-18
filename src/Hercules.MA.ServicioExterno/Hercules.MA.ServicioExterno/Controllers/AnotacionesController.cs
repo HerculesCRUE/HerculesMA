@@ -75,6 +75,20 @@ namespace Hercules.MA.ServicioExterno.Controllers
             }
             return Ok(anotacionesId);
         }
+        [HttpPost("DeleteAnnotation")]
+        public IActionResult DeleteAnnotation([FromForm] string idAnnotation)
+        {
+            try
+            {
+                AccionesAnotaciones annotations = new AccionesAnotaciones();
+                annotations.DeleteAnnotation(idAnnotation);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return Ok();
+        }
 
     }
 }
