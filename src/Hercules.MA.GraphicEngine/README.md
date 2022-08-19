@@ -12,7 +12,7 @@
 # Hércules MA. Configuración de las gráficas de indicadores.
 [Introducción](#introducción)
 
-[Ejemplo de configuración de las gráficas de indicadores](#ejemplo-de-configuración-de-las-gráficas-de-indicadores)
+[Configuración de las gráficas de indicadores](#configuración-de-las-gráficas-de-indicadores)
 
 [Gráficas de barras](#graficabarras)
 
@@ -22,10 +22,11 @@
 
 [Indicadores](#indicadores)
 
-[Ejemplo de guardado de gráficas y funcionamiento de Indicadores Personales](#ejemplo-de-guardado-de-gráficas-y-funcionamiento-de-indicadores-personales)
+[Ejemplo de guardado de gráficas](#ejemplo-de-guardado-de-gráficas)
 
-Introducción
-============
+[Indicadores Personales](#indicadores-personales)
+
+# Introducción
 
 Este documento describe, mediante un ejemplo práctico, cómo se realiza la configuración de las distintas gráficas de indicadores en Hércules MA. Esta configuración está preparada para que la administre un usuario administrador.
 La configuración de las gráficas se lleva a cabo mediante la edición de archivos JSON situados en la carpeta ./Config/configGraficas/ que definen diversos aspectos para cada uno de las gráficas.
@@ -33,10 +34,8 @@ También se explicará como un usuario no administrador de la plataforma puede g
 
 El análisis de indicadores se puede consultar en [Análisis de indicadores de investigación - Módulo de Catálogo de indicadores](https://confluence.um.es/confluence/pages/viewpage.action?pageId=397534317)
 
-Ejemplo de configuración de las gráficas de indicadores
-========================================================
+# Configuración de las gráficas de indicadores
 
-Se va a proceder a la explicación de la creación de una de las gráficas con su correspondiente página y con un ejemplo de faceta.
 Para agregar una página nueva, hay que crear un archivo .json con un nombre distintivo y situarlo en el directorio de configGraficas. En él vamos a crear la siguiente estructura:
 
 ```
@@ -239,98 +238,132 @@ Dentro de la lista de gráficas, se van a configurar cada una de las gráficas q
 
 
 
-Indicadores
-============
-Una vez que el usuario administrador haya configurado las gráficas, el resto de usuarios van a poder verlas desde la página de Indicadores.
-En la parte superior se puede ver un menú de pestañas y el botón que despliega las facetas.
+# Indicadores
+Una vez que el usuario administrador haya configurado las gráficas, el resto de usuarios podrán verlas e interactuar con ellas desde la página de Indicadores.
+En la parte superior se puede ver un menú de pestañas.
 
-![image](https://user-images.githubusercontent.com/88077103/174986969-ac547490-7612-4bc6-b2b7-3e1a03a1c335.png)
+![](../../Docs/media/GraphicEngine/GraphicEngineMenu.png)
 
-Pasando a las gráficas, puede haber tres tipos de botones.
 
-![image](https://user-images.githubusercontent.com/105039324/175277550-a70a9999-02fd-4160-9019-446150545657.png)
+
+Y el botón que despliega las facetas.
+
+![](../../Docs/media/GraphicEngine/GraphicEngineFacetas.png)
+
+Las graficas a su vez tiene distintos botones para interactuar:
 
 - Desplegable (arriba a la izquierda): Está opción únicamente se mostra cuando en la gráfica esté agregada la configuración de idGrupo. Dicha opción mostrará un listado de gráficas para poder seleccionar la que se quiera visualizar.
 
+![](../../Docs/media/GraphicEngine/GraphicEngineDesplegable.png)
+
+
 - Expandir/Contraer (arriba a la derecha): Aplica/disminuye la gráfica para la visualización de datos.
+
+![](../../Docs/media/GraphicEngine/GraphicEngineExpandir.png)
+
 
 - Lupa (arriba a la derecha): Se abrirá un popup con la gráfica ampliada.
 
-![image](https://user-images.githubusercontent.com/88077103/175925979-1864f30c-f0cd-4956-bc91-e6dfcb7c4eb5.png)
+![](../../Docs/media/GraphicEngine/GraphicEngineLupa.png)
 
-- Tres puntos (arriba a la derecha): Se abrirá un menú con diversas acciones.
-  - Guardar en mi panel: Permite al usuario guardarse la gráfica en "Mis indicadores" (Explicado en el siguiente apartado). 
-  - Descargar como .csv: Permite descargar los datos de la gráfica en formato .csv.
-  - Descargar como imagen .jpg: Permite descargar la gráfica como una imagen .jpg.
 
-Ejemplo de guardado de gráficas y funcionamiento de Indicadores Personales
-==========================================================================
-Los usuarios van a tener una opción en su menú llamada "Mis indicadores" en la que van a poder guardar las gráficas que quieran su espacio personal. 
+- Menú de acciones (arriba a la derecha):
+  - Descargar JPG: Permite descargarse una imagen, en formtato JPG, de la gráfica completa.
+  - Descargar CSV: Permite descargar los datos de la gráfica en formato CSV.
+  - Guardar en mi panel: Permite al usuario guardarse la gráfica en ["Mis indicadores"](#indicadores-personales). 
+  - Configuración: Abrirá un menú de configuracion de la gráfica para editar título, anchura de la gráfica y orden. Solo será visible a usuarios administradores en esta pestaña. 
+  
+![](../../Docs/media/GraphicEngine/GraphicEngineAcciones.png)
+
+
+## Ejemplo de guardado de gráficas
+Los usuarios tienen una opción en su menú, llamada "Mis indicadores", en la que pueden guardar gráficas para su espacio personal. 
+
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadores.png)
+
 Para guardar una gráfica en el espacio personal hay que seguir los siguientes pasos:
 
 - Situados en la página de Indicadores, pulsamos al botón de tres puntos de la gráfica a guardar y seleccionamos la opción de "Guardar en mi panel".
 
-![image](https://user-images.githubusercontent.com/88077103/175925979-1864f30c-f0cd-4956-bc91-e6dfcb7c4eb5.png)
+![](../../Docs/media/GraphicEngine/GraphicEngineGuardarGrafica.png)
 
 - Se nos abrirá un pop-up con una pequeña configuración de guardado:
 
-![image](https://user-images.githubusercontent.com/88077103/174978448-a232da46-421a-428b-a381-bd40db6cd54d.png)
+![](../../Docs/media/GraphicEngine/GraphicEngineGuardarGraficaMenu.png)
 
   - Título de la gráfica: Título el cual se va a guardar la gráfica.
   - Anchura: Porcentaje de anchura de la gráfica.
-  - Seleccionar página / Crear nueva página: Selección de dónde se va a guardar la gráfica. En el caso de que no se tenga páginas creadas, únicamente aparecerá la segunda opción de creación.
- 
+  - Seleccionar página / Crear nueva página: Página en la cual se guardará la gráfica. En el caso de que no se tenga páginas creadas, únicamente aparecerá la segunda opción "Crear nueva página".
+  
 Una vez pulsado el botón guardar, se nos habrá generado la gráfica en el menú de "Mis indicadores".
-Si nos dirigimos allí la veremos tal y como la hayamos guardado, es decir, con filtros incluidos. 
+Si nos dirigimos allí, la veremos tal y como la hayamos guardado, es decir, con filtros incluidos. 
 También se habrá creado la página si lo hemos seleccionado.
+ 
+## Indicadores Personales
+La sección de indicadores personales permite al usuario, la interacción con gráficas de una manera más personal. Pudiendo modificar algunos aspectos de la misma, como la escala de los ejes, la anchura, titulo y orden. Permitiendo incluso generar un informe personalizado con las gráficas.
 
-![image](https://user-images.githubusercontent.com/88077103/174979828-d6692717-6564-459a-8952-2dc6e5076a6a.png)
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresGuardado.png)
 
-En el menú de la página se pueden ver dos opciones, editar página y borrar página.
-Si pulsamos sobre editar página se nos abrirá un popup el cual podemos cambiar el nombre de la página y el orden de la misma.
+En el menú de la página se puede ver "Descargar", "Editar página" y "Borrar página".
 
-![image](https://user-images.githubusercontent.com/88077103/174980559-90c08bf1-a4db-4df9-b6c7-827bfeef33f8.png)
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuGeneral.png)
 
-Por otro lado, si pulsamos borrar página se nos mostraá un mensaje de borrado.
+Al pulsar sobre "Descargar", se generará un archivo PDF presentando todas las gráficas de una manera limpia.
 
-![image](https://user-images.githubusercontent.com/88077103/174981116-596330be-18cd-4c50-a083-6fa1d0d2a66e.png)
+Si pulsamos sobre "Editar página" se abrirá un popup, en el cual podemos cambiar el título de la página y el orden de la misma.
 
-Pasando al apartado de las gráficas, si pulsamos a los tres puntos se nos abrirá un menú con opciones adicionales.
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresEditarPagina.png)
 
-![image](https://user-images.githubusercontent.com/88077103/175926493-e4785f9c-c650-4ec2-9f73-c4fc97ba8cdd.png)
+Pulsando "Borrar página" se nos mostrará un mensaje de borrado. Eliminando la página en el caso de aceptarlo.
 
-Si pulsamos a editar gráfica se nos abrirá el siguiente popup:
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresBorrarPagina.png)
 
-![image](https://user-images.githubusercontent.com/88077103/174982103-338c92f8-96c2-44ef-bf64-af430415ed8b.png)
 
-- Título de la gráfica: Permite modificar el nombre de la gráfica.
-- Anchura de la gráfica: Permite cambiar el ancho de la gráfica.
-- Orden de la gráfica: Mueve la gráfica a la posición seleccionada.
+En el apartado de las gráficas, si pulsamos el menú de acciones, representado por tres puntos, se abrirán opciones adicionales.
 
-Si se selecciona la opción de eliminar gráfica, se nos mostrará un mensaje similar al de borrar página.
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAcciones)
 
-![image](https://user-images.githubusercontent.com/88077103/174982932-60f6f333-7e30-49d8-b2fa-b2094225ef39.png)
+ - Descargar JPG - Descargará una imagen JPG de la gráfica.
+ 
+ - Descargar CSV - Descargará un archivo CSV con los datos de la gráfica.
+ 
+ - Editar y ordenar gráfica - Abrirá un popup con las siguientes opciones de edición:
+  - Título de la gráfica: Permite modificar el título de la gráfica.
+  - Anchura de la gráfica: Permite cambiar el ancho de la gráfica.
+  - Orden de la gráfica: Mueve la gráfica a la posición seleccionada.
+  - Escala del eje primario: Establece la altura maxima del eje primario.
+  - Escala del eje secundario: Establece la altura maxima del eje secundario.
+  
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAccionesEditar)
+  
+  
+ - Eliminar gráfica - Abrirá un popup, similar al de "Borrar página", para confirmar el borrado de la gráfica.
+  
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAccionesBorrar)
 
-Configuración en el appsettings.json
-====================================
+
+## Configuración en el appsettings.json
+
 ```json
 {
-  "RabbitMQ": {
-    "colaFuentesExternas": ""
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
   },
-  "QueueRabbit": "",
+  "AllowedHosts": "*",
   "LogPath": ""
 }
 ```
-- colaFuentesExternas: Cadena de conexión de la cola de Rabbit.
-- QueueRabbit: Nombre de la cola de Rabbit.
+- Logging: Nivel de almacenamiento de logs.
 - LogPath: Ruta dónde se van a almacenar los logs.
 
-Dependencias
-============
-- dotNetRDF: v2.7.2
+## Dependencias
+
 - GnossApiWrapper.NetCore: v1.0.8
-- RabbitMQ.Client: v6.3.1
+- Newtonsoft.Json: 13.0.1
 - Swashbuckle.AspNetCore: v6.2.4
 
 
