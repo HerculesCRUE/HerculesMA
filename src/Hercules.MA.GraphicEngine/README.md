@@ -323,21 +323,21 @@ En el apartado de las gráficas, si pulsamos el menú de acciones, representado 
 
 ![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAcciones.png)
 
- - Descargar JPG - Descargará una imagen JPG de la gráfica.
+  - Descargar JPG - Descargará una imagen JPG de la gráfica.
  
- - Descargar CSV - Descargará un archivo CSV con los datos de la gráfica.
+  - Descargar CSV - Descargará un archivo CSV con los datos de la gráfica.
  
- - Editar y ordenar gráfica - Abrirá un popup con las siguientes opciones de edición:
-  - Título de la gráfica: Permite modificar el título de la gráfica.
-  - Anchura de la gráfica: Permite cambiar el ancho de la gráfica.
-  - Orden de la gráfica: Mueve la gráfica a la posición seleccionada.
-  - Escala del eje primario: Establece la altura maxima del eje primario.
-  - Escala del eje secundario: Establece la altura maxima del eje secundario.
+  - Editar y ordenar gráfica - Abrirá un popup con las siguientes opciones de edición:
+    - Título de la gráfica: Permite modificar el título de la gráfica.
+    - Anchura de la gráfica: Permite cambiar el ancho de la gráfica.
+    - Orden de la gráfica: Mueve la gráfica a la posición seleccionada.
+    - Escala del eje primario: Establece la altura maxima del eje primario.
+    - Escala del eje secundario: Establece la altura maxima del eje secundario.
   
 ![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAccionesEditar.png)
   
   
- - Eliminar gráfica - Abrirá un popup, similar al de "Borrar página", para confirmar el borrado de la gráfica.
+  - Eliminar gráfica - Abrirá un popup, similar al de "Borrar página", para confirmar el borrado de la gráfica.
   
 ![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAccionesBorrar.png)
 
