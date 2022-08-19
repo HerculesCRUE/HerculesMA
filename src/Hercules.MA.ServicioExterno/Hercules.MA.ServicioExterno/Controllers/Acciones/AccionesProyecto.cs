@@ -736,23 +736,27 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 #endregion
 
                 //Seleccionamos los pMax colaboradores mas relacionados con el Projecto
+                colaboradores = colaboradores.OrderByDescending(x => x).ToHashSet();
                 numRelacionesColaboradorProjecto = numRelacionesColaboradorProjecto.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-                if (numRelacionesColaboradorProjecto.Count > pMax)
+                if (colaboradores.Count > pMax)
+                //if (numRelacionesColaboradorProjecto.Count > pMax)
                 {
-                    colaboradores = new HashSet<string>(numRelacionesColaboradorProjecto.Keys.ToList().GetRange(0, pMax));
+                    //colaboradores = new HashSet<string>(numRelacionesColaboradorProjecto.Keys.ToList().GetRange(0, pMax));
                     //Eliminamos los nodos que no son necesarios
                     foreach (string idNodo in dicNodos.Keys.ToList())
                     {
-                        if (!colaboradores.Contains(idNodo) && idNodo != ("http://gnoss/" + pIdProyecto))
+                        if (!colaboradores.Contains(idNodo) && idNodo != ("http://gnoss/" + pIdProyecto) && dicNodos.ContainsKey(idNodo))
                         {
                             dicNodos.Remove(idNodo);
                         }
                     }
                 }
                 //Creamos las relaciones entre el Projecto y los colaboradores
-                foreach (string colaborador in numRelacionesColaboradorProyectoProjecto.Keys)
+                foreach (string colaborador in colaboradores)
+                //foreach (string colaborador in numRelacionesColaboradorProyectoProjecto.Keys)
                 {
-                    if (colaboradores.Contains(colaborador))
+                    if (colaboradores.Contains(colaborador) && numRelacionesColaboradorProyectoProjecto.ContainsKey(colaborador))
+                    //if (colaboradores.Contains(colaborador))
                     {
                         string group = "http://gnoss/" + pIdProyecto.ToUpper();
                         string nombreRelacion = "Proyectos";
@@ -778,9 +782,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         });
                     }
                 }
-                foreach (string colaborador in numRelacionesColaboradorDocumentoProjecto.Keys)
+                //foreach (string colaborador in numRelacionesColaboradorDocumentoProjecto.Keys)
+                foreach (string colaborador in colaboradores)
                 {
-                    if (colaboradores.Contains(colaborador))
+                    if (colaboradores.Contains(colaborador) && numRelacionesColaboradorDocumentoProjecto.ContainsKey(colaborador))
+                    //if (colaboradores.Contains(colaborador))
                     {
                         string group = "http://gnoss/" + pIdProyecto.ToUpper();
                         string nombreRelacion = "Documentos";
