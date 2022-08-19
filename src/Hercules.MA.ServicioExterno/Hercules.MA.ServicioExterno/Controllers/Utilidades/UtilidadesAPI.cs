@@ -367,6 +367,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         }}
                     }}
                 ");
+            
+            filtrosPersonalizados.Add("?search", 
+                $@"
+                {pVarAnterior} [PARAMETRO] [PARAMETRO]0.
+                 FILTER REGEX([PARAMETRO]0,{"\"[EXPRESION]\""},{ "\"i\""}) 
+                ");
+            //variable, f(e|é)l(i|í)x
+
 
             string varInicial = pVarAnterior;
             string pVarAnteriorAux = string.Empty;
@@ -377,9 +385,56 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                 foreach (KeyValuePair<string, List<string>> item in pDicFiltros)
                 {
+                    
                     if (filtrosPersonalizados.ContainsKey(item.Key))
                     {
-                        filtro.Append(filtrosPersonalizados[item.Key].Replace("[PARAMETRO]", item.Value.First()));
+                        string filtroParametros;
+                        if (filtrosPersonalizados[item.Key].Contains("[EXPRESION]"))
+                        {
+                            filtroParametros = filtrosPersonalizados[item.Key].Replace("[PARAMETRO]", item.Key);
+
+                            StringBuilder expresion = new StringBuilder();
+                            foreach (char c in HttpUtility.UrlDecode(item.Value.First()).ToLower().ToCharArray())
+                            {
+                                if (c.Equals('a') || c.Equals('á'))
+                                {
+                                    expresion.Append("(a|á)");
+                                }
+                                else if (c.Equals('e') || c.Equals('é'))
+                                {
+                                    expresion.Append("(e|é)");
+                                }
+                                else if (c.Equals('i') || c.Equals('í'))
+                                {
+                                    expresion.Append("(i|í)");
+                                }
+                                else if (c.Equals('o') || c.Equals('ó'))
+                                {
+                                    expresion.Append("(o|ó)");
+                                }
+                                else if (c.Equals('u') || c.Equals('ú'))
+                                {
+                                    expresion.Append("(u|ú)");
+                                }
+                                else
+                                {
+                                    expresion.Append(c);
+                                }
+
+                            }
+                            pVarAnterior = item.Key + "0";
+                            string expresionStr = expresion.ToString();
+
+                            filtroParametros = filtroParametros.Replace("[EXPRESION]", expresionStr);
+                        }
+                        else
+                        {
+                             filtroParametros = filtrosPersonalizados[item.Key].Replace("[PARAMETRO]", item.Value.First());
+
+                        }
+
+                        filtro.Append(filtroParametros);
+                        
                     }
                     else
                     {
@@ -539,6 +594,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             pVarAnterior = varInicial;
                         }
                     }
+
                 }
                 return filtro.ToString();
             }
