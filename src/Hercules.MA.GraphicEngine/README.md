@@ -321,7 +321,7 @@ Pulsando "Borrar página" se nos mostrará un mensaje de borrado. Eliminando la 
 
 En el apartado de las gráficas, si pulsamos el menú de acciones, representado por tres puntos, se abrirán opciones adicionales.
 
-![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAcciones)
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAcciones.png)
 
  - Descargar JPG - Descargará una imagen JPG de la gráfica.
  
@@ -334,12 +334,12 @@ En el apartado de las gráficas, si pulsamos el menú de acciones, representado 
   - Escala del eje primario: Establece la altura maxima del eje primario.
   - Escala del eje secundario: Establece la altura maxima del eje secundario.
   
-![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAccionesEditar)
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAccionesEditar.png)
   
   
  - Eliminar gráfica - Abrirá un popup, similar al de "Borrar página", para confirmar el borrado de la gráfica.
   
-![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAccionesBorrar)
+![](../../Docs/media/GraphicEngine/GraphicEngineMisIndicadoresMenuAccionesBorrar.png)
 
 
 ## Configuración en el appsettings.json
