@@ -412,25 +412,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         {{
                             {{
 			                    {pVarAnterior} <http://w3id.org/roh/title> ?title.
-			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
+			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| ""
                             }}
                             UNION
 		                    {{
 			                    {pVarAnterior} vivo:freeTextKeyword ?keywordO.
                                 ?keywordO <http://w3id.org/roh/title> ?keyword.
-			                    ?keyword bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
+			                    ?keyword bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
 		                    }}
 		                    UNION
 		                    {{
 			                    {pVarAnterior} bibo:abstract ?abstract.
-			                    ?abstract bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
+			                    ?abstract bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| ""
                             }}
                             UNION
 		                    {{
 			                    {pVarAnterior} bibo:authorList ?authorList.
 			                    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
 			                    ?person <http://xmlns.com/foaf/0.1/name> ?namePerson.
-			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
+			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
                             }}
                         }}
                     }}
@@ -444,7 +444,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 		                    ?s a 'project'
 		                    {{
 			                    ?s roh:title ?title.
-			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE] || '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
+			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| ""
                             }}
 		                    UNION
 		                    {{
@@ -475,7 +475,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 	                    {{
 		                    {{
 			                    ?s foaf:name ?namePerson .
-			                    ?namePerson bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE] || '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
+			                    ?namePerson bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| ""
                             }}
 	                    }}
                     }}
