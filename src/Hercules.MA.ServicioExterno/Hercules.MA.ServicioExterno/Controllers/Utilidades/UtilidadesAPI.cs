@@ -403,7 +403,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                 ");
 
 
-            string consultaGenerica = $@"
+            //Filtros searcher buscadores
+            filtrosPersonalizados.Add("searcherPublications",
+                 $@"
                     {{
                         SELECT DISTINCT {pVarAnterior}
                         WHERE
@@ -432,15 +434,52 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }}
                         }}
                     }}
-                ";
-            //Filtros searcher buscadores
-            filtrosPersonalizados.Add("searcherPublications", consultaGenerica);
+                ");
 
-            filtrosPersonalizados.Add("searcherProjects", consultaGenerica);
+            filtrosPersonalizados.Add("searcherProjects",
+                 $@"
+                    {{
+	                    select ?s
+	                    {{
+		                    ?s a 'project'
+		                    {{
+			                    ?s roh:title ?title.
+			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE] || '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
+                            }}
+		                    UNION
+		                    {{
+			                    ?s bibo:abstract ?abstract.
+			                    ?abstract bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
+		                    }}
+		                    UNION
+                            {{
+			                    ?s vivo:freeTextKeyword? keywordO.
+                                ?keywordO roh:title? keyword.
+			                    ?keyword bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
+                            }}
+		                    UNION
+		                    {{
+                                ?person  a 'person'.
+                                ?s roh:membersProject ?person.
+			                    ?person foaf:name ?namePerson.
+			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
+		                    }}
+	                    }}
+                    }}
+                ");
 
-            filtrosPersonalizados.Add("searcherPersons", consultaGenerica);
-
-            filtrosPersonalizados.Add("searcherParticipantes", consultaGenerica);
+            filtrosPersonalizados.Add("searcherPersons",
+                 $@"
+                    {{
+	                    select ?s where 
+	                    {{
+		                    {{
+			                    ?s foaf:name ?namePerson .
+			                    ?namePerson bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE] || '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
+                            }}
+	                    }}
+                    }}
+                ");
 
 
             string varInicial = pVarAnterior;
@@ -459,8 +498,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         {
                             string filtroParametros = filtrosPersonalizados[item.Key].Replace("[PARAMETRO]", item.Value.First());
                             filtro.Append(filtroParametros);
-                        }
-                        else
+                        }else
                         {
                             string filtroParametros = ObtenerQuerySearch(filtrosPersonalizados[item.Key], item.Value.First());
                             filtro.Append(filtroParametros);
