@@ -121,12 +121,14 @@ Dentro de la lista de gráficas, se van a configurar cada una de las gráficas q
 - nombre: Es el nombre o título de la gráfica. Multiidioma. Obligatorio. String.
 - tipo: Representa el tipo de gráfica (Barras, Circular, Nodos). Obligatorio. String.
 - anchura: Representa el ancho de la gráfica a modo de fracción, es decir, 11 es 1/1, 23 es 2/3, etc... (11, 12, 13, 14, 16, 23, 34, 38, 58). Obligatorio. Número.
+- isPrivate: Decide si la gráfica es visible para los usuarios sin permisos. Opcional. Boolean.
 - idGrupo: Junta las gráficas con este mismo identificador en un desplegable. Opcional. String.
 - propCategoryPath: Indica el nombre de la propiedad que apunta al CategoryPath. Opcional, únicamente poner si se trata de un tesauro. String.
 - config: Configuración específica de la gráfica. Varía en función del tipo de gráfica. Obligatorio.
   - reciproco: Opcional. String. Indica si el valor a obtener es inverso o no. Se agrega el rdftype y los saltos necesarios para acceder a la propiedad. Ej: rdf:type='group'@@@vivo:relates@@@roh:roleOf
   - orientacionVertical: Representa si las barras son verticales u horizontales. Opcional. Boolean.
   - datosNodos: Representa si la gráfica obtiene los datos como una gráfica de nodos. Opcional. Boolean.
+  - numMaxNodos: Representa la máxima cantidad de nodos que se mostrarán, quitando el resto de nodos menos relevantes. Opcional. Número.
   - ejeX: Es el filtro de los datos del eje X. Obligatorio. String.
   - rango: El eje X de la gráfica se agrupa tomando los valores 1-3, 4-10, 11-30, 30+. Opcional. Boolean.
   - abreviar: Abrevia los labels del eje X. Opcional. Boolean.
@@ -187,12 +189,14 @@ Dentro de la lista de gráficas, se van a configurar cada una de las gráficas q
   - tipo: Representa el tipo de gráfica (Barras, Circular, Nodos). Obligatorio. String.
   - anchura: Representa el ancho de la gráfica a modo de fracción, es decir, 11 es 1/1, 23 es 2/3, etc... (11, 12, 13, 14, 16, 23, 34, 38, 58). Obligatorio. Número.
   - idGrupo: Junta las gráficas con este mismo identificador en un desplegable. Opcional. String.
+  - isPrivate: Decide si la gráfica es visible para los usuarios sin permisos. Opcional. Boolean.
   - config: Configuración específica de la gráfica. Varía en función del tipo de gráfica. Obligatorio.
     - porcentual: Indica si el porcentaje de cada porción deberá ser mostrado cuando se pasa el raton por encima. Opcional. Boolean
     - dimensiones: Distintas dimensiones de la gráfica. Obligatorio.
       - nombre: Es el nombre de la dimensión. Multiidioma. Obligatorio. String.
       - filtro: Es el filtro de la dimensión. En caso de estar vacío ("") tomará los valores del ejeX. Obligatorio. String.
       - calculo: Es el cálculo que aplica la dimensión para sus datos (SUM, AVG, MIN, MAX). Opcional. String.
+      - exterior: Representa si la gráfica es de doble círculo y esta dimensión corresponde a la circunferencia exterior. Opcional. Boolean.
       - color: Es el color en hexadecimal de la dimensión. Opcional. String.
       - colorMaximo: Crea un degradado entre este color hexadecimal y el color de la opción anterior, se utiliza en los casos en los que el filtro devuelve más de un valor. Opcional. String
       - orden: Orden de dibujado de la dimensión. Opcional. Número.
@@ -227,6 +231,7 @@ Dentro de la lista de gráficas, se van a configurar cada una de las gráficas q
   - tipo: Representa el tipo de gráfica (Barras, Circular, Nodos). Obligatorio. String.
   - anchura: Representa el ancho de la gráfica a modo de fracción, es decir, 11 es 1/1, 23 es 2/3, etc... (11, 12, 13, 14, 16, 23, 34, 38, 58). Obligatorio. Número.
   - idGrupo: Junta las gráficas con este mismo identificador en un desplegable. Opcional. String.
+  - isPrivate: Decide si la gráfica es visible para los usuarios sin permisos. Opcional. Boolean.
   - config: Configuración específica de la gráfica. Varía en función del tipo de gráfica. Obligatorio
     - dimensiones: Distintas dimensiones de la gráfica. Obligatorio.
       - nombre: Es el nombre de la dimensión. Multiidioma. Obligatorio. String.
