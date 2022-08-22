@@ -189,6 +189,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Otros campos
                 cRsource.Roh_dateIssued = DateTime.UtcNow;
 
+                cRsource.Roh_title = "-";
+
                 // Sección de las descripciones, limpiamos los strings de tags que no queramos
                 cRsource.Roh_text = texto != null ? CleanHTML.StripTagsCharArray(texto, new string[] {}, new string[] {}) : "";
 

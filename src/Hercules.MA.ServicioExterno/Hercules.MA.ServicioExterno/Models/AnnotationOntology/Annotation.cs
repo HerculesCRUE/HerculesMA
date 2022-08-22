@@ -40,6 +40,10 @@ namespace AnnotationOntology
 		[RDFProperty("http://w3id.org/roh/dateIssued")]
 		public DateTime? Roh_dateIssued { get; set; }
 
+		[RDFProperty("http://w3id.org/roh/title")]
+		public string Roh_title { get; set; }
+
+
 		[RDFProperty("http://w3id.org/roh/text")]
 		public string Roh_text { get; set; }
 
@@ -59,6 +63,7 @@ namespace AnnotationOntology
 				propList.Add(new DateOntologyProperty("roh:dateIssued", this.Roh_dateIssued.Value));
 			}
 			propList.Add(new StringOntologyProperty("roh:text", this.Roh_text));
+			propList.Add(new StringOntologyProperty("roh:title", this.Roh_title));
 			propList.Add(new StringOntologyProperty("roh:owner", this.IdRoh_owner));
 		}
 
@@ -105,7 +110,7 @@ namespace AnnotationOntology
 			{
 				tags = tags.Substring(0, tags.LastIndexOf(','));
 			}
-			string titulo = $"{this.Roh_text.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}";
+			string titulo = $"{this.Roh_title.Replace("\r\n", "").Replace("\n", "").Replace("\r", "").Replace("\"", "\"\"").Replace("'", "''").Replace("|", "#PIPE#")}";
 			string tablaDoc = $"'{titulo}', '', '{resourceAPI.GraphsUrl}', '{tags}'";
 			KeyValuePair<Guid, string> valor = new KeyValuePair<Guid, string>(ResourceID, tablaDoc);
 
@@ -120,7 +125,7 @@ namespace AnnotationOntology
 
 		internal void AddResourceTitle(ComplexOntologyResource resource)
 		{
-			resource.Title = this.Roh_text;
+			resource.Title = this.Roh_title;
 		}
 	}
 }
