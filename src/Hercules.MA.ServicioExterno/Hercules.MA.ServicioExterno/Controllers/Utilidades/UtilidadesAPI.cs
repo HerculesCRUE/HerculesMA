@@ -95,114 +95,111 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             //Filtros personalizados
             Dictionary<string, string> filtrosPersonalizados = new Dictionary<string, string>();
             filtrosPersonalizados.Add("searchColaboradoresPorGrupo",
-                        @$"
-                            {{
-                                SELECT DISTINCT {pVarAnterior}
-	                            WHERE 
-	                            {{	
-                                    {pVarAnterior} a 'person'	
-		                            {{
-			                            {{
-				                            #Documentos
-				                            SELECT *
-				                            WHERE {{
-					                            ?documento <http://w3id.org/roh/isProducedBy> <http://gnoss/[PARAMETRO]>.
-					                            ?documento a 'document'.
-					                            ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
-					                            ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
-				                            }}
-			                            }} 
-			                            UNION 
-			                            {{
-				                            #Proyectos
-				                            SELECT *
-				                            WHERE {{
-					                            ?proy <http://w3id.org/roh/publicGroupList> <http://gnoss/[PARAMETRO]>.
-					                            ?proy a 'project'.
-					                            ?proy ?propRol ?role.
-					                            FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://w3id.org/roh/mainResearchers>))
-					                            ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
-				                            }}
-			                            }}
-		                            }}		
-		                            MINUS
-		                            {{
-			                            {pVarAnterior} <http://vivoweb.org/ontology/core#relates> <http://gnoss/[PARAMETRO]>
-		                            }}
-	                            }}
-                            }}
-                        ");
-
-
+                @$"
+                    {{
+                        SELECT DISTINCT {pVarAnterior}
+	                    WHERE 
+	                    {{	
+                            {pVarAnterior} a 'person'	
+		                    {{
+			                    {{
+				                    #Documentos
+				                    SELECT *
+				                    WHERE {{
+					                    ?documento <http://w3id.org/roh/isProducedBy> <http://gnoss/[PARAMETRO]>.
+					                    ?documento a 'document'.
+					                    ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
+					                    ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                    }}
+			                    }} 
+			                    UNION 
+			                    {{
+				                    #Proyectos
+				                    SELECT *
+				                    WHERE {{
+					                    ?proy <http://w3id.org/roh/publicGroupList> <http://gnoss/[PARAMETRO]>.
+					                    ?proy a 'project'.
+					                    ?proy ?propRol ?role.
+					                    FILTER(?propRol in (<http://vivoweb.org/ontology/core#relates>,<http://w3id.org/roh/mainResearchers>))
+					                    ?role <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                    }}
+			                    }}
+		                    }}		
+		                    MINUS
+		                    {{
+			                    {pVarAnterior} <http://vivoweb.org/ontology/core#relates> <http://gnoss/[PARAMETRO]>
+		                    }}
+	                    }}
+                    }}
+                ");
 
             filtrosPersonalizados.Add("searchPersonasRelacionadasConProyecto",
-                        @$"
-                            {{
-                                SELECT DISTINCT {pVarAnterior}
-	                            WHERE 
-	                            {{	
-                                    <http://gnoss/[PARAMETRO]> <http://w3id.org/roh/publicAuthorList> {pVarAnterior}.
-	                            }}
-                            }}
-                        ");
+                @$"
+                    {{
+                        SELECT DISTINCT {pVarAnterior}
+	                    WHERE 
+	                    {{	
+                            <http://gnoss/[PARAMETRO]> <http://w3id.org/roh/publicAuthorList> {pVarAnterior}.
+	                    }}
+                    }}
+                ");
 
             filtrosPersonalizados.Add("searchColaboradoresPorPersona",
-                        @$"
-                            {{
-	                            SELECT DISTINCT {pVarAnterior}
-	                            WHERE 
-	                            {{	
-                                    {pVarAnterior} a 'person'	
-		                            {{
-			                            {{
-				                            #Documentos
-				                            SELECT *
-				                            WHERE {{
-                                                ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutoresA.
-					                            ?listaAutoresA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/[PARAMETRO]>.					                           
-					                            ?documento a 'document'.
-					                            ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
-					                            ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
-				                            }}
-			                            }}
-			                            UNION 
-			                            {{
-				                            #Proyectos
-				                            SELECT *
-				                            WHERE {{
-					                            ?proy ?propRolA ?roleA.
-					                            FILTER(?propRolA in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
-					                            ?roleA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/[PARAMETRO]>.
-					                            ?proy a 'project'.
-					                            ?proy ?propRolB ?roleB.
-					                            FILTER(?propRolB in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
-					                            ?roleB <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
-				                            }}
-			                            }}
-		                            }}		
-		                            FILTER({pVarAnterior}!=<http://gnoss/[PARAMETRO]>)
-	                            }}
-                            }}
-                        ");
-
+                @$"
+                    {{
+	                    SELECT DISTINCT {pVarAnterior}
+	                    WHERE 
+	                    {{	
+                            {pVarAnterior} a 'person'	
+		                    {{
+			                    {{
+				                    #Documentos
+				                    SELECT *
+				                    WHERE {{
+                                        ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutoresA.
+					                    ?listaAutoresA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/[PARAMETRO]>.					                           
+					                    ?documento a 'document'.
+					                    ?documento <http://purl.org/ontology/bibo/authorList> ?listaAutores.
+					                    ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                    }}
+			                    }}
+			                    UNION 
+			                    {{
+				                    #Proyectos
+				                    SELECT *
+				                    WHERE {{
+					                    ?proy ?propRolA ?roleA.
+					                    FILTER(?propRolA in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+					                    ?roleA <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/[PARAMETRO]>.
+					                    ?proy a 'project'.
+					                    ?proy ?propRolB ?roleB.
+					                    FILTER(?propRolB in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+					                    ?roleB <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+				                    }}
+			                    }}
+		                    }}		
+		                    FILTER({pVarAnterior}!=<http://gnoss/[PARAMETRO]>)
+	                    }}
+                    }}
+                ");
 
             filtrosPersonalizados.Add("searchPersonasColaboradoresConProyecto",
-                        @$"
-                            {{
-                                SELECT DISTINCT {pVarAnterior}
-                                WHERE
-                                {{
-                                    ?doc a 'document'.
-                                    ?doc <http://w3id.org/roh/project> <http://gnoss/[PARAMETRO]>.
-                                    ?doc <http://purl.org/ontology/bibo/authorList> ?relacion.
-                                    ?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
-                                    MINUS
-		                            {{
-                                        <http://gnoss/[PARAMETRO]> <http://w3id.org/roh/publicAuthorList> {pVarAnterior}  
-		                            }}
-                                }}
-                            }}
-                        ");
+                @$"
+                    {{
+                        SELECT DISTINCT {pVarAnterior}
+                        WHERE
+                        {{
+                            ?doc a 'document'.
+                            ?doc <http://w3id.org/roh/project> <http://gnoss/[PARAMETRO]>.
+                            ?doc <http://purl.org/ontology/bibo/authorList> ?relacion.
+                            ?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
+                            MINUS
+		                    {{
+                                <http://gnoss/[PARAMETRO]> <http://w3id.org/roh/publicAuthorList> {pVarAnterior}  
+		                    }}
+                        }}
+                    }}
+                ");
 
             filtrosPersonalizados.Add("searchPublicacionesPublicasPerson", 
                 $@"
@@ -306,6 +303,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                     }}
                     }}
                 ");
+
             filtrosPersonalizados.Add("searchProyectosPorGrupo",
                 $@"
                     {{
@@ -316,6 +314,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                        }}
                     }}
                 ");
+
             filtrosPersonalizados.Add("searchMiembrosGrupo",
                 $@"
                     {{
@@ -327,6 +326,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         }} 
                     }}
                 ");
+
             filtrosPersonalizados.Add("searchColaboradoresGruposExternos",
                 $@"
                     {{
@@ -557,38 +557,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
                                 if (!filtrosReciprocos.ContainsKey(item.Key))
                                 {
-                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro.Replace("+", "%2B")).ToLower()})) ");
-                                   /* StringBuilder expresion = new StringBuilder();
-                                    foreach (char c in HttpUtility.UrlDecode(valorFiltro).ToLower().ToCharArray())
-                                    {
-                                        if (c.Equals('a') || c.Equals('á'))
-                                        {
-                                            expresion.Append("(a|á)");
-                                        }
-                                        else if (c.Equals('e') || c.Equals('é'))
-                                        {
-                                            expresion.Append("(e|é)");
-                                        }
-                                        else if (c.Equals('i') || c.Equals('í'))
-                                        {
-                                            expresion.Append("(i|í)");
-                                        }
-                                        else if (c.Equals('o') || c.Equals('ó'))
-                                        {
-                                            expresion.Append("(o|ó)");
-                                        }
-                                        else if (c.Equals('u') || c.Equals('ú'))
-                                        {
-                                            expresion.Append("(u|ú)");
-                                        }
-                                        else
-                                        {
-                                            expresion.Append(c);
-                                        }
-                                        
-                                    }
-                                    string a = expresion.ToString();
-                                    filtro.Append($@"FILTER REGEX({pVarAnterior},{a},{"\"i\""}) ");*/
+                                    filtro.Append($@"FILTER({pVarAnterior} IN ({HttpUtility.UrlDecode(valorFiltro.Replace("+", "%2B"))})) ");                                   
                                 }
                             }
                             pVarAnterior = varInicial;
