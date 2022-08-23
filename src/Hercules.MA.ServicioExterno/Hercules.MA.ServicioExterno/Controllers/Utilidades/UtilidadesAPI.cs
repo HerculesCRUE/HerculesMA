@@ -239,12 +239,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         WHERE
                         {{
                             ?doc a 'document'.
+                            ?doc <http://w3id.org/roh/isValidated> 'true'.
                             ?doc <http://w3id.org/roh/project> <http://gnoss/[PARAMETRO]>.
                             ?doc <http://purl.org/ontology/bibo/authorList> ?relacion.
                             ?relacion <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> {pVarAnterior}.
                             MINUS
 		                    {{
-                                <http://gnoss/[PARAMETRO]> <http://w3id.org/roh/publicAuthorList> {pVarAnterior}  
+                                <http://gnoss/[PARAMETRO]> <http://w3id.org/roh/membersProject> {pVarAnterior}  
 		                    }}
                         }}
                     }}
