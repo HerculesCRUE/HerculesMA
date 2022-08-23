@@ -266,14 +266,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 			                    ?scientificActivity ?pAux ?oAux.
 			                    ?oAux <http://w3id.org/roh/isPublic> 'true'.
 			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
-		                    }}UNION
-		                    {{
-                                FILTER(?person=<[PARAMETRO]>)
-			                    {pVarAnterior} a 'document'.
-			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
-			                    {pVarAnterior} <http://purl.org/ontology/bibo/authorList> ?list.
-			                    ?list <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
 		                    }}
+                            #UNION
+		                    #{{
+                            #    FILTER(?person=<[PARAMETRO]>)
+			                #    {pVarAnterior} a 'document'.
+			                #    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
+			                #    {pVarAnterior} <http://purl.org/ontology/bibo/authorList> ?list.
+			                #    ?list <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+		                    #}}
 	                    }}
                     }}
                 ");
