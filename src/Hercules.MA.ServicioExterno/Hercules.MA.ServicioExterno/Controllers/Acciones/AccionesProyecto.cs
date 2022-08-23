@@ -614,11 +614,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pIdProyecto">ID del recurso del proyecto.</param>
         /// <param name="pParametros">Filtros aplicados en las facetas.</param>
+        /// <param name="pMax"></param>
         /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
         public List<DataItemRelacion> GetDatosGraficaRedColaboradores(string pIdProyecto, string pParametros, int pMax)
         {
-
-
             HashSet<string> colaboradores = new HashSet<string>();
             Dictionary<string, int> numRelacionesColaboradorProjecto = new Dictionary<string, int>();
             Dictionary<string, int> numRelacionesColaboradorDocumentoProjecto = new Dictionary<string, int>();
