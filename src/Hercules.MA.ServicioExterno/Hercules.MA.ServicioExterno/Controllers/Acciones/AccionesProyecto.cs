@@ -812,7 +812,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         string select = "SELECT ?person group_concat(distinct ?project;separator=\",\") as ?projects";
                         string where = $@"
-                    WHERE {{ 
+                        WHERE {{ 
                             ?project a 'project'.
                             ?project ?propRol ?rol.
                             FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
@@ -833,7 +833,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         string select = "SELECT ?person group_concat(?document;separator=\",\") as ?documents";
                         string where = $@"
-                    WHERE {{ 
+                        WHERE {{ 
                             ?document a 'document'.
                             ?document <http://purl.org/ontology/bibo/authorList> ?authorList.
                             ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
