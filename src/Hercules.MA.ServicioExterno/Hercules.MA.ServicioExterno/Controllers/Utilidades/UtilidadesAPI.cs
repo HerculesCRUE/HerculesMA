@@ -107,6 +107,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
         /// <returns>String con los filtros creados.</returns>
         public static string CrearFiltros(Dictionary<string, List<string>> pDicFiltros, string pVarAnterior, ref int pAux)
         {
+            // Edito los espacios y acentos del diccionario
+            foreach (KeyValuePair<string, List<string>> keyValue in pDicFiltros)
+            {
+                for (int i = 0; i < keyValue.Value.Count; i++)
+                {
+                    keyValue.Value[i] = HttpUtility.HtmlDecode(keyValue.Value[i]);
+                }
+            }
+
             // Filtros de fechas.
             List<string> filtrosFecha = new List<string>();
             filtrosFecha.Add("dct:issued");
@@ -412,25 +421,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         {{
                             {{
 			                    {pVarAnterior} <http://w3id.org/roh/title> ?title.
-			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| ""
+			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and|| '[PARAMETROESPACIOIN]' |||""
                             }}
                             UNION
 		                    {{
 			                    {pVarAnterior} vivo:freeTextKeyword ?keywordO.
                                 ?keywordO <http://w3id.org/roh/title> ?keyword.
-			                    ?keyword bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
+			                    ?keyword bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
 		                    }}
 		                    UNION
 		                    {{
 			                    {pVarAnterior} bibo:abstract ?abstract.
-			                    ?abstract bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| ""
+			                    ?abstract bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
                             }}
                             UNION
 		                    {{
 			                    {pVarAnterior} bibo:authorList ?authorList.
 			                    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
 			                    ?person <http://xmlns.com/foaf/0.1/name> ?namePerson.
-			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
+			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
                             }}
                         }}
                     }}
@@ -444,25 +453,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 		                    ?s a 'project'
 		                    {{
 			                    ?s roh:title ?title.
-			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| ""
+			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and ||'[PARAMETROESPACIOIN]' |||""
                             }}
 		                    UNION
 		                    {{
 			                    ?s bibo:abstract ?abstract.
-			                    ?abstract bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
+			                    ?abstract bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
 		                    }}
 		                    UNION
                             {{
-			                    ?s vivo:freeTextKeyword? keywordO.
-                                ?keywordO roh:title? keyword.
-			                    ?keyword bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
+			                    ?s vivo:freeTextKeyword ?keywordO.
+                                ?keywordO roh:title ?keyword.
+			                    ?keyword bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
                             }}
 		                    UNION
 		                    {{
                                 ?person  a 'person'.
                                 ?s roh:membersProject ?person.
 			                    ?person foaf:name ?namePerson.
-			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'|||""
+			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
 		                    }}
 	                    }}
                     }}
@@ -475,7 +484,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 	                    {{
 		                    {{
 			                    ?s foaf:name ?namePerson .
-			                    ?namePerson bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| ""
+			                    ?namePerson bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
                             }}
 	                    }}
                     }}
@@ -498,7 +507,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         {
                             string filtroParametros = filtrosPersonalizados[item.Key].Replace("[PARAMETRO]", item.Value.First());
                             filtro.Append(filtroParametros);
-                        }else
+                        }
+                        else
                         {
                             string filtroParametros = ObtenerQuerySearch(filtrosPersonalizados[item.Key], item.Value.First());
                             filtro.Append(filtroParametros);
@@ -667,8 +677,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
             return null;
         }
-
-
 
         /// <summary>
         /// Permite calcular el valor del ancho de la línea según el número de colaboraciones que tenga el nodo.
