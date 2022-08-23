@@ -113,6 +113,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                 for (int i = 0; i < keyValue.Value.Count; i++)
                 {
                     keyValue.Value[i] = HttpUtility.UrlDecode(keyValue.Value[i]);
+
+                    //Si el diccionario trae un valor vacío o un espacio elimino ese filtro
+                    if (string.IsNullOrEmpty(keyValue.Value[i]))
+                    {
+                        pDicFiltros.Remove(keyValue.Key);
+                    }
                 }
             }
 
@@ -421,7 +427,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                         {{
                             {{
 			                    {pVarAnterior} <http://w3id.org/roh/title> ?title.
-			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and|| '[PARAMETROESPACIOIN]' |||""
+			                    ?title bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and|| '[PARAMETROESPACIOIN]' |||""
                             }}
                             UNION
 		                    {{
@@ -432,7 +438,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 		                    UNION
 		                    {{
 			                    {pVarAnterior} bibo:abstract ?abstract.
-			                    ?abstract bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
+			                    ?abstract bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
                             }}
                             UNION
 		                    {{
@@ -453,7 +459,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 		                    {pVarAnterior} a 'project'
 		                    {{
 			                    {pVarAnterior} roh:title ?title.
-			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and ||'[PARAMETROESPACIOIN]' |||""
+			                    ?title bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
                             }}
 		                    UNION
 		                    {{
@@ -468,7 +474,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             }}
 		                    UNION
 		                    {{
-                                ?person  a 'person'.
+                                ?person a 'person'.
                                 {pVarAnterior} roh:membersProject ?person.
 			                    ?person foaf:name ?namePerson.
 			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
@@ -484,7 +490,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 	                    {{
 		                    {{
 			                    {pVarAnterior} foaf:name ?namePerson .
-			                    ?namePerson bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
+			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
                             }}
 	                    }}
                     }}
