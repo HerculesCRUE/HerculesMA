@@ -448,28 +448,28 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             filtrosPersonalizados.Add("searcherProjects",
                  $@"
                     {{
-	                    select ?s
+	                    select {pVarAnterior}
 	                    {{
-		                    ?s a 'project'
+		                    {pVarAnterior} a 'project'
 		                    {{
-			                    ?s roh:title ?title.
+			                    {pVarAnterior} roh:title ?title.
 			                    ?title bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and ||'[PARAMETROESPACIOIN]' |||""
                             }}
 		                    UNION
 		                    {{
-			                    ?s bibo:abstract ?abstract.
+			                    {pVarAnterior} bibo:abstract ?abstract.
 			                    ?abstract bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
 		                    }}
 		                    UNION
                             {{
-			                    ?s vivo:freeTextKeyword ?keywordO.
+			                    {pVarAnterior} vivo:freeTextKeyword ?keywordO.
                                 ?keywordO roh:title ?keyword.
 			                    ?keyword bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
                             }}
 		                    UNION
 		                    {{
                                 ?person  a 'person'.
-                                ?s roh:membersProject ?person.
+                                {pVarAnterior} roh:membersProject ?person.
 			                    ?person foaf:name ?namePerson.
 			                    ?namePerson bif:contains ""|||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' |||""
 		                    }}
@@ -480,10 +480,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             filtrosPersonalizados.Add("searcherPersons",
                  $@"
                     {{
-	                    select ?s where 
+	                    select {pVarAnterior} where 
 	                    {{
 		                    {{
-			                    ?s foaf:name ?namePerson .
+			                    {pVarAnterior} foaf:name ?namePerson .
 			                    ?namePerson bif:contains "" |||[PARAMETROESPACIOULTIMODIFERENTE]|| '[PARAMETROESPACIOIN]' and || '[PARAMETROESPACIOIN]' ||| ""
                             }}
 	                    }}
