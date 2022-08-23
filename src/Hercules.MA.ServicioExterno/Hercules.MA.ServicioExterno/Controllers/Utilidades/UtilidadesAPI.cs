@@ -112,7 +112,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
             {
                 for (int i = 0; i < keyValue.Value.Count; i++)
                 {
-                    keyValue.Value[i] = HttpUtility.HtmlDecode(keyValue.Value[i]);
+                    keyValue.Value[i] = HttpUtility.UrlDecode(keyValue.Value[i]);
                 }
             }
 
