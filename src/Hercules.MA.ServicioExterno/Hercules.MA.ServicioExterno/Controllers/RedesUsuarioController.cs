@@ -39,8 +39,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// Controlador para modificar los datos de las fuentes de RO.
         /// </summary>
         /// <param name="pIdGnossUser">Usuario de gnoss.</param>
-        /// <param name="pDicDatosAntiguos">Datos antiguos a modificar.</param>
-        /// <param name="pDicDatosNuevos">Datos nuevos a modificar.</param>
+        /// <param name="pDataUser"></param>
         /// <returns>Diccionario con los datos.</returns>
         [HttpPost("SetDatosRedesUsuario")]
         public IActionResult SetDatosRedesUsuario([FromForm] string pIdGnossUser, [FromForm] User pDataUser)

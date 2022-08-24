@@ -119,8 +119,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         fechaDate = DateTime.ParseExact(e["date"].value, "yyyyMMddHHmmss", null);
                         fecha = fechaDate.ToString("g");
                     }
-                    catch (Exception exc) { }
-                    
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
+
                     // Creamos el diccionario
                     Dictionary<string, string> longs = new Dictionary<string, string>();
                     longs.Add("id", id);

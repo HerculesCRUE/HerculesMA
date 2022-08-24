@@ -48,7 +48,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     thesaurusTypes = JsonConvert.DeserializeObject<List<string>>(listadoCluster);
                 }
             }
-            catch (Exception e) { throw new Exception("El texto que ha introducido no corresponde a un json válido"); }
+            catch (Exception ex)
+            {
+                mResourceApi.Log.Error("El texto que ha introducido no corresponde a un json válido");
+                mResourceApi.Log.Error("Excepcion: " + ex.Message);
+            }
 
             var thesaurus = UtilidadesAPI.GetTesauros(mResourceApi, thesaurusTypes);
 
@@ -105,7 +109,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             {
                                 if (us.userID != null && us.shortUserID != null)
                                 {
-                                    relationIDs["http://gnoss.com/" + us.shortUserID]= us.userID;
+                                    relationIDs["http://gnoss.com/" + us.shortUserID] = us.userID;
                                 }
                                 else
                                 {
@@ -161,7 +165,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }).ToList();
 
 
-                    } catch(Exception e) { }
+                    }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
                 }
 
 
@@ -260,10 +268,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         // perfiles.ForEach(e => mResourceApi.PersistentDelete(e));
                         // borra el recurso
                         mResourceApi.PersistentDelete(resourceGuid);
-                    } catch (Exception e ) {
+                    }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
                         return false;
                     }
-                    
+
                 }
             }
             else
@@ -278,6 +289,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// Método público para obtener los datos de un cluster
         /// </summary>
         /// <param name="pIdClusterId">Identificador del cluster</param>
+        /// <param name="loadUsuarios"></param>
         /// <returns>Diccionario con las listas de thesaurus.</returns>
         internal Models.Cluster.Cluster LoadCluster(string pIdClusterId, bool loadUsuarios = true)
         {
@@ -328,7 +340,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtenemos todos los datos de las areas temáticas
             if (pDataCluster.terms.Count > 0)
             {
-                pDataCluster.terms = UtilidadesAPI.LoadCurrentTerms(mResourceApi , pDataCluster.terms, "cluster");
+                pDataCluster.terms = UtilidadesAPI.LoadCurrentTerms(mResourceApi, pDataCluster.terms, "cluster");
             }
 
 
@@ -367,14 +379,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         perfilCluster.tags = e["freeTextKeywordGroup"].value.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
                     }
-                    catch (Exception except) {
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
                         perfilCluster.tags = new();
                     }
                     try
                     {
                         perfilCluster.terms = e["knowledgeAreaGroup"].value.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
                     }
-                    catch (Exception except) {
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
                         perfilCluster.terms = new();
                     }
                     perfilCluster.users = new List<PerfilCluster.UserCluster>();
@@ -439,9 +455,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             userID = e["memberPerfil"].value,
                             name = e["nombreUser"].value,
                             shortUserID = mResourceApi.GetShortGuid(e["memberPerfil"].value).ToString().ToLower(),
-                            numPublicacionesTotal= e.ContainsKey("numDoc") ? int.Parse(e["numDoc"].value) : 0,
+                            numPublicacionesTotal = e.ContainsKey("numDoc") ? int.Parse(e["numDoc"].value) : 0,
                             ipNumber = e.ContainsKey("ipNumber") ? int.Parse(e["ipNumber"].value) : 0,
-                            info=info
+                            info = info
                         });
                     });
 
@@ -498,7 +514,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 					                            ?area <http://w3id.org/roh/categoryNode> ?node.
 					                            FILTER(?node in(<{string.Join(">,<", perfilCluster.terms)}>))
 				                            }}";
-                } else if (pDataCluster.terms != null && pDataCluster.terms.Count > 0)
+                }
+                else if (pDataCluster.terms != null && pDataCluster.terms.Count > 0)
                 {
                     filtroCategorias = $@"  {{
 					                            ?doc <http://w3id.org/roh/hasKnowledgeArea> ?area.
@@ -599,7 +616,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
                 string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
-                string perfil = fila["perfil"].value;                
+                string perfil = fila["perfil"].value;
                 int numDoc = int.Parse(fila["numDoc"].value);
                 if (respuesta[person][perfil].terms == null)
                 {
@@ -631,8 +648,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
                 string person = fila["person"].value.Replace("http://gnoss/", "").ToLower();
-                string perfil = fila["perfil"].value;                
-                
+                string perfil = fila["perfil"].value;
+
                 int numDoc = int.Parse(fila["numDoc"].value);
                 if (respuesta[person][perfil].tags == null)
                 {
@@ -791,7 +808,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     // Añade el perfil al cluster que corresponde previamente cargado
                     clusterList.Find(cl => cl.entityID == e["cluster"].value).profiles.Add(profile);
-                } else
+                }
+                else
                 {
                     // Añade el ID en el listado de IDs
                     listIdsClusters.Add(e["cluster"].value);
@@ -822,8 +840,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         // Añade el cluster al listado
                         clusterList.Add(cluster);
 
-                    } catch (Exception xcpt) { }
-                    
+                    }
+                    catch (Exception ex) 
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
+
                 }
 
             });
@@ -892,7 +914,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         string nombreCategoria = UtilidadesAPI.GetValorFilaSparqlObject(fila, "nombreCategoria");
                         int numCategoria = int.Parse(UtilidadesAPI.GetValorFilaSparqlObject(fila, "numCategorias"));
-                        dicResultados.Add(nombreCategoria + " (" + numCategoria +")", numCategoria);
+                        dicResultados.Add(nombreCategoria + " (" + numCategoria + ")", numCategoria);
                     }
                 }
             }
@@ -952,12 +974,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         public List<DataItemRelacion> DatosGraficaColaboradoresCluster(Models.Cluster.Cluster pCluster, List<string> pPersons, bool seleccionados)
         {
             List<string> colaboradores = pPersons.Select(x => "http://gnoss/" + x.ToUpper()).ToList();
-            if(seleccionados)
+            if (seleccionados)
             {
                 colaboradores = new List<string>();
             }
             List<string> listSeleccionados = new List<string>();
-            if (pCluster!=null && pCluster.profiles != null)
+            if (pCluster != null && pCluster.profiles != null)
             {
                 foreach (PerfilCluster perfilCluster in pCluster.profiles)
                 {
@@ -1080,7 +1102,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         string clave = nodo.Key;
                         Models.Graficas.DataItemRelacion.Data.Type type = Models.Graficas.DataItemRelacion.Data.Type.none;
                         type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
-                        if(listSeleccionados.Contains(nodo.Key))
+                        if (listSeleccionados.Contains(nodo.Key))
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_ip;
                         }
@@ -1404,9 +1426,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     userID = e["memberPerfil"].value,
                     name = e["nombreUser"].value,
                     shortUserID = mResourceApi.GetShortGuid(e["memberPerfil"].value).ToString().ToLower(),
-                    numPublicacionesTotal= e.ContainsKey("numDoc") ? int.Parse(e["numDoc"].value) : 0,
+                    numPublicacionesTotal = e.ContainsKey("numDoc") ? int.Parse(e["numDoc"].value) : 0,
                     ipNumber = e.ContainsKey("ipNumber") ? int.Parse(e["ipNumber"].value) : 0,
-                    info=info
+                    info = info
                 }));
             });
 

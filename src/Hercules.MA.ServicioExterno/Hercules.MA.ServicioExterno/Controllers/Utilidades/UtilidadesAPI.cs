@@ -294,15 +294,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 			                    ?oAux <http://w3id.org/roh/isPublic> 'true'.
 			                    ?oAux <http://vivoweb.org/ontology/core#relatedBy> {pVarAnterior}
 		                    }}
-                            UNION
-		                    {{
-                                FILTER(?person=<[PARAMETRO]>)
-			                    {pVarAnterior} a 'project'.
-			                    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
-			                    {pVarAnterior} ?propRol ?rol.
-                                FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
-                                ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
-		                    }}
+                            #UNION
+		                    #{{
+                            #    FILTER(?person=<[PARAMETRO]>)
+			                #    {pVarAnterior} a 'project'.
+			                #    {pVarAnterior} <http://w3id.org/roh/isValidated> 'true'.
+			                #    {pVarAnterior} ?propRol ?rol.
+                            #    FILTER(?propRol in (<http://w3id.org/roh/researchers>,<http://w3id.org/roh/mainResearchers>))
+                            #    ?rol <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+		                    #}}
 	                    }}
                     }}
                 ");
@@ -847,7 +847,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             relationProjIDs.Add(new Guid(e["s"].value.Split("http://gnoss.com/").Last()), e["entidad"].value);
                         });
                     }
-                    catch (Exception e) { }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
 
                 }
             }

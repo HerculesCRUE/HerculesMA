@@ -866,7 +866,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
             }).Start();

@@ -256,7 +256,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// Controlador para crear/actualizar los datos de la oferta 
         /// </summary>
         /// <param name="idRecurso">.</param>
-        /// <param name="nuevoEstado">.</param
+        /// <param name="nuevoEstado">.</param>
         /// <param name="estadoActual">.</param>
         /// <param name="predicado">.</param>
         /// <param name="pIdGnossUser">.</param>
