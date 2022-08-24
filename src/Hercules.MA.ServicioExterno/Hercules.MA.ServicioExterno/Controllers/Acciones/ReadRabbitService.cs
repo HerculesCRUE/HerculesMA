@@ -76,6 +76,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="receivedFunction"></param>
         /// <param name="shutdownFunction"></param>
+        /// <param name="queue"></param>
         public void ListenToQueue(ReceivedDelegate receivedFunction, ShutDownDelegate shutdownFunction, string queue)
         {
             IModel channel = connection.CreateModel();
@@ -125,6 +126,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="url">the http call url</param>
         /// <param name="method">Crud method for the call</param>
+        /// <param name="headers"></param>
         /// <returns></returns>
         protected async Task<string> httpCall(string url, string method = "GET", Dictionary<string, string> headers = null)
         {

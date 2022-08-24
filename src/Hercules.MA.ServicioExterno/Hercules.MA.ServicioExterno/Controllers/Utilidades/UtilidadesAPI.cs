@@ -847,7 +847,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                             relationProjIDs.Add(new Guid(e["s"].value.Split("http://gnoss.com/").Last()), e["entidad"].value);
                         });
                     }
-                    catch (Exception e) { }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
 
                 }
             }

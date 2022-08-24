@@ -268,7 +268,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         nombreGrupo = bindingRes.First()["firstName"].value;
                     }
-                } catch(Exception e) { }
+                } 
+                catch(Exception ex)
+                {
+                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                }
                 dicNodos.Add("http://gnoss/" + pIdPersona, nombreGrupo);
             }
             #endregion

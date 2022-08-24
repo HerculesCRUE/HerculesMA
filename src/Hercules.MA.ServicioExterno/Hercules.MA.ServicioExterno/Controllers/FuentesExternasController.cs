@@ -117,6 +117,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="url">The http call URL.</param>
         /// <param name="method">Crud method for the call.</param>
+        /// <param name="headers"></param>
         /// <returns></returns>
         protected async Task<string> httpCall(string url, string method = "GET", Dictionary<string, string> headers = null)
         {

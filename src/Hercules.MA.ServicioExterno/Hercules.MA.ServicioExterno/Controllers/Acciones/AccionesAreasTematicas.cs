@@ -51,7 +51,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     break;
                 default:
                     throw new Exception("No hay configuración para el tipo '" + pType + "'");
-                    break;
+                    //break;
             }
             if (!string.IsNullOrEmpty(pAnioInicio) || !string.IsNullOrEmpty(pAnioInicio))
             {

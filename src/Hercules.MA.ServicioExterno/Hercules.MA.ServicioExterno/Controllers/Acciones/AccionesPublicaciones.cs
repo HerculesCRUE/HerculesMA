@@ -225,7 +225,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <summary>
         /// Obtienes los datos de las pestañas de cada sección de la ficha.
         /// </summary>
-        /// <param name="pPersona">Nombre de la persona.</param>
+        /// <param name="pDocumento"></param>
         /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
         public Dictionary<string, int> GetDatosCabeceraDocumento(string pDocumento)
         {
