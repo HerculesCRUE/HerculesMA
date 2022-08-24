@@ -195,7 +195,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 cRsource.Roh_title = "-";
 
                 // Sección de las descripciones, limpiamos los strings de tags que no queramos
-                cRsource.Roh_text = texto != null ? CleanHTML.StripTagsCharArray(texto.Replace("<", "&lt").Replace(">", "&gt"), new string[] { }, new string[] { }) :"" ;// != null ? CleanHTML.StripTagsCharArray(texto, new string[] {}, new string[] {}) : "";
+                cRsource.Roh_text = texto != null ? CleanHTML.StripTagsCharArray(texto.Replace("<", "&lt").Replace(">", "&gt").Replace("\"", "&quot").Replace("\'","&squot"), new string[] { }, new string[] { }) :"" ;// != null ? CleanHTML.StripTagsCharArray(texto, new string[] {}, new string[] {}) : "";
 
                 // Comprobamos si es un documento u otro RO cualquiera
                 cRsource.IdsRoh_researchobject = new();
