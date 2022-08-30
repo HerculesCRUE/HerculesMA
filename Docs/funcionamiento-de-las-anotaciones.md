@@ -21,6 +21,7 @@ Las anotaciones no poseen un listado público, pero si un listado de tus anotaci
 
 ## Buscador de mis anotaciones
 Existe un listado en una pagina de busqueda de las anotaciones privadas del usuario, para acceder a él hay que ir al menú lateral derecho > "Gestión de Anotaciones" > "Mis Anotaciones" 
+
 ![](./media/Anotaciones/MisAnotacionesMenu.png)
 
 Para acceder a la página de 'Mis anotaciones' hay que estar logueado y únicamente se mostrarán las anotaciones que tú has creado.
@@ -41,7 +42,7 @@ El listado de las anotaciones es una página de busqueda llamada 'Mis Anotacione
 Al acceder como usuario loggeado a una publicacion o RO aparecera una pestaña nueva, Mis Anotaciones, donde se muestran las anotaciones que ese usuario tiene sobre esa publicacion o RO. Si el usuario no tiene anotaciones, aparece un mensaje informandole que no hay.
 ![](./media/Anotaciones/PestanyaAnotaciones.png)
 ### Resumen funcional
-Para acceder a esta pestaña se tiene que acceder antes a una publicacion o RO, y debajo de la descripcion y etiquetas, en la seccion con pestañas, aparece la pestaña de anotaciones.
+Para acceder a esta pestaña se tiene que acceder antes a una publicacion o RO, y debajo de la descripcion y etiquetas, en la sección con pestañas, aparece la pestaña de anotaciones.
 
 ### Resumen del desarrollo
 La lógica javascript se encuentra en el archivo annotation.js y en las vistas de publicacion y ROs.
@@ -56,7 +57,7 @@ Se realizan llamadas a los diferentes servicios para las diferentes funcionalida
 Para la creación de una anotacion, debes de estar loguedado como personal investigador.
 
 ### Resumen funcional
-Se debe acceder a una publicacion o RO, despues en la esquina superior derecha hay un menu desplegable de acciones, una de esas acciones se llama "Nueva Anotación", al pincharla se abre un modal donde puedes introducir el texto de tu anotación y un boton de enviar que la guarda.
+Se debe acceder a una publicacion o RO, despues en la esquina superior derecha hay un menú desplegable de acciones, una de esas acciones se llama "Nueva Anotación", al pincharla se abre un modal donde puedes introducir el texto de tu anotación y un boton de enviar que la guarda.
 ![](./media/Anotaciones/NuevaAnotacion.png)
 ![](./media/Anotaciones/NuevaAnotacion2.png)
 ### Resumen del desarrollo
@@ -72,7 +73,7 @@ La edición de una anotación se realiza en la pestaña de anotaciones de una pu
 A la derecha de la anotación hay un menu expandible de acciones, una de las acciones es editar anotacion, al pincharla se abre un modal con el texto de la anotación que le permite al usuario editarlo.
 
 ### Resumen del desarrollo
-Toda la lógica de la edición de una anotación y la de la creación de la misma es igual, unicamente el guardado tiene un parametro mas, la id de la anotación existente.
+Toda la lógica de la edición de una anotación y la de la creación de la misma es igual, unicamente el guardado tiene un parametro mas, el id de la anotación existente.
 
 - Guardado de la anotación (Igual que en la creación de la anotacion, pero con un parámetro más):
     - **API:** ServicioExterno
@@ -86,7 +87,7 @@ El Borrado de una anotación se realiza en la pestaña de anotaciones de una pub
 A la derecha de la anotación hay un menu expandible de acciones, una de las acciones es borrar anotacion, al pincharla se elimina la anotacion.
 
 ### Resumen del desarrollo
-Toda la lógica de la edición de una anotación y la de la creación de la misma es igual, unicamente el guardado tiene un parametro mas, la id de la anotación existente.
+Se realizan llamadas a los diferentes servicios para las diferentes funcionalidades, la lista de llamadas son las siguientes: 
 
 - Borrado de la anotacion:
     - **API:** ServicioExterno
