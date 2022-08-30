@@ -99,7 +99,7 @@ En esta pantalla nos encontramos con las funciones típicas de las fichas de los
 Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
 - **Edición**: Botón que otorga la posibilidad de editar el cluster (un enlace), que lleva a la página edición (creación) de clusters, junto a un parámetro con el id del recurso para la carga y edición del mismo.
 - **Borrar**: Botón que permite borrar el recurso, para evitar accidentes, saldrá un mensaje para confirmar la acción.
-
+ 
 ![](./media/acciones_ficha_cluster.jpg)
 
 **Datos enriquecidos:**
