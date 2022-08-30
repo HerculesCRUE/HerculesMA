@@ -26,6 +26,9 @@ No existe un listado general de los cluster, únicamente existe un listado de mi
 Existe un listado simple de "Mis clusters", para acceder a él hay que ir al menú lateral derecho > "Gestión de clusters" > "Mis clusters" 
 
 Para acceder a la página de 'Mis clusters' hay que estar logueado y únicamente se mostrarán los clusters que tú has creado.
+ 
+![](./media/edicion_cluster.jpg)
+
 ### Resumen funcional
 El listado de clusters contiene un listado simple de los clusters y un listado de los investigadores por cada perfil de investigador. Así mismo dispone de un enlace a la ficha de los clusters de investigación y un botón de edición al mismo. El enlace de editar enlaza a la página de creación del cluster pasándole como parámetro el id del mismo.
 
@@ -78,6 +81,8 @@ Se realizan llamadas a los diferentes servicios para las diferentes funcionalida
 
 ## Edición del cluster
 La edición del cluster se realiza en la misma págína que la creación del mismo, únicamente que se le pasa un parámetro indicando el id del mismo.
+ 
+![](./media/edicion_cluster.jpg)
 
 Para acceder a la edición del mimo, se puede acceder desde la página del listado de los clusters o desde la ficha del mismo.
 
@@ -105,6 +110,8 @@ Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
 **Datos enriquecidos:**
 - **Participantes**: Pestaña con una gráfica de las relaciones de los participantes elegidos para el cluster y un listado del personal investigador seleccionado indicando a qué perfil se ha añadido.
 - **Temas de investigación**: Gráfica que pone de relieve los Áreas de investigación que más se repiten en la publicación científica de los investigadores seleccionados.
+ 
+![](./media/pestanas_ficha_cluster.jpg)
 
 ### Resumen del desarrollo
 Archivo: 'Views/Recursos/cluster.cshtml'.
