@@ -20,11 +20,7 @@ Los cluster no poseen un listado público, pero si una página para la creación
 
 
 ## Listado general de los cluster
-(No existe un listado general de los cluster, únicamente existe un listado de mis clusters)
-- RdfType
-- Url (y cómo llegar en la página)
-- Facetas
-- Búsqueda personalizada
+No existe un listado general de los cluster, únicamente existe un listado de mis clusters
 
 ## Listado de mis cluster
 Existe un listado simple de "Mis clusters", para acceder a él hay que ir al menú lateral derecho > "Gestión de clusters" > "Mis clusters" 
@@ -41,9 +37,12 @@ La vista de creación del cluster se encuentra 'Views/Views/CMS/ConsultaSPARQL/L
 Para la creación del cluster, debes de estar loguedado como personal investigador y acceder al menú lateral derecho > "Gestión de clusters" > "Nuevo Cluster".
 ### Resumen funcional
 La creación de un cluster consiste en un formaulario de varios pasos (o Stepper), y dispone de las siguientes funcionalidades:
-- Step 1
-- Step 2
-- Step 3: Nos encontramos en la pantalla donde se eligen los investigadores que corresponden con los perfiles de investigación. En esta pantalla se realiza una llamada a 'buscadorPersonalizado' (ficharecurso.js), con las búsquedas personalizadas 'searchClusterMixto', 'searchClusterAjuste' y 'searchClusterVolumen' dependiendo del orden seleccionado
+- **Step 1** (Definir cluster): Contiene los campos de 
+	- Nombre (Obligatorio)
+	- Descripción
+	- Áreas temáticas (Obligatorio)
+- **Step 2** (Definir perfiles y áreas de investigación): En este paso se definirán los diferentes perfiles y áreas de investigación encargados del filtro y segmentación posterior de los investigadores que vayan a ser parte del cluster. Se podrán añadir tantos perfiles como se quiera, y cada perfil constará de un número indeterminado de áreas temáticas y de al menos un descriptor específico.
+- **Step 3** (Recomendaciones y selección de investigadores): Nos encontramos en la pantalla donde se eligen los investigadores que corresponden con los perfiles de investigación. En esta pantalla se realiza una llamada a 'buscadorPersonalizado' (ficharecurso.js), con las búsquedas personalizadas 'searchClusterMixto', 'searchClusterAjuste' y 'searchClusterVolumen' dependiendo del orden seleccionado. En el buscador se seleccionarán los perfiles a los que se quiere que pertenezcan los diferentes investigadores. También aparecerán gráficas mostrando las relaciones entre los investigadores, y una segunda pestaña mostrando los investigadores seleccionados segmentados por los diferentes perfiles seleccionados anteriormente.
 
 ### Datos del gestor
 La creación de los clusters es una página del cms llamada 'Nuevo Cluster'
@@ -57,9 +56,9 @@ Se realizan llamadas a los diferentes servicios para las diferentes funcionalida
 	- **Controlador:** ClusterController
 	- **Función:** [GET]GetThesaurus
 - Carga de los `Descriptores específicos`:
-	 - **API:** ServicioExterno
+	- **API:** ServicioExterno
 	- **Controlador:** ClusterController
-	 - **Función:** [GET]SearchTags
+	- **Función:** [GET]SearchTags
 - Gráfica de las relaciones entre los investigadores:
 	- **API:** ServicioExterno
 	- **Controlador:** ClusterController
@@ -84,7 +83,6 @@ Para acceder a la edición del mimo, se puede acceder desde la página del lista
 
 ### Resumen del desarrollo
 Toda la lógica de edición del cluster y la de la creación del mismo es igual, únicamente se carga el contenido del cluster si se le pasa el id como parámetro, y se llama a la API para obtener los datos necesarios para precargar los datos. Las llamadas a la API que no se encuentran en la creación del mismo son las siguientes:
-
 - Carga del cluster:
 	- **API:** ServicioExterno
 	- **Controlador:** ClusterController
@@ -97,16 +95,33 @@ Toda la lógica de edición del cluster y la de la creación del mismo es igual,
 ## Ficha del cluster
 Se accede desde el listado de los clusters o desde la creación/edición de los mismos una vez que se han guardado los cambios.
 ### Resumen funcional
-Resumen del contenido
-Detalles relevantes
-Acciones del menú a destacar
+En esta pantalla nos encontramos con las funciones típicas de las fichas de los diferentes contenidos; nos encontramos con el título, la fecha de creación de la página, la descripción del mismo y las areas temáticas.
+Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
+- **Edición**: Botón que otorga la posibilidad de editar el cluster (un enlace), que lleva a la página edición (creación) de clusters, junto a un parámetro con el id del recurso para la carga y edición del mismo.
+- **Borrar**: Botón que permite borrar el recurso, para evitar accidentes, saldrá un mensaje para confirmar la acción.
+![](./media/acciones_ficha_cluster.jpg)
 
-Datos enriquecidos:
-- Participantes: Pestaña con...
-- Temas de investigación:
+**Datos enriquecidos:**
+- **Participantes**: Pestaña con una gráfica de las relaciones de los participantes elegidos para el cluster y un listado del personal investigador seleccionado indicando a qué perfil se ha añadido.
+- **Temas de investigación**: Gráfica que pone de relieve los Áreas de investigación que más se repiten en la publicación científica de los investigadores seleccionados.
 
 ### Resumen del desarrollo
-Archivo:
+Archivo: 'Views/Recursos/cluster.cshtml'.
+Javascript: El js mayormento se encuentra en el propio archivo de la ficha.
+Los métodos usados en el editor son los siguientes:
+- Grafo de relaciones con otros participantes:
+	- **API:** ServicioExterno
+	- **Controlador:** ClusterController
+	- **Función:** [POST]DatosGraficaColaboradoresCluster
+- Gráfica de la distribución de los principales temas de investigación:
+	- **API:** ServicioExterno
+	- **Controlador:** ClusterController
+	- **Función:** [POST]DatosGraficaAreasTematicasCluster
+- Borrar:
+	- **API:** ServicioExterno
+	- **Controlador:** ClusterController
+	- **Función:** [POST]BorrarCluster
+
 
 ### Datos del gestor
 La ficha del cluster equivale  'Nuevo Cluster'
