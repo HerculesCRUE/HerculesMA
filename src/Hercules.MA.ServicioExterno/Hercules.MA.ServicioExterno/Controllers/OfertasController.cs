@@ -20,7 +20,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para obtener los thesaurus usados las ofertas.
+        /// Controlador para obtener los thesaurus usados por las ofertas.
         /// </summary>
         /// <param name="listThesaurus">Elemento padre que define el thesaurus</param>
         /// <param name="lang">Idioma para los thesaurus multiidioma </param>
@@ -98,7 +98,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         /// <summary>
-        /// Cambiar el estado de una oferta
+        /// Cambiar el estado de un listado de ofertas
         /// </summary>
         /// <param name="pIdOfferIds">Ids (array de GUIDs) de las ofertas a modificar.</param>
         /// <param name="estado">Id del estado al que se quiere establecer.</param>

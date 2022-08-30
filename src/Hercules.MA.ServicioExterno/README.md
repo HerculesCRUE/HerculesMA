@@ -23,11 +23,25 @@ Los métodos de éste controlador tendrán la siguiente url:
 
 Los métodos son los siguientes:
 
+
+## [POST] GetThesaurus
+Controlador para obtener los thesaurus usados en el cluster
+
+*Parámetros:*
+ - **listThesaurus** *(string[])*: Elemento padre que define los thesaurus a devolver
+ - **lang** *(string)*: Idioma del literal devuelto del thesaurus, por defecto 'es'
+ 
+*Devuelve:*
+*Object* Diccionario con los datos. (Diccionario clave -> listado de thesaurus)
+
+
+
 ## [GET] BorrarOferta
 Borra una oferta
 
 *Parámetros:*
  - **pIdOfferID** *(string)*: Id de la oferta a borrar
+ - **pIdGnossUser** *(string)*: Id del usuario que realiza la acción
 
 *Devuelve:*
 *Boolean* True o false si ha sido borrado.
@@ -41,6 +55,21 @@ Cambia el estado de una oferta
  - **estado** *(string)*: Id del estado al que se quiere establecer
  - **estadoActual** *(string)*: Id del estado que tiene actualmente (Necesario para la modificación del mismo)
  - **pIdGnossUser** *(Guid)*: Id del usuario que modifica el estado, necesario para actualizar el historial
+ - **pIdGnossUser** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
+
+*Devuelve:*
+*String* Id del nuevo estado.
+
+
+## [POST] CambiarEstadoAll
+Cambiar el estado de un listado de ofertas
+
+*Parámetros:*
+ - **pIdOfferIds** *(Guid[])*: Ids (array de GUIDs) de las ofertas a modificar
+ - **estado** *(string)*: Id del estado al que se quiere establecer
+ - **estadoActual** *(string)*: Id del estado que tiene actualmente (Necesario para la modificación del mismo)
+ - **pIdGnossUser** *(Guid)*: Id del usuario que modifica el estado, necesario para actualizar el historial
+ - **pIdGnossUser** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
 
 *Devuelve:*
 *String* Id del nuevo estado.
@@ -125,7 +154,7 @@ Los métodos de éste controlador tendrán la siguiente url:
 Controlador para obtener los thesaurus usados en el cluster
 
 *Parámetros:*
- - **listThesaurus** *(string)*: Elemento padre que define el thesaurus
+ - **listThesaurus** *(string)*: Elemento padre que define el thesaurus, por defecto un texto vacío.
  
 *Devuelve:*
 *Object* Diccionario con los datos. (Diccionario clave -> listado de thesaurus)
