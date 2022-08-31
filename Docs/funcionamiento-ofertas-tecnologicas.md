@@ -61,12 +61,12 @@ En esta sección también se podrá filtrar por facetas o por búsqueda y se pod
 ## Creación de la oferta
 Consta de un 'STEP' de 5 pasos, en los cuales se irá avanzando para la configuración de dicha oferta. Por defecto, ya sea al crearla o editarla, el estado de la oferta será de 'Borrador'.
 
-### Resumen funcional TODO cambiar
+### Resumen funcional
 Los pasos para la creación (y edición) de ofertas tecnológicas serán los siguientes:
 - **Step 1** (Definir oferta): Contiene los campos de 
 	- Título de la oferta tecnológica
 	- Descriptores específicos: Conjunto de términos libres útiles para definir la oferta, servirán como filtro para los investigadores del paso 2
-	- Posibilidad de añadir el grupo / grupos entero a la oferta actual, dependerá de si el usuario es un investigador y no un gestor
+	- Añadir personal investigador de tu grupo: Puedes añadir o eliminar los investigadores de tu grupo.
 - **Step 2** (Selección de investigadores): El paso actual consistirá en un buscador con los investigadores, para ser añadidos a oferta. El listado de usuarios se verá afectado por el conjunto de descriptores específicos añadido.
 También se mostrarán los añadidos en una pestaña específica para mostrarlos separadamente y poder eliminarlos si fuera preciso.
 - **Step 3** (Datos generales): En este paso se procederá a añadir más campos relacionados con contenido relevante para definir la oferta, los campos serán:
@@ -80,7 +80,8 @@ También se mostrarán los añadidos en una pestaña específica para mostrarlos
 - **Step 4** (Datos descriptivos): En este paso se incluirán campos te texto para dar más información respecto a las ofertas. Los campos serán los siguientes:
 	- Descripción (Obligatorio): Texto descriptivo de la oferta, que será el más representativo de todos los datos descriptivos de la oferta. 
 	- Aplicaciones (Obligatorio): Texto explicativo de qué aplicaciones tendría la solución aportada, qué problemas se resolverían 
-	- Destinatarios (Obligatorio): Texto descriptivo de a quién le puede interesar la oferta: tipos de empresas... 
+	- Destinatarios (Obligatorio): Texto descriptivo de a quién le puede interesar la oferta: tipos de empresas...
+	- Ventajas/Beneficios (Obligatorio): Texto explicativo de las principales ventajas técnicas que aporta la tecnología.
 	- Origen: Texto descriptivo del origen de la Oferta Tecnológica 
 	- Innovación: Texto explicativo de las innovaciones que aportaría la solución ofertada 
 	- Tipo de socio buscado: Texto descriptivo del Tipo de Socio al que se orientaría la oferta 
