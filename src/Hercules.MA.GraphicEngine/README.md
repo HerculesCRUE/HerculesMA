@@ -262,7 +262,7 @@ Las graficas a su vez tiene distintos botones para interactuar:
 ![](../../Docs/media/GraphicEngine/GraphicEngineDesplegable.png)
 
 
-- Expandir/Contraer (arriba a la derecha): Aplica/disminuye la gráfica para la visualización de datos.
+- Expandir/Contraer (arriba a la derecha): Amplia / Disminuye la gráfica para la visualización de datos.
 
 ![](../../Docs/media/GraphicEngine/GraphicEngineExpandir.png)
 
