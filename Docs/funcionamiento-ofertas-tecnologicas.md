@@ -54,6 +54,8 @@ Existe un listado simple de "Mis ofertas tecnológicas", para acceder a él hay 
 
 Para acceder a la página de "Mis ofertas tecnológicas" hay que estar logueado y únicamente se mostrarán las ofertas tecnológicas que tú has creado.
 
+![](./media/Ofertas/Localizacion.png)
+
 ### Resumen funcional
 El listado de "Mis ofertas tecnológicas" mostrará el estado en el que se encuentra la oferta tecnológica.
 En esta sección también se podrá filtrar por facetas o por búsqueda y se podrán realizar unas acciones sobre tus propias ofertas, ya sea enviar a borrador, editar o eliminar la oferta.
@@ -67,6 +69,7 @@ Los pasos para la creación (y edición) de ofertas tecnológicas serán los sig
 	- Título de la oferta tecnológica
 	- Descriptores específicos: Conjunto de términos libres útiles para definir la oferta, servirán como filtro para los investigadores del paso 2
 	- Añadir personal investigador de tu grupo: Puedes añadir o eliminar los investigadores de tu grupo.
+![](./media/Ofertas/Step1.png)
 - **Step 2** (Selección de investigadores): El paso actual consistirá en un buscador con los investigadores, para ser añadidos a oferta. El listado de usuarios se verá afectado por el conjunto de descriptores específicos añadido.
 También se mostrarán los añadidos en una pestaña específica para mostrarlos separadamente y poder eliminarlos si fuera preciso.
 - **Step 3** (Datos generales): En este paso se procederá a añadir más campos relacionados con contenido relevante para definir la oferta, los campos serán:
@@ -77,6 +80,7 @@ También se mostrarán los añadidos en una pestaña específica para mostrarlos
 		- Tecnología demostrada con prototipo funcional (TRL 6-7)
 		- Sistema completo disponible para cliente-mercado (TRL 8-9) 
 	- Sector de Encuadre: Desplegable que contendrá los valores de los sectores a los que la entidad enfoca sus ofertas
+![](./media/Ofertas/Step3.png)
 - **Step 4** (Datos descriptivos): En este paso se incluirán campos te texto para dar más información respecto a las ofertas. Los campos serán los siguientes:
 	- Descripción (Obligatorio): Texto descriptivo de la oferta, que será el más representativo de todos los datos descriptivos de la oferta. 
 	- Aplicaciones (Obligatorio): Texto explicativo de qué aplicaciones tendría la solución aportada, qué problemas se resolverían 
