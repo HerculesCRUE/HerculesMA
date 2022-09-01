@@ -129,7 +129,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// 
         /// Hay muchos estilos/formatos para citar y solo están contemplados 6.
         /// 
-        ///     - APA: autor, autor y autor. (año). título. revista, volumen. doi
+        ///     - APA: autor, autor & autor. (año). título. revista, volumen. doi
         ///     - BibTeX: @article{autor_autor_año, title={titulo}, volume={volumen}, ISSN={issn}, DOI={doi}, journal={revista}, publisher={editorial}, author={autor and autor and autor}, year={año} }
         ///     - Chicago: autor, autor and autor. “titulo” revista volumen (año). doi:doi.
         ///     - CSE: 1. autor, autor, autor, titulo volumen (año), doi:doi
