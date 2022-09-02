@@ -494,7 +494,7 @@
       "nombre": {
         "es": "Revistas"
       },
-      "filtro": "vivo:hasPublicationVenue@@@roh:title",
+      "filtro": "roh:hasPublicationVenueJournalText",
       "numeroItemsFaceta": 10,
       "verTodos": true
     },
