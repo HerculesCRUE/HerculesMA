@@ -11,14 +11,14 @@
 
 # Funcionamiento de los Buscadores
 
- 1.- [Introducción](#introducción)  
- 2.- [CMS](#aa)  
-   a.- [Configuración](#aa)  
- 3.- [Páginas de búsqueda](#aa)  
-   a.- [Componentes](#aa)  
-   b.- [Configuración de la página](#aa)  
-   c.- [Configuración de las facetas](#aa)  
-   d.- [Configuración del parámetro de búsqueda](#aa)  
+ -  [Introducción](#introducción)  
+ -  [CMS](#aa)  
+   -  [Configuración](#aa)  
+ -  [Páginas de búsqueda](#aa)  
+   -  [Componentes](#aa)  
+   -  [Configuración de la página](#aa)  
+   -  [Configuración de las facetas](#aa)  
+   -  [Configuración del parámetro de búsqueda](#aa)  
 
 ## Introducción
 Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
