@@ -21,7 +21,7 @@
    - [Configuración del parámetro de búsqueda](#aa)
 
 ## Introducción
-En esta documentación se explican las nociones de configuración de las páginas generas usadas en EDMA, en particular páginas del CMS y buscadores.  
+En esta documentación se explican las nociones de configuración de las páginas generales usadas en EDMA, en particular páginas del CMS y buscadores.  
 Para acceder a la administración de páginas hay que acceder con el usuario administrador a la URL {URL_COMUNIDAD}/administrar-paginas
 
 ![](./media/Paginas/Listado-paginas.jpg)
