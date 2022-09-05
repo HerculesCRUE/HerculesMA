@@ -11,10 +11,10 @@
 
 # Funcionamiento de los Buscadores
 
- 1. [Introducción](#introducción)
- 2. [CMS](#aa)
+ - [Introducción](#introducción)
+ - [CMS](#aa)
    - [Configuración](#aa)
- 3. [Páginas de búsqueda](#aa)
+ - [Páginas de búsqueda](#aa)
    - [Componentes](#aa)
    - [Configuración de la página](#aa)
    - [Configuración de las facetas](#aa)
