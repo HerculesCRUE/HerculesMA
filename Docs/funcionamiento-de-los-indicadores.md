@@ -51,10 +51,6 @@ Ambos indicadores consumen el mismo controlador. Ahora se repasarán las distint
 	- **API:** GraphicEngine
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]GetFaceta
-- Obtención del objeto de la gráfica y sus datos:
-	- **API:** GraphicEngine
-	- **Controlador:** GraphicControllers
-	- **Función:** [GET]GetGrafica
 - Obtiene las páginas de indicadores generales:
 	- **API:** GraphicEngine
 	- **Controlador:** GraphicControllers
@@ -95,6 +91,10 @@ Ambos indicadores consumen el mismo controlador. Ahora se repasarán las distint
 	- **API:** GraphicEngine
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]BorrarGrafica
+- Borra la página de indicadores personales del usuario:
+	- **API:** GraphicEngine
+	- **Controlador:** GraphicControllers
+	- **Función:** [GET]BorrarPagina
 - Edita el nombre de la página de indicadores personales:
 	- **API:** GraphicEngine
 	- **Controlador:** GraphicControllers
