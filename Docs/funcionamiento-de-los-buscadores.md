@@ -11,14 +11,14 @@
 
 # Funcionamiento de los Buscadores
 
- -  [Introducción](#introducción)  
- -  [CMS](#aa)  
-   -  [Configuración](#aa)  
- -  [Páginas de búsqueda](#aa)  
-   -  [Componentes](#aa)  
-   -  [Configuración de la página](#aa)  
-   -  [Configuración de las facetas](#aa)  
-   -  [Configuración del parámetro de búsqueda](#aa)  
+ - [Introducción](#introducción)
+ - [CMS](#aa)
+   - [Configuración](#aa)
+ - [Páginas de búsqueda](#aa)
+   - [Componentes](#aa)
+   - [Configuración de la página](#aa)
+   - [Configuración de las facetas](#aa)
+   - [Configuración del parámetro de búsqueda](#aa)
 
 
 
