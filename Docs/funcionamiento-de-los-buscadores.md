@@ -1,9 +1,9 @@
 ![](./media/CabeceraDocumentosMD.png)
 
-| Fecha                 | 29/8/2022                                |
+| Fecha                 | 05/09/2022                                |
 | --------------------- | ---------------------------------------- |
-| Título                | Funcionamiento de los Buscadores         |
-| Descripción           | Guía de funcionamiento de los Buscadores |
+| Título                | Configuración de páginas                 |
+| Descripción           | Guía de funcionamiento de las páginas de búsqueda y CMS |
 | Versión               | 1.0                                      |
 | Módulo                | Documentación                            |
 | Tipo                  | Especificación                           |
