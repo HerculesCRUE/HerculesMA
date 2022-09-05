@@ -12,7 +12,7 @@
 # Funcionamiento de los Buscadores
 
  - [Introducción](#introducción)
- - [CMS](#aa)
+ - [CMS](#cms)
    - [Configuración](#aa)
  - [Páginas de búsqueda](#aa)
    - [Componentes](#aa)
@@ -26,6 +26,14 @@ Para acceder a la administración de páginas hay que acceder con el usuario adm
 
 ![](./media/Paginas/Listado-paginas.jpg)
 
+Dentro de esta página se pueden crear/editar/eliminar las páginas del CMS y los búscadores de la comunidad.  
+
+### CMS
+
+Las páginas del CMS son páginas personalizadas en las que presentar información como la home {URL_COMUNIDAD}/home o la página de indicadores {URL_COMUNIDAD}/indicadores.
+
+
+Las páginas de búsqueda sirven para crear un sistema de interrogación desde el que poder refinar las búsquedas.
 
 de Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
 Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.  
