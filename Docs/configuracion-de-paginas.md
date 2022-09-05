@@ -1,9 +1,9 @@
 ![](./media/CabeceraDocumentosMD.png)
 
-| Fecha                 | 29/8/2022                                |
+| Fecha                 | 05/09/2022                                |
 | --------------------- | ---------------------------------------- |
-| Título                | Funcionamiento de los Buscadores         |
-| Descripción           | Guía de funcionamiento de los Buscadores |
+| Título                | Configuración de páginas                 |
+| Descripción           | Guía de funcionamiento de las páginas de búsqueda y CMS |
 | Versión               | 1.0                                      |
 | Módulo                | Documentación                            |
 | Tipo                  | Especificación                           |
@@ -11,8 +11,25 @@
 
 # Funcionamiento de los Buscadores
 
-## Descripción
-Los buscadores son paginas que muestran datos de la ontologia permiten encontrar datos a los usuarios. Para hacer esto disponen de una caja de busqueda y ademas suelen contener facetas.
+ - [Introducción](#introducción)
+ - [CMS](#aa)
+   - [Configuración](#aa)
+ - [Páginas de búsqueda](#aa)
+   - [Componentes](#aa)
+   - [Configuración de la página](#aa)
+   - [Configuración de las facetas](#aa)
+   - [Configuración del parámetro de búsqueda](#aa)
+
+## Introducción
+En esta documentación se explican las nociones de configuración de las páginas generas usadas en EDMA, en particular páginas del CMS y buscadores.  
+Para acceder a la administración de páginas hay que acceder con el usuario administrador a la URL {URL_COMUNIDAD}/administrar-paginas
+
+![](./media/Paginas/Listado-paginas.jpg)
+
+
+de Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
+Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.  
+//TODO imagen
 
 ## Gestionar Buscadores
 
