@@ -20,12 +20,6 @@
 
 [Gráficas de nodos](#graficanodos)
 
-[Indicadores](#indicadores)
-
-[Ejemplo de guardado de gráficas](#ejemplo-de-guardado-de-gráficas)
-
-[Indicadores Personales](#indicadores-personales)
-
 # Introducción
 
 Este documento describe, mediante un ejemplo práctico, cómo se realiza la configuración de las distintas gráficas de indicadores en Hércules MA. Esta configuración está preparada para que la administre un usuario administrador.
