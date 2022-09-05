@@ -32,8 +32,8 @@ namespace Hercules.MA.ServicioExterno.Controllers
             bool borrado;
             try
             {
-                AccionesOferta accionCluster = new AccionesOferta();
-                borrado = accionCluster.BorrarOferta(pIdROId, pIdGnossUser);
+                AccionesRosVinculados accionesRosVinculados = new();
+                borrado = accionesRosVinculados.DeleteLinked(resourceRO, pIdROId, pIdGnossUser);
             }
             catch (Exception)
             {
@@ -48,6 +48,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// Controlador para Obtener los ROs vinculados de un RO en concreto
         /// </summary>
         /// <param name="pIdROId">ID del RO a obtener las relaciones.</param>
+        /// <param name="lang">Idioma de los literales para la consulta</param>
         /// <returns>Listado de los RO vinculados.</returns>
         [HttpGet("LoadRosLinked")]
         public IActionResult LoadRosLinked(string pIdROId, string lang = "es")

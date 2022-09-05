@@ -28,11 +28,122 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
         #endregion
 
+
         /// <summary>
-        /// Método público para cargar los estados de la oferta (activado, en borrador,...)
+        /// Método público para eliminar los ROs vinculados en otro RO
+        /// </summary>
+        /// <param name="idRecurso">Id del RO sobre el que borrar el elemento</param>
+        /// <param name="idLinkedRo">Id de RO a borrar</param>
+        /// <param name="pIdGnossUser">Id del usuario que realiza la acción</param>
+        /// <returns>Bool determinando si se ha borrado o no.</returns>
+        internal bool DeleteLinked(string idRecurso, string idLinkedRo, Guid pIdGnossUser)
+        {
+
+            Dictionary<Guid, bool> result = new();
+
+            // Selecciono qué tipo de RO son los recursos pasados y obtengo las propiedades de la ontología
+            ResTypeRo typeResource = GetTypeRo(idRecurso);
+            ResTypeRo typeLinked = GetTypeRo(idLinkedRo);
+
+
+            // Establezco la propiedad que se va a usar dependiendo de si es un documento que estoy relacionando o es un RO
+            string predicateLinkInRO = string.Empty;
+            if (typeLinked.typeRO == TypeRO.Document)
+            {
+                predicateLinkInRO = "http://w3id.org/roh/linkedDocument";
+            }
+            else
+            {
+                predicateLinkInRO = "http://w3id.org/roh/linkedRO";
+            }
+
+
+            // Obtengo el id del recurso si es un Guid
+            Guid guid = Guid.Empty;
+            Dictionary<Guid, string> longsId = new();
+            if (Guid.TryParse(idRecurso, out guid))
+            {
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceApi, typeResource.longType, typeResource.type);
+                idRecurso = longsId[guid];
+            }
+            else
+            {
+                guid = mResourceApi.GetShortGuid(idRecurso);
+            }
+
+            // Obtengo el id del recurso vinculado si es un Guid
+            Guid guidLinked = Guid.Empty;
+            longsId = new();
+            if (Guid.TryParse(idLinkedRo, out guidLinked))
+            {
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidLinked }, mResourceApi, typeLinked.longType, typeLinked.type);
+                idLinkedRo = longsId[guidLinked];
+            }
+            else
+            {
+                guidLinked = mResourceApi.GetShortGuid(idLinkedRo);
+            }
+
+
+            // Obtengo el id del usuario si es un Guid
+            string LongpIdGnossUser = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
+
+
+
+            // Modificar el estado y añadir un nuevo estado en el "historial"
+            if (guid != Guid.Empty && guidLinked != Guid.Empty)
+            {
+
+                // Compruebo si se tiene permisos para realizar la actualización de la oferta
+                if (!CheckUpdateLink(LongpIdGnossUser, idRecurso, idLinkedRo))
+                {
+                    throw new Exception("Error al intentar modificar el estado, no tienes permiso para cambiar a este estado");
+                }
+
+
+                if (idRecurso != idLinkedRo)
+                {
+                    // Eliminar el vínculo en el recurso
+                    // Cambio la ontología dependiendo del tipo de recurso en el que nos encontramos
+                    mResourceApi.ChangeOntoly(typeResource.type);
+
+                    // Elimino el triple
+                    try
+                    {
+                        Dictionary<Guid, List<RemoveTriples>> dicModificacion = new Dictionary<Guid, List<RemoveTriples>>();
+                        List<RemoveTriples> listaTriplesModificacion = new List<RemoveTriples>();
+
+
+                        // Eliminación (Triples).
+                        RemoveTriples triple = new RemoveTriples();
+                        //triple.Predicate = "http://w3id.org/roh/linkedRO";
+                        //triple.Predicate = "http://w3id.org/roh/linkedDocument";
+                        triple.Predicate = predicateLinkInRO;
+                        triple.Value = idLinkedRo;
+                        listaTriplesModificacion.Add(triple);
+
+                        // Eliminación.
+                        dicModificacion.Add(guid, listaTriplesModificacion);
+                        result = mResourceApi.DeletePropertiesLoadedResources(dicModificacion);
+                    }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
+                }
+
+            }
+
+            return result[guid];
+
+        }
+
+
+
+        /// <summary>
+        /// Método público para cargar los ROs relacionados con un RO dado
         /// </summary>
         /// <param name="idRecurso">Id del RO sobre el que obtener los elementos linkados</param>
-        /// <param name="pIdGnossUser">Id del usuario que realiza la acción</param>
         /// <param name="lang">Idioma de los literales para la consulta</param>
         /// <returns>Diccionario con los datos.</returns>
         public List<ROLinked> LoadRosLinked(string idRecurso, string lang = "es")
@@ -68,13 +179,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
 
-            // Listado de clusters para rellenar.
+            // Listado de vínculos a cargar.
             List<ROLinked> rosLinked = new();
             List<string> listIdslinked = new();
 
-            // Obtener el los profiles a través del id de usuario de la cuenta
-            string select = "select DISTINCT ?s ?title ?abstract ?issued ?type ?roType ?roTypeTitle ?origin group_concat(distinct ?idGnossL;separator=',') as ?idGnoss group_concat(distinct ?clKnowledgeArea;separator=',') as ?gckarea " +
-                "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/researchobject.owl> FROM <http://gnoss.com/taxonomy.owl>";
+            // Obtengo los ROs vinculados desde un RO dado, las causísticas son las siguientes:
+            // 1. Los grafos sobre los que obtengo los ROs relacionados pueden ser http://gnoss.com/document.owl o http://gnoss.com/researchobject.owl
+            // 2. Obtengo los ROs desde la propiedad http://w3id.org/roh/linkedRO o http://w3id.org/roh/linkedDocument dependiendo del tipo de recurso que sean
+            // 3. Obtengo los ROs en los que el id del RO pasado es una referencia de las propiedades que corresponden a las del apartado anterior.
+            
+            string select = "select DISTINCT ?s ?title ?abstract ?issued ?isValidated ?type ?roType ?roTypeTitle ?origin group_concat(distinct ?idGnossL;separator=',') as ?idGnoss group_concat(distinct ?clKnowledgeArea;separator=',') as ?gckarea " +
+                "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/researchobject.owl> FROM <http://gnoss.com/researchobjecttype.owl>";
             string where = @$"where {{
 
                     {{
@@ -101,7 +216,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         
                         ?s <http://w3id.org/roh/title> ?title.
-                        ?s <http://w3id.org/roh/isValidated> 'true'.
+                        # ?s <http://w3id.org/roh/isValidated> 'true'.
+
+
+                        OPTIONAL
+                        {{
+                            ?s <http://w3id.org/roh/isValidated> ?isValidated.
+                        }}
 
                         OPTIONAL
                         {{
@@ -118,18 +239,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
                         }}
 
-                        OPTIONAL
-                        {{
+                         OPTIONAL
+                         {{
                             ?s <http://purl.org/dc/elements/1.1/type> ?roType.
                             ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
                             FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
                         }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://w3id.org/roh/hasKnowledgeArea> ?clHasKnowledgeArea.
-                            ?clHasKnowledgeArea <http://w3id.org/roh/categoryNode> ?clKnowledgeArea.
-                        }}
+                        # OPTIONAL
+                        # {{
+                        #     ?s <http://w3id.org/roh/hasKnowledgeArea> ?clHasKnowledgeArea.
+                        #     ?clHasKnowledgeArea <http://w3id.org/roh/categoryNode> ?clKnowledgeArea.
+                        # }}
 
 
                         BIND ('false' as ?origin)
@@ -158,7 +279,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }}
 
                         ?s <http://w3id.org/roh/title> ?title.
-                        ?s <http://w3id.org/roh/isValidated> 'true'.
+                        # ?s <http://w3id.org/roh/isValidated> 'true'.
+                        
+                        OPTIONAL
+                        {{
+                            ?s <http://w3id.org/roh/isValidated> ?isValidated.
+                        }}
 
                         OPTIONAL
                         {{
@@ -175,18 +301,18 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
                         }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/dc/elements/1.1/type> ?roType.
-                            ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
-                            FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
-                        }}
+                         OPTIONAL
+                         {{
+                             ?s <http://purl.org/dc/elements/1.1/type> ?roType.
+                             ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
+                             FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
+                         }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://w3id.org/roh/hasKnowledgeArea> ?clHasKnowledgeArea.
-                            ?clHasKnowledgeArea <http://w3id.org/roh/categoryNode> ?clKnowledgeArea.
-                        }}
+                        # OPTIONAL
+                        # {{
+                        #     ?s <http://w3id.org/roh/hasKnowledgeArea> ?clHasKnowledgeArea.
+                        #     ?clHasKnowledgeArea <http://w3id.org/roh/categoryNode> ?clKnowledgeArea.
+                        # }}
 
 
                     }}
@@ -199,72 +325,70 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             sparqlObject.results.bindings.ForEach(e =>
             {
 
-                // Busca si existe el cluster actualmente
-                if (rosLinked.Find(cl => cl.entityID == e["s"].value) != null)
+                
+                // Añade el ID en el listado de IDs
+                listIdslinked.Add(e["s"].value);
+
+
+                // Obtengo las areas de conocimiento de los ROs
+                List<string> rOTerms = new List<string>();
+                if (e.ContainsKey("gckarea") && e["gckarea"].value != String.Empty)
                 {
-                    // Añade el perfil al cluster que corresponde previamente cargado
-                    //rosLinked.Find(cl => cl.entityID == e["cluster"].value).profiles.Add(profile);
+                    rOTerms = e["gckarea"].value.Split(",").ToList();
                 }
-                else
+
+
+                // Obtengo las ids de los usuarios gnoss de los creadores del RO
+                List<string> idsGnoss = new List<string>();
+                if (e.ContainsKey("idGnoss") && e["idGnoss"].value != String.Empty)
                 {
-                    // Añade el ID en el listado de IDs
-                    listIdslinked.Add(e["s"].value);
+                    idsGnoss = e["idGnoss"].value.Split(",").ToList();
+                }
 
+                // Creo los ROs relacionados y los añado a una lista
+                // Obtengo datos necesarios para pintar los mismos y para segmentarlos correctamente
+                try
+                {
 
-
-
-
-
-
-                    // Obtengo las areas de conocimiento del cluster
-                    List<string> rOTerms = new List<string>();
-                    if (e.ContainsKey("gckarea") && e["gckarea"].value != String.Empty)
-                    {
-                        rOTerms = e["gckarea"].value.Split(",").ToList();
-                    }
-
-                    // 1. Crea un nuevo cluter
-                    // 2. Añade el perfil al cluster
-                    // 3. Añade el cluster creado al listado de clusters
+                    var fecha = e.ContainsKey("issued") ? e["issued"].value : String.Empty;
+                    DateTime fechaDate = DateTime.Now;
                     try
                     {
-
-                        var fecha = e.ContainsKey("issued") ? e["issued"].value : String.Empty;
-                        DateTime fechaDate = DateTime.Now;
-                        try
-                        {
-                            fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
-                            fecha = fechaDate.ToString("dd/MM/yyyy");
-                        }
-                        catch (Exception ex)
-                        {
-                            mResourceApi.Log.Error("Excepcion: " + ex.Message);
-                        }
-                        ROLinked ro = new()
-                        {
-                            title = e.ContainsKey("title") ? e["title"].value : String.Empty,
-                            entityID = e.ContainsKey("s") ? e["s"].value : String.Empty,
-                            description = e.ContainsKey("abstract") ? e["abstract"].value : String.Empty,
-                            roType = e.ContainsKey("roType") ? e["roType"].value : String.Empty,
-                            roTypeTitle = e.ContainsKey("roTypeTitle") ? e["roTypeTitle"].value : String.Empty,
-                            origin = e.ContainsKey("origin") ? false : true,
-                            fecha = fechaDate,
-                            terms = rOTerms
-                        };
-
-                        // Añade el cluster al listado
-                        rosLinked.Add(ro);
-
+                        fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
+                        fecha = fechaDate.ToString("dd/MM/yyyy");
                     }
                     catch (Exception ex)
                     {
                         mResourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
+                    bool isValidated = false;
+                    if (e.ContainsKey("isValidated")) { bool.TryParse(e["isValidated"].value, out isValidated); }
+                    ROLinked ro = new()
+                    {
+                        title = e.ContainsKey("title") ? e["title"].value : String.Empty,
+                        entityID = e.ContainsKey("s") ? e["s"].value : String.Empty,
+                        description = e.ContainsKey("abstract") ? e["abstract"].value : String.Empty,
+                        roType = e.ContainsKey("roType") ? e["roType"].value : String.Empty,
+                        roTypeTitle = e.ContainsKey("roTypeTitle") ? e["roTypeTitle"].value : String.Empty,
+                        origin = e.ContainsKey("origin") ? false : true,
+                        idsGnoss = idsGnoss,
+                        type = e.ContainsKey("type") ? e["type"].value : String.Empty,
+                        isValidated = isValidated,
+                        fecha = fecha,
+                        terms = rOTerms
+                    };
+                    
 
+                    // Añade el RO al listado
+                    rosLinked.Add(ro);
+
+                }
+                catch (Exception ex)
+                {
+                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
             });
-
 
 
             return rosLinked;
@@ -341,13 +465,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             if (guid != Guid.Empty && guidLinked != Guid.Empty)
             {
 
-                // Obtengo el recurso al que pretendo modificar el estado
-                // Es necesario para las notificaciones y para comprobar si tengo o no permisos
-                // Obtengo el recurso para conseguir el id del creador de la oferta
 
-                //oferta = LoadOffer(idRecurso, false);
-
-                // Compruebo si se tiene permisos para realizar la actualización de la oferta
+                // Compruebo si se tiene permisos para realizar la actualización del RO
                 if (!CheckUpdateLink(LongpIdGnossUser, idRecurso, idLinkedRo))
                 {
                     throw new Exception("Error al intentar modificar el estado, no tienes permiso para cambiar a este estado");
@@ -360,25 +479,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     // Comprueba si el id del recuro no está vacío
                     mResourceApi.ChangeOntoly(typeResource.type);
 
-                    // Modifico el estado
+                    // Añado el vículo
                     try
                     {
-                        Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-                        List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+                        Dictionary<Guid, List<TriplesToInclude>> dicInclusion = new Dictionary<Guid, List<TriplesToInclude>>();
+                        List<TriplesToInclude> listaTriplesInclusion = new List<TriplesToInclude>();
 
 
                         // Modificación (Triples).
-                        TriplesToModify triple = new TriplesToModify();
+                        TriplesToInclude triple = new TriplesToInclude();
                         //triple.Predicate = "http://w3id.org/roh/linkedRO";
                         //triple.Predicate = "http://w3id.org/roh/linkedDocument";
                         triple.Predicate = predicateLinkInRO;
                         triple.NewValue = idLinkedRo;
                         //triple.OldValue = idLinkedRo;
-                        listaTriplesModificacion.Add(triple);
+                        listaTriplesInclusion.Add(triple);
 
                         // Modificación.
-                        dicModificacion.Add(guid, listaTriplesModificacion);
-                        result = mResourceApi.ModifyPropertiesLoadedResources(dicModificacion);
+                        dicInclusion.Add(guid, listaTriplesInclusion);
+                        result = mResourceApi.InsertPropertiesLoadedResources(dicInclusion);
                     }
                     catch (Exception ex)
                     {
@@ -402,9 +521,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Retorna un booleano indicando si puede o no ser actualizado.</returns>
         private bool CheckUpdateLink(string longUserId, string idCurrentResource, string idOtherResource)
         {
-
             return true;
         }
+
 
         /// <summary>
         /// Método que comprueba el tipo de recurso que es.
