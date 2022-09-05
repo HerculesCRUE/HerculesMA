@@ -20,6 +20,19 @@
    -  [Configuración de las facetas](#aa)  
    -  [Configuración del parámetro de búsqueda](#aa)  
 
+
+
+ - [Hercules ASIO Especificación de funciones de Carga](Hercules-ASIO-Especificacion-de-funciones-de-Carga.md)
+ - [Hércules ASIO Especificación de las funciones de descubrimiento](Hercules-ASIO-Especificacion-de-las-funciones-de-descubrimiento.md)
+ - [Hercules ASIO Fuentes externas de información para las funciones de descubrimiento](Hercules-ASIO-Fuentes-externas-de-informacion-para-las-funciones-de-descubrimiento.md)
+ - [Hércules ASIO Procedencia de datos externos - Provenance. Descripción del servicio SPARQL](Hercules-ASIO-Procedencia-de-datos-externos-Provenance.md)
+ - [UrisFactory](UrisFactory/)
+   - [Buenas prácticas del esquema de URIs](UrisFactory/Buenas-practicas-URIs.md)
+   - [Especificación de Esquema de URIs](UrisFactory/Especificacion-Esquema-de-URIs.md)
+   - [Plantilla de documento de adhesión a las recomendaciones de buenas prácticas de URIs](UrisFactory/Plantilla-de-documento-de-adhesion-a-las-recomendaciones-de-buenas-practicas-de-URIs.md)
+ - [Hércules ASIO Modelo de multilingüismo](Hercules-ASIO-Modelo-de-multilinguismo.md)
+ - 
+
 ## Introducción
 Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
 Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.  
