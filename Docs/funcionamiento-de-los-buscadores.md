@@ -21,7 +21,11 @@
    - [Configuración del parámetro de búsqueda](#aa)
 
 ## Introducción
-Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
+En esta documentación se explican las nociones de configuración de las páginas generas usadas en EDMA, en particular páginas del CMS y buscadores.  
+Para acceder a la administración de páginas hay que acceder con el usuario administrador a la URL {URL_COMUNIDAD}/administrar-paginas
+
+
+de Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
 Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.  
 //TODO imagen
 
