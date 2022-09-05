@@ -12,7 +12,9 @@
 # Funcionamiento de los Buscadores
 
 ## Descripción
-Los buscadores son paginas que muestran datos de la ontologia permiten encontrar datos a los usuarios. Para hacer esto disponen de una caja de busqueda y ademas suelen contener facetas.
+Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.
+Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.
+//TODO imagen
 
 ## Gestionar Buscadores
 
