@@ -13,7 +13,7 @@
 
 ## Descripción
 Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
-Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados. 
+Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.  
 //TODO imagen
 
 ## Gestionar Buscadores
