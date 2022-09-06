@@ -53,6 +53,8 @@ Las páginas de búsqueda se sirven desde la Web pero utilizan dos servicios adi
  - Servicio de facetas: Es el servicio encargado de pintar las facetas laterales con las que poder refinar la búsqueda 
  - Servicio de resultados: Es el servicio encargado de pintar los resutlados de las búsquedas (publicaciones, investigadores...)  
 
+![](./media/Paginas/Facetas-resultados.jpg)
+
 #### Configuración de la página
 
 
