@@ -15,8 +15,8 @@
  - [CMS](#cms)
    - [Configuración](#configuración)
  - [Páginas de búsqueda](#páginas-de-búsqueda)
-   - [Componentes](#aa)
-   - [Configuración de la página](#aa)
+   - [Componentes](#componentes)
+   - [Configuración de la página](#configuración-de-la-página)
    - [Configuración de las facetas](#aa)
    - [Configuración del parámetro de búsqueda](#aa)
 
@@ -45,16 +45,19 @@ Dentro de este proyecto se han utilizazo 3 tipos de componentes (se pueden ver e
 
 ### Páginas de búsqueda
 
+Las páginas de búsqueda sirven para crear un sistema de interrogación desde el que poder refinar las búsquedas como el búscador de publicaciones {URL_COMUNIDAD}/buscador-publicaciones o de investigadores {URL_COMUNIDAD}/buscador-personal-investigador.
+
+#### Componentes
+
+Las páginas de búsqueda se sirven desde la Web pero utilizan dos servicios adicionales mediante peticiones AJAX
+ - Servicio de facetas: Es el servicio encargado de pintar las facetas laterales con las que poder refinar la búsqueda 
+ - Servicio de resultados: Es el servicio encargado de pintar los resutlados de las búsquedas (publicaciones, investigadores...)  
+
+#### Configuración de la página
 
 
 
 
-
-
-
-
-
-Las páginas de búsqueda sirven para crear un sistema de interrogación desde el que poder refinar las búsquedas.
 
 de Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
 Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.  
