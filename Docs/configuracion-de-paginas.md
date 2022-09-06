@@ -9,11 +9,11 @@
 | Tipo                  | Especificación                           |
 | Cambios de la Versión | Versión inicial                          |
 
-# Funcionamiento de los Buscadores
+# Configuración de páginas
 
  - [Introducción](#introducción)
  - [CMS](#cms)
-   - [Configuración](#aa)
+   - [Configuración](#configuración)
  - [Páginas de búsqueda](#aa)
    - [Componentes](#aa)
    - [Configuración de la página](#aa)
@@ -31,6 +31,27 @@ Dentro de esta página se pueden crear/editar/eliminar las páginas del CMS y lo
 ### CMS
 
 Las páginas del CMS son páginas personalizadas en las que presentar información como la home {URL_COMUNIDAD}/home o la página de indicadores {URL_COMUNIDAD}/indicadores.
+
+#### Configuración
+
+Las páginas del CMS se pueden estructurar en fila y columnas y dentro de ellas se pueden añadir componentes
+
+![](./media/Paginas/Edicion-cms.jpg)
+
+Dentro de este proyecto se han utilizazo 3 tipos de componentes (se pueden ver en {URL_COMUNIDAD}/administrar-comunidad-cms-listado-componentes):  
+1.- HTML Libre: Sirven para representar un HTML simple.  
+2.- Consulta SPARQL: Sirven para recuperar datos de la BBDD sparql y representar los datos.
+3.- Destacado: En este proyecto se han utilizado como los componentes HTML Libre pero personalizando la vista con el HTML.
+
+
+
+
+
+
+
+
+
+
 
 
 Las páginas de búsqueda sirven para crear un sistema de interrogación desde el que poder refinar las búsquedas.
