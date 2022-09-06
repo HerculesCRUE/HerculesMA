@@ -95,7 +95,7 @@ Se pueden crear filtros personalizados para las páginas de búsqueda desde la U
 ![](./media/Paginas/Listado-filtros.jpg)
 
 En este proyecto se han utilizado dos tipos de filtros personalizados
- - Con un parámetro simple: Incluyendo en la query [PARAMETRO], lo que se sustotuirá por el parámetro pasado (usado en algunas de las búsquedas incluidas en las fichas).
+ - Con un parámetro simple: Incluyendo en la query [PARAMETRO], lo que se sustituirá por el parámetro pasado (usado en algunas de las búsquedas incluidas en las fichas).
  - Troceando el texto por los espacios: Incluyendo en la query |||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| que troceará el texto por espacios y sustituira la última aparición por la última parte y las anteriores por la penúltima parte (Utilizado en los buscadores).  
 
 Los datos a configurar son los siguientes:
