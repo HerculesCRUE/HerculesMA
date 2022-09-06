@@ -75,6 +75,8 @@ Dentro de este proyecto se han utilizazo 4 tipos de facetas:
  - Número: Sirven para representar una propiedad de tipo numérico.  
  - Tesauro: Sirven para representar un arbol de categorías. 
 
+![](./media/Paginas/Listado-facetas.jpg)
+
 Los datos más relevantes a configurar son los siguientes:
  - Nombre de la faceta: Define el nombre de la faceta (multiidioma).
  - Faceta: Propiedad de la faceta (separado por @@@ si tiene saltos).
@@ -82,6 +84,8 @@ Los datos más relevantes a configurar son los siguientes:
  - Algoritmo de transformación: Se puede establecer si es multiidioma o booleano entre otras opciones.
  - Orden: Permite establecer el orden en el que se muestra la faceta (orden alfabético o en función de los resultados).  
  - Número de elementos visibles: Permite establecer el nº de elementos a mostrar en la faceta.
+
+![](./media/Paginas/Edicion-faceta.jpg)
 
 #### Configuración del parámetro de búsqueda
 
