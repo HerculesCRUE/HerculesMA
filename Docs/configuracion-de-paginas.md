@@ -9,7 +9,7 @@
 | Tipo                  | Especificación                           |
 | Cambios de la Versión | Versión inicial                          |
 
-# Funcionamiento de los Buscadores
+# Configuración de páginas
 
  - [Introducción](#introducción)
  - [CMS](#cms)
