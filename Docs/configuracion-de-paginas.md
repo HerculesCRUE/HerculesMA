@@ -63,6 +63,8 @@ En las páginas de búsqueda los datos más relevantes a configurar son los sigu
  - Campo Filtro: Define el filtro que se aplica a la búsqeuda dentro del grafo de búsqueda, si hay varios filtros deben ir separados por '|'.
  - Lista de órdenes: Define los órdenes disponibles en la página.
 
+![](./media/Paginas/Edicion-buscador.jpg)
+
 #### Configuración de las facetas
 
 Las facetas se pueden administrar desde {URL_COMUNIDAD}/administrar-facetas.  
