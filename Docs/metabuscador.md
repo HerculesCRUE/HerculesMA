@@ -1,27 +1,49 @@
 ![](./media/CabeceraDocumentosMD.png)
 
-| Fecha                 | 05/09/2022                                |
+| Fecha                 | 05/09/2022                               |
 | --------------------- | ---------------------------------------- |
-| Título                | Configuración de páginas                 |
-| Descripción           | Guía de funcionamiento de las páginas de búsqueda y CMS |
+| Título                | Metabuscador                             |
+| Descripción           | Guía de funcionamiento del metabuscador  |
 | Versión               | 1.0                                      |
 | Módulo                | Documentación                            |
 | Tipo                  | Especificación                           |
 | Cambios de la Versión | Versión inicial                          |
 
-# Configuración de páginas
+# Metabuscador
 
  - [Introducción](#introducción)
- - [CMS](#cms)
-   - [Configuración](#configuración)
- - [Páginas de búsqueda](#páginas-de-búsqueda)
-   - [Componentes](#componentes)
-   - [Configuración de la página](#configuración-de-la-página)
-   - [Configuración de las facetas](#configuración-de-las-facetas)
-   - [Configuración del parámetro de búsqueda](#configuración-del-parámetro-de-búsqueda)
+ - [Componentes](#componentes)
+ - [Flujo](#flujo)
 
 ## Introducción
-En esta documentación se explican las nociones de configuración de las páginas generales usadas en EDMA, en particular páginas del CMS y buscadores.  
+En esta documentación se explica el funcinoamiento del metabuscador que se encuetra en la cabecera de las páginas.  
+Este metabuscador realiza búsquedas dentro de las páginas púbicas de MA:
+ - Publicaciones
+ - Personal investigador
+ - Proyectos
+ - Grupos de investigación
+ - Research Objects
+ - Ofertas tecnológicas
+
+## Componentes
+Los componentes involucrados en el metabuscador son los siguientes:
+ - Javascript: El comportamiento javascript está dentro del fichero [community_proy.js](https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Estilos/theme/community_proy.js) y para lanzarlo se ejecuta metabuscador.init
+ - Servicio externo: Es el [servicio](https://github.com/HerculesCRUE/HerculesMA/tree/main/src/Hercules.MA.ServicioExterno) que se utiliza para devolver los resultados del metabuscador 
+
+## Flujo
+
+ - Al cargar cualquier página se ejecuta metabuscador.init() que prepara el funcionamiento del metabuscador
+ - En el evento 'keyup' del input del metabuscador se desencadena una llamada al controlador 'Search' del metabuscador en el método 'DoMetaSearch' pasando como parámetros 'stringSearch' con el texto que hay dentro del input y el parametro 'lang' con el idioma de navegación.
+ ![](./media/Metabuscador/Peticion.jpg)
+
+
+
+
+
+
+
+
+
 Para acceder a la administración de páginas hay que acceder con el usuario administrador a la URL {URL_COMUNIDAD}/administrar-paginas
 
 ![](./media/Paginas/Listado-paginas.jpg)
