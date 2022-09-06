@@ -18,7 +18,7 @@
    - [Componentes](#componentes)
    - [Configuración de la página](#configuración-de-la-página)
    - [Configuración de las facetas](#configuración-de-las-facetas)
-   - [Configuración del parámetro de búsqueda](#aa)
+   - [Configuración del parámetro de búsqueda](#configuración-del-parámetro-de-búsqueda)
 
 ## Introducción
 En esta documentación se explican las nociones de configuración de las páginas generales usadas en EDMA, en particular páginas del CMS y buscadores.  
