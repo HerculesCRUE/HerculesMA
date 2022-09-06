@@ -17,7 +17,7 @@
  - [Páginas de búsqueda](#páginas-de-búsqueda)
    - [Componentes](#componentes)
    - [Configuración de la página](#configuración-de-la-página)
-   - [Configuración de las facetas](#aa)
+   - [Configuración de las facetas](#configuración-de-las-facetas)
    - [Configuración del parámetro de búsqueda](#aa)
 
 ## Introducción
@@ -57,40 +57,33 @@ Las páginas de búsqueda se sirven desde la Web pero utilizan dos servicios adi
 
 #### Configuración de la página
 
+En las páginas de búsqueda los datos más relevantes a configurar son los siguientes:
+ - Nombre: Define el nombre de la página (multiidioma).
+ - Ruta: Define la URL de la página (multiidioma).
+ - Campo Filtro: Define el filtro que se aplica a la búsqeuda dentro del grafo de búsqueda, si hay varios filtros deben ir separados por '|'.
+ - Lista de órdenes: Define los órdenes disponibles en la página.
 
+#### Configuración de las facetas
 
+Las facetas se pueden administrar desde {URL_COMUNIDAD}/administrar-facetas.  
 
+Dentro de este proyecto se han utilizazo 4 tipos de facetas:  
+ - Texto: Sirven para representar una propiedad textual.  
+ - Fecha: Sirven para representar una propiedad de tipo fecha.  
+ - Número: Sirven para representar una propiedad de tipo numérico.  
+ - Tesauro: Sirven para representar un arbol de categorías. 
 
-de Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
-Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.  
-//TODO imagen
+Los datos más relevantes a configurar son los siguientes:
+ - Nombre de la faceta: Define el nombre de la faceta (multiidioma).
+ - Faceta: Propiedad de la faceta (separado por @@@ si tiene saltos).
+ - Objetos de conocimiento en los que va a aparecer: Define los tipos de recursos en los que va a estar disponbile esa faceta.
+ - Algoritmo de transformación: Se puede establecer si es multiidioma o booleano entre otras opciones.
+ - Orden: Permite establecer el orden en el que se muestra la faceta (orden alfabético o en función de los resultados).  
+ - Número de elementos visibles: Permite establecer el nº de elementos a mostrar en la faceta.
 
-## Gestionar Buscadores
+#### Configuración del parámetro de búsqueda
 
-### Pagina
-- Nombre: Nombre de de la pagina, aparece como cabezera debajo de la caja de busqueda.
-- Ruta: Direccion en la que se encontrara la pagina en la url (sin el domino).
-- Filtro de orden: Lista con los filtros que aplicaran orden a los elementos de la pagina.
-- 
-### Aspecto de la minificha.
-El comportamiento del buscador esta definido en las vistas /Views/Views/CargadorResultados/_ResultadoRecurso.cshtml y /Views/Views/CargadorResultados/CargarResultados.cshtml
-En la vista _ResultadoRecurso.cshtml se define el aspecto que tendra la minificha, basandose en las propiedades del objeto de conocimiento.
-### Objeto de conocimiento.
-Los objetos de conocimiento definen la informacion que aparecera en la minificha.
-
-Ajustes mas relevantes:
-- Nombre: Nombre del objeto de conocimiento
-- Namespace: Nombre de la ontologia 
-- Lista de Propiedades: Las propiedades que se quiere que aparezcan en la ficha o usadas en las facetas.
-
-
-## Facetas 
-Las facetas son filtros que se aplican a los resultados. Aparecen a la izquierda de los resultados.
-Las facetas estan definidas en Administración semántica > Facetas
-
-Ajustes mas relevantes:
-- Nombre de la faceta
-- Tipo de faceta: Indica el tipo de informacion que representa la faceta (Texto, Fecha, Numero, Tesauro, Siglo, Texto Invariable)
-- Objectos de conocimiento en los que va a aparecer: Aqui se indica el objeto de conocimiento del buscador
-
-## Metabuscador
+Se pueden crear filtros personalizados para las páginas de búsqueda desde la URL {URL_COMUNIDAD}/administrar-parametros-busqueda-personalizados para que la búsqueda responda de una determinada manera a un input de tipo texto.  
+En este proyecto se han utilizado dos tipos de filtros personalizados
+ - Con un parámetro simple: Incluyendo en la query [PARAMETRO], lo que se sustotuirá por el parámetro pasado (usado en algunas de las búsquedas incluidas en las fichas).
+ - Troceando el texto por los espacios: Incluyendo en la query |||[PARAMETROESPACIOULTIMODIFERENTE]||'[PARAMETROESPACIOIN]' and||'[PARAMETROESPACIOIN]'||| que troceará el texto por espacios y sustituira la última aparición por la última parte y las anteriores por la penúltima parte (Utilizado en los buscadores).
