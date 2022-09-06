@@ -36,7 +36,7 @@ Los componentes involucrados en el metabuscador son los siguientes:
  - En el evento 'keyup' del input del metabuscador se desencadena una llamada al controlador 'Search' del metabuscador en el método 'DoMetaSearch' pasando como parámetros 'stringSearch' con el texto que hay dentro del input y el parametro 'lang' con el idioma de navegación.
  ![](./media/Metabuscador/Peticion.jpg)
  - Una vez llega la petición al servicio se realizan las siguientes acciones:
-  - sdfsdf 
+   - sdfsdf 
 
 
 
