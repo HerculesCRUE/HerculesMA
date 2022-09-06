@@ -16,7 +16,7 @@
  - [Flujo](#flujo)
 
 ## Introducción
-En esta documentación se explica el funcinoamiento del metabuscador que se encuetra en la cabecera de las páginas.  
+En esta documentación se explica el funcionamiento del metabuscador que se encuetra en la cabecera de las páginas.  
 Este metabuscador realiza búsquedas dentro de las páginas púbicas de MA:
  - Publicaciones
  - Personal investigador
