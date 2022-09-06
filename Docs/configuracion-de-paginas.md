@@ -14,9 +14,9 @@
  - [Introducción](#introducción)
  - [CMS](#cms)
    - [Configuración](#configuración)
- - [Páginas de búsqueda](#aa)
-   - [Componentes](#aa)
-   - [Configuración de la página](#aa)
+ - [Páginas de búsqueda](#páginas-de-búsqueda)
+   - [Componentes](#componentes)
+   - [Configuración de la página](#configuración-de-la-página)
    - [Configuración de las facetas](#aa)
    - [Configuración del parámetro de búsqueda](#aa)
 
@@ -39,22 +39,27 @@ Las páginas del CMS se pueden estructurar en fila y columnas y dentro de ellas 
 ![](./media/Paginas/Edicion-cms.jpg)
 
 Dentro de este proyecto se han utilizazo 3 tipos de componentes (se pueden ver en {URL_COMUNIDAD}/administrar-comunidad-cms-listado-componentes):  
-1.- HTML Libre: Sirven para representar un HTML simple.  
-2.- Consulta SPARQL: Sirven para recuperar datos de la BBDD sparql y representar los datos.
-3.- Destacado: En este proyecto se han utilizado como los componentes HTML Libre pero personalizando la vista con el HTML.
+ - HTML Libre: Sirven para representar un HTML simple.  
+ - Consulta SPARQL: Sirven para recuperar datos de la BBDD sparql y representar los datos.
+ - Destacado: En este proyecto se han utilizado como los componentes HTML Libre pero personalizando la vista con el HTML.
+
+### Páginas de búsqueda
+
+Las páginas de búsqueda sirven para crear un sistema de interrogación desde el que poder refinar las búsquedas como el búscador de publicaciones {URL_COMUNIDAD}/buscador-publicaciones o de investigadores {URL_COMUNIDAD}/buscador-personal-investigador.
+
+#### Componentes
+
+Las páginas de búsqueda se sirven desde la Web pero utilizan dos servicios adicionales mediante peticiones AJAX
+ - Servicio de facetas: Es el servicio encargado de pintar las facetas laterales con las que poder refinar la búsqueda 
+ - Servicio de resultados: Es el servicio encargado de pintar los resutlados de las búsquedas (publicaciones, investigadores...)  
+
+![](./media/Paginas/Facetas-resultados.jpg)
+
+#### Configuración de la página
 
 
 
 
-
-
-
-
-
-
-
-
-Las páginas de búsqueda sirven para crear un sistema de interrogación desde el que poder refinar las búsquedas.
 
 de Los buscadores son un tipo de página que muestra un determinado sistema de interrogación.  
 Estos buscadores están compuestos por el servicio de facetas y el servicio de resultados.  
