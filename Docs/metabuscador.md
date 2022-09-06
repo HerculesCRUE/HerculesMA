@@ -33,7 +33,7 @@ Los componentes involucrados en el metabuscador son los siguientes:
 ## Flujo
  - Al arrancar el servicio externo se ejecuta el método 'GenerateMetaShearch' dentro de la clase 'AccionesMetaBusqueda' que se encarga de cargar los datos para que posteriormente estén disponibles en las búsquedas. Carga en el objeto AccionesMetaBusqueda.textSearch todas las palabras que aparecen en los elementos buscables asociados a la propiedad, a un peso y al objeto en el que aparecen (Este proceso se repite cada 5 minutos).
  - Al cargar cualquier página se ejecuta metabuscador.init() que prepara el funcionamiento del metabuscador
- - En el evento 'keyup' del input del metabuscador se desencadena una llamada al controlador 'Search' del metabuscador en el método 'DoMetaSearch' pasando como parámetros 'stringSearch' con el texto que hay dentro del input y el parametro 'lang' con el idioma de navegación.
+ - En el evento 'keyup' del input del metabuscador se desencadena una llamada al controlador 'Search' del servicio externo en el método 'DoMetaSearch' pasando como parámetros 'stringSearch' con el texto que hay dentro del input y el parametro 'lang' con el idioma de navegación.
  ![](./media/Metabuscador/Peticion.jpg)
  - Una vez llega la petición al servicio se realizan las siguientes acciones:
    - Se limpia el texto (pasándolo todo a minúsculas y eliminando acentos) 
