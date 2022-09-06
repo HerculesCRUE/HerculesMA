@@ -24,8 +24,8 @@ Existen indicadores de dos tipos, los generales o públicos para todos los usuar
 Aquí se detallará la vista, el js y los controladores que se utilizan para el funcionamiento de los indicadores.
 ### Archivos de las vistas
 Se utilizan dos vistas, una para los indicadores generales y otra para los indicadores personales.
-- Indicadores generales: "Views/Views/CMS/Destacado/Metricas.cshtml"
-- Indicadores personales: "Views/Views/CMS/Destacado/IndicadoresPersonalizados.cshtml"
+- Indicadores generales: Es la vista 'Metricas' del CMS destacado.
+- Indicadores personales: Es la vista 'Indicadores personalizados' del CMS destacado.
 ### Archivos de JavaScript
 Ambos indicadores utilizan el archivo de JS "Estilos/theme/graphic-engine.js" en el que se consume otro archivo JS "Estilos/theme/graficas_proy.js".
 Este último archivo funciona como librería para generar gráficas en Hércules, y utiliza las librerías de Chart.js y cytoscape.js para crear los distintos tipos de gráficas.
