@@ -14,7 +14,7 @@
  - [Introducción](#introducción)
  - [CMS](#cms)
    - [Configuración](#configuración)
- - [Páginas de búsqueda](#aa)
+ - [Páginas de búsqueda](#páginas-de-búsqueda)
    - [Componentes](#aa)
    - [Configuración de la página](#aa)
    - [Configuración de las facetas](#aa)
@@ -43,7 +43,7 @@ Dentro de este proyecto se han utilizazo 3 tipos de componentes (se pueden ver e
  - Consulta SPARQL: Sirven para recuperar datos de la BBDD sparql y representar los datos.
  - Destacado: En este proyecto se han utilizado como los componentes HTML Libre pero personalizando la vista con el HTML.
 
-
+### Páginas de búsqueda
 
 
 
