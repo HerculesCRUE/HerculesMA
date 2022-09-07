@@ -22,12 +22,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
 
-        public static List<Publication> publications = null;
-        public static List<ResearchObject> researchObjects = null;
-        public static List<Group> groups = null;
-        public static List<Project> projects = null;
-        public static List<Person> persons = null;
-        public static List<Offer> offers = null;
+        public static int publicationsCount = 0;
+        public static int researchObjectsCount = 0;
+        public static int groupsCount = 0;
+        public static int projectsCount = 0;
+        public static int personsCount = 0;
+        public static int offersCount = 0;
 
         public static Dictionary<string, List<ObjectSearch.Property>> textSearch = new Dictionary<string, List<ObjectSearch.Property>>();
 
@@ -113,7 +113,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     break;
                                 }
                             }
-                            persons = personsTemp;
+                            personsCount = personsTemp.Where(x => x.searchable).Count();
                         }
                         #endregion
 
@@ -266,7 +266,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                 }
                             }
 
-                            publications = publicationsTemp;
+                            publicationsCount = publicationsTemp.Count;
                         }
                         #endregion
 
@@ -417,10 +417,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     break;
                                 }
                             }
-
-
-
-                            researchObjects = researchObjectsTemp;
+                            researchObjectsCount = researchObjectsTemp.Count;
                         }
                         #endregion
 
@@ -537,7 +534,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     break;
                                 }
                             }
-                            groups = groupsTemp;
+                            groupsCount = groupsTemp.Count;
                         }
                         #endregion
 
@@ -654,7 +651,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     break;
                                 }
                             }
-                            projects = projectsTemp;
+                            projectsCount = projectsTemp.Count;
                         }
                         #endregion
 
@@ -764,8 +761,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     break;
                                 }
                             }
-
-                            offers = offersTemp;
+                            offersCount = offersTemp.Count;
                         }
                         #endregion
 
@@ -861,7 +857,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         textSearch = textSearchTemp;
 
-                        //TODO COnfigurable
                         Thread.Sleep(300000);
                     }
                     catch (Exception ex)
@@ -1279,22 +1274,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         public Dictionary<string, int> GetNumItems()
         {
             Dictionary<string, int> result = new Dictionary<string, int>();
-            result["persons"] = 0;
-            result["documents"] = 0;
-            result["researchObjects"] = 0;
-            result["groups"] = 0;
-            result["projects"] = 0;
-            result["offers"] = 0;
-            if (persons != null && publications != null && researchObjects != null && groups != null && projects != null && offers != null)
-            {
-                result["persons"] = persons.Where(x => x.searchable).Count();
-                result["documents"] = publications.Count;
-                result["researchObjects"] = researchObjects.Count;
-                result["groups"] = groups.Count;
-                result["projects"] = projects.Count;
-                result["offers"] = offers.Count;
-            }
-
+            result["persons"] = personsCount;
+            result["documents"] = publicationsCount;
+            result["researchObjects"] = researchObjectsCount;
+            result["groups"] = groupsCount;
+            result["projects"] = projectsCount;
+            result["offers"] = offersCount;
             return result;
 
         }
