@@ -188,7 +188,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // 2. Obtengo los ROs desde la propiedad http://w3id.org/roh/linkedRO o http://w3id.org/roh/linkedDocument dependiendo del tipo de recurso que sean
             // 3. Obtengo los ROs en los que el id del RO pasado es una referencia de las propiedades que corresponden a las del apartado anterior.
             
-            string select = "select DISTINCT ?s ?title ?abstract ?issued ?isValidated ?type ?roType ?roTypeTitle ?origin group_concat(distinct ?idGnossL;separator=',') as ?idGnoss group_concat(distinct ?clKnowledgeArea;separator=',') as ?gckarea " +
+            string select = "select DISTINCT ?s ?title ?abstract ?issued ?type ?roType ?roTypeTitle ?origin group_concat(distinct ?idGnossL;separator=',') as ?idGnoss " +
                 "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/researchobject.owl> FROM <http://gnoss.com/researchobjecttype.owl>";
             string where = @$"where {{
 
@@ -219,28 +219,22 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         # ?s <http://w3id.org/roh/isValidated> 'true'.
 
 
-                        OPTIONAL
-                        {{
-                            ?s <http://w3id.org/roh/isValidated> ?isValidated.
-                        }}
+                        # OPTIONAL
+                        # {{
+                        #     ?s <http://w3id.org/roh/isValidated> ?isValidated.
+                        # }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/dc/terms/issued> ?issued.
-                        }}
+                        ?s <http://purl.org/dc/terms/issued> ?issued.
 
                         OPTIONAL
                         {{
                             ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
                         }}
 
+                        ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
+
                         OPTIONAL
                         {{
-                            ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
-                        }}
-
-                         OPTIONAL
-                         {{
                             ?s <http://purl.org/dc/elements/1.1/type> ?roType.
                             ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
                             FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
@@ -269,44 +263,36 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?s ?related ?resource
                         Filter (?related in (<http://w3id.org/roh/linkedDocument>, <http://w3id.org/roh/linkedRO>))
 
-                    
                         ?personL a <http://xmlns.com/foaf/0.1/Person>.
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/ontology/bibo/authorList> ?authorListL.
-                            ?authorListL <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?personL.
-                            ?personL <http://w3id.org/roh/gnossUser> ?idGnossL.
-                        }}
+                        
+                        ?s <http://purl.org/ontology/bibo/authorList> ?authorListL.
+                        ?authorListL <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?personL.
+                        ?personL <http://w3id.org/roh/gnossUser> ?idGnossL.
+                        
 
                         ?s <http://w3id.org/roh/title> ?title.
                         # ?s <http://w3id.org/roh/isValidated> 'true'.
                         
-                        OPTIONAL
-                        {{
-                            ?s <http://w3id.org/roh/isValidated> ?isValidated.
-                        }}
+                        # OPTIONAL
+                        # {{
+                        #     ?s <http://w3id.org/roh/isValidated> ?isValidated.
+                        # }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/dc/terms/issued> ?issued.
-                        }}
+                        ?s <http://purl.org/dc/terms/issued> ?issued.
 
                         OPTIONAL
                         {{
                             ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
                         }}
 
+                        ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
+
                         OPTIONAL
                         {{
-                            ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
-                        }}
-
-                         OPTIONAL
-                         {{
                              ?s <http://purl.org/dc/elements/1.1/type> ?roType.
                              ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
                              FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
-                         }}
+                        }}
 
                         # OPTIONAL
                         # {{
