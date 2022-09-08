@@ -169,25 +169,21 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 guidUser = mResourceApi.GetShortGuid(idUser);
             }
 
-
-            // Obtener el id del usuario usando el id de la cuenta
-            string userGnossId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, guidUser);
-
-
-
+            // Obtener el id del investigador usando el id de la cuenta
+            string researcherId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, guidUser);
 
             int MAX_INTENTOS = 10;
             bool uploadedR = false;
 
 
-            if (!string.IsNullOrEmpty(userGnossId))
+            if (!string.IsNullOrEmpty(researcherId))
             {
 
                 // creando los cluster
                 Annotation cRsource = new();
 
                 // Usuario creador
-                cRsource.IdRoh_owner = userGnossId;
+                cRsource.IdRoh_owner = researcherId;
 
                 // Otros campos
                 cRsource.Roh_dateIssued = DateTime.UtcNow;
@@ -238,7 +234,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 else
                 {
-                    // Inserción.
+                    // Creación.
                     ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null);
                     int numIntentos = 0;
                     while (!resource.Uploaded)

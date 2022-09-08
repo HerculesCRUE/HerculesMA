@@ -37,10 +37,9 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 ?s <http://purl.org/ontology/bibo/authorList> ?autoresAux.
                 ?autoresAux <http://xmlns.com/foaf/0.1/nick> ?autores.
                 OPTIONAL {{ ?s <http://w3id.org/roh/year> ?anio. }}
-                OPTIONAL {{ ?s <http://vivoweb.org/ontology/core#hasPublicationVenue> ?auxRevista. }}
-                OPTIONAL {{ ?auxRevista <http://w3id.org/roh/title> ?revista. }}
-                OPTIONAL {{ ?auxRevista <http://purl.org/ontology/bibo/editor> ?publisher. }}
-                OPTIONAL {{ ?auxRevista <http://purl.org/ontology/bibo/issn> ?issn. }}
+                OPTIONAL {{ ?s <http://w3id.org/roh/hasPublicationVenueJournalText> ?revista. }}
+                OPTIONAL {{ ?s <http://purl.org/ontology/bibo/publisher> ?publisher. }}
+                OPTIONAL {{ ?s <http://purl.org/ontology/bibo/issn> ?issn. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/volume> ?volumen. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/doi> ?doi. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
@@ -153,11 +152,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 ?s <http://w3id.org/roh/title> ?titulo FILTER(?s=<{pIdRecurso}>).
                 ?s <http://purl.org/ontology/bibo/authorList> ?autoresAux.
                 ?autoresAux <http://xmlns.com/foaf/0.1/nick> ?autores.
-                OPTIONAL {{ ?s <http://w3id.org/roh/year> ?anio. }}
-                OPTIONAL {{ ?s <http://vivoweb.org/ontology/core#hasPublicationVenue> ?auxRevista. }}
-                OPTIONAL {{ ?auxRevista <http://w3id.org/roh/title> ?revista. }}
-                OPTIONAL {{ ?auxRevista <http://purl.org/ontology/bibo/editor> ?publisher. }}
-                OPTIONAL {{ ?auxRevista <http://purl.org/ontology/bibo/issn> ?issn. }}
+                OPTIONAL {{ ?s <http://w3id.org/roh/year> ?anio. }}                
+                OPTIONAL {{ ?s <http://w3id.org/roh/hasPublicationVenueJournalText> ?revista. }}
+                OPTIONAL {{ ?s <http://purl.org/ontology/bibo/publisher> ?publisher. }}
+                OPTIONAL {{ ?s <http://purl.org/ontology/bibo/issn> ?issn. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/volume> ?volumen. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/doi> ?doi. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
