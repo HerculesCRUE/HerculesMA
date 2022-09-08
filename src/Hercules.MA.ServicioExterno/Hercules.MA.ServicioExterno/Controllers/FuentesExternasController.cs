@@ -30,6 +30,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             {
                 ReadRabbitService rabbitMQService = new ReadRabbitService(_Configuracion);
                 string orcid = Acciones.AccionesFuentesExternas.GetORCID(pUserId);
+                string idGnoss = Acciones.AccionesFuentesExternas.GetIdGnoss(pUserId);
 
                 if (!string.IsNullOrEmpty(orcid))
                 {
@@ -46,7 +47,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                     Dictionary<string, string> dicIDs = Acciones.AccionesFuentesExternas.GetUsersIDs(pUserId);
 
                     // Publicaciones.
-                    List<string> listaDatos = new List<string>() { "investigador", orcid, ultimaFechaMod };
+                    List<string> listaDatos = new List<string>() { "investigador", orcid, ultimaFechaMod, idGnoss };
                     rabbitMQService.PublishMessage(listaDatos, _Configuracion.GetQueueRabbit());
 
                     // Zenodo

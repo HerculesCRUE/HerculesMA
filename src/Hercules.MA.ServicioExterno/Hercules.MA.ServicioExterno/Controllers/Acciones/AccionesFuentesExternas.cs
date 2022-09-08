@@ -53,6 +53,38 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
         /// <summary>
+        /// Obtiene el IDGNOSS del usuario.
+        /// </summary>
+        /// <param name="pUserId">ID del usuario conectado.</param>
+        /// <returns></returns>
+        public static string GetIdGnoss(string pUserId)
+        {
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append(mPrefijos);
+            select.Append("SELECT ?s ");
+            where.Append("WHERE { ");
+            where.Append($@"?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}>. ");
+            where.Append("} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    if (fila.ContainsKey("s"))
+                    {
+                        return fila["s"].value;
+                    }
+                }
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
         /// Obtiene la fecha de la última actualización.
         /// </summary>
         /// <param name="pUserId">ID del usuario conectado.</param>
