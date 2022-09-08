@@ -69,7 +69,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}>. ");
             where.Append("} ");
 
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
