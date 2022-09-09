@@ -85,7 +85,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             if(string.IsNullOrEmpty(idBusqueda))
             {
                 resultadoQuery = null;
-                select = new StringBuilder(), where = new StringBuilder();
+                select = new StringBuilder();
+                where = new StringBuilder();
 
                 // Consulta sparql.
                 select.Append(mPrefijos);
