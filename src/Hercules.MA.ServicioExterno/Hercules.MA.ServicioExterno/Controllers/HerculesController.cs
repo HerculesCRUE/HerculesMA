@@ -473,5 +473,31 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
             return Ok();
         }
+
+
+
+
+        /// <summary>
+        /// Controlador para obtener la información del usuario en la home de ED.
+        /// </summary>
+        /// <param name="pIdGnossUser">Usuario de gnoss.</param>
+        /// <returns>Diccionario con los datos.</returns>
+        [HttpGet("GetInfoHomeEdUser")]
+        public IActionResult GetInfoHomeEdUser(string pIdGnossUser)
+        {
+            Dictionary<string, string> datosUsuario = null;
+
+            try
+            {
+                AccionesPersona accionP = new AccionesPersona();
+                datosUsuario = accionP.GetInfoHomeEdUser(pIdGnossUser);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return Ok(datosUsuario);
+        }
     }
 }
