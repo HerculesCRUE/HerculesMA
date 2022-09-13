@@ -11,6 +11,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         public static IConfigurationRoot configuracion;
         private string RabbitConnectionString { get; set; }
         private string QueueRabbit { get; set; }
+        private string DenormalizerQueueRabbit { get; set; }
         private string DoiQueueRabbit { get; set; }
         private string UrlSimilarity { get; set; }
         private string UrlPublicacion { get; set; }
@@ -80,6 +81,29 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 QueueRabbit = queue;
             }
             return QueueRabbit;
+        }
+
+        /// <summary>
+        /// Obtiene la el nombre de la cola Rabbit de desnormalización de configuración.
+        /// </summary>
+        /// <returns>Nombre de la cola Rabbit.</returns>
+        public string GetDenormalizerQueueRabbit()
+        {
+            if (string.IsNullOrEmpty(DenormalizerQueueRabbit))
+            {
+                IDictionary environmentVariables = Environment.GetEnvironmentVariables();
+                string queue = string.Empty;
+                if (environmentVariables.Contains("DenormalizerQueueRabbit"))
+                {
+                    queue = environmentVariables["DenormalizerQueueRabbit"] as string;
+                }
+                else
+                {
+                    queue = configuracion["DenormalizerQueueRabbit"];
+                }
+                DenormalizerQueueRabbit = queue;
+            }
+            return DenormalizerQueueRabbit;
         }
 
         /// <summary>
