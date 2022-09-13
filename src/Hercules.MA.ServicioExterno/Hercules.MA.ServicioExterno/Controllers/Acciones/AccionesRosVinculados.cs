@@ -583,6 +583,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, ROLinked> rosLinked = new();
             List<Guid> listIdslinked = new();
 
+            var minus = "";
+            if (listItemsRelated.Count > 0)
+            {
+                minus = $@"FILTER(?s NOT IN(<{string.Join("><", listItemsRelated)}>))";
+            }
+
             string select = "select DISTINCT ?s ?issued ?title ?abstract ?isValidated " +
                 "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/researchobject.owl>";
             string where = @$"where {{
@@ -613,7 +619,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     FILTER (contains(lcase(str(?title)), ""{text.Trim().ToLower()}""))
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
-                    FILTER(?s NOT IN (<{string.Join("><", listItemsRelated)}>))
+                    {minus}
                 }} ORDER BY DESC(?type) LIMIT 20";
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
 
