@@ -29,48 +29,24 @@ namespace Hercules.MA.Journals
         public static int MAX_INTENTOS = 10;
 
         static void Main(string[] args)
-        {
-            // Obtención de revistas de BBDD.            
+        {            
+            string nombreExcel = "Revistas";
+            string nombreHoja = "revistas";
+
+            // Obtención de revistas de BBDD.
             List<string> idRecursosRevistas = ObtenerIDsRevistas();
             Dictionary<string, Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas);
 
             // Diccionario de revistas.
-            List<Journal> listaRevistas = dicRevistasBBDD.Values.ToList();
+            List<Journal> listaRevistas = dicRevistasBBDD.Values.ToList();            
 
-            // Lectura del excel. 
-            Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de Scopus...");
-            DataSet dataSetScopus = LecturaExcel($@"{configuracion.GetRutaDatos()}/scopus/CiteScore.xlsx");
+            Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de revistas...");
+            DataSet dataSet = LecturaExcel($@"{configuracion.GetRutaDatos()}/revistas/{nombreExcel}.xlsx");
 
-            // Obtiebe los años de las revistas.
-            List<int> listaAnyosRevistas = ObtenerAnyos(dataSetScopus);
-
-            // Obtención de las revistas.
-            foreach (int anyo in listaAnyosRevistas)
+            if (ComprobarColumnasExcel(dataSet, nombreHoja))
             {
-                // Datos de WoS (SCIE). Lectura del excel. 
-                Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de 'WoS (SCIE) {anyo}'...");
-                DataSet dataSetSCIE = LecturaExcel($@"{configuracion.GetRutaDatos()}/wos/{anyo}/JCR_SCIE_{anyo}.xlsx");
-                if (ComprobarExcelWOS(dataSetSCIE, anyo, "SCIE"))
-                {
-                    Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetSCIE.Tables[dataSetSCIE.Tables[$@"JCR_SCIE_{anyo}"].TableName].Rows.Count} revistas de WoS (SCIE)...");
-                    listaRevistas = GetRevistasWoS(dataSetSCIE, anyo, listaRevistas, "SCIE");
-                }
-
-                // Datos de WoS (SSCI). Lectura del excel. 
-                Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de 'WoS (SSCI) {anyo}'...");
-                DataSet dataSetSSCI = LecturaExcel($@"{configuracion.GetRutaDatos()}/wos/{anyo}/JCR_SSCI_{anyo}.xlsx");
-                if (ComprobarExcelWOS(dataSetSSCI, anyo, "SSCI"))
-                {
-                    Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetSSCI.Tables[dataSetSSCI.Tables[$@"JCR_SSCI_{anyo}"].TableName].Rows.Count} revistas de WoS (SSCI)...");
-                    listaRevistas = GetRevistasWoS(dataSetSSCI, anyo, listaRevistas, "SSCI");
-                }
-
-                // Datos de Scopus.
-                if (ComprobarExcelScopus(dataSetScopus, anyo))
-                {
-                    Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetScopus.Tables[dataSetScopus.Tables[$@"CiteScore {anyo}"].TableName].Rows.Count} revistas de Scopus...");
-                    listaRevistas = GetRevistasScopus(dataSetScopus, anyo, listaRevistas);
-                }
+                Console.WriteLine($@"{DateTime.Now} Procesando revistas...");
+                listaRevistas = GetRevistas(dataSet, nombreHoja, listaRevistas);
             }
 
             // Ordenación de por Key.
@@ -81,6 +57,52 @@ namespace Hercules.MA.Journals
 
             // Carga/Modificación/Borrado de datos de BBDD. 
             ModificarRevistas(listaRevistas);
+
+            // TODO: Versión antigua. No borrar de momento.
+            // Lectura del excel. 
+            //Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de Scopus...");
+            //DataSet dataSetScopus = LecturaExcel($@"{configuracion.GetRutaDatos()}/scopus/CiteScore.xlsx");
+
+            //// Obtiebe los años de las revistas.
+            //List<int> listaAnyosRevistas = ObtenerAnyos(dataSetScopus);
+
+            //// Obtención de las revistas.
+            //foreach (int anyo in listaAnyosRevistas)
+            //{
+            //    // Datos de WoS (SCIE). Lectura del excel. 
+            //    Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de 'WoS (SCIE) {anyo}'...");
+            //    DataSet dataSetSCIE = LecturaExcel($@"{configuracion.GetRutaDatos()}/wos/{anyo}/JCR_SCIE_{anyo}.xlsx");
+            //    if (ComprobarExcelWOS(dataSetSCIE, anyo, "SCIE"))
+            //    {
+            //        Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetSCIE.Tables[dataSetSCIE.Tables[$@"JCR_SCIE_{anyo}"].TableName].Rows.Count} revistas de WoS (SCIE)...");
+            //        listaRevistas = GetRevistasWoS(dataSetSCIE, anyo, listaRevistas, "SCIE");
+            //    }
+
+            //    // Datos de WoS (SSCI). Lectura del excel. 
+            //    Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de 'WoS (SSCI) {anyo}'...");
+            //    DataSet dataSetSSCI = LecturaExcel($@"{configuracion.GetRutaDatos()}/wos/{anyo}/JCR_SSCI_{anyo}.xlsx");
+            //    if (ComprobarExcelWOS(dataSetSSCI, anyo, "SSCI"))
+            //    {
+            //        Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetSSCI.Tables[dataSetSSCI.Tables[$@"JCR_SSCI_{anyo}"].TableName].Rows.Count} revistas de WoS (SSCI)...");
+            //        listaRevistas = GetRevistasWoS(dataSetSSCI, anyo, listaRevistas, "SSCI");
+            //    }
+
+            //    // Datos de Scopus.
+            //    if (ComprobarExcelScopus(dataSetScopus, anyo))
+            //    {
+            //        Console.WriteLine($@"{DateTime.Now} [{anyo}] Procesando {dataSetScopus.Tables[dataSetScopus.Tables[$@"CiteScore {anyo}"].TableName].Rows.Count} revistas de Scopus...");
+            //        listaRevistas = GetRevistasScopus(dataSetScopus, anyo, listaRevistas);
+            //    }
+            //}
+
+            //// Ordenación de por Key.
+            //listaRevistas = listaRevistas.OrderBy(obj => obj.titulo).ToList();
+
+            //// Comprobar si hay datos duplicados.
+            //ComprobarErrores(listaRevistas);
+
+            //// Carga/Modificación/Borrado de datos de BBDD. 
+            //ModificarRevistas(listaRevistas);
         }
 
 
@@ -129,6 +151,134 @@ namespace Hercules.MA.Journals
                 }
             }
         }
+
+        /// <summary>
+        /// Contruye el objeto de Revista.
+        /// </summary>
+        /// <param name="pDataSet"></param>
+        /// <param name="pNombreHoja"></param>
+        /// <param name="pListaRevistas"></param>
+        /// <returns></returns>
+        public static List<Journal> GetRevistas(DataSet pDataSet, string pNombreHoja, List<Journal> pListaRevistas)
+        {
+            // Obtención de la hoja a leer.
+            DataTable tabla = pDataSet.Tables[$@"{pNombreHoja}"];
+
+            // Contadores.
+            int revistasSinTitulo = 0;
+            int revistasSinIdentificadores = 0;
+
+            // Ordenar DATASET
+            var xx = pDataSet.Tables[tabla.TableName];
+            xx.DefaultView.Sort = "TITLE ASC, PUBLISHER_NAME ASC, ISSN ASC, EISSN ASC, SOURCE ASC, YEAR ASC";
+            xx = pDataSet.Tables[tabla.TableName].DefaultView.ToTable();
+
+            foreach (DataRow fila in xx.Rows)
+            {
+                // Si la revista no tiene título, no es válida.
+                if (string.IsNullOrEmpty(fila["TITLE"].ToString()))
+                {
+                    revistasSinTitulo++;
+                    continue;
+                }
+
+                // Si la revista no tiene ISSN ni EISSN, no es válida.
+                if (string.IsNullOrEmpty(fila["ISSN"].ToString()) && string.IsNullOrEmpty(fila["EISSN"].ToString()))
+                {
+                    revistasSinIdentificadores++;
+                    continue;
+                }
+
+                // Datos 
+                string titleAux = fila["TITLE"].ToString();
+                string editorialAux = fila["PUBLISHER_NAME"].ToString();
+                string issnAux = LimpiarIdentificador(fila["ISSN"].ToString());
+                string eissnAux = LimpiarIdentificador(fila["EISSN"].ToString());
+
+                // Si tienen el mismo ISSN e EISSN, únicamente tienen EISSN.
+                if (!string.IsNullOrEmpty(issnAux) && !string.IsNullOrEmpty(eissnAux) && issnAux == eissnAux)
+                {
+                    issnAux = null;
+                }
+
+                Journal revista = ComprobarRevista(pListaRevistas, titleAux, editorialAux, issnAux, eissnAux);
+
+                if (revista == null)
+                {
+                    revista = new Journal();
+                    revista.indicesImpacto = new HashSet<IndiceImpacto>();
+                    pListaRevistas.Add(revista);
+                }
+
+                // Año.
+                int anyo = Int32.Parse(fila["YEAR"].ToString());
+
+                // Título.
+                revista.titulo = titleAux;
+
+                if (!string.IsNullOrEmpty(editorialAux))
+                {
+                    // Publicador.
+                    revista.publicador = editorialAux;
+                }
+
+                if (!string.IsNullOrEmpty(issnAux))
+                {
+                    // ISSN.
+                    revista.issn = issnAux;
+                }
+
+                if (!string.IsNullOrEmpty(eissnAux))
+                {
+                    // EISSN.
+                    revista.eissn = eissnAux;
+                }
+
+                // Índice de impacto.
+                bool encontrado = false;
+                foreach (IndiceImpacto item in revista.indicesImpacto)
+                {
+                    if (item.fuente == fila["SOURCE"].ToString() && item.anyo == anyo)
+                    {
+                        encontrado = true;
+                        break;
+                    }
+                }
+
+                if (!encontrado && !string.IsNullOrEmpty(fila["IMPACT_FACTOR"].ToString()))
+                {
+                    revista.indicesImpacto.Add(CrearIndiceImpacto(fila, anyo));
+                }
+
+                // Categorías.
+                if (!string.IsNullOrEmpty(fila["CATEGORY_DESCRIPTION"].ToString()) && !string.IsNullOrEmpty(fila["IMPACT_FACTOR"].ToString()))
+                {
+                    HashSet<Categoria> categorias = revista.indicesImpacto.First(x => x.anyo == anyo && x.fuente == fila["SOURCE"].ToString()).categorias;
+                    Categoria categoria = CrearCategoria(fila, anyo);
+
+                    if (!categorias.Any(x => x.nomCategoria == categoria.nomCategoria))
+                    {
+                        revista.indicesImpacto.First(x => x.anyo == anyo && x.fuente == fila["SOURCE"].ToString()).categorias.Add(categoria);
+                    }
+                    else
+                    {
+                        Categoria categoriaCargada = categorias.First(x => x.nomCategoria == categoria.nomCategoria);
+                        float rangoNuevo = (float)categoria.posicionPublicacion / (float)categoria.numCategoria;
+                        float rangoCargado = (float)categoriaCargada.posicionPublicacion / (float)categoriaCargada.numCategoria;
+
+                        if ((rangoNuevo < rangoCargado) || (rangoNuevo == rangoCargado && categoria.numCategoria > categoriaCargada.numCategoria))
+                        {
+                            categorias.Remove(categoriaCargada);
+                            categorias.Add(categoria);
+                            revista.indicesImpacto.First(x => x.anyo == anyo && x.fuente == fila["SOURCE"].ToString()).categorias = categorias;
+                        }
+                    }
+                }
+            }
+
+            return pListaRevistas;
+        }
+
 
         /// <summary>
         /// Contruye el objeto de Revista.
@@ -374,6 +524,32 @@ namespace Hercules.MA.Journals
         /// <param name="pFila">Fila con los datos pertenecientes al excel.</param>
         /// <param name="pAnyo">Año.</param>
         /// <returns>Índice de impacto.</returns>
+        public static IndiceImpacto CrearIndiceImpacto(DataRow pFila, int pAnyo)
+        {
+            IndiceImpacto indiceImpacto = new IndiceImpacto();
+            indiceImpacto.categorias = new HashSet<Categoria>();
+
+            // Fuente.
+            indiceImpacto.fuente = pFila["SOURCE"].ToString();
+
+            // Año.
+            indiceImpacto.anyo = pAnyo;
+
+            // Índice de impacto.
+            if (!string.IsNullOrEmpty(pFila["IMPACT_FACTOR"].ToString()))
+            {
+                indiceImpacto.indiceImpacto = float.Parse(pFila["IMPACT_FACTOR"].ToString().Replace(",", "."), CultureInfo.InvariantCulture);
+            }
+
+            return indiceImpacto;
+        }
+
+        /// <summary>
+        /// Permite crear un índice de impacto con los datos de Scopus.
+        /// </summary>
+        /// <param name="pFila">Fila con los datos pertenecientes al excel.</param>
+        /// <param name="pAnyo">Año.</param>
+        /// <returns>Índice de impacto.</returns>
         public static IndiceImpacto CrearIndiceImpactoScopus(DataRow pFila, int pAnyo)
         {
             IndiceImpacto indiceImpacto = new IndiceImpacto();
@@ -516,6 +692,58 @@ namespace Hercules.MA.Journals
         }
 
         /// <summary>
+        /// Permite crear una categoría con los datos de WoS.
+        /// </summary>
+        /// <param name="pFila">Fila con los datos pertenecientes al excel.</param>
+        /// <param name="pAnyo">Año.</param>
+        /// <returns>Categoría.</returns>
+        public static Categoria CrearCategoria(DataRow pFila, int pAnyo)
+        {
+            Categoria categoria = new Categoria();
+
+            // Fuente.
+            categoria.fuente = pFila["SOURCE"].ToString();
+
+            // Año.
+            categoria.anyo = pAnyo;
+
+            // Nombre categoría.
+            if (!string.IsNullOrEmpty(pFila["CATEGORY_DESCRIPTION"].ToString()))
+            {
+                categoria.nomCategoria = pFila["CATEGORY_DESCRIPTION"].ToString();
+            }
+
+            // Ranking y Posición en ranking.
+            if (!string.IsNullOrEmpty(pFila["RANK"].ToString()) && !string.IsNullOrEmpty(pFila["RANK_OUT_OF"].ToString()) && pFila["RANK"].ToString() != "--" && pFila["RANK_OUT_OF"].ToString() != "--")
+            {
+                categoria.posicionPublicacion = Int32.Parse(pFila["RANK"].ToString());
+                categoria.numCategoria = Int32.Parse(pFila["RANK_OUT_OF"].ToString());
+            }
+
+            // Cuartil.
+            if (!string.IsNullOrEmpty(pFila["QUARTILE_RANK"].ToString()))
+            {
+                switch (pFila["QUARTILE_RANK"].ToString().ToLower())
+                {
+                    case "q1":
+                        categoria.cuartil = 1;
+                        break;
+                    case "q2":
+                        categoria.cuartil = 2;
+                        break;
+                    case "q3":
+                        categoria.cuartil = 3;
+                        break;
+                    case "q4":
+                        categoria.cuartil = 4;
+                        break;
+                }
+            }
+
+            return categoria;
+        }
+
+        /// <summary>
         /// Dado un ISSN o E-ISSN, lo construye en buen formato.
         /// </summary>
         /// <param name="pId">Identificador a formatear.</param>
@@ -568,28 +796,32 @@ namespace Hercules.MA.Journals
         /// <param name="pIssn">ISSN</param>
         /// <returns>Revista si la encuentra o null si no la encuentra.</returns>
         /// <exception cref="Exception"></exception>
-        public static Journal ComprobarRevista(List<Journal> pListaRevistas, string pTitulo = null, string pEditorial = null, string pIssn = null)
+        public static Journal ComprobarRevista(List<Journal> pListaRevistas, string pTitulo = null, string pEditorial = null, string pIssn = null, string pEissn = null)
         {
             // No consideramos el EISSN como identificador porque diferentes revistas (con diferentes ISSN que sean tengan algún parentesco) pueden tener la misma versión online.
-
             Journal revista = null;
             List<Journal> revistasMismoTituloYEditorial = pListaRevistas.Where(x => x.titulo.ToLower() == pTitulo.ToLower() && x.publicador?.ToLower() == pEditorial?.ToLower()).ToList();
             List<Journal> revistasMismoISSN = pListaRevistas.Where(x => x.issn == pIssn && !string.IsNullOrEmpty(pIssn)).Except(revistasMismoTituloYEditorial).ToList();
+            List<Journal> revistasMismoTituloYEISSN = pListaRevistas.Where(x => x.titulo.ToLower() == pTitulo.ToLower() && x.eissn == pEissn && !string.IsNullOrEmpty(pEissn)).Except(revistasMismoISSN).Except(revistasMismoTituloYEditorial).ToList();
 
-            if (revistasMismoTituloYEditorial.Count > 1 || revistasMismoISSN.Count > 1)
+            if (revistasMismoTituloYEditorial.Count > 1 || revistasMismoISSN.Count > 1 || revistasMismoTituloYEISSN.Count > 1)
             {
                 throw new Exception("Datos duplicados.");
             }
 
-            if (revistasMismoTituloYEditorial.Count > 0 && revistasMismoISSN.Count == 0)
-            {
-                revista = revistasMismoTituloYEditorial[0];
-            }
-            else if (revistasMismoISSN.Count > 0 && revistasMismoTituloYEditorial.Count == 0)
+            if (revistasMismoISSN.Count > 0 && revistasMismoTituloYEditorial.Count == 0 && revistasMismoTituloYEISSN.Count == 0)
             {
                 revista = revistasMismoISSN[0];
             }
-            else if (revistasMismoTituloYEditorial.Count > 0 || revistasMismoISSN.Count > 0)
+            else if (revistasMismoTituloYEditorial.Count > 0 && revistasMismoISSN.Count == 0 && revistasMismoTituloYEISSN.Count == 0)
+            {
+                revista = revistasMismoTituloYEditorial[0];
+            }
+            else if (revistasMismoTituloYEISSN.Count > 0 && revistasMismoTituloYEditorial.Count == 0 && revistasMismoISSN.Count == 0)
+            {
+                revista = revistasMismoTituloYEISSN[0];
+            }
+            else if (revistasMismoTituloYEditorial.Count > 0 || revistasMismoISSN.Count > 0 || revistasMismoTituloYEISSN.Count > 0)
             {
                 // No debería entrar por aquí, porque significaría que hay una revista con mismo título/editorial y otra revista diferente con el mismo ISSN.
                 // Nos quedamos con la que tenga el mismo ISSN.
@@ -607,22 +839,7 @@ namespace Hercules.MA.Journals
         /// <param name="pListaRevistas">Lista de revistas.</param>
         /// <exception cref="Exception"></exception>
         public static void ComprobarErrores(List<Journal> pListaRevistas)
-        {
-            #region --- Comprobar que no haya revistas con el mismo título y editorial.
-            Dictionary<string, Journal> titulos = new Dictionary<string, Journal>();
-            foreach (Journal revista in pListaRevistas)
-            {
-                try
-                {
-                    titulos.Add(revista.titulo.ToLower() + "|||" + revista.publicador.ToLower(), revista);
-                }
-                catch
-                {
-                    throw new Exception("Hay revistas con el mismo título.");
-                }
-            }
-            #endregion
-
+        {            
             #region --- Comprobar que no haya revistas con el mismo ISSN.
             Dictionary<string, Journal> issns = new Dictionary<string, Journal>();
             foreach (Journal revista in pListaRevistas)
@@ -637,6 +854,36 @@ namespace Hercules.MA.Journals
                     {
                         throw new Exception("Hay revistas con el mismo ISSN.");
                     }
+                }
+            }
+            #endregion
+
+            #region --- Comprobar que no haya revistas con el mismo título y editorial.
+            Dictionary<string, Journal> titulos = new Dictionary<string, Journal>();
+            foreach (Journal revista in pListaRevistas)
+            {
+                try
+                {
+                    titulos.Add(revista.titulo.ToLower() + "|||" + revista.publicador.ToLower(), revista);
+                }
+                catch
+                {
+                    throw new Exception("Hay revistas con el mismo título y publicador.");
+                }
+            }
+            #endregion
+
+            #region --- Comprobar que no haya revistas con el mismo título y editorial.
+            Dictionary<string, Journal> eissns = new Dictionary<string, Journal>();
+            foreach (Journal revista in pListaRevistas)
+            {
+                try
+                {
+                    eissns.Add(revista.titulo.ToLower() + "|||" + revista.eissn, revista);
+                }
+                catch
+                {
+                    throw new Exception("Hay revistas con el mismo título y EISSN.");
                 }
             }
             #endregion
@@ -1013,6 +1260,91 @@ namespace Hercules.MA.Journals
         }
 
         /// <summary>
+        /// Comprueba que el Excel genérico esté bien formado.
+        /// </summary>
+        /// <param name="pDataSet">Dataset.</param>
+        /// <param name="pNombreHoja">Nombre de la hoja.</param>
+        /// <returns></returns>
+        public static bool ComprobarColumnasExcel(DataSet pDataSet, string pNombreHoja)
+        {
+            DataTable tabla = pDataSet.Tables[$@"{pNombreHoja}"];
+            if (tabla == null)
+            {
+                Console.WriteLine($@"{DateTime.Now} Hoja excel inválida. El excel de no contiene el título '{pNombreHoja}'.");
+                return false;
+            }
+
+            // Comprobación de los nombres de las columnas. 
+            if (!tabla.Columns.Contains("TITLE"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'TITLE'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("PUBLISHER_NAME"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'PUBLISHER_NAME'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("ISSN"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'ISSN'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("EISSN"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'EISSN'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("IMPACT_FACTOR"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'IMPACT_FACTOR'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("CATEGORY_DESCRIPTION"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'CATEGORY_DESCRIPTION'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("RANK"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'RANK'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("RANK_OUT_OF"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'RANK_OUT_OF'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("QUARTILE_RANK"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'QUARTILE_RANK'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("SOURCE"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'SOURCE'.");
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("YEAR"))
+            {
+                Console.WriteLine($@"{DateTime.Now} Revista inválida. No contiene la columna 'YEAR'.");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Comprueba que el Excel de Scopus esté bien formado.
         /// </summary>
         /// <param name="pDataSet">Dataset.</param>
@@ -1104,6 +1436,26 @@ namespace Hercules.MA.Journals
             }
 
             return dataSet;
+        }
+
+        /// <summary>
+        /// Obtiene los años de las revistas. En Scopus mira las páginas y en WoS el nombre de lo directorios.
+        /// </summary>
+        /// <param name="pDataSet">Data Scopus.</param>
+        /// <returns></returns>
+        public static List<int> ObtenerAnyosColumna(DataSet pDataSet, string pNombreHoja)
+        {
+            HashSet<int> listaAnyosRevistas = new HashSet<int>();
+
+            foreach (DataRow fila in pDataSet.Tables[pNombreHoja].Rows)
+            {
+                listaAnyosRevistas.Add(Int32.Parse(fila["YEAR"].ToString()));
+            }
+
+            List<int> listaDevolver = listaAnyosRevistas.ToList();
+            listaDevolver.Sort();
+
+            return listaDevolver;
         }
 
         /// <summary>
