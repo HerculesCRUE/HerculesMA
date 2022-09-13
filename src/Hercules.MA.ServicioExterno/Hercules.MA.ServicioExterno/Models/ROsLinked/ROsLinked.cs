@@ -19,6 +19,7 @@ namespace Hercules.MA.ServicioExterno.Models.ROsLinked
         public bool isValidated { get; set; }
         public List<string> terms { get; set; }
         public List<string> idsGnoss { get; set; }
+        public string url { get; set; }
     }
 
     public enum TypeRO

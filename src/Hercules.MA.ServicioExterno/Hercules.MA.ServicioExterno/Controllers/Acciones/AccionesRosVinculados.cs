@@ -564,5 +564,127 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             return resTypeRo;
         }
+
+
+
+
+
+        /// <summary>
+        /// Método público para cargar los ROs relacionados con un RO dado
+        /// </summary>
+        /// <param name="text">String a buscar</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
+        /// <param name="listItemsRelated">Ids de ROs seleccionados</param>
+        /// <returns>Diccionario con los datos.</returns>
+        public List<ROLinked> SearchROs(string text, string pIdGnossUser, List<string> listItemsRelated, string pLang = "es")
+        {
+
+            // Listado de vínculos a cargar.
+            Dictionary<Guid, ROLinked> rosLinked = new();
+            List<Guid> listIdslinked = new();
+
+            string select = "select DISTINCT ?s ?issued ?title ?abstract ?isValidated " +
+                "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/researchobject.owl>";
+            string where = @$"where {{
+
+                    ?person a <http://xmlns.com/foaf/0.1/Person>.
+                    ?s <http://purl.org/ontology/bibo/authorList> ?authorList.
+                    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                    ?person <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    
+                    # Obtenemos los elementos relacionados desde el recurso dado
+                    ?s a ?rosType.
+                    Filter (?rosType in (<http://purl.org/ontology/bibo/Document>, <http://w3id.org/roh/ResearchObject>))
+
+                    ?s <http://w3id.org/roh/title> ?title.
+                    # ?s <http://w3id.org/roh/isValidated> 'true'.
+
+                    OPTIONAL
+                    {{
+                        ?s <http://w3id.org/roh/isValidated> ?isValidated.
+                    }}
+
+                    OPTIONAL
+                    {{
+                        ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
+                    }}
+
+                    ?s <http://purl.org/dc/terms/issued> ?issued.
+
+                    FILTER (contains(lcase(str(?title)), ""{text.Trim().ToLower()}""))
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
+                    FILTER(?s NOT IN (<{string.Join("><", listItemsRelated)}>))
+                }} ORDER BY DESC(?type) LIMIT 20";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+
+            // Rellena el los clusters
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                // Añade el ID en el listado de IDs
+                listIdslinked.Add(mResourceApi.GetShortGuid(e["s"].value));
+
+                // Obtengo las ids de los usuarios gnoss de los creadores del RO
+                List<string> idsGnoss = new List<string>();
+                if (e.ContainsKey("idGnoss") && e["idGnoss"].value != String.Empty)
+                {
+                    idsGnoss = e["idGnoss"].value.Split(",").ToList();
+                }
+
+                var fecha = "";
+                if (e.ContainsKey("issued"))
+                {
+                    fecha = e["issued"].value;
+                    DateTime fechaDate = DateTime.Now;
+                    try
+                    {
+                        fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
+                        fecha = fechaDate.ToString("dd/MM/yyyy");
+                    }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
+                }
+
+                // Creo los ROs relacionados y los añado a una lista
+                // Obtengo datos necesarios para pintar los mismos y para segmentarlos correctamente
+                try
+                {
+
+                    bool isValidated = false;
+                    if (e.ContainsKey("isValidated")) { bool.TryParse(e["isValidated"].value, out isValidated); }
+                    ROLinked ro = new()
+                    {
+                        title = e.ContainsKey("title") ? e["title"].value : String.Empty,
+                        entityID = e.ContainsKey("s") ? e["s"].value : String.Empty,
+                        description = e.ContainsKey("abstract") ? e["abstract"].value : String.Empty,
+                        fecha = fecha,
+                        isValidated = isValidated
+                    };
+
+
+                    // Añade el RO al listado
+                    rosLinked.Add(mResourceApi.GetShortGuid(e["s"].value), ro);
+
+                }
+                catch (Exception ex)
+                {
+                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                }
+
+            });
+
+            if (listIdslinked.Count > 0)
+            {
+                mResourceApi.GetUrl(listIdslinked, pLang).ForEach(e =>
+                {
+                    rosLinked[e.resource_id].url = e.url;
+                });
+            }
+
+
+            return rosLinked.Values.ToList();
+        }
+
     }
 }
