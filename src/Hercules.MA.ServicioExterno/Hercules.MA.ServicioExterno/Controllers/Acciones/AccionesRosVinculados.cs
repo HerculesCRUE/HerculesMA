@@ -192,19 +192,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Listado de vínculos a cargar.
             List<ROLinked> rosLinked = new();
-            List<string> listIdslinked = new();
+            List<Guid> listIdslinked = new();
 
             // Obtengo los ROs vinculados desde un RO dado, las causísticas son las siguientes:
             // 1. Los grafos sobre los que obtengo los ROs relacionados pueden ser http://gnoss.com/document.owl o http://gnoss.com/researchobject.owl
             // 2. Obtengo los ROs desde la propiedad http://w3id.org/roh/linkedRO o http://w3id.org/roh/linkedDocument dependiendo del tipo de recurso que sean
             // 3. Obtengo los ROs en los que el id del RO pasado es una referencia de las propiedades que corresponden a las del apartado anterior.
 
-            string select = "select DISTINCT ?s ?title ?abstract ?issued ?isValidated ?type ?roType ?roTypeTitle ?origin group_concat(distinct ?idGnossL;separator=',') as ?idGnoss group_concat(distinct ?clKnowledgeArea;separator=',') as ?gckarea " +
-                "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/researchobject.owl> FROM <http://gnoss.com/researchobjecttype.owl>";
+            string select = "select DISTINCT ?s ?title ?abstract ?issued ?origin ?isValidated  " +
+                " FROM <http://gnoss.com/document.owl> " +
+                "FROM <http://gnoss.com/researchobject.owl> ";
             string where = @$"where {{
 
                     {{
-
                         # ?personR a <http://xmlns.com/foaf/0.1/Person>.
                         # OPTIONAL
                         # {{
@@ -217,13 +217,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?resource ?related ?s.
                         Filter (?related in (<http://w3id.org/roh/linkedDocument>, <http://w3id.org/roh/linkedRO>))
 
-                        ?personL a <http://xmlns.com/foaf/0.1/Person>.
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/ontology/bibo/authorList> ?authorListL.
-                            ?authorListL <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?personL.
-                            ?personL <http://w3id.org/roh/gnossUser> ?idGnossL.
-                        }}
+                        # ?personL a <http://xmlns.com/foaf/0.1/Person>.
+                        # OPTIONAL
+                        # {{
+                        #     ?s <http://purl.org/ontology/bibo/authorList> ?authorListL.
+                        #     ?authorListL <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?personL.
+                        #     ?personL <http://w3id.org/roh/gnossUser> ?idGnossL.
+                        # }}
 
                         
                         ?s <http://w3id.org/roh/title> ?title.
@@ -235,27 +235,21 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?s <http://w3id.org/roh/isValidated> ?isValidated.
                         }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/dc/terms/issued> ?issued.
-                        }}
+                        ?s <http://purl.org/dc/terms/issued> ?issued.
 
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
-                        }}
+                        # OPTIONAL
+                        # {{
+                        #     ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
+                        # }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
-                        }}
+                        ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
 
-                         OPTIONAL
-                         {{
-                            ?s <http://purl.org/dc/elements/1.1/type> ?roType.
-                            ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
-                            FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
-                        }}
+                        # OPTIONAL
+                        # {{
+                        #     ?s <http://purl.org/dc/elements/1.1/type> ?roType.
+                        #     ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
+                        #     FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
+                        # }}
 
                         # OPTIONAL
                         # {{
@@ -280,14 +274,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?s ?related ?resource
                         Filter (?related in (<http://w3id.org/roh/linkedDocument>, <http://w3id.org/roh/linkedRO>))
 
-                    
-                        ?personL a <http://xmlns.com/foaf/0.1/Person>.
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/ontology/bibo/authorList> ?authorListL.
-                            ?authorListL <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?personL.
-                            ?personL <http://w3id.org/roh/gnossUser> ?idGnossL.
-                        }}
+                        # ?personL a <http://xmlns.com/foaf/0.1/Person>.
+                        
+                        # ?s <http://purl.org/ontology/bibo/authorList> ?authorListL.
+                        # ?authorListL <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?personL.
+                        # ?personL <http://w3id.org/roh/gnossUser> ?idGnossL.
+                        
 
                         ?s <http://w3id.org/roh/title> ?title.
                         # ?s <http://w3id.org/roh/isValidated> 'true'.
@@ -297,27 +289,21 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?s <http://w3id.org/roh/isValidated> ?isValidated.
                         }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/dc/terms/issued> ?issued.
-                        }}
+                        ?s <http://purl.org/dc/terms/issued> ?issued.
 
-                        OPTIONAL
-                        {{
-                            ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
-                        }}
+                        # OPTIONAL
+                        # {{
+                        #     ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
+                        # }}
 
-                        OPTIONAL
-                        {{
-                            ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
-                        }}
+                        ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
 
-                         OPTIONAL
-                         {{
-                             ?s <http://purl.org/dc/elements/1.1/type> ?roType.
-                             ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
-                             FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
-                         }}
+                        # OPTIONAL
+                        # {{
+                        #      ?s <http://purl.org/dc/elements/1.1/type> ?roType.
+                        #      ?roType <http://purl.org/dc/elements/1.1/title> ?roTypeTitle.
+                        #      FILTER( lang(?roTypeTitle) = '{lang}' OR lang(?roTypeTitle) = '')
+                        # }}
 
                         # OPTIONAL
                         # {{
@@ -325,6 +311,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         #     ?clHasKnowledgeArea <http://w3id.org/roh/categoryNode> ?clKnowledgeArea.
                         # }}
 
+                        
+                        BIND ('true' as ?origin)
 
                     }}
 
@@ -338,7 +326,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
                 // Añade el ID en el listado de IDs
-                listIdslinked.Add(e["s"].value);
+                listIdslinked.Add(mResourceApi.GetShortGuid(e["s"].value));
 
 
                 // Obtengo las areas de conocimiento de los ROs
@@ -381,7 +369,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         description = e.ContainsKey("abstract") ? e["abstract"].value : String.Empty,
                         roType = e.ContainsKey("roType") ? e["roType"].value : String.Empty,
                         roTypeTitle = e.ContainsKey("roTypeTitle") ? e["roTypeTitle"].value : String.Empty,
-                        origin = e.ContainsKey("origin") ? false : true,
+                        origin = e.ContainsKey("origin") && e["origin"].value == "false" ? false : true,
                         idsGnoss = idsGnoss,
                         type = e.ContainsKey("type") ? e["type"].value : String.Empty,
                         isValidated = isValidated,
@@ -401,6 +389,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             });
 
+            if (listIdslinked.Count > 0)
+            {
+                try
+                {
+                    mResourceApi.GetUrl(listIdslinked, "es").ForEach(e =>
+                    {
+                        rosLinked.Find(ro => mResourceApi.GetShortGuid(ro.entityID) == e.resource_id).url = e.url;
+                    });
+                }
+                catch (Exception) { }
+            }
 
             return rosLinked;
         }
@@ -595,5 +594,134 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             return resTypeRo;
         }
+
+
+
+
+
+        /// <summary>
+        /// Método público para cargar los ROs relacionados con un RO dado
+        /// </summary>
+        /// <param name="text">String a buscar</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
+        /// <param name="listItemsRelated">Ids de ROs seleccionados</param>
+        /// <returns>Diccionario con los datos.</returns>
+        public List<ROLinked> SearchROs(string text, string pIdGnossUser, List<string> listItemsRelated, string pLang = "es")
+        {
+
+            // Listado de vínculos a cargar.
+            Dictionary<Guid, ROLinked> rosLinked = new();
+            List<Guid> listIdslinked = new();
+
+            // Variable para excluir 
+            var minus = "";
+            if (listItemsRelated.Count > 0)
+            {
+                minus = $@"FILTER(?s NOT IN(<{string.Join(">,<", listItemsRelated)}>))";
+            }
+
+            string select = "select DISTINCT ?s ?issued ?title ?abstract ?isValidated " +
+                "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/researchobject.owl>";
+            string where = @$"where {{
+
+                    ?person a <http://xmlns.com/foaf/0.1/Person>.
+                    ?s <http://purl.org/ontology/bibo/authorList> ?authorList.
+                    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
+                    ?person <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    
+                    # Obtenemos los elementos relacionados desde el recurso dado
+                    ?s a ?rosType.
+                    Filter (?rosType in (<http://purl.org/ontology/bibo/Document>, <http://w3id.org/roh/ResearchObject>))
+
+                    ?s <http://w3id.org/roh/title> ?title.
+                    # ?s <http://w3id.org/roh/isValidated> 'true'.
+
+                    OPTIONAL
+                    {{
+                        ?s <http://w3id.org/roh/isValidated> ?isValidated.
+                    }}
+
+                    OPTIONAL
+                    {{
+                        ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
+                    }}
+
+                    ?s <http://purl.org/dc/terms/issued> ?issued.
+
+                    FILTER (contains(lcase(str(?title)), ""{text.Trim().ToLower()}""))
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
+                    {minus}
+                }} ORDER BY DESC(?type) LIMIT 20";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+
+            // Rellena el los clusters
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                // Añade el ID en el listado de IDs
+                listIdslinked.Add(mResourceApi.GetShortGuid(e["s"].value));
+
+                // Obtengo las ids de los usuarios gnoss de los creadores del RO
+                List<string> idsGnoss = new List<string>();
+                if (e.ContainsKey("idGnoss") && e["idGnoss"].value != String.Empty)
+                {
+                    idsGnoss = e["idGnoss"].value.Split(",").ToList();
+                }
+
+                var fecha = "";
+                if (e.ContainsKey("issued"))
+                {
+                    fecha = e["issued"].value;
+                    DateTime fechaDate = DateTime.Now;
+                    try
+                    {
+                        fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
+                        fecha = fechaDate.ToString("dd/MM/yyyy");
+                    }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
+                }
+
+                // Creo los ROs relacionados y los añado a una lista
+                // Obtengo datos necesarios para pintar los mismos y para segmentarlos correctamente
+                try
+                {
+
+                    bool isValidated = false;
+                    if (e.ContainsKey("isValidated")) { bool.TryParse(e["isValidated"].value, out isValidated); }
+                    ROLinked ro = new()
+                    {
+                        title = e.ContainsKey("title") ? e["title"].value : String.Empty,
+                        entityID = e.ContainsKey("s") ? e["s"].value : String.Empty,
+                        description = e.ContainsKey("abstract") ? e["abstract"].value : String.Empty,
+                        fecha = fecha,
+                        isValidated = isValidated
+                    };
+
+
+                    // Añade el RO al listado
+                    rosLinked.Add(mResourceApi.GetShortGuid(e["s"].value), ro);
+
+                }
+                catch (Exception ex)
+                {
+                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                }
+
+            });
+
+            if (listIdslinked.Count > 0)
+            {
+                mResourceApi.GetUrl(listIdslinked, pLang).ForEach(e =>
+                {
+                    rosLinked[e.resource_id].url = e.url;
+                });
+            }
+
+
+            return rosLinked.Values.ToList();
+        }
+
     }
 }

@@ -610,5 +610,148 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             return dataGrafica;
         }
 
+
+
+        /// <summary>
+        /// Obtiene los topics de las publicaciones de la persona.
+        /// </summary>
+        /// <param name="pIdGnossUser">ID del recurso de la persona.</param>
+        /// <returns>Listado de topics de dicha persona.</returns>
+        public Dictionary<string, string> GetInfoHomeEdUser(string pIdGnossUser)
+        {
+            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceApi, pIdGnossUser);
+            Dictionary<string, string> result = new();
+            SparqlObject resultadoQuery = null;
+            string select = "", where = "";
+
+
+
+            select = $@"SELECT distinct ?s ?name ?tituloOrg ?foto COUNT(distinct ?doc) as ?numPublicaciones COUNT(distinct ?doc2) as ?numPV COUNT(distinct ?ro) as ?numOtrosR
+                FROM <http://gnoss.com/organization.owl> 
+                FROM <http://gnoss.com/person.owl> 
+                FROM <http://gnoss.com/curriculumvitae.owl>
+                FROM <http://gnoss.com/document.owl>
+                FROM <http://gnoss.com/researchobject.owl>";
+
+            where = $@"WHERE {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person> . 
+                    ?cv <http://w3id.org/roh/cvOf> ?s.
+                    ?cv <http://w3id.org/roh/personalData> ?pData.
+
+
+                    ?doc a <http://purl.org/ontology/bibo/Document>.
+                    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+                    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
+    
+
+                    OPTIONAL {{
+                        ?doc2 a <http://purl.org/ontology/bibo/Document>.
+                        ?doc2 <http://purl.org/ontology/bibo/authorList> ?authorList2.
+                        ?authorList2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
+                        ?doc2 <http://w3id.org/roh/isValidated> 'false'.
+                    }}
+
+                    OPTIONAL {{
+                        ?ro a <http://w3id.org/roh/ResearchObject>.
+                        ?ro <http://purl.org/ontology/bibo/authorList> ?authorListr.
+                        ?authorListr <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
+                    }}
+
+                    ?s <http://xmlns.com/foaf/0.1/name> ?name.
+
+                    OPTIONAL {{
+                        ?notificacion <http://w3id.org/roh/hasRole> ?organization. 
+                        ?organization <http://w3id.org/roh/title> ?tituloOrg.
+                    }}
+    
+                    OPTIONAL {{
+                        ?pData <http://xmlns.com/foaf/0.1/img> ?foto
+                    }}
+
+	                ?s <http://w3id.org/roh/gnossUser> <http://gnoss/{pIdGnossUser.ToUpper()}>
+                }}";
+
+
+            select = $@"SELECT distinct ?s COUNT(distinct ?ro) as ?numOtrosR 
+                FROM <http://gnoss.com/person.owl>";
+
+            where = $@"WHERE {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+	                ?s <http://w3id.org/roh/gnossUser> <http://gnoss/{pIdGnossUser.ToUpper()}>.
+
+                    ?ro a <http://w3id.org/roh/ResearchObject>.
+                    ?ro <http://purl.org/ontology/bibo/authorList> ?authorListr.
+                    ?authorListr <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
+                }}";
+
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "researchobject");
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    result.Add("numOtrosR", UtilidadesAPI.GetValorFilaSparqlObject(fila, "numOtrosR"));
+                }
+            }
+
+
+
+            select = $@"SELECT distinct ?s COUNT(distinct ?doc2) as ?numPV
+                FROM <http://gnoss.com/person.owl>";
+
+            where = $@"WHERE {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+
+                    ?doc2 a <http://purl.org/ontology/bibo/Document>.
+                    ?doc2 <http://purl.org/ontology/bibo/authorList> ?authorList2.
+                    ?authorList2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
+                    ?doc2 <http://w3id.org/roh/isValidated> 'false'.
+
+	                ?s <http://w3id.org/roh/gnossUser> <http://gnoss/{pIdGnossUser.ToUpper()}>
+                }}";
+
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "document");
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    result.Add("numPV", UtilidadesAPI.GetValorFilaSparqlObject(fila, "numPV"));
+                }
+            }
+
+
+            select = $@"SELECT distinct ?s COUNT(distinct ?doc) as ?numPublicaciones
+                FROM <http://gnoss.com/person.owl>";
+
+            where = $@"WHERE {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+
+                    ?doc a <http://purl.org/ontology/bibo/Document>.
+                    ?doc <http://purl.org/ontology/bibo/authorList> ?authorList.
+                    ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?s.
+
+	                ?s <http://w3id.org/roh/gnossUser> <http://gnoss/{pIdGnossUser.ToUpper()}>
+                }}";
+
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "document");
+
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    result.Add("numPublicaciones", UtilidadesAPI.GetValorFilaSparqlObject(fila, "numPublicaciones"));
+                }
+            }
+
+
+            return result;
+        }
+
+
+
     }
 }

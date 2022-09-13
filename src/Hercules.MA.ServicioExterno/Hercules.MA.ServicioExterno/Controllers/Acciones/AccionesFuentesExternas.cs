@@ -53,6 +53,66 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
         /// <summary>
+        /// Obtiene el IDGNOSS del usuario.
+        /// </summary>
+        /// <param name="pUserId">ID del usuario conectado.</param>
+        /// <returns></returns>
+        public static string GetIdGnoss(string pUserId)
+        {
+            string idBusqueda = string.Empty;
+            SparqlObject resultadoQuery = null;
+            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+
+            // Consulta sparql.
+            select.Append(mPrefijos);
+            select.Append("SELECT ?s ");
+            where.Append("WHERE { ");
+            where.Append($@"?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}>. ");
+            where.Append("} ");
+
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            {
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                {
+                    if (fila.ContainsKey("s"))
+                    {
+                        idBusqueda = fila["s"].value.ToLower().Replace("gnoss", "gnoss.com");
+                    }
+                }
+            }
+
+            if(!string.IsNullOrEmpty(idBusqueda))
+            {
+                resultadoQuery = null;
+                select = new StringBuilder();
+                where = new StringBuilder();
+
+                // Consulta sparql.
+                select.Append(mPrefijos);
+                select.Append("SELECT ?s ");
+                where.Append("WHERE { ");
+                where.Append($@"graph ?g{{ <{idBusqueda}> <http://gnoss/hasEntidad> ?s. }}");
+                where.Append($@"?s ?p <http://xmlns.com/foaf/0.1/Person>. ");
+                where.Append("} ");
+
+                resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
+                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                {
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    {
+                        if (fila.ContainsKey("s"))
+                        {
+                            return fila["s"].value;
+                        }
+                    }
+                }
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
         /// Obtiene la fecha de la última actualización.
         /// </summary>
         /// <param name="pUserId">ID del usuario conectado.</param>

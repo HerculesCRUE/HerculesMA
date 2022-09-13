@@ -71,6 +71,31 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
 
+
+
+        /// <summary>
+        /// Controlador para Obtener los ROs vinculados de un RO en concreto
+        /// </summary>
+        /// <param name="text">String a buscar</param>
+        /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
+        /// <param name="listItemsRelated">Ids de ROs seleccionados</param>
+        /// <returns>Listado de los RO vinculados.</returns>
+        [HttpPost("SearchROs")]
+        [Produces("application/json")]
+        public IActionResult SearchROs([FromForm] string text, [FromForm] string pIdGnossUser, [FromForm] List<string> listItemsRelated)
+        {
+            try
+            {
+                AccionesRosVinculados accionesRosVinculados = new();
+                return Ok(accionesRosVinculados.SearchROs(text, pIdGnossUser, listItemsRelated));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         /// <summary>
         /// Controlador para crear una vinculación 
         /// </summary>
