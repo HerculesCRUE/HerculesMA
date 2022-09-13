@@ -70,19 +70,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}>. ");
             where.Append("} ");
 
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person"); //TODO
+            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
                     if (fila.ContainsKey("s"))
                     {
-                        idBusqueda = fila["s"].value.ToLower();
+                        idBusqueda = fila["s"].value.ToLower().Replace("gnoss", "gnoss.com");
                     }
                 }
             }
 
-            if(string.IsNullOrEmpty(idBusqueda))
+            if(!string.IsNullOrEmpty(idBusqueda))
             {
                 resultadoQuery = null;
                 select = new StringBuilder();
@@ -92,11 +92,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 select.Append(mPrefijos);
                 select.Append("SELECT ?s ");
                 where.Append("WHERE { ");
-                where.Append($@"graph ?g{{ <<http://gnoss/{idBusqueda}> <http://gnoss/hasEntidad> ?s. }}");
+                where.Append($@"graph ?g{{ <{idBusqueda}> <http://gnoss/hasEntidad> ?s. }}");
                 where.Append($@"?s ?p <http://xmlns.com/foaf/0.1/Person>. ");
                 where.Append("} ");
 
-                resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+                resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                 {
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
