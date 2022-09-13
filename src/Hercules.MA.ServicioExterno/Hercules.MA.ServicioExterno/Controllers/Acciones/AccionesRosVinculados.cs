@@ -188,8 +188,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // 2. Obtengo los ROs desde la propiedad http://w3id.org/roh/linkedRO o http://w3id.org/roh/linkedDocument dependiendo del tipo de recurso que sean
             // 3. Obtengo los ROs en los que el id del RO pasado es una referencia de las propiedades que corresponden a las del apartado anterior.
             
-            string select = "select DISTINCT ?s ?title ?abstract ?issued ?origin " +
-                "FROM <http://gnoss.com/document.owl> " +
+            string select = "select DISTINCT ?s ?title ?abstract ?issued ?origin ?isValidated  " +
+                " FROM <http://gnoss.com/document.owl> " +
                 "FROM <http://gnoss.com/researchobject.owl> ";
             string where = @$"where {{
 
