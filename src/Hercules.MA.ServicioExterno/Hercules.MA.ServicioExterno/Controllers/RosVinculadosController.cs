@@ -16,7 +16,13 @@ namespace Hercules.MA.ServicioExterno.Controllers
     [EnableCors("_myAllowSpecificOrigins")]
     public class RosVinculadosController : ControllerBase
     {
+        readonly ConfigService _Configuracion;
 
+        public RosVinculadosController(ConfigService pConfig)
+        {
+            _Configuracion = pConfig;
+
+        }
 
         /// <summary>
         /// Borra un vínculo
@@ -33,7 +39,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 AccionesRosVinculados accionesRosVinculados = new();
-                borrado = accionesRosVinculados.DeleteLinked(resourceRO, pIdROId, pIdGnossUser);
+                borrado = accionesRosVinculados.DeleteLinked(resourceRO, pIdROId, pIdGnossUser, _Configuracion);
             }
             catch (Exception)
             {
@@ -79,7 +85,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             try
             {
                 AccionesRosVinculados accionesRosVinculados = new AccionesRosVinculados();
-                return Ok(accionesRosVinculados.AddLink(resourceRO, pIdROId, pIdGnossUser));
+                return Ok(accionesRosVinculados.AddLink(resourceRO, pIdROId, pIdGnossUser, _Configuracion));
             }
             catch (Exception)
             {
