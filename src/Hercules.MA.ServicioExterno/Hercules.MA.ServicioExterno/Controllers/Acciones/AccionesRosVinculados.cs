@@ -600,7 +600,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             var minus = "";
             if (listItemsRelated.Count > 0)
             {
-                minus = $@"FILTER(?s NOT IN(<{string.Join("><", listItemsRelated)}>))";
+                minus = $@"FILTER(?s NOT IN(<{string.Join(">,<", listItemsRelated)}>))";
             }
 
             string select = "select DISTINCT ?s ?issued ?title ?abstract ?isValidated " +
