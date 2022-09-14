@@ -11,6 +11,7 @@ using Hercules.MA.ServicioExterno.Controllers.Utilidades;
 using Microsoft.AspNetCore.Cors;
 using Hercules.MA.ServicioExterno.Models.Cluster;
 using Hercules.MA.ServicioExterno.Models.ROsLinked;
+using Hercules.MA.ServicioExterno.Models;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
@@ -36,9 +37,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="idLinkedRo">Id de RO a borrar</param>
         /// <param name="pIdGnossUser">Id del usuario que realiza la acción</param>
         /// <returns>Bool determinando si se ha borrado o no.</returns>
-        internal bool DeleteLinked(string idRecurso, string idLinkedRo, Guid pIdGnossUser)
+        internal bool DeleteLinked(string idRecurso, string idLinkedRo, Guid pIdGnossUser, ConfigService pConfig)
         {
-
             Dictionary<Guid, bool> result = new();
 
             // Selecciono qué tipo de RO son los recursos pasados y obtengo las propiedades de la ontología
@@ -134,6 +134,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             }
 
+            ReadRabbitService rabbitMQService = new ReadRabbitService(pConfig);
+            DenormalizerItemQueue item1publication = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.document, new HashSet<string> { idRecurso });
+            rabbitMQService.PublishMessage(item1publication, pConfig.GetDenormalizerQueueRabbit());
+            DenormalizerItemQueue item2publication = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.document, new HashSet<string> { idLinkedRo });
+            rabbitMQService.PublishMessage(item2publication, pConfig.GetDenormalizerQueueRabbit());
+            DenormalizerItemQueue item1ro = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.researchobject, new HashSet<string> { idRecurso });
+            rabbitMQService.PublishMessage(item1ro, pConfig.GetDenormalizerQueueRabbit());
+            DenormalizerItemQueue item2ro = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.researchobject, new HashSet<string> { idLinkedRo });
+            rabbitMQService.PublishMessage(item2ro, pConfig.GetDenormalizerQueueRabbit());
+
+
             return result[guid];
 
         }
@@ -187,7 +198,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // 1. Los grafos sobre los que obtengo los ROs relacionados pueden ser http://gnoss.com/document.owl o http://gnoss.com/researchobject.owl
             // 2. Obtengo los ROs desde la propiedad http://w3id.org/roh/linkedRO o http://w3id.org/roh/linkedDocument dependiendo del tipo de recurso que sean
             // 3. Obtengo los ROs en los que el id del RO pasado es una referencia de las propiedades que corresponden a las del apartado anterior.
-            
+
             string select = "select DISTINCT ?s ?title ?abstract ?issued ?origin ?isValidated  " +
                 " FROM <http://gnoss.com/document.owl> " +
                 "FROM <http://gnoss.com/researchobject.owl> ";
@@ -313,7 +324,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             sparqlObject.results.bindings.ForEach(e =>
             {
 
-                
+
                 // Añade el ID en el listado de IDs
                 listIdslinked.Add(mResourceApi.GetShortGuid(e["s"].value));
 
@@ -365,7 +376,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         fecha = fecha,
                         terms = rOTerms
                     };
-                    
+
 
                     // Añade el RO al listado
                     rosLinked.Add(ro);
@@ -404,9 +415,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="idLinkedRo">Id del RO a vincular</param>
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
         /// <returns>String con el RO vinculado.</returns>
-        internal bool AddLink(string idRecurso, string idLinkedRo, Guid pIdGnossUser)
+        internal bool AddLink(string idRecurso, string idLinkedRo, Guid pIdGnossUser, ConfigService pConfig)
         {
-
             Dictionary<Guid, bool> result = new();
 
             // Selecciono qué tipo de RO son los recursos pasados y obtengo las propiedades de la ontología
@@ -457,7 +467,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtengo el id del recurso si es un Guid
 
             string LongpIdGnossUser = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
-            
+
 
 
             // Modificar el estado y añadir un nuevo estado en el "historial"
@@ -487,11 +497,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         // Modificación (Triples).
                         TriplesToInclude triple = new TriplesToInclude();
-                        //triple.Predicate = "http://w3id.org/roh/linkedRO";
-                        //triple.Predicate = "http://w3id.org/roh/linkedDocument";
                         triple.Predicate = predicateLinkInRO;
                         triple.NewValue = idLinkedRo;
-                        //triple.OldValue = idLinkedRo;
                         listaTriplesInclusion.Add(triple);
 
                         // Modificación.
@@ -505,6 +512,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
 
             }
+
+            ReadRabbitService rabbitMQService = new ReadRabbitService(pConfig);
+            DenormalizerItemQueue itemPublication = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.document, new HashSet<string> { idRecurso, idLinkedRo });
+            rabbitMQService.PublishMessage(itemPublication, pConfig.GetDenormalizerQueueRabbit());
+            DenormalizerItemQueue itemRo = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.researchobject, new HashSet<string> { idRecurso , idLinkedRo });
+            rabbitMQService.PublishMessage(itemRo, pConfig.GetDenormalizerQueueRabbit());
 
             return result[guid];
         }
