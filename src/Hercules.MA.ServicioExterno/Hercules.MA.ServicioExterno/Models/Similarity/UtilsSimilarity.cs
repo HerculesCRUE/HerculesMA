@@ -338,10 +338,8 @@ where
                 EnrichmentSimilarityGetResponse responseGetObject = responseGet.Content.ReadAsAsync<EnrichmentSimilarityGetResponse>().Result;
                 dicSimilarsAux = responseGetObject.similar_ros_calculado;
                 dicSimilarsAux.Remove(pId);
-            }else
-            {
-
             }
+
             if (dicSimilarsAux.Count > 0)
             {
                 //Hacemos una verificación para que sólo se devuelvan validados
