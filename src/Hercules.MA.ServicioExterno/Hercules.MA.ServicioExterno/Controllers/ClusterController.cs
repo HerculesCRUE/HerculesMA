@@ -175,8 +175,8 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="pIdClusterId">Id del Cluster a borrar.</param>
         /// <returns>Un booleano si ha sido borrado.</returns>
-        [HttpPost("borrarCluster")]
-        public IActionResult BorrarCluster([Required] string pIdClusterId)
+        [HttpPost("BorrarCluster")]
+        public IActionResult BorrarCluster([FromForm] string pIdClusterId)
         {
 
             bool borrado = false;
