@@ -624,7 +624,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 minus = $@"FILTER(?s NOT IN(<{string.Join(">,<", listItemsRelated)}>))";
             }
 
-            string select = "select DISTINCT ?s ?issued ?title ?abstract ?isValidated " +
+            string select = "select DISTINCT ?s ?issued ?title ?isValidated " +
                 "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/researchobject.owl>";
             string where = @$"where {{
 
@@ -645,12 +645,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?s <http://w3id.org/roh/isValidated> ?isValidated.
                     }}
 
+                    # OPTIONAL
+                    # {{
+                    #     ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
+                    # }}
+
                     OPTIONAL
                     {{
-                        ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
+                        ?s <http://purl.org/dc/terms/issued> ?issued.
                     }}
-
-                    ?s <http://purl.org/dc/terms/issued> ?issued.
 
                     FILTER (contains(lcase(str(?title)), ""{text.Trim().ToLower()}""))
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
