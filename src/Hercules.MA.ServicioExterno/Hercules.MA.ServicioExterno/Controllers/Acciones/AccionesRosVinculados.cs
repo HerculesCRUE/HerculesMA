@@ -588,6 +588,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="text">String a buscar</param>
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial</param>
         /// <param name="listItemsRelated">Ids de ROs seleccionados</param>
+        /// <param name="pLang">Idioma para los ROs</param>
         /// <returns>Diccionario con los datos.</returns>
         public List<ROLinked> SearchROs(string text, string pIdGnossUser, List<string> listItemsRelated, string pLang = "es")
         {
