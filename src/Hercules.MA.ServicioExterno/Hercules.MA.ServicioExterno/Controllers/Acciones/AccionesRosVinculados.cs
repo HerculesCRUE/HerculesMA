@@ -194,7 +194,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // 2. Obtengo los ROs desde la propiedad http://w3id.org/roh/linkedRO o http://w3id.org/roh/linkedDocument dependiendo del tipo de recurso que sean
             // 3. Obtengo los ROs en los que el id del RO pasado es una referencia de las propiedades que corresponden a las del apartado anterior.
 
-            string select = "select DISTINCT ?s ?title ?abstract ?issued ?origin ?isValidated  " +
+            string select = "select DISTINCT ?s ?title ?issued ?origin ?isValidated  " +
                 " FROM <http://gnoss.com/document.owl> " +
                 "FROM <http://gnoss.com/researchobject.owl> ";
             string where = @$"where {{
@@ -230,14 +230,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?s <http://w3id.org/roh/isValidated> ?isValidated.
                         }}
 
-                        ?s <http://purl.org/dc/terms/issued> ?issued.
+                        OPTIONAL
+                        {{
+                            ?s <http://purl.org/dc/terms/issued> ?issued.
+                            # ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
+                        }}
 
                         # OPTIONAL
                         # {{
                         #     ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
                         # }}
-
-                        ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
 
                         # OPTIONAL
                         # {{
@@ -284,14 +286,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?s <http://w3id.org/roh/isValidated> ?isValidated.
                         }}
 
-                        ?s <http://purl.org/dc/terms/issued> ?issued.
 
                         # OPTIONAL
                         # {{
                         #     ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
                         # }}
 
-                        ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
+                        OPTIONAL
+                        {{
+                            ?s <http://purl.org/dc/terms/issued> ?issued.
+                            # ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type.
+                        }}
 
                         # OPTIONAL
                         # {{
@@ -308,11 +313,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         
                         BIND ('true' as ?origin)
-
                     }}
 
                     FILTER(?resource = <{idRecurso.ToString()}>)
-                }} ORDER BY DESC(?type)";
+                }}";
             SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, typeResource.type);
 
             // Rellena el los clusters
@@ -348,8 +352,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     DateTime fechaDate = DateTime.Now;
                     try
                     {
-                        fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
-                        fecha = fechaDate.ToString("dd/MM/yyyy");
+                        if (fecha != String.Empty)
+                        {
+                            fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
+                            fecha = fechaDate.ToString("dd/MM/yyyy");
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -612,7 +619,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 minus = $@"FILTER(?s NOT IN(<{string.Join(">,<", listItemsRelated)}>))";
             }
 
-            string select = "select DISTINCT ?s ?issued ?title ?abstract ?isValidated " +
+            string select = "select DISTINCT ?s ?issued ?title ?isValidated " +
                 "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/researchobject.owl>";
             string where = @$"where {{
 
@@ -633,12 +640,15 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?s <http://w3id.org/roh/isValidated> ?isValidated.
                     }}
 
+                    # OPTIONAL
+                    # {{
+                    #     ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
+                    # }}
+
                     OPTIONAL
                     {{
-                        ?s <http://purl.org/ontology/bibo/abstract> ?abstract.
+                        ?s <http://purl.org/dc/terms/issued> ?issued.
                     }}
-
-                    ?s <http://purl.org/dc/terms/issued> ?issued.
 
                     FILTER (contains(lcase(str(?title)), ""{text.Trim().ToLower()}""))
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
