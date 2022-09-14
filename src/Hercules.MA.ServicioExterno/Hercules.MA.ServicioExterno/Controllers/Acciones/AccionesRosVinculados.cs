@@ -135,15 +135,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
             ReadRabbitService rabbitMQService = new ReadRabbitService(pConfig);
-            DenormalizerItemQueue item1publication = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.document, new HashSet<string> { idRecurso });
-            rabbitMQService.PublishMessage(item1publication, pConfig.GetDenormalizerQueueRabbit());
-            DenormalizerItemQueue item2publication = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.document, new HashSet<string> { idLinkedRo });
-            rabbitMQService.PublishMessage(item2publication, pConfig.GetDenormalizerQueueRabbit());
-            DenormalizerItemQueue item1ro = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.researchobject, new HashSet<string> { idRecurso });
-            rabbitMQService.PublishMessage(item1ro, pConfig.GetDenormalizerQueueRabbit());
-            DenormalizerItemQueue item2ro = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.researchobject, new HashSet<string> { idLinkedRo });
-            rabbitMQService.PublishMessage(item2ro, pConfig.GetDenormalizerQueueRabbit());
-
+            DenormalizerItemQueue itemPublication = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.document, new HashSet<string> { idRecurso, idLinkedRo });
+            rabbitMQService.PublishMessage(itemPublication, pConfig.GetDenormalizerQueueRabbit());
+            DenormalizerItemQueue itemRo = new DenormalizerItemQueue(DenormalizerItemQueue.ItemType.researchobject, new HashSet<string> { idRecurso, idLinkedRo });
+            rabbitMQService.PublishMessage(itemRo, pConfig.GetDenormalizerQueueRabbit());
 
             return result[guid];
 
