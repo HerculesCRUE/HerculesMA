@@ -457,7 +457,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         <http://gnoss/{pIdProyecto}> roh:title ?nombre.                        
                 }}";
 
-                string nombreProyecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value;
+                string nombreProyecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value.Substring(0, 20) + "...";
                 dicNodos.Add("http://gnoss/" + pIdProyecto, nombreProyecto);
             }
             #endregion
@@ -669,7 +669,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         <http://gnoss/{pIdProyecto}> roh:title ?nombre.                        
                 }}";
 
-                string nombreProjecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value;
+                string nombreProjecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value.Substring(0, 20) + "...";
                 dicNodos.Add("http://gnoss/" + pIdProyecto, nombreProjecto);
             }
             #endregion
