@@ -28,6 +28,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             HashSet<string> miembros = new HashSet<string>();
             HashSet<string> ip = new HashSet<string>();
+            string grupo = "";
 
             //Nodos            
             Dictionary<string, string> dicNodos = new Dictionary<string, string>();
@@ -102,8 +103,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 WHERE {{ 
                         <http://gnoss/{pIdGroup}> roh:title ?nombre.                        
                 }}";
-
                 string nombreGrupo = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value.Substring(0, 20) + "...";
+                grupo = "http://gnoss/" + pIdGroup;
                 dicNodos.Add("http://gnoss/" + pIdGroup, nombreGrupo);
             }
             #endregion
@@ -269,6 +270,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
                         }
+                        else if (grupo == nodo.Key)
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_project;
+                        }
                         Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", type);
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
                         items.Add(dataColabo);
@@ -309,6 +314,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         public List<DataItemRelacion> DatosGraficaColaboradoresGrupo(string pIdGroup, string pParametros, int pMax)
         {
             HashSet<string> colaboradores = new HashSet<string>();
+            string grupo = "";
             Dictionary<string, int> numRelacionesColaboradorGrupo = new Dictionary<string, int>();
             Dictionary<string, int> numRelacionesColaboradorDocumentoGrupo = new Dictionary<string, int>();
             Dictionary<string, int> numRelacionesColaboradorProyectoGrupo = new Dictionary<string, int>();
@@ -492,6 +498,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     if (colaboradores.Contains(colaborador))
                     {
                         string group = "http://gnoss/" + pIdGroup.ToUpper();
+                        grupo = "http://gnoss/" + pIdGroup;
                         string nombreRelacion = "Documentos";
                         if (!dicRelaciones.ContainsKey(group))
                         {
@@ -588,6 +595,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         if (colaboradores.Contains(nodo.Key))
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
+                        }
+                        else if (grupo == nodo.Key)
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_project;
                         }
                         else
                         {
