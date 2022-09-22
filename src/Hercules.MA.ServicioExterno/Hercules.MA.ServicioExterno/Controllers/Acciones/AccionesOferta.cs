@@ -881,7 +881,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Obtenemos los resúmenes de las propiedades industriales intelectuales (PII) y los añadimos al objeto de la oferta
                 try
                 {
-                    pDataOffer.pii = GetPIITeaserTODO(pDataOffer.pii.Values.Select(x => x.id).ToList());
+                    pDataOffer.pii = GetPIITeaser(pDataOffer.pii.Values.Select(x => x.id).ToList());
                 }
                 catch (Exception ex)
                 {
@@ -1531,7 +1531,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="ids">Listado (Ids) de los PII.</param>
         /// <param name="isLongIds">Booleano que determina si los Ids son Ids largos o cortos.</param>
         /// <returns>relación entre el guid y el objeto de los PII correspondientes (resumido).</returns>
-        internal Dictionary<Guid, PIIOffer> GetPIITeaserTODO(List<string> ids, bool isLongIds = true)
+        internal Dictionary<Guid, PIIOffer> GetPIITeaser(List<string> ids, bool isLongIds = true)
         {
 
             Dictionary<Guid, PIIOffer> result = new();
@@ -1545,7 +1545,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // 3. Selecciona únicamente los Ids largos
                 try
                 {
-                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://vivoweb.org/ontology/core#Project", "project").Select(e => e.Value).ToList();
+                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://purl.org/ontology/bibo/Patent", "patent").Select(e => e.Value).ToList();
                 }
                 catch (Exception ex)
                 {
@@ -1556,59 +1556,69 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Obtenemos los datos de los proyectos y lo guardamos en el diccionario
             string select = $@"{ mPrefijos }
-                SELECT DISTINCT ?s ?title ?end ?start ?description ?geographicRegion ?organizacion GROUP_CONCAT(?userName;separator=',') as ?autores 
+                SELECT DISTINCT ?s ?title ?description ?dateFiled ?organizacion GROUP_CONCAT(?userName;separator=';') as ?autores GROUP_CONCAT(?autorId;separator=';') as ?listaAutoresIds 
                 FROM <http://gnoss.com/organization.owl>";
 
             string where = @$"where {{
 
-                ?s a <http://vivoweb.org/ontology/core#Project>.
+                ?s a <http://purl.org/ontology/bibo/Patent>.
                 ?s <http://w3id.org/roh/title> ?title.
-                ?s <http://w3id.org/roh/isValidated> 'true'.
-                OPTIONAL{{ ?s <http://vivoweb.org/ontology/core#end> ?end }}
-                OPTIONAL{{ ?s <http://vivoweb.org/ontology/core#start> ?start }}
-                OPTIONAL{{ ?s <http://vivoweb.org/ontology/core#description> ?description }}
+                # ?s <http://w3id.org/roh/isValidated> 'true'.
+                OPTIONAL{{ ?s <http://w3id.org/roh/dateFiled> ?dateFiled }}
+                OPTIONAL{{ ?s <http://w3id.org/roh/qualityDescription> ?description }}
                 OPTIONAL{{
-                    ?s <http://w3id.org/roh/conductedBy> ?conductedBy.
-                    ?conductedBy <http://w3id.org/roh/title> ?organizacion
-                }}
-                OPTIONAL{{
-                    ?s <http://vivoweb.org/ontology/core#geographicFocus> ?o.
-                    ?o <http://purl.org/dc/elements/1.1/title> ?geographicRegion.
-                    FILTER(lang(?geographicRegion)='es')
+                    ?s <http://w3id.org/roh/ownerOrganizationTitle> ?organizacion.
                 }}
                 OPTIONAL{{ 
-                    ?s ?pAux ?listaAutores
-                    FILTER (?pAux in (<http://w3id.org/roh/mainResearchers>, <http://w3id.org/roh/researchers>)).
+                    ?s <http://purl.org/ontology/bibo/authorList> ?listaAutores.
                     ?listaAutores <http://xmlns.com/foaf/0.1/nick> ?userName.
+                    ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?autorId
+
                 }}
                 FILTER(?s in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "project");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "patent");
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
             {
                 try
                 {
+
+                    var fecha = e.ContainsKey("dateFiled") ? e["dateFiled"].value : String.Empty;
+                    DateTime fechaDate = DateTime.Now;
+                    try
+                    {
+                        if (fecha != String.Empty)
+                        {
+                            fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
+                            fecha = fechaDate.ToString("dd/MM/yyyy");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
+
+
                     Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["s"].value);
-                    string geographicRegion = e.ContainsKey("geographicRegion") ? e["geographicRegion"].value : "";
                     string organizacion = e.ContainsKey("organizacion") ? e["organizacion"].value : "";
-                    var info = geographicRegion + ((geographicRegion != "" && organizacion != "") ? ", " : "") + organizacion;
 
                     result.Add(currentShortId, new PIIOffer()
                     {
                         id = e["s"].value,
                         shortId = currentShortId,
                         name = e["title"].value,
-                        info = info,
+                        organizacion = organizacion,
                         description = e.ContainsKey("description") ? e["description"].value : "",
-                        dates = new string[] { e.ContainsKey("start") ? e["start"].value : "", e.ContainsKey("end") ? e["end"].value : "" },
-                        researchers = e.ContainsKey("autores") ? e["autores"].value.Split(",").ToList() : new List<string>(),
+                        fecha = fecha,
+                        researchers = e.ContainsKey("autores") ? e["autores"].value.Split(";").ToList() : new List<string>(),
+                        researchersIds = e.ContainsKey("listaAutoresIds") ? e["listaAutoresIds"].value.Split(";").ToList() : new List<string>(),
 
                     });
                 }
-                catch (Exception ext) { new Exception("Ha habido un error al procesar los datos de los proyectos:" + ext.Message); }
+                catch (Exception ext) { new Exception("Ha habido un error al procesar los datos de las patentes:" + ext.Message); }
 
             });
 
