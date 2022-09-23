@@ -1721,6 +1721,39 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
 
+        /// <summary>
+        /// Método que comprueba si el usuario es un usuario otri.
+        /// </summary>
+        /// <param name="pIdGnossUser">Id del usuario actual</param>
+        /// <returns>Retorna un listado de ids con los usuarios otri.</returns>
+        public bool CheckIfIsOtri(Guid pIdGnossUser)
+        {
+            string select = "select ?s ?isOtriManager";
+            string where = @$"where {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    OPTIONAL {{?s <http://w3id.org/roh/isOtriManager> ?isOtriManager.}}
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            var userGnossId = string.Empty;
+            var isOtriManager = false;
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                try
+                {
+                    bool.TryParse(e["isOtriManager"].value, out isOtriManager);
+                }
+                catch (Exception ex)
+                {
+                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                }
+            });
+
+            return isOtriManager;
+
+        }
+
 
         /// <summary>
         /// Método que lista el perfil de usuarios al que pertenece el usuario actual respecto a una oferta tecnológica dada.
@@ -2014,6 +2047,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         }
+
+
 
         private bool mostrar(string estadoStr, TipoUser tipoUser)
         {

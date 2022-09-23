@@ -301,5 +301,27 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
 
+
+
+        /// <summary>
+        /// Controlador para comprobar si es un usuario otri 
+        /// </summary>
+        /// <param name="pIdGnossUser">Usuario de gnoss que realiza la acción.</param>
+        /// <returns>Bool si es otri.</returns>
+        [HttpGet("CheckIfIsOtri")]
+        public IActionResult CheckIfIsOtri([Required] Guid pIdGnossUser)
+        {
+            try
+            {
+                AccionesOferta accionOferta = new AccionesOferta();
+                return Ok(accionOferta.CheckIfIsOtri(pIdGnossUser));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
     }
 }
