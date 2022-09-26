@@ -44,7 +44,7 @@ Las vistas de personalización de las facetas son las siguentes:
 
 ### Resumen del desarrollo
 
-- **Búsqueda personalizada (Búsuqeda):** searcherProjects
+- **Búsqueda personalizada (Búsqueda):** searcherProjects
 - **RdfTypes:** project
 - **Campo Filtro:** rdf:type=project|roh:isValidated=true
 
