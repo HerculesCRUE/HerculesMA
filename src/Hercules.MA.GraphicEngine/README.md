@@ -188,7 +188,7 @@ Dentro de la lista de gráficas, se van a configurar cada una de las gráficas q
     - porcentual: Indica si el porcentaje de cada porción deberá ser mostrado cuando se pasa el raton por encima. Opcional. Boolean
     - dimensiones: Distintas dimensiones de la gráfica. Obligatorio.
       - nombre: Es el nombre de la dimensión. Multiidioma. Obligatorio. String.
-      - filtro: Es el filtro de la dimensión. En caso de estar vacío ("") tomará los valores del ejeX. Obligatorio. String.
+      - filtro: Es el filtro de la dimensión. Obligatorio. String.
       - calculo: Es el cálculo que aplica la dimensión para sus datos (SUM, AVG, MIN, MAX). Opcional. String.
       - exterior: Representa si la gráfica es de doble círculo y esta dimensión corresponde a la circunferencia exterior. Opcional. Boolean.
       - color: Es el color en hexadecimal de la dimensión. Opcional. String.
