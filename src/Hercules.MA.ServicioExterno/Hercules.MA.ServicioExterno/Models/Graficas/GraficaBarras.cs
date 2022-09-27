@@ -38,6 +38,7 @@ namespace Hercules.MA.ServicioExterno.Models.Graficas.GraficaBarras
         public string backgroundColor { get; set; }
         public List<int> data { get; set; }
         public float barPercentage { get; set; }
+        public float maxBarThickness { get; set; }
         public string stack { get; set; }
         public DatosBarra(string pLabel, string pBackgroundColor, List<int> pData, float pBarPercentage, string pStack)
         {
@@ -45,6 +46,7 @@ namespace Hercules.MA.ServicioExterno.Models.Graficas.GraficaBarras
             this.backgroundColor = pBackgroundColor;
             this.data = pData;
             this.barPercentage = pBarPercentage;
+            this.maxBarThickness = 100;
             this.stack = pStack;
         }
     }

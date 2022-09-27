@@ -28,6 +28,7 @@ namespace Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion
             icon_ip,
             icon_area,
             icon_group,
+            icon_project,
             relation_document,
             relation_project
         }
