@@ -629,6 +629,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<string, int> numRelacionesColaboradorDocumentoProjecto = new Dictionary<string, int>();
             Dictionary<string, int> numRelacionesColaboradorProyectoProjecto = new Dictionary<string, int>();
 
+
+            string project = "http://gnoss/" + pIdProyecto.ToUpper();
+
             //Nodos            
             Dictionary<string, string> dicNodos = new Dictionary<string, string>();
             //Relaciones
@@ -717,7 +720,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         string where = $@"
                         WHERE {{ 
                             ?document a 'document'.
-                            ?document <http://purl.org/ontology/bibo/authorList> ?person. 
+                            ?document <http://purl.org/ontology/bibo/authorList> ?authorList.
+                            ?authorList <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}order by desc(?numRelacionesDocumentos)";
                         SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
@@ -742,6 +746,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 //Seleccionamos los pMax colaboradores mas relacionados con el Projecto
                 numRelacionesColaboradorProjecto = numRelacionesColaboradorProjecto.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+
                 if (numRelacionesColaboradorProjecto.Count > pMax)
                 {
                     colaboradores = new HashSet<string>(numRelacionesColaboradorProjecto.Keys.ToList().GetRange(0, pMax));
@@ -759,14 +764,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     if (colaboradores.Contains(colaborador))
                     {
-                        string group = "http://gnoss/" + pIdProyecto.ToUpper();
                         string nombreRelacion = "Proyectos";
-                        if (!dicRelaciones.ContainsKey(group))
+                        if (!dicRelaciones.ContainsKey(project))
                         {
-                            dicRelaciones.Add(group, new List<DataQueryRelaciones>());
+                            dicRelaciones.Add(project, new List<DataQueryRelaciones>());
                         }
 
-                        DataQueryRelaciones dataQueryRelaciones = (dicRelaciones[group].FirstOrDefault(x => x.nombreRelacion == nombreRelacion));
+                        DataQueryRelaciones dataQueryRelaciones = (dicRelaciones[project].FirstOrDefault(x => x.nombreRelacion == nombreRelacion));
                         if (dataQueryRelaciones == null)
                         {
                             dataQueryRelaciones = new DataQueryRelaciones()
@@ -774,7 +778,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                 nombreRelacion = nombreRelacion,
                                 idRelacionados = new List<Datos>()
                             };
-                            dicRelaciones[group].Add(dataQueryRelaciones);
+                            dicRelaciones[project].Add(dataQueryRelaciones);
                         }
                         dataQueryRelaciones.idRelacionados.Add(new Datos()
                         {
@@ -787,14 +791,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     if (colaboradores.Contains(colaborador))
                     {
-                        string group = "http://gnoss/" + pIdProyecto.ToUpper();
                         string nombreRelacion = "Documentos";
-                        if (!dicRelaciones.ContainsKey(group))
+                        if (!dicRelaciones.ContainsKey(project))
                         {
-                            dicRelaciones.Add(group, new List<DataQueryRelaciones>());
+                            dicRelaciones.Add(project, new List<DataQueryRelaciones>());
                         }
 
-                        DataQueryRelaciones dataQueryRelaciones = (dicRelaciones[group].FirstOrDefault(x => x.nombreRelacion == nombreRelacion));
+                        DataQueryRelaciones dataQueryRelaciones = (dicRelaciones[project].FirstOrDefault(x => x.nombreRelacion == nombreRelacion));
                         if (dataQueryRelaciones == null)
                         {
                             dataQueryRelaciones = new DataQueryRelaciones()
@@ -802,7 +805,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                 nombreRelacion = nombreRelacion,
                                 idRelacionados = new List<Datos>()
                             };
-                            dicRelaciones[group].Add(dataQueryRelaciones);
+                            dicRelaciones[project].Add(dataQueryRelaciones);
                         }
                         dataQueryRelaciones.idRelacionados.Add(new Datos()
                         {
@@ -882,6 +885,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         if (colaboradores.Contains(nodo.Key))
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
+                        }
+                        else if (project == nodo.Key)
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_project;
                         }
                         Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", type);
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
