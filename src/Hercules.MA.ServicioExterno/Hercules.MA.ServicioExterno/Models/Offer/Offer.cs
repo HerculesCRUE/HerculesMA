@@ -62,10 +62,11 @@ namespace Hercules.MA.ServicioExterno.Models.Offer
         public string id { get; set; }
         public Guid shortId { get; set; }
         public string name { get; set; }
-        public string info { get; set; }
+        public string organizacion { get; set; }
         public string description { get; set; }
-        public string[] dates { get; set; }
+        public string fecha { get; set; }
         public List<string> researchers { get; set; }
+        public List<string> researchersIds { get; set; }
     }
     public class UsersOffer
     {

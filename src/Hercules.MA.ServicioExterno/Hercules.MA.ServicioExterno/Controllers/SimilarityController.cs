@@ -45,7 +45,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         /// <summary>
-        /// Obtiene los research object similares
+        /// Obtiene los research object similares.
         /// </summary>
         /// <param name="pIdRO">ID del researchobject</param>
         /// <returns></returns>

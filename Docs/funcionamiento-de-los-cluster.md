@@ -52,7 +52,7 @@ La creación de los clusters es una página del cms llamada 'Nuevo Cluster'
 La vista de creación del cluster se encuentra 'Views/Views/CMS/Destacado/CreacionCluster.cshtml'. La vista de personalización en el gestor de GNOSS se encuentra en 'Plantillas de los componentes del CMS/Destacado/CreacionCluster'
 
 ### Resumen del desarrollo
-La lógica javascript se encuentra en el archivo cluster.js
+La lógica javascript se encuentra en el archivo cluster.js (https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Estilos/theme/offer.js)
 Se realizan llamadas a los diferentes servicios para las diferentes funcionalidades, la lista de llamadas son las siguientes:
 - Carga de taxonomías `Áreas temáticas`:
 	- **API:** ServicioExterno

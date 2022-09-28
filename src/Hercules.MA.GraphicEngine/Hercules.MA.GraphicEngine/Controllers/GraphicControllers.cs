@@ -39,7 +39,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
             return Models.GraphicEngine.GetGrafica(pIdPagina, pIdGrafica, pFiltroFacetas, pLang);
         }
         /// <summary>
-        /// Obtención de una lista de gráficas y sus datos específicos del usuario
+        /// Obtención de una lista de gráficas y sus datos específicos del usuario.
         /// </summary>
         /// <param name="pPageId"></param>
         /// <returns></returns>
@@ -52,7 +52,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
             return Models.GraphicEngine.GetGraficasUserByPageId(pPageId);
         }
         /// <summary>
-        /// Crea una nueva página de indicadores personales
+        /// Crea una nueva página de indicadores personales.
         /// </summary>
         /// <param name="pUserId"></param>
         /// <param name="pTitulo"></param>

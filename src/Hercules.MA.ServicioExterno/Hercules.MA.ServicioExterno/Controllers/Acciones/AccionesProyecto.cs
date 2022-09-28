@@ -390,6 +390,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             HashSet<string> miembros = new HashSet<string>();
             HashSet<string> ip = new HashSet<string>();
+            string proyecto = "";
 
             //Nodos            
             Dictionary<string, string> dicNodos = new Dictionary<string, string>();
@@ -457,7 +458,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         <http://gnoss/{pIdProyecto}> roh:title ?nombre.                        
                 }}";
 
-                string nombreProyecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value;
+                string nombreProyecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value.Substring(0, 20) + "...";
+                proyecto = "http://gnoss/" + pIdProyecto;
                 dicNodos.Add("http://gnoss/" + pIdProyecto, nombreProyecto);
             }
             #endregion
@@ -570,6 +572,10 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
                         }
+                        else if (proyecto == nodo.Key)
+                        {
+                            type = Models.Graficas.DataItemRelacion.Data.Type.icon_project;
+                        }
                         Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", type);
                         DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
                         items.Add(dataColabo);
@@ -669,7 +675,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         <http://gnoss/{pIdProyecto}> roh:title ?nombre.                        
                 }}";
 
-                string nombreProjecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value;
+                string nombreProjecto = mResourceApi.VirtuosoQuery(select, where, mIdComunidad).results.bindings.First()["nombre"].value.Substring(0, 20) + "...";
                 dicNodos.Add("http://gnoss/" + pIdProyecto, nombreProjecto);
             }
             #endregion

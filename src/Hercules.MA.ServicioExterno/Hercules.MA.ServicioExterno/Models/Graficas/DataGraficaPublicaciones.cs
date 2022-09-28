@@ -32,6 +32,7 @@ namespace Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaPublicaciones
         public string label { get; set; }
         public string type { get; set; }
         public string stack { get; set; }
+        public float maxBarThickness { get; set; }
         public List<int> data { get; set; }
         public List<string> backgroundColor { get; set; }
         public List<string> borderColor { get; set; }
@@ -42,6 +43,7 @@ namespace Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaPublicaciones
             this.label = pLabel;
             this.data = pData;
             this.backgroundColor = pBackgroundColor;
+            this.maxBarThickness = 100;
             this.borderColor = pBorderColor;
             this.borderWidth = pBorderWidth;
             this.stack = pStack;
