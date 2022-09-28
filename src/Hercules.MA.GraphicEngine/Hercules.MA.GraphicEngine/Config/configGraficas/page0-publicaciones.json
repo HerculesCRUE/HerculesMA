@@ -224,6 +224,7 @@
         "datosNodos": true,
         "numMaxNodos": 35,
         "abreviar": true,
+        "ocultarLeyenda": true,
         "orientacionVertical": false,
         "ejeX": "",
         "orderDesc": false,

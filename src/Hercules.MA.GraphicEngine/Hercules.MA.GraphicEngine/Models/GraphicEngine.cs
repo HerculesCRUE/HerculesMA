@@ -351,6 +351,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                 configPagina.isCircular = itemGrafica.tipo == EnumGraficas.Circular;
                 configPagina.isAbr = itemGrafica.config.abreviar;
+                configPagina.hideLegend = itemGrafica.config.ocultarLeyenda;
                 configPagina.isNodes = itemGrafica.tipo == EnumGraficas.Nodos;
                 configPagina.isHorizontal = !(itemGrafica.tipo == EnumGraficas.Circular || itemGrafica.config.orientacionVertical);
                 configPagina.isCircular = itemGrafica.tipo == EnumGraficas.Circular;
@@ -523,6 +524,10 @@ namespace Hercules.MA.GraphicEngine.Models
                 grafica.isPercentage = pGrafica.config.porcentual;
             }
 
+            if (pGrafica.config.ocultarLeyenda)
+            {
+                grafica.hideLeyend = true;
+            }
             // ID Grupo.
             if (!string.IsNullOrEmpty(pGrafica.idGrupo))
             {
@@ -1155,7 +1160,10 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 grafica.isAbr = pGrafica.config.abreviar;
             }
-
+            if (pGrafica.config.ocultarLeyenda)
+            {
+                grafica.hideLeyend = true;
+            }
             // Porcentaje.
             if (pGrafica.config.porcentual)
             {
@@ -3770,6 +3778,27 @@ namespace Hercules.MA.GraphicEngine.Models
                     pDicRelaciones[itemA].Remove(dataQueryRelaciones);
                 }
             }
+        }
+        public static string GetUserFromMetricPage(string pMetricID)
+        {
+
+            string select = "SELECT DISTINCT ?user ";
+            string where = $@"WHERE{{
+               
+                {{
+                  ?user ?s <{pMetricID}>.
+                  ?user a <http://xmlns.com/foaf/0.1/Person>.
+                }}
+                
+            }}
+
+            ";
+            SparqlObject sparqlObjectAux = mResourceApi.VirtuosoQuery(select, where, "person");
+            List<string> resultados = sparqlObjectAux.results.bindings.Select(x => x["user"].value).Distinct().ToList();
+            string user = resultados.ToList().FirstOrDefault();
+            return user;
+
+         
         }
 
         /// <summary>
