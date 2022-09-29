@@ -25,9 +25,25 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
     public class AccionesSimilarity
     {
         #region --- Constantes   
-        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
-        private static ResourceApi mResourceApi = new ResourceApi(RUTA_OAUTH);
+        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
+        private static ResourceApi mResourceAPI = null;
         #endregion
+
+        private static ResourceApi resourceApi
+        {
+            get
+            {
+                while (mResourceAPI == null)
+                {
+                    try
+                    {
+                        mResourceAPI = new ResourceApi(RUTA_OAUTH);
+                    }
+                    catch (Exception) { }
+                }
+                return mResourceAPI;
+            }
+        }
 
         /// <summary>
         /// 
@@ -40,7 +56,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             if (!string.IsNullOrEmpty(pConfig.GetUrlSimilarity()))
             {
-                UtilsSimilarity utilsSimilarity = new UtilsSimilarity(pConfig.GetUrlSimilarity(), mResourceApi, pType);
+                UtilsSimilarity utilsSimilarity = new UtilsSimilarity(pConfig.GetUrlSimilarity(), mResourceAPI, pType);
                 return utilsSimilarity.GetSimilars(pId);
             }
             else
