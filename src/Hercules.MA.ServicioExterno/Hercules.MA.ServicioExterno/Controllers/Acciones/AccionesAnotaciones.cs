@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
 using AnnotationOntology;
+using System.Threading;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
@@ -15,15 +16,57 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
     {
 
         #region --- Constantes     
-        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
-        private static ResourceApi mResourceApi = new ResourceApi(RUTA_OAUTH);
-        private static CommunityApi mCommunityApi = new CommunityApi(RUTA_OAUTH);
+        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
+        private static ResourceApi mResourceAPI = null;
+        private static CommunityApi mCommunityAPI = null;
         private static Guid mIdComunidad = mCommunityApi.GetCommunityId();
-        private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
+        private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models{Path.DirectorySeparatorChar}JSON{Path.DirectorySeparatorChar}prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string COLOR_GRAFICAS = "#6cafe3";
         private static string COLOR_GRAFICAS_HORIZONTAL = "#6cafe3"; //#1177ff
         #endregion
+
+        private static ResourceApi resourceApi
+        {
+            get
+            {
+                while (mResourceAPI == null)
+                {
+                    try
+                    {
+                        mResourceAPI = new ResourceApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar ResourceApi");
+                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mResourceAPI;
+            }
+        }
+
+        private static CommunityApi communityApi
+        {
+            get
+            {
+                while (mCommunityAPI == null)
+                {
+                    try
+                    {
+                        mCommunityAPI = new CommunityApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar CommunityApi");
+                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mCommunityAPI;
+            }
+        }
 
         public List<Dictionary<string, string>> GetOwnAnnotationsInRO(string idRO, string idUser, string rdfType, string ontology)
         {
@@ -41,12 +84,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsIdRO = new();
             if (Guid.TryParse(idRO, out guidRO))
             {
-                longsIdRO = UtilidadesAPI.GetLongIds(new List<Guid>() { guidRO }, mResourceApi, rdfType, ontology);
+                longsIdRO = UtilidadesAPI.GetLongIds(new List<Guid>() { guidRO }, mResourceAPI, rdfType, ontology);
                 idRO = longsIdRO[guidRO];
             }
             else
             {
-                guidRO = mResourceApi.GetShortGuid(idRO);
+                guidRO = mResourceAPI.GetShortGuid(idRO);
             }
 
 
@@ -55,12 +98,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsIdUs = new();
             if (!Guid.TryParse(idUser, out guidUser))
             {
-                guidUser = mResourceApi.GetShortGuid(idUser);
+                guidUser = mResourceAPI.GetShortGuid(idUser);
             }
 
 
             // Obtener el id del usuario usando el id de la cuenta
-            string userGnossId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, guidUser);
+            string userGnossId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceAPI, guidUser);
 
 
 
@@ -100,7 +143,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?user = <{userGnossId}>)
             }} ORDER BY DESC(?date)";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = mResourceAPI.VirtuosoQuery(select, where, "person");
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
@@ -121,7 +164,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        mResourceAPI.Log.Error("Excepcion: " + ex.Message);
                     }
 
                     // Creamos el diccionario
@@ -144,7 +187,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
-        public string CreateNewAnnotation( string idRO, string idUser, string rdfType, string ontology, string texto, string idAnnotation = null)
+        public string CreateNewAnnotation(string idRO, string idUser, string rdfType, string ontology, string texto, string idAnnotation = null)
         {
 
             // Obtengo el id del RO si es Guid
@@ -152,12 +195,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsIdRO = new();
             if (Guid.TryParse(idRO, out guidRO))
             {
-                longsIdRO = UtilidadesAPI.GetLongIds(new List<Guid>() { guidRO }, mResourceApi, rdfType, ontology);
+                longsIdRO = UtilidadesAPI.GetLongIds(new List<Guid>() { guidRO }, mResourceAPI, rdfType, ontology);
                 idRO = longsIdRO[guidRO];
             }
             else
             {
-                guidRO = mResourceApi.GetShortGuid(idRO);
+                guidRO = mResourceAPI.GetShortGuid(idRO);
             }
 
 
@@ -166,11 +209,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsIdUs = new();
             if (!Guid.TryParse(idUser, out guidUser))
             {
-                guidUser = mResourceApi.GetShortGuid(idUser);
+                guidUser = mResourceAPI.GetShortGuid(idUser);
             }
 
             // Obtener el id del investigador usando el id de la cuenta
-            string researcherId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, guidUser);
+            string researcherId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceAPI, guidUser);
 
             int MAX_INTENTOS = 10;
             bool uploadedR = false;
@@ -191,11 +234,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 cRsource.Roh_title = "-";
 
                 // Sección de las descripciones, limpiamos los strings de tags que no queramos
-                cRsource.Roh_text = texto != null ? CleanHTML.StripTagsCharArray(texto.Replace("&", "&amp").Replace("<", "&lt").Replace(">", "&gt").Replace("\"", "&quot").Replace("\'", "&apos"), new string[] { }, new string[] { }) :"" ;// != null ? CleanHTML.StripTagsCharArray(texto, new string[] {}, new string[] {}) : "";
+                cRsource.Roh_text = texto != null ? CleanHTML.StripTagsCharArray(texto.Replace("&", "&amp").Replace("<", "&lt").Replace(">", "&gt").Replace("\"", "&quot").Replace("\'", "&apos"), new string[] { }, new string[] { }) : "";// != null ? CleanHTML.StripTagsCharArray(texto, new string[] {}, new string[] {}) : "";
 
                 // Comprobamos si es un documento u otro RO cualquiera
                 cRsource.IdsRoh_researchobject = new();
-                cRsource.IdsRoh_document =  new();
+                cRsource.IdsRoh_document = new();
 
                 switch (ontology)
                 {
@@ -209,7 +252,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
                 // Guardando o actualizando el recurso
-                mResourceApi.ChangeOntoly("annotation");
+                mResourceAPI.ChangeOntoly("annotation");
                 // Comprueba si es una actualización o no
                 if (idAnnotation != null)
                 {
@@ -217,7 +260,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     string[] recursoSplit = idAnnotation.Split('_');
 
                     // Modificación.
-                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null, new Guid(recursoSplit[recursoSplit.Length - 2]), new Guid(recursoSplit[recursoSplit.Length - 1]));
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceAPI, null, new Guid(recursoSplit[recursoSplit.Length - 2]), new Guid(recursoSplit[recursoSplit.Length - 1]));
                     int numIntentos = 0;
                     while (!resource.Modified)
                     {
@@ -227,7 +270,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             break;
                         }
 
-                        mResourceApi.ModifyComplexOntologyResource(resource, false, false);
+                        mResourceAPI.ModifyComplexOntologyResource(resource, false, false);
                         uploadedR = resource.Modified;
                     }
 
@@ -235,7 +278,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 else
                 {
                     // Creación.
-                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null);
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceAPI, null);
                     int numIntentos = 0;
                     while (!resource.Uploaded)
                     {
@@ -244,7 +287,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             break;
                         }
-                        idAnnotation = mResourceApi.LoadComplexSemanticResource(resource, false, true);
+                        idAnnotation = mResourceAPI.LoadComplexSemanticResource(resource, false, true);
                         uploadedR = resource.Uploaded;
                     }
                 }
@@ -266,8 +309,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             // Obtengo el id del RO si es Guid
             Guid guidAnnotation;
-            guidAnnotation = mResourceApi.GetShortGuid(idAnnotation);
-            return mResourceApi.PersistentDelete(guidAnnotation);
+            guidAnnotation = mResourceAPI.GetShortGuid(idAnnotation);
+            return mResourceAPI.PersistentDelete(guidAnnotation);
         }
     }
 
