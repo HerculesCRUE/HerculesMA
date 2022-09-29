@@ -33,6 +33,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public string idGrupo { get; set; }
         public string propCategoryPath { get; set; }
         public bool isPrivate { get; set; }
+
         public Config config { get; set; }
     }
 
@@ -46,6 +47,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public bool rango { get; set; }
         public bool porcentual { get; set; }
         public bool abreviar { get; set; }
+        public bool ocultarLeyenda { get; set; }
         public bool orderDesc { get; set; }
         public string color { get; set; }
         public bool rellenarEjeX { get; set; }

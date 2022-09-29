@@ -22,14 +22,14 @@
         "rellenarEjeX": true,
         "yAxisPrint": [
           {
-            "yAxisID": "y1",
+            "yAxisID": "y2",
             "posicion": "left",
             "nombreEje": {
               "es": "Nº de publicaciones"
             }
           },
           {
-            "yAxisID": "y2",
+            "yAxisID": "y1",
             "posicion": "right",
             "nombreEje": {
               "es": "Nº de citas"
@@ -224,6 +224,7 @@
         "datosNodos": true,
         "numMaxNodos": 35,
         "abreviar": true,
+        "ocultarLeyenda": true,
         "orientacionVertical": false,
         "ejeX": "",
         "orderDesc": false,

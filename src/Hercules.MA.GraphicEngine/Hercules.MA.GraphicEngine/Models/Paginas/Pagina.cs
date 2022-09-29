@@ -15,6 +15,7 @@ namespace Hercules.MA.GraphicEngine.Models.Paginas
         public int anchura { get; set; }
         public string idGrupo { get; set; }
         public bool isAbr { get; set; }
+        public bool hideLegend { get; set; }
         public bool isPercentage { get; set; }
         public bool isHorizontal { get; set; }
         public bool isVertical { get; set; }
