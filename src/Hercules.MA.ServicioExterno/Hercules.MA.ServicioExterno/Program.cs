@@ -22,7 +22,7 @@ namespace Hercules.MA.ServicioExterno
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    GenerateMetaSearch();
+                    //GenerateMetaSearch();
                 });
             
 
