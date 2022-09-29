@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
@@ -19,15 +20,57 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
     public class AccionesPublicaciones
     {
         #region --- Constantes     
-        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
-        private static ResourceApi mResourceApi = new ResourceApi(RUTA_OAUTH);
-        private static CommunityApi mCommunityApi = new CommunityApi(RUTA_OAUTH);
+        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
+        private static ResourceApi mResourceAPI = null;
+        private static CommunityApi mCommunityAPI = null;
         private static Guid mIdComunidad = mCommunityApi.GetCommunityId();
-        private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
+        private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models{Path.DirectorySeparatorChar}JSON{Path.DirectorySeparatorChar}prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string COLOR_GRAFICAS = "#6cafe3";
         private static string COLOR_GRAFICAS_HORIZONTAL = "#6cafe3"; //#1177ff
         #endregion
+
+        private static ResourceApi resourceApi
+        {
+            get
+            {
+                while (mResourceAPI == null)
+                {
+                    try
+                    {
+                        mResourceAPI = new ResourceApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar ResourceApi");
+                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mResourceAPI;
+            }
+        }
+
+        private static CommunityApi communityApi
+        {
+            get
+            {
+                while (mCommunityAPI == null)
+                {
+                    try
+                    {
+                        mCommunityAPI = new CommunityApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar CommunityApi");
+                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mCommunityAPI;
+            }
+        }
 
 
         /// <summary>
@@ -51,7 +94,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     OPTIONAL{{?documento <http://w3id.org/roh/quartile> ?cuartil}}
                                 }}ORDER BY ?fecha";
 
-                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                SparqlObject resultadoQuery = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad);
 
                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                 {
@@ -98,7 +141,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                     ?documento <http://w3id.org/roh/citationCount> ?numCitas
                                 }}ORDER BY ?fecha";
 
-                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                SparqlObject resultadoQuery = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad);
 
                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                 {
@@ -229,7 +272,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
         public Dictionary<string, int> GetDatosCabeceraDocumento(string pDocumento)
         {
-            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceApi, pDocumento);
+            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceAPI, pDocumento);
             Dictionary<string, int> dicResultados = new Dictionary<string, int>();
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder();
@@ -253,7 +296,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                   FILTER(?s != ?item)
                }} ";
 
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where, mIdComunidad);
+            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where, mIdComunidad);
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
