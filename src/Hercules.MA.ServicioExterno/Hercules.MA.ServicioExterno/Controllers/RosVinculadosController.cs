@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
@@ -127,7 +128,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
             Dictionary<Guid, bool> result = new();
 
 
-            string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
+            string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
             Gnoss.ApiWrapper.ResourceApi mResourceApi = new Gnoss.ApiWrapper.ResourceApi(RUTA_OAUTH);
 
             // Añadir cambio en el historial de la disponibilidad
