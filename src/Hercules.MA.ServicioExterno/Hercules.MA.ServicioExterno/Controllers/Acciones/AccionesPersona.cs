@@ -40,7 +40,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     catch (Exception)
                     {
                         Console.WriteLine("No se ha podido iniciar ResourceApi");
-                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
                         Thread.Sleep(10000);
                     }
                 }
@@ -61,6 +61,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     catch (Exception)
                     {
                         Console.WriteLine("No se ha podido iniciar CommunityApi");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
                         Thread.Sleep(10000);
                     }
                 }
@@ -95,7 +96,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Objeto con todos los datos necesarios para crear la gráfica en el JS.</returns>
         public Dictionary<string, int> GetDatosCabeceraPersona(string pPersona)
         {
-            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceAPI, pPersona);
+            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(resourceApi, pPersona);
             Dictionary<string, int> dicResultados = new Dictionary<string, int>();
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder(), where = new StringBuilder();
@@ -121,7 +122,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>) ");
             where.Append("}} ");
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -159,7 +160,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"FILTER(?id != <{idGrafoBusqueda}>) ");
             where.Append("}}} ");
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -181,7 +182,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Lista con los grupos de investigación pertenecientes.</returns>
         public List<string> GetGrupoInvestigacion(string pIdPersona)
         {
-            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceAPI, pIdPersona);
+            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(resourceApi, pIdPersona);
             List<string> grupos = new List<string>();
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder(), where = new StringBuilder();
@@ -200,7 +201,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"FILTER(?persona1 LIKE <{idGrafoBusqueda}> || ?persona2 LIKE <{idGrafoBusqueda}>) ");
             where.Append("} ");
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -220,7 +221,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Listado de topics de dicha persona.</returns>
         public List<Dictionary<string, string>> GetTopicsPersona(string pIdPersona)
         {
-            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceAPI, pIdPersona);
+            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(resourceApi, pIdPersona);
             List<Dictionary<string, string>> categorias = new List<Dictionary<string, string>>();
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder(), where = new StringBuilder();
@@ -237,11 +238,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("?categoria skos:prefLabel ?nombreCategoria. ");
             where.Append("?categoria <http://purl.org/dc/elements/1.1/source> ?source. ");
             where.Append("?categoria <http://purl.org/dc/elements/1.1/identifier> ?identifier. ");
-            
+
             where.Append($@"FILTER(?persona = <{idGrafoBusqueda}>)");
             where.Append("} ");
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -296,7 +297,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         ?person foaf:name ?nombre.
                 }}";
 
-                SparqlObject resultadoQuery = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad);
+                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                 {
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
@@ -322,18 +323,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 string nombreGrupo = "";
                 try
                 {
-                    var bindingRes = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad).results.bindings;
+                    var bindingRes = resourceApi.VirtuosoQuery(select, where, idComunidad).results.bindings;
                     if (bindingRes.First().ContainsKey("nombre") && bindingRes.First()["nombre"].value != "")
                     {
                         nombreGrupo = bindingRes.First()["nombre"].value;
-                    } else if (bindingRes.First().ContainsKey("firstName"))
+                    }
+                    else if (bindingRes.First().ContainsKey("firstName"))
                     {
                         nombreGrupo = bindingRes.First()["firstName"].value;
                     }
-                } 
-                catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
-                    mResourceAPI.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
                 dicNodos.Add("http://gnoss/" + pIdPersona, nombreGrupo);
             }
@@ -357,7 +359,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?rolProy <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}order by desc(?numRelacionesProyectos)";
-                        SparqlObject resultadoQuery = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad);
+                        SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
                             string person = fila["person"].value;
@@ -386,7 +388,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 					        ?listaAutoresB <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?person.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}order by desc(?numRelacionesDocumentos)";
-                        SparqlObject resultadoQuery = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad);
+                        SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
                             string person = fila["person"].value;
@@ -494,7 +496,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?rolProyB <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/{pIdPersona}>.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}";
-                        SparqlObject resultadoQuery = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad);
+                        SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
                         Dictionary<string, List<string>> personaProy = new Dictionary<string, List<string>>();
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
@@ -516,7 +518,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             ?authorListB <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> <http://gnoss/{pIdPersona}>.
                             FILTER(?person in (<{string.Join(">,<", colaboradores)}>))
                         }}";
-                        SparqlObject resultadoQuery = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad);
+                        SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
                         Dictionary<string, List<string>> personaDoc = new Dictionary<string, List<string>>();
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
@@ -554,7 +556,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_member;
                         }
-                        else {
+                        else
+                        {
                             type = Models.Graficas.DataItemRelacion.Data.Type.icon_ip;
                         }
                         Models.Graficas.DataItemRelacion.Data data = new Models.Graficas.DataItemRelacion.Data(clave, nodo.Value, null, null, null, "nodes", type);
@@ -601,7 +604,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Objeto que se trata en JS para contruir la gráfica.</returns>
         public DataGraficaAreasTags GetDatosGraficaProyectosPersonaHorizontal(string pIdPersona, string pParametros)
         {
-            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceAPI, pIdPersona);
+            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(resourceApi, pIdPersona);
             Dictionary<string, int> dicResultados = new Dictionary<string, int>();
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder(), where = new StringBuilder();
@@ -630,7 +633,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 where.Append(filtros);
             }
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mIdComunidad);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -681,7 +684,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Listado de topics de dicha persona.</returns>
         public Dictionary<string, string> GetInfoHomeEdUser(string pIdGnossUser)
         {
-            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(mResourceAPI, pIdGnossUser);
+            string idGrafoBusqueda = UtilidadesAPI.ObtenerIdBusqueda(resourceApi, pIdGnossUser);
             Dictionary<string, string> result = new();
             SparqlObject resultadoQuery = null;
             string select = "", where = "";
@@ -747,7 +750,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), "researchobject");
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "researchobject");
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -774,7 +777,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), "document");
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "document");
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -799,7 +802,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), "document");
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "document");
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {

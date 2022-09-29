@@ -18,6 +18,7 @@ using Hercules.MA.ServicioExterno.Models.Graficas.DataGraficaAreasTags;
 using Microsoft.AspNetCore.Cors;
 using System.Net.Http;
 using Hercules.MA.ServicioExterno.Models.Similarity;
+using System.Threading;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
@@ -39,7 +40,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     {
                         mResourceAPI = new ResourceApi(RUTA_OAUTH);
                     }
-                    catch (Exception) { }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar ResourceApi");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
                 }
                 return mResourceAPI;
             }
@@ -56,7 +62,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         {
             if (!string.IsNullOrEmpty(pConfig.GetUrlSimilarity()))
             {
-                UtilsSimilarity utilsSimilarity = new UtilsSimilarity(pConfig.GetUrlSimilarity(), mResourceAPI, pType);
+                UtilsSimilarity utilsSimilarity = new UtilsSimilarity(pConfig.GetUrlSimilarity(), resourceApi, pType);
                 return utilsSimilarity.GetSimilars(pId);
             }
             else

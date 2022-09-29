@@ -15,7 +15,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
         private static ResourceApi mResourceAPI = null;
         private static CommunityApi mCommunityAPI = null;
-        private static Guid mCommunityID = mCommunityApi.GetCommunityId();
+        private static Guid? mIDComunidad = null;
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         #endregion
@@ -33,7 +33,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     catch (Exception)
                     {
                         Console.WriteLine("No se ha podido iniciar ResourceApi");
-                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
                         Thread.Sleep(10000);
                     }
                 }
@@ -54,11 +54,31 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     catch (Exception)
                     {
                         Console.WriteLine("No se ha podido iniciar CommunityApi");
-                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
                         Thread.Sleep(10000);
                     }
                 }
                 return mCommunityAPI;
+            }
+        }
+
+        private static Guid idComunidad
+        {
+            get
+            {
+                while (!mIDComunidad.HasValue)
+                {
+                    try
+                    {
+                        mIDComunidad = communityApi.GetCommunityId();
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido obtener el ID de la comnunidad");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mIDComunidad.Value;
             }
         }
 
@@ -80,7 +100,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("OPTIONAL{?s roh:ORCID ?orcid. } ");
             where.Append("} ");
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
@@ -113,7 +133,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}>. ");
             where.Append("} ");
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
@@ -139,7 +159,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 where.Append($@"?s ?p <http://xmlns.com/foaf/0.1/Person>. ");
                 where.Append("} ");
 
-                resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), "person");
+                resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                 {
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
@@ -173,7 +193,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("OPTIONAL{?s roh:lastUpdatedDate ?fecha. } ");
             where.Append("} ");
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
@@ -215,7 +235,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append("OPTIONAL{?s roh:tokenGitHub ?tokenGitHub. } ");
             where.Append("} ");
 
-            resultadoQuery = mResourceAPI.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
+            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), idComunidad);
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)

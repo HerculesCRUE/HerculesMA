@@ -24,7 +24,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
         private static ResourceApi mResourceAPI = null;
         private static CommunityApi mCommunityAPI = null;
-        private static Guid mIdComunidad = mCommunityApi.GetCommunityId();
+        private static Guid? mIDComunidad = null;
         private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models{Path.DirectorySeparatorChar}JSON{Path.DirectorySeparatorChar}prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
 
@@ -43,7 +43,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     catch (Exception)
                     {
                         Console.WriteLine("No se ha podido iniciar ResourceApi");
-                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
                         Thread.Sleep(10000);
                     }
                 }
@@ -64,13 +64,33 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     catch (Exception)
                     {
                         Console.WriteLine("No se ha podido iniciar CommunityApi");
-                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
                         Thread.Sleep(10000);
                     }
                 }
                 return mCommunityAPI;
             }
         }
+        private static Guid idComunidad
+        {
+            get
+            {
+                while (!mIDComunidad.HasValue)
+                {
+                    try
+                    {
+                        mIDComunidad = communityApi.GetCommunityId();
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido obtener el ID de la comnunidad");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mIDComunidad.Value;
+            }
+        }
+
 
         /// <summary>
         /// Método público para eliminar los ROs vinculados en otro RO
@@ -105,12 +125,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsId = new();
             if (Guid.TryParse(idRecurso, out guid))
             {
-                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceAPI, typeResource.longType, typeResource.type);
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, resourceApi, typeResource.longType, typeResource.type);
                 idRecurso = longsId[guid];
             }
             else
             {
-                guid = mResourceAPI.GetShortGuid(idRecurso);
+                guid = resourceApi.GetShortGuid(idRecurso);
             }
 
             // Obtengo el id del recurso vinculado si es un Guid
@@ -118,17 +138,17 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             longsId = new();
             if (Guid.TryParse(idLinkedRo, out guidLinked))
             {
-                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidLinked }, mResourceAPI, typeLinked.longType, typeLinked.type);
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidLinked }, resourceApi, typeLinked.longType, typeLinked.type);
                 idLinkedRo = longsId[guidLinked];
             }
             else
             {
-                guidLinked = mResourceAPI.GetShortGuid(idLinkedRo);
+                guidLinked = resourceApi.GetShortGuid(idLinkedRo);
             }
 
 
             // Obtengo el id del usuario si es un Guid
-            string LongpIdGnossUser = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceAPI, pIdGnossUser);
+            string LongpIdGnossUser = UtilidadesAPI.GetResearcherIdByGnossUser(resourceApi, pIdGnossUser);
 
 
 
@@ -147,7 +167,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     // Eliminar el vínculo en el recurso
                     // Cambio la ontología dependiendo del tipo de recurso en el que nos encontramos
-                    mResourceAPI.ChangeOntoly(typeResource.type);
+                    resourceApi.ChangeOntoly(typeResource.type);
 
                     // Elimino el triple
                     try
@@ -166,11 +186,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         // Eliminación.
                         dicModificacion.Add(guid, listaTriplesModificacion);
-                        result = mResourceAPI.DeletePropertiesLoadedResources(dicModificacion);
+                        result = resourceApi.DeletePropertiesLoadedResources(dicModificacion);
                     }
                     catch (Exception ex)
                     {
-                        mResourceAPI.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
 
@@ -218,12 +238,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsId = new();
             if (Guid.TryParse(idRecurso, out guid))
             {
-                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceAPI, typeResource.longType, typeResource.type);
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, resourceApi, typeResource.longType, typeResource.type);
                 idRecurso = longsId[guid];
             }
             else
             {
-                guid = mResourceAPI.GetShortGuid(idRecurso);
+                guid = resourceApi.GetShortGuid(idRecurso);
             }
 
 
@@ -359,7 +379,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     FILTER(?resource = <{idRecurso.ToString()}>)
                 }}";
-            SparqlObject sparqlObject = mResourceAPI.VirtuosoQuery(select, where, typeResource.type);
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, typeResource.type);
 
             // Rellena el los clusters
             sparqlObject.results.bindings.ForEach(e =>
@@ -367,7 +387,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
                 // Añade el ID en el listado de IDs
-                listIdslinked.Add(mResourceAPI.GetShortGuid(e["s"].value));
+                listIdslinked.Add(resourceApi.GetShortGuid(e["s"].value));
 
 
                 // Obtengo las areas de conocimiento de los ROs
@@ -402,7 +422,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-                        mResourceAPI.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                     bool isValidated = false;
                     if (e.ContainsKey("isValidated")) { bool.TryParse(e["isValidated"].value, out isValidated); }
@@ -428,7 +448,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceAPI.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
             });
@@ -437,9 +457,9 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             {
                 try
                 {
-                    mResourceAPI.GetUrl(listIdslinked, "es").ForEach(e =>
+                    resourceApi.GetUrl(listIdslinked, "es").ForEach(e =>
                     {
-                        rosLinked.Find(ro => mResourceAPI.GetShortGuid(ro.entityID) == e.resource_id).url = e.url;
+                        rosLinked.Find(ro => resourceApi.GetShortGuid(ro.entityID) == e.resource_id).url = e.url;
                     });
                 }
                 catch (Exception) { }
@@ -485,12 +505,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsId = new();
             if (Guid.TryParse(idRecurso, out guid))
             {
-                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceAPI, typeResource.longType, typeResource.type);
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, resourceApi, typeResource.longType, typeResource.type);
                 idRecurso = longsId[guid];
             }
             else
             {
-                guid = mResourceAPI.GetShortGuid(idRecurso);
+                guid = resourceApi.GetShortGuid(idRecurso);
             }
 
             // Obtengo el id del recurso vinculado si es un Guid
@@ -498,19 +518,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             longsId = new();
             if (Guid.TryParse(idLinkedRo, out guidLinked))
             {
-                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidLinked }, mResourceAPI, typeLinked.longType, typeLinked.type);
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidLinked }, resourceApi, typeLinked.longType, typeLinked.type);
                 idLinkedRo = longsId[guidLinked];
             }
             else
             {
-                guidLinked = mResourceAPI.GetShortGuid(idLinkedRo);
+                guidLinked = resourceApi.GetShortGuid(idLinkedRo);
             }
 
 
 
             // Obtengo el id del recurso si es un Guid
 
-            string LongpIdGnossUser = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceAPI, pIdGnossUser);
+            string LongpIdGnossUser = UtilidadesAPI.GetResearcherIdByGnossUser(resourceApi, pIdGnossUser);
 
 
 
@@ -530,7 +550,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     // Añadir cambio en el historial de la disponibilidad
                     // Comprueba si el id del recuro no está vacío
-                    mResourceAPI.ChangeOntoly(typeResource.type);
+                    resourceApi.ChangeOntoly(typeResource.type);
 
                     // Añado el vículo
                     try
@@ -547,11 +567,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         // Modificación.
                         dicInclusion.Add(guid, listaTriplesInclusion);
-                        result = mResourceAPI.InsertPropertiesLoadedResources(dicInclusion);
+                        result = resourceApi.InsertPropertiesLoadedResources(dicInclusion);
                     }
                     catch (Exception ex)
                     {
-                        mResourceAPI.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
 
@@ -594,7 +614,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsId = new();
             if (!Guid.TryParse(idRecurso, out guid))
             {
-                guid = mResourceAPI.GetShortGuid(idRecurso);
+                guid = resourceApi.GetShortGuid(idRecurso);
             }
 
             string select = $@"select distinct ?type ?longType";
@@ -605,7 +625,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
    
             }}";
 
-            SparqlObject sparqlObject = mResourceAPI.VirtuosoQuery(select, where, mIdComunidad);
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, idComunidad);
             string type = string.Empty;
             string longType = string.Empty;
             sparqlObject.results.bindings.ForEach(e =>
@@ -628,7 +648,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceAPI.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             });
 
@@ -696,13 +716,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
                     {minus}
                 }} ORDER BY DESC(?type) LIMIT 20";
-            SparqlObject sparqlObject = mResourceAPI.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "person");
 
             // Rellena el los clusters
             sparqlObject.results.bindings.ForEach(e =>
             {
                 // Añade el ID en el listado de IDs
-                listIdslinked.Add(mResourceAPI.GetShortGuid(e["s"].value));
+                listIdslinked.Add(resourceApi.GetShortGuid(e["s"].value));
 
                 // Obtengo las ids de los usuarios gnoss de los creadores del RO
                 List<string> idsGnoss = new List<string>();
@@ -723,7 +743,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-                        mResourceAPI.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
 
@@ -745,19 +765,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
                     // Añade el RO al listado
-                    rosLinked.Add(mResourceAPI.GetShortGuid(e["s"].value), ro);
+                    rosLinked.Add(resourceApi.GetShortGuid(e["s"].value), ro);
 
                 }
                 catch (Exception ex)
                 {
-                    mResourceAPI.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
             });
 
             if (listIdslinked.Count > 0)
             {
-                mResourceAPI.GetUrl(listIdslinked, pLang).ForEach(e =>
+                resourceApi.GetUrl(listIdslinked, pLang).ForEach(e =>
                 {
                     rosLinked[e.resource_id].url = e.url;
                 });

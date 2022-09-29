@@ -35,7 +35,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                     catch (Exception)
                     {
                         Console.WriteLine("No se ha podido iniciar ResourceApi");
-                        Console.WriteLine($"Contenido Oauth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
                         Thread.Sleep(10000);
                     }
                 }
@@ -69,7 +69,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
-                SparqlObject sparqlObject = mResourceAPI.VirtuosoQuery(select, where, "document");
+                SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "document");
                 string titulo = string.Empty;
                 List<string> autores = new List<string>();
                 string anio = string.Empty;
@@ -185,7 +185,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
-                SparqlObject sparqlObject = mResourceAPI.VirtuosoQuery(select, where, "document");
+                SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "document");
                 string titulo = string.Empty;
                 List<string> autores = new List<string>();
                 string anio = string.Empty;
