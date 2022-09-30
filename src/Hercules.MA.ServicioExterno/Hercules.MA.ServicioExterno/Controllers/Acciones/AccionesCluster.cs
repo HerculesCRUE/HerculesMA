@@ -124,7 +124,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     if (numMember.Count > 0)
                     {
 
-                        select = "select distinct ?s ?entidad FROM<http://gnoss.com/person.owl>";
+                        select = "select distinct ?s ?entidad";
                         where = @$"where {{
                             ?s <http://gnoss/hasEntidad> ?entidad.
                             ?entidad a<http://xmlns.com/foaf/0.1/Person>.
@@ -348,7 +348,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             foreach (string p in perfiles)
             {
                 //Datos del perfil (nombre, categorías y tags)
-                select = "select distinct ?s ?title group_concat(distinct ?freeTextKeyword;separator=',') as ?freeTextKeywordGroup group_concat(distinct ?KnowledgeArea;separator=',') as ?knowledgeAreaGroup FROM <http://gnoss.com/person.owl>";
+                select = "select distinct ?s ?title group_concat(distinct ?freeTextKeyword;separator=',') as ?freeTextKeywordGroup group_concat(distinct ?KnowledgeArea;separator=',') as ?knowledgeAreaGroup";
                 where = @$"where {{
                     ?s a <http://w3id.org/roh/ClusterPerfil>.
                     ?s <http://w3id.org/roh/title> ?title.
@@ -363,7 +363,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     FILTER(?s = <{p}>)
                 }}";
-                sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+                sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster" ,"person"});
 
                 PerfilCluster perfilCluster = new();
                 perfilCluster.tags = new();
@@ -401,7 +401,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
 
                     //Datos de los miembros
-                    select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
+                    select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber ";
                     where = @$"where {{
                     ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
                     ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
@@ -431,7 +431,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     FILTER(?s = <{p}>)
                 }}";
-                    sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+                    sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string>{ "cluster","person","document","project","organization","department"});
 
                     // Carga los datos en el objeto
                     sparqlObject.results.bindings.ForEach(e =>
@@ -738,7 +738,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             List<string> listIdsClusters = new();
 
             // Obtener el los profiles a través del id de usuario de la cuenta
-            string select = "select ?cluster ?titleCluster ?issued ?description ?profiles ?title group_concat(distinct ?clKnowledgeArea;separator=',') as ?clKnowledgeAreaGroup  group_concat(distinct ?freeTextKeyword;separator=',') as ?freeTextKeywordGroup group_concat(distinct ?KnowledgeArea;separator=',') as ?knowledgeAreaGroup FROM <http://gnoss.com/cluster.owl> FROM <http://gnoss.com/clusterperfil.owl>";
+            string select = "select ?cluster ?titleCluster ?issued ?description ?profiles ?title group_concat(distinct ?clKnowledgeArea;separator=',') as ?clKnowledgeAreaGroup  group_concat(distinct ?freeTextKeyword;separator=',') as ?freeTextKeywordGroup group_concat(distinct ?KnowledgeArea;separator=',') as ?knowledgeAreaGroup";
             string where = @$"where {{
                     ?person a <http://xmlns.com/foaf/0.1/Person>.
                     ?person <http://w3id.org/roh/gnossUser> ?idGnoss.
@@ -779,7 +779,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     FILTER(?idGnoss = <http://gnoss/{userId.ToString().ToUpper()}>)
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person", "cluster", "clusterperfil" });
 
             // Rellena el los clusters
             sparqlObject.results.bindings.ForEach(e =>
@@ -1150,6 +1150,53 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pSearch">parámetro que corresponde a la cadena de búsqueda.</param>
         /// <returns>Listado de etiquetas de resultado.</returns>
+        public List<string> memberList
+            
+            
+            
+            
+            
+            
+            
+            
+            Cluser(string pClusterId)
+        {
+            string select = "SELECT DISTINCT ?user";
+            string where = $@"WHERE{{
+                {{
+                    <{pClusterId}> <http://w3id.org/roh/clusterPerfil> ?s.
+                    ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?a.
+                    ?a <http://w3id.org/roh/gnossUser> ?user
+                }}
+                UNION
+                {{
+                    <{pClusterId}>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#member>?a.
+                    ?a <http://w3id.org/roh/gnossUser> ?user
+
+                }}
+            }}
+            ";
+            SparqlObject sparqlObjectAux = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string>{"cluster","person"});
+            List<string> resultados = sparqlObjectAux.results.bindings.Select(x => x["user"].value).Distinct().ToList();
+            return resultados;
+        }
+        public string getOwnerFromCluser(string pClusterId)
+        {
+
+            string select = "SELECT DISTINCT ?user ";
+            string where = $@"WHERE{{
+                {{
+                    <{pClusterId}>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#member>?a.
+                    ?a <http://w3id.org/roh/gnossUser> ?user
+
+                }}
+            }}
+            ";
+            SparqlObject sparqlObjectAux = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster" ,"person"});
+            List<string> resultados = sparqlObjectAux.results.bindings.Select(x => x["user"].value).Distinct().ToList();
+            string user = resultados.ToList().FirstOrDefault();
+            return user;
+        }
         public List<string> SearchTags(string pSearch)
         {
             int numMax = 20;
@@ -1370,7 +1417,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             List<Tuple<string, PerfilCluster.UserCluster>> result = new();
 
             //Datos de los miembros
-            string select = "select distinct ?s ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
+            string select = "select distinct ?s ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber ";
             string where = @$"where {{
                     ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?memberPerfil.
                     ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
@@ -1400,7 +1447,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     FILTER(?s in ({string.Join(',', listProfilesIds.Select(e => '<' + e + '>'))}))
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "cluster");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster", "person","document","project","organization", "department" });
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>

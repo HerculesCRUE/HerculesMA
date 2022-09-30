@@ -279,8 +279,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Coonsulta para obtener la información del investigador
             string select = $@"{ mPrefijos }
-                select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento (count(distinct ?doc)) as ?numDoc
-                FROM <http://gnoss.com/organization.owl>  FROM <http://gnoss.com/group.owl> FROM <http://gnoss.com/department.owl> FROM <http://gnoss.com/document.owl>";
+                select distinct ?person ?name group_concat(distinct ?group;separator=',') as ?groups ?tituloOrg ?hasPosition ?departamento (count(distinct ?doc)) as ?numDoc";
 
             string where = @$"where {{
                 ?main a <http://xmlns.com/foaf/0.1/Person>.
@@ -314,7 +313,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 FILTER(?idGnoss = <http://gnoss/{userGUID.ToString().ToUpper()}>)
             }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "person","organization","group","department","document" });
 
             // Obtiene los datos de la consulta y rellena el diccionario de respuesta con los datos de cada investigador.
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
@@ -881,7 +880,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Obtenemos los resúmenes de las propiedades industriales intelectuales (PII) y los añadimos al objeto de la oferta
                 try
                 {
-                    pDataOffer.pii = GetPIITeaser(pDataOffer.pii.Values.Select(x => x.id).ToList());
+                    pDataOffer.pii = GetPIITeaserTODO(pDataOffer.pii.Values.Select(x => x.id).ToList());
                 }
                 catch (Exception ex)
                 {
@@ -1156,7 +1155,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     // Si es una actualización, hay que recuperar los cambios anteriores del evento
                     select = "SELECT distinct ?s ?creatorId ?roleOf ?validFrom ?availability \n";
-                    select += "FROM <http://gnoss.com/offer.owl> FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/offerstate.owl>";
                     where = @$"where {{
                             ?offer <http://www.schema.org/offeredBy> ?creatorId.
                             ?offer <http://w3id.org/roh/availabilityChangeEvent> ?s.
@@ -1169,7 +1167,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     try
                     {
-                        sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offer");
+                        sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "offer" ," person", "offerstate" } );
                         sparqlObject.results.bindings.ForEach(e =>
                         {
 
@@ -1286,7 +1284,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
             // Obtenemos todos los datos de los perfiles y Añadimos el perfil creado a los datos de la oferta
-            string select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber FROM <http://gnoss.com/person.owl> FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/project.owl> FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/department.owl>";
+            string select = "select distinct ?memberPerfil ?nombreUser ?hasPosition ?tituloOrg ?departamento (count(distinct ?doc)) as ?numDoc (count(distinct ?proj)) as ?ipNumber";
             string where = @$"where {{
                 ?memberPerfil <http://xmlns.com/foaf/0.1/name> ?nombreUser.
                 OPTIONAL {{
@@ -1316,7 +1314,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?memberPerfil in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person" ,"document", "project", "organization" , "department" });
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
@@ -1379,8 +1377,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Obtenemos los datos de los documentos y lo guardamos en el diccionario
             string select = $@"{ mPrefijos }
-                SELECT DISTINCT ?s ?title ?fecha ?description ?organizacion ?start ?end GROUP_CONCAT(?userName;separator=',') as ?autores 
-                FROM <http://gnoss.com/organization.owl> FROM <http://gnoss.com/person.owl>";
+                SELECT DISTINCT ?s ?title ?fecha ?description ?organizacion ?start ?end GROUP_CONCAT(?userName;separator=',') as ?autores";
 
             string where = @$"where {{
                 ?s a <http://purl.org/ontology/bibo/Document>.
@@ -1399,7 +1396,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?s in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document" ,"person", "organization" });
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
@@ -1461,8 +1458,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Obtenemos los datos de los proyectos y lo guardamos en el diccionario
             string select = $@"{ mPrefijos }
-                SELECT DISTINCT ?s ?title ?end ?start ?description ?geographicRegion ?organizacion GROUP_CONCAT(?userName;separator=',') as ?autores 
-                FROM <http://gnoss.com/organization.owl>";
+                SELECT DISTINCT ?s ?title ?end ?start ?description ?geographicRegion ?organizacion GROUP_CONCAT(?userName;separator=',') as ?autores ";
 
             string where = @$"where {{
 
@@ -1489,7 +1485,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?s in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "project");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "project" , "organization" });
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
@@ -1531,7 +1527,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <param name="ids">Listado (Ids) de los PII.</param>
         /// <param name="isLongIds">Booleano que determina si los Ids son Ids largos o cortos.</param>
         /// <returns>relación entre el guid y el objeto de los PII correspondientes (resumido).</returns>
-        internal Dictionary<Guid, PIIOffer> GetPIITeaser(List<string> ids, bool isLongIds = true)
+        internal Dictionary<Guid, PIIOffer> GetPIITeaserTODO(List<string> ids, bool isLongIds = true)
         {
 
             Dictionary<Guid, PIIOffer> result = new();
@@ -1545,7 +1541,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // 3. Selecciona únicamente los Ids largos
                 try
                 {
-                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://purl.org/ontology/bibo/Patent", "patent").Select(e => e.Value).ToList();
+                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://vivoweb.org/ontology/core#Project", "project").Select(e => e.Value).ToList();
                 }
                 catch (Exception ex)
                 {
@@ -1555,70 +1551,59 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
             // Obtenemos los datos de los proyectos y lo guardamos en el diccionario
-            string select = $@"{ mPrefijos }
-                SELECT DISTINCT ?s ?title ?description ?dateFiled ?organizacion GROUP_CONCAT(?userName;separator=';') as ?autores GROUP_CONCAT(?autorId;separator=';') as ?listaAutoresIds 
-                FROM <http://gnoss.com/organization.owl>";
+            string select = $@"{mPrefijos}
+                SELECT DISTINCT ?s ?title ?end ?start ?description ?geographicRegion ?organizacion GROUP_CONCAT(?userName;separator=',') as ?autores ";
 
             string where = @$"where {{
 
-                ?s a <http://purl.org/ontology/bibo/Patent>.
+                ?s a <http://vivoweb.org/ontology/core#Project>.
                 ?s <http://w3id.org/roh/title> ?title.
-                # ?s <http://w3id.org/roh/isValidated> 'true'.
-                OPTIONAL{{ ?s <http://w3id.org/roh/dateFiled> ?dateFiled }}
-                OPTIONAL{{ ?s <http://w3id.org/roh/qualityDescription> ?description }}
+                ?s <http://w3id.org/roh/isValidated> 'true'.
+                OPTIONAL{{ ?s <http://vivoweb.org/ontology/core#end> ?end }}
+                OPTIONAL{{ ?s <http://vivoweb.org/ontology/core#start> ?start }}
+                OPTIONAL{{ ?s <http://vivoweb.org/ontology/core#description> ?description }}
                 OPTIONAL{{
-                    ?s <http://w3id.org/roh/ownerOrganizationTitle> ?organizacion.
+                    ?s <http://w3id.org/roh/conductedBy> ?conductedBy.
+                    ?conductedBy <http://w3id.org/roh/title> ?organizacion
+                }}
+                OPTIONAL{{
+                    ?s <http://vivoweb.org/ontology/core#geographicFocus> ?o.
+                    ?o <http://purl.org/dc/elements/1.1/title> ?geographicRegion.
+                    FILTER(lang(?geographicRegion)='es')
                 }}
                 OPTIONAL{{ 
-                    ?s <http://purl.org/ontology/bibo/authorList> ?listaAutores.
+                    ?s ?pAux ?listaAutores
+                    FILTER (?pAux in (<http://w3id.org/roh/mainResearchers>, <http://w3id.org/roh/researchers>)).
                     ?listaAutores <http://xmlns.com/foaf/0.1/nick> ?userName.
-                    ?listaAutores <http://www.w3.org/1999/02/22-rdf-syntax-ns#member> ?autorId
-
                 }}
                 FILTER(?s in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "patent");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "project" , "organization" });
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
             {
                 try
                 {
-
-                    var fecha = e.ContainsKey("dateFiled") ? e["dateFiled"].value : String.Empty;
-                    DateTime fechaDate = DateTime.Now;
-                    try
-                    {
-                        if (fecha != String.Empty)
-                        {
-                            fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
-                            fecha = fechaDate.ToString("dd/MM/yyyy");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
-                    }
-
-
                     Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["s"].value);
+                    string geographicRegion = e.ContainsKey("geographicRegion") ? e["geographicRegion"].value : "";
                     string organizacion = e.ContainsKey("organizacion") ? e["organizacion"].value : "";
+                    var info = geographicRegion + ((geographicRegion != "" && organizacion != "") ? ", " : "") + organizacion;
 
                     result.Add(currentShortId, new PIIOffer()
                     {
                         id = e["s"].value,
                         shortId = currentShortId,
                         name = e["title"].value,
-                        organizacion = organizacion,
+                        info = info,
                         description = e.ContainsKey("description") ? e["description"].value : "",
-                        fecha = fecha,
-                        researchers = e.ContainsKey("autores") ? e["autores"].value.Split(";").ToList() : new List<string>(),
-                        researchersIds = e.ContainsKey("listaAutoresIds") ? e["listaAutoresIds"].value.Split(";").ToList() : new List<string>(),
+                        dates = new string[] { e.ContainsKey("start") ? e["start"].value : "", e.ContainsKey("end") ? e["end"].value : "" },
+                        researchers = e.ContainsKey("autores") ? e["autores"].value.Split(",").ToList() : new List<string>(),
 
                     });
                 }
-                catch (Exception ext) { new Exception("Ha habido un error al procesar los datos de las patentes:" + ext.Message); }
+                catch (Exception ext) { new Exception("Ha habido un error al procesar los datos de los proyectos:" + ext.Message); }
 
             });
 
@@ -1720,39 +1705,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         }
 
 
-
-        /// <summary>
-        /// Método que comprueba si el usuario es un usuario otri.
-        /// </summary>
-        /// <param name="pIdGnossUser">Id del usuario actual</param>
-        /// <returns>Retorna un listado de ids con los usuarios otri.</returns>
-        public bool CheckIfIsOtri(Guid pIdGnossUser)
-        {
-            string select = "select ?s ?isOtriManager";
-            string where = @$"where {{
-                    ?s a <http://xmlns.com/foaf/0.1/Person>.
-                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
-                    OPTIONAL {{?s <http://w3id.org/roh/isOtriManager> ?isOtriManager.}}
-                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
-                }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
-            var userGnossId = string.Empty;
-            var isOtriManager = false;
-            sparqlObject.results.bindings.ForEach(e =>
-            {
-                try
-                {
-                    bool.TryParse(e["isOtriManager"].value, out isOtriManager);
-                }
-                catch (Exception ex)
-                {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
-                }
-            });
-
-            return isOtriManager;
-
-        }
 
 
         /// <summary>
@@ -2014,9 +1966,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Retorna un listado de ids con los usuarios otri.</returns>
         private List<string> GetOtriId(string longId)
         {
-            string select = "SELECT DISTINCT ?otriUser " +
-                "FROM <http://gnoss.com/organization.owl> " +
-                "FROM <http://gnoss.com/offer.owl> ";
+            string select = "SELECT DISTINCT ?otriUser ";
 
             string where = @$"where {{
                     ?otriUser a <http://xmlns.com/foaf/0.1/Person>.
@@ -2028,7 +1978,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     FILTER (?creatorUser = <{longId}>)
                 }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "person" , "organization", "offer" });
             List<string> users = new();
 
             sparqlObject.results.bindings.ForEach(e =>
@@ -2047,8 +1997,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
         }
-
-
 
         private bool mostrar(string estadoStr, TipoUser tipoUser)
         {

@@ -30,7 +30,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         {
             try
             {
-                string select = "SELECT DISTINCT ?titulo ?autores ?anio ?revista ?publisher ?issn ?volumen ?doi ?paginaInicio ?paginaFin FROM <http://gnoss.com/maindocument.owl>";
+                string select = "SELECT DISTINCT ?titulo ?autores ?anio ?revista ?publisher ?issn ?volumen ?doi ?paginaInicio ?paginaFin";
                 string where =
                 $@"WHERE {{
                 ?s <http://w3id.org/roh/title> ?titulo FILTER(?s=<{pIdRecurso}>).
@@ -45,7 +45,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
-                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
+                SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document" , "maindocument" });
                 string titulo = string.Empty;
                 List<string> autores = new List<string>();
                 string anio = string.Empty;
@@ -146,7 +146,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         {
             try
             {
-                string select = "SELECT DISTINCT ?titulo ?autores ?anio ?revista ?publisher ?issn ?volumen ?doi ?paginaInicio ?paginaFin FROM <http://gnoss.com/maindocument.owl>";
+                string select = "SELECT DISTINCT ?titulo ?autores ?anio ?revista ?publisher ?issn ?volumen ?doi ?paginaInicio ?paginaFin ";
                 string where =
                 $@"WHERE {{
                 ?s <http://w3id.org/roh/title> ?titulo FILTER(?s=<{pIdRecurso}>).
@@ -161,7 +161,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
-                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "document");
+                SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document", "maindocument" });
                 string titulo = string.Empty;
                 List<string> autores = new List<string>();
                 string anio = string.Empty;

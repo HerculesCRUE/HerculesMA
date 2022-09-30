@@ -2,7 +2,7 @@
 using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
-using Hercules.MA.Journals.Config;
+using Hercules.MA.Journals.Controllers;
 using Hercules.MA.Journals.Models;
 using System;
 using System.Collections.Generic;
@@ -18,9 +18,9 @@ namespace Hercules.MA.Journals
 {
     internal class Program
     {
-        private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config");
+        private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config");
 
-        public static ConfigService configuracion = new ConfigService();
+        public static ConfigService configS;
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -32,16 +32,16 @@ namespace Hercules.MA.Journals
         {            
             string nombreExcel = "Revistas";
             string nombreHoja = "revistas";
-
+            configS = new ConfigService();
             // Obtención de revistas de BBDD.
-            List<string> idRecursosRevistas = ObtenerIDsRevistas();
-            Dictionary<string, Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas);
+            //List<string> idRecursosRevistas = ObtenerIDsRevistas();
+            //Dictionary<string, Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas);
 
             // Diccionario de revistas.
-            List<Journal> listaRevistas = dicRevistasBBDD.Values.ToList();            
-
+            //List<Journal> listaRevistas = dicRevistasBBDD.Values.ToList();            
+            List<Journal> listaRevistas = new List<Journal>();
             Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de revistas...");
-            DataSet dataSet = LecturaExcel($@"{configuracion.GetRutaDatos()}/revistas/{nombreExcel}.xlsx");
+            DataSet dataSet = LecturaExcel($@"{configS.GetRutaDatos()}/{nombreExcel}.xlsx");
 
             if (ComprobarColumnasExcel(dataSet, nombreHoja))
             {
@@ -56,7 +56,7 @@ namespace Hercules.MA.Journals
             ComprobarErrores(listaRevistas);
 
             // Carga/Modificación/Borrado de datos de BBDD. 
-            ModificarRevistas(listaRevistas);
+            //ModificarRevistas(listaRevistas);
 
             // TODO: Versión antigua. No borrar de momento.
             // Lectura del excel. 

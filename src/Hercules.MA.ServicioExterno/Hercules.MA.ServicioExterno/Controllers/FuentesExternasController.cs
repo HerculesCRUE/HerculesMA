@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Threading.Tasks;
-
+using Hercules.MA.ServicioExterno.Models;
 namespace Hercules.MA.ServicioExterno.Controllers
 {
     [ApiController]
@@ -26,6 +27,12 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("InsertToQueue")]
         public IActionResult InsertToQueueFuentesExternas(string pUserId)
         {
+
+            if (!Security.CheckUser(new Guid(pUserId), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
             try
             {
                 ReadRabbitService rabbitMQService = new ReadRabbitService(_Configuracion);
@@ -79,7 +86,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
         [HttpGet("InsertDoiToQueue")]
         public bool InsertDoiToQueueFuentesExternas([Required] string pDoi, [Required] string pNombreCompletoAutor, [Required] string pOrcid)
-        {
+        { 
             try
             {
                 ReadRabbitService rabbitMQService = new ReadRabbitService(_Configuracion);

@@ -48,7 +48,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             // Consulta sparql.
             select.Append(mPrefijos);
-            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?orcid ?orcidCV ?researcherId ?researcherIdCV ?scopusId ?scopusIdCV ?semanticScholarId ?useMatching FROM <http://gnoss.com/curriculumvitae.owl>");
+            select.Append("SELECT DISTINCT ?s ?usuarioFigShare ?tokenFigShare ?usuarioGitHub ?tokenGitHub ?orcid ?orcidCV ?researcherId ?researcherIdCV ?scopusId ?scopusIdCV ?semanticScholarId ?useMatching");
             where.Append("WHERE { ");
             where.Append($@"?s roh:gnossUser <{idGnossUser}>. ");
             where.Append($@"?c roh:cvOf ?s. ");
@@ -67,7 +67,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"OPTIONAL{{?s roh:useMatching ?useMatching. }} ");
             where.Append("} ");
 
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "person");
+            resultadoQuery = mResourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "person" , "curriculumvitae" });
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
