@@ -207,6 +207,18 @@ Controlador para cargar los perfiles de cada investigador sugerido del cluster
 *Object* Diccionario con los datos necesarios para cada persona por cluster.
 
 
+## [POST] LoadSavedProfiles
+Controlador para cargar la configuración de los perfiles de todos los clusters de un usuario de la web
+
+*Parámetros:*
+ - **pIdUser** *(Object)*: Id del usuario
+ - **loadSavedProfiles** *(bool)*: Booleano que determina si cargamos los investigadores de cada perfil
+ 
+*Devuelve:*
+*Objects* Listado con los datos necesarios de los clusters y sus perfiles.
+
+
+
 
 ## [POST] DatosGraficaColaboradoresCluster
 Controlador que obtiene el objeto para crear la gráfica tipo araña de las relaciones entre los perfiles seleccionados en el cluster
