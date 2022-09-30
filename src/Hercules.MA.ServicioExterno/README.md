@@ -25,7 +25,7 @@ Los métodos son los siguientes:
 
 
 ## [POST] GetThesaurus
-Controlador para obtener los thesaurus usados en el cluster
+Controlador para obtener los thesaurus usados en las ofertas
 
 *Parámetros:*
  - **listThesaurus** *(string[])*: Elemento padre que define los thesaurus a devolver
@@ -36,12 +36,12 @@ Controlador para obtener los thesaurus usados en el cluster
 
 
 
-## [GET] BorrarOferta
+## [POST] BorrarOferta
 Borra una oferta
 
 *Parámetros:*
  - **pIdOfferID** *(string)*: Id de la oferta a borrar
- - **pIdGnossUser** *(string)*: Id del usuario que realiza la acción
+ - **pIdGnossUser** *(Guid)*: Id del usuario que realiza la acción
 
 *Devuelve:*
 *Boolean* True o false si ha sido borrado.
@@ -55,7 +55,7 @@ Cambia el estado de una oferta
  - **estado** *(string)*: Id del estado al que se quiere establecer
  - **estadoActual** *(string)*: Id del estado que tiene actualmente (Necesario para la modificación del mismo)
  - **pIdGnossUser** *(Guid)*: Id del usuario que modifica el estado, necesario para actualizar el historial
- - **pIdGnossUser** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
+ - **text** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
 
 *Devuelve:*
 *String* Id del nuevo estado.
@@ -69,14 +69,14 @@ Cambiar el estado de un listado de ofertas
  - **estado** *(string)*: Id del estado al que se quiere establecer
  - **estadoActual** *(string)*: Id del estado que tiene actualmente (Necesario para la modificación del mismo)
  - **pIdGnossUser** *(Guid)*: Id del usuario que modifica el estado, necesario para actualizar el historial
- - **pIdGnossUser** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
+ - **text** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
 
 *Devuelve:*
-*String* Id del nuevo estado.
+*Bool* True o false indicando si se han hecho los cambios o no.
 
 
 ## [GET] LoadOffer
-Controlador para guardar los datos de la oferta
+Controlador para cargar los datos de la oferta
 
 *Parámetros:*
  - **pIdOfferId** *(string)*: Id de la oferta a borrar
@@ -117,7 +117,6 @@ Controlador para Obtener los sectores de encuadre
 
 
 
-
 ## [GET] LoadMatureStates
 Controlador para Obtener los estados de madurez de las ofertas tecnológicas
 
@@ -125,8 +124,7 @@ Controlador para Obtener los estados de madurez de las ofertas tecnológicas
  - **lang** *(string)*: Idioma a cargar
  
 *Devuelve:*
-*string[]* Listado de las líneas de investigación.
-
+*string[]* Listado de los estados de madurez.
 
 
 
@@ -134,11 +132,23 @@ Controlador para Obtener los estados de madurez de las ofertas tecnológicas
 Controlador para crear/actualizar los datos de la oferta
 
 *Parámetros:*
- - **pIdGnossUser** *(string)*: Usuario de gnoss que realiza la acción
+ - **pIdGnossUser** *(Guid)*: Usuario de gnoss que realiza la acción
  - **oferta** *(Object)*: Objeto con la oferta tecnológica a crear/actualizar
  
 *Devuelve:*
 *string* Id de la oferta creada o modificada.
+
+
+
+## [POST] GetUserProfileInOffer
+Controlador que lista el perfil de usuarios al que pertenece el usuario actual respecto a una oferta tecnológica dada 
+
+*Parámetros:*
+ - **pIdOfertaId** *(string)*: Id de la oferta tecnológica
+ - **userId** *(Guid)*: Usuario de gnoss que realiza la acción
+ 
+*Devuelve:*
+*Object* Objeto json
 
 
 
