@@ -93,7 +93,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                     return true;
                 }
 
-                return true;
+                return false;
             }
             catch (Exception ex)
             {
