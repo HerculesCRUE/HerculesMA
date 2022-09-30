@@ -25,7 +25,7 @@ Los métodos son los siguientes:
 
 
 ## [POST] GetThesaurus
-Controlador para obtener los thesaurus usados en el cluster
+Controlador para obtener los thesaurus usados en las ofertas
 
 *Parámetros:*
  - **listThesaurus** *(string[])*: Elemento padre que define los thesaurus a devolver
@@ -36,12 +36,12 @@ Controlador para obtener los thesaurus usados en el cluster
 
 
 
-## [GET] BorrarOferta
+## [POST] BorrarOferta
 Borra una oferta
 
 *Parámetros:*
  - **pIdOfferID** *(string)*: Id de la oferta a borrar
- - **pIdGnossUser** *(string)*: Id del usuario que realiza la acción
+ - **pIdGnossUser** *(Guid)*: Id del usuario que realiza la acción
 
 *Devuelve:*
 *Boolean* True o false si ha sido borrado.
@@ -55,7 +55,7 @@ Cambia el estado de una oferta
  - **estado** *(string)*: Id del estado al que se quiere establecer
  - **estadoActual** *(string)*: Id del estado que tiene actualmente (Necesario para la modificación del mismo)
  - **pIdGnossUser** *(Guid)*: Id del usuario que modifica el estado, necesario para actualizar el historial
- - **pIdGnossUser** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
+ - **text** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
 
 *Devuelve:*
 *String* Id del nuevo estado.
@@ -69,14 +69,14 @@ Cambiar el estado de un listado de ofertas
  - **estado** *(string)*: Id del estado al que se quiere establecer
  - **estadoActual** *(string)*: Id del estado que tiene actualmente (Necesario para la modificación del mismo)
  - **pIdGnossUser** *(Guid)*: Id del usuario que modifica el estado, necesario para actualizar el historial
- - **pIdGnossUser** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
+ - **text** *(string)*: Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación
 
 *Devuelve:*
-*String* Id del nuevo estado.
+*Bool* True o false indicando si se han hecho los cambios o no.
 
 
 ## [GET] LoadOffer
-Controlador para guardar los datos de la oferta
+Controlador para cargar los datos de la oferta
 
 *Parámetros:*
  - **pIdOfferId** *(string)*: Id de la oferta a borrar
@@ -117,7 +117,6 @@ Controlador para Obtener los sectores de encuadre
 
 
 
-
 ## [GET] LoadMatureStates
 Controlador para Obtener los estados de madurez de las ofertas tecnológicas
 
@@ -125,8 +124,7 @@ Controlador para Obtener los estados de madurez de las ofertas tecnológicas
  - **lang** *(string)*: Idioma a cargar
  
 *Devuelve:*
-*string[]* Listado de las líneas de investigación.
-
+*string[]* Listado de los estados de madurez.
 
 
 
@@ -134,11 +132,23 @@ Controlador para Obtener los estados de madurez de las ofertas tecnológicas
 Controlador para crear/actualizar los datos de la oferta
 
 *Parámetros:*
- - **pIdGnossUser** *(string)*: Usuario de gnoss que realiza la acción
+ - **pIdGnossUser** *(Guid)*: Usuario de gnoss que realiza la acción
  - **oferta** *(Object)*: Objeto con la oferta tecnológica a crear/actualizar
  
 *Devuelve:*
 *string* Id de la oferta creada o modificada.
+
+
+
+## [POST] GetUserProfileInOffer
+Controlador que lista el perfil de usuarios al que pertenece el usuario actual respecto a una oferta tecnológica dada 
+
+*Parámetros:*
+ - **pIdOfertaId** *(string)*: Id de la oferta tecnológica
+ - **userId** *(Guid)*: Usuario de gnoss que realiza la acción
+ 
+*Devuelve:*
+*Object* Objeto json
 
 
 
@@ -197,6 +207,18 @@ Controlador para cargar los perfiles de cada investigador sugerido del cluster
 *Object* Diccionario con los datos necesarios para cada persona por cluster.
 
 
+## [POST] LoadSavedProfiles
+Controlador para cargar la configuración de los perfiles de todos los clusters de un usuario de la web
+
+*Parámetros:*
+ - **pIdUser** *(Object)*: Id del usuario
+ - **loadSavedProfiles** *(bool)*: Booleano que determina si cargamos los investigadores de cada perfil
+ 
+*Devuelve:*
+*Objects* Listado con los datos necesarios de los clusters y sus perfiles.
+
+
+
 
 ## [POST] DatosGraficaColaboradoresCluster
 Controlador que obtiene el objeto para crear la gráfica tipo araña de las relaciones entre los perfiles seleccionados en el cluster
@@ -244,6 +266,130 @@ Controlador que sugiere etiquetas con la búsqueda dada
  
 *Devuelve:*
 *string[]* Listado de las etiquetas de resultado
+
+
+
+
+# RosVinculadosController
+La documentación funcional de los ROs vinculados está en [ROs vinculados](https://confluence.um.es/confluence/display/HERCULES/ROs+vinculados).
+
+Los métodos de éste controlador tendrán la siguiente url:
+> https://something.com/servicioexterno/RosVinculados/[METODO]
+
+Los métodos son los siguientes:
+
+
+## [POST] DeleteLinked
+Borra un vínculo
+
+*Parámetros:*
+ - **resourceRO** *(string)*: Id (Guid) del RO relacionado
+ - **pIdROId** *(string)*: Id (Guid) del RO a eliminar de vinculados
+ - **pIdGnossUser** *(string)*: Id del usuario que realiza la acción
+ 
+*Devuelve:*
+*Bool* 'true' or 'false' si ha sido borrado
+
+
+
+## [GET] LoadRosLinked
+Controlador para Obtener los ROs vinculados de un RO en concreto
+
+*Parámetros:*
+ - **pIdOfferID** *(string)*: ID del RO a obtener las relaciones
+ - **pIdGnossUser** *(string)*: Idioma de los literales para la consulta, por defecto "es"
+
+*Devuelve:*
+*Objects* Listado de los RO vinculados.
+
+
+
+
+## [POST] SearchROs
+Controlador para Obtener los ROs vinculados de un RO en concreto
+
+*Parámetros:*
+ - **text** *(string)*: String a buscar
+ - **pIdGnossUser** *(string)*: Id del usuario que modifica el estado, necesario para actualizar el historial
+ - **listItemsRelated** *(string[])*: Ids de ROs seleccionados
+
+*Devuelve:*
+*Objects* Listado de los RO vinculados.
+
+
+
+
+## [POST] AddLink
+Controlador para crear una vinculación
+
+*Parámetros:*
+ - **resourceRO** *(string)*: Id (Guid) del RO relacionado
+ - **pIdROId** *(string)*: Id (Guid) del RO a añadir a vinculados
+ - **pIdGnossUser** *(Guid)*: Id del usuario que realiza la acción
+
+*Devuelve:*
+*Objects* Id de la oferta creada o modificada.
+
+
+
+
+
+
+
+# AnotacionesController
+La documentación funcional de los ROs vinculados está en [Anotaciones](https://confluence.um.es/confluence/display/HERCULES/Anotaciones+sobre+los+ROs).
+
+Los métodos de éste controlador tendrán la siguiente url:
+> https://something.com/servicioexterno/Anotaciones/[METODO]
+
+Los métodos son los siguientes:
+
+
+## [POST] GetOwnAnnotationsInRO
+Controlador para obtener las anotaciones de un investigador en un RO concreto.
+Los valores posibles de la ontología serían actualmente:
+"http://purl.org/ontology/bibo/Document", "document"
+"http://w3id.org/roh/ResearchObject", "researchobject"
+
+*Parámetros:*
+ - **idRO** *(string)*: Id del RO
+ - **idUser** *(string)*: Id del usuario
+ - **rdfType** *(string)*: rdfType de la ontología
+ - **ontology** *(string)*: Nombre de la ontología
+ 
+*Devuelve:*
+*Objects* Diccionario con los datos
+
+
+
+## [POST] CreateNewAnnotation
+Controlador para crear una nueva anotación
+Los valores posibles de la ontología serían actualmente:
+"http://purl.org/ontology/bibo/Document", "document"
+"http://w3id.org/roh/ResearchObject", "researchobject"
+
+*Parámetros:*
+ - **idRO** *(string)*: Id del RO
+ - **idUser** *(string)*: Id del usuario
+ - **rdfType** *(string)*: rdfType de la ontología
+ - **ontology** *(string)*: Nombre de la ontología
+ - **texto** *(string)*: Texto de la anotación
+ - **idAnnotation** *(string)*: Id de la anotación (si se guarda) (Puede ser nulo)
+ 
+*Devuelve:*
+*Objects* Diccionario con los datos
+
+
+
+## [POST] DeleteAnnotation
+Metodo para eliminar una anotacion
+
+*Parámetros:*
+ - **idAnnotation** *(string)*: Id de la anotacion a eliminar
+ 
+*Devuelve:*
+*Bool* 'true' o 'false' si ha sido eliminada
+
 
 
 # HerculesController

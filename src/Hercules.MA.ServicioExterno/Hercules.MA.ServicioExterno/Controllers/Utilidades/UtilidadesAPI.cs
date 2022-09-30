@@ -810,6 +810,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
             // Definimos la variable que va a contener los IDs de los elementos en formato url
             List<string> idsURL = new();
+            List<string> graphs = new() {nameOntology};
             if (ids != null)
             {
                 // Obtenemos las urls de los iDs cortos
@@ -822,9 +823,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                 });
 
                 // Creamos la url de la ontología si ésta está vacía
-                if (urlOntology == null)
+                if (urlOntology != null)
                 {
-                    urlOntology = "http://gnoss.com/" + nameOntology + ".owl";
+                    string onto = urlOntology.Split("http://gnoss.com/").Last().Replace(".owl", "");
+                    if (onto != graphs.FirstOrDefault())
+                    {
+                        graphs.Add(onto);
+                    }
                 }
 
                 // Query to get the full ID
@@ -841,7 +846,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                     try
                     {
                         // Obtenemos el diccionario con la relación entre id corto (GUID) e id largo
-                        SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, nameOntology);
+                        SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, graphs);
                         sparqlObject.results.bindings.ForEach(e =>
                         {
                             relationProjIDs.Add(new Guid(e["s"].value.Split("http://gnoss.com/").Last()), e["entidad"].value);
@@ -857,7 +862,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
             return relationProjIDs;
         }
-
 
         /// <summary>
         /// Método estático para generar notificaciones a los diferentes usuarios
@@ -899,7 +903,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
             return recursoCargar.Uploaded;
         }
-
 
         /// <summary>
         /// Método estático para obtener los tesauros.
@@ -956,7 +959,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
             string termsTxt = String.Join(',', terms.Select(e => "<" + e + ">"));
 
-            string select = "select ?o FROM <http://gnoss.com/taxonomy.owl>";
+            string select = "select ?o";
             string where = @$"where {{
                 ?s a <http://w3id.org/roh/CategoryPath>.
                 ?s <http://w3id.org/roh/categoryNode> ?o.
@@ -966,7 +969,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
                 }}
                 FILTER(?s IN ({termsTxt}))
             }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, ontology);
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { ontology , "taxonomy" });
 
             List<string> termsRes = new();
 
@@ -1004,8 +1007,6 @@ namespace Hercules.MA.ServicioExterno.Controllers.Utilidades
 
             return userGnossId;
         }
-
-
 
     }
 }

@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Hercules.MA.ServicioExterno.Models;
+using static Hercules.MA.ServicioExterno.Models.Cluster.Cluster;
+using static Hercules.MA.ServicioExterno.Models.Cluster.Cluster.PerfilCluster;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
@@ -50,6 +53,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         {
 
             string idClusterRes = string.Empty;
+            if (!Security.CheckUser(new Guid(pIdGnossUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             try
             {
                 AccionesCluster accionCluster = new AccionesCluster();
@@ -71,10 +78,24 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("LoadCluster")]
         public IActionResult LoadCluster([Required] string pIdClusterId)
         {
+            AccionesCluster accionCluster = new AccionesCluster();
+            bool flag = false;
+            foreach (string pIdGnossUser in accionCluster.memberListFromCluser(pIdClusterId))
+            {
+                string a = pIdGnossUser.Split("/")[pIdGnossUser.Split("/").Length - 1];
+                if (Security.CheckUser(new Guid(pIdGnossUser.Split("/")[pIdGnossUser.Split("/").Length - 1]), Request))
+                {
+                    flag = true;
+                }
+            }
+            if (!flag)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+          
             Cluster idClusterRes;
             try
-            {
-                AccionesCluster accionCluster = new AccionesCluster();
+            {   
                 idClusterRes = accionCluster.LoadCluster(pIdClusterId);
             }
             catch (Exception)
@@ -93,6 +114,22 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpPost("LoadProfiles")]
         public IActionResult LoadProfiles([FromForm] Cluster pDataCluster, [FromForm] List<string> pPersons)
         {
+
+            bool flag = false;
+            foreach (PerfilCluster perfil in pDataCluster.profiles)
+            {
+                foreach (UserCluster idGnossUser in perfil.users ){
+                    if (Security.CheckUser(new Guid(idGnossUser.userID), Request))
+                    {
+                        flag = true;
+                    }
+                } 
+            }
+            if (!flag)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
             try
             {
                 AccionesCluster accionCluster = new AccionesCluster();
@@ -113,6 +150,11 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("loadSavedProfiles")]
         public IActionResult LoadSavedProfiles([Required] Guid pIdUser, bool loadSavedProfiles = false)
         {
+
+            if (!Security.CheckUser(pIdUser, Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             try
             {
                 AccionesCluster accionCluster = new AccionesCluster();
@@ -178,12 +220,17 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpPost("BorrarCluster")]
         public IActionResult BorrarCluster([FromForm] string pIdClusterId)
         {
-
+            AccionesCluster accionCluster = new AccionesCluster();
+            string pUserId = accionCluster.getOwnerFromCluser(pIdClusterId);
+            if (!Security.CheckUser(new Guid(pUserId.Split("/")[pUserId.Split("/").Length - 1]), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             bool borrado = false;
 
             try
             {
-                AccionesCluster accionCluster = new AccionesCluster();
+                
                 borrado = accionCluster.BorrarCluster(pIdClusterId);
             }
             catch (Exception)

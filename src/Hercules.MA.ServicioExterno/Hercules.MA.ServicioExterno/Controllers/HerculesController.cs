@@ -7,6 +7,7 @@ using Hercules.MA.ServicioExterno.Models.Graficas.DataItemRelacion;
 using Hercules.MA.ServicioExterno.Models.RedesUsuario;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -436,8 +437,12 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("GetDatosRedesUsuario")]
         public IActionResult GetDatosRedesUsuario(string pIdGnossUser)
         {
-            Dictionary<string, string> datosRedesUsuario = null;
 
+            if (!Security.CheckUser(new Guid(pIdGnossUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+            Dictionary<string, string> datosRedesUsuario = null;
             try
             {
                 AccionesRedesUsuario accionDocumento = new AccionesRedesUsuario();
@@ -461,6 +466,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("SetDatosRedesUsuario")]
         public IActionResult SetDatosRedesUsuario(string pIdGnossUser, string pDicDatosAntiguos, string pDicDatosNuevos)
         {
+            if (!Security.CheckUser(new Guid(pIdGnossUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             try
             {
                 AccionesRedesUsuario accionDocumento = new AccionesRedesUsuario();
@@ -486,7 +495,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         public IActionResult GetInfoHomeEdUser(string pIdGnossUser)
         {
             Dictionary<string, string> datosUsuario = null;
-
+            if (!Security.CheckUser(new Guid(pIdGnossUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             try
             {
                 AccionesPersona accionP = new AccionesPersona();
