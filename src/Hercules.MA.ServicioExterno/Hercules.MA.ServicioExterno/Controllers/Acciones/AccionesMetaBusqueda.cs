@@ -15,11 +15,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
     {
 
         #region --- Constantes     
-        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
-        private static ResourceApi mResourceApi = new ResourceApi(RUTA_OAUTH);
-        private static CommunityApi mCommunityApi = new CommunityApi(RUTA_OAUTH);
-        private static Guid mIdComunidad = mCommunityApi.GetCommunityId();
-        private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
+        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
+        private static ResourceApi mResourceAPI = null;
+        private static CommunityApi mCommunityAPI = null;
+        private static Guid? mIDComunidad = null;
+        private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models{Path.DirectorySeparatorChar}JSON{Path.DirectorySeparatorChar}prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
 
         public static int publicationsCount = 0;
@@ -31,9 +31,71 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
         public static Dictionary<string, List<ObjectSearch.Property>> textSearch = new Dictionary<string, List<ObjectSearch.Property>>();
 
-
-
         #endregion
+
+        private static ResourceApi resourceApi
+        {
+            get
+            {
+                while (mResourceAPI == null)
+                {
+                    try
+                    {
+                        mResourceAPI = new ResourceApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar ResourceApi");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mResourceAPI;
+            }
+        }
+
+        private static CommunityApi communityApi
+        {
+            get
+            {
+                while (mCommunityAPI == null)
+                {
+                    try
+                    {
+                        mCommunityAPI = new CommunityApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar CommunityApi");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mCommunityAPI;
+            }
+        }
+
+        private static Guid idComunidad
+        {
+            get
+            {
+                while (!mIDComunidad.HasValue)
+                {
+                    try
+                    {
+                        mIDComunidad = communityApi.GetCommunityId();
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido obtener el ID de la comnunidad");
+                        Console.WriteLine($"Ruta OAuth: {RUTA_OAUTH}");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mIDComunidad.Value;
+            }
+        }
 
         /// <summary>
         /// Busca los elementos necesarios y los guarda en una variable estática para realizar posteriormente la búsqueda en el metabuscador
@@ -71,7 +133,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 OPTIONAL{{?id roh:isActive ?isActive.}}
                                             }}ORDER BY asc(?name) asc(?id) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -133,7 +195,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 OPTIONAL{{ ?id dct:issued ?fecha}}
                                             }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -195,7 +257,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?lista rdf:member ?author.
                                             }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -239,7 +301,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id vivo:freeTextKeyword ?tagAux. ?tagAux roh:title ?tag
                                             }}ORDER BY DESC(?id) DESC(?tag) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -286,7 +348,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 OPTIONAL{{ ?id dct:issued ?fecha}}
                                             }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -347,7 +409,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?lista rdf:member ?author.
                                             }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -391,7 +453,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id vivo:freeTextKeyword ?tag
                                             }}ORDER BY DESC(?id) DESC(?tag) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -436,7 +498,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 OPTIONAL{{ ?id vivo:description ?description}}  
                                             }}ORDER BY DESC(?title) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -494,7 +556,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id roh:membersGroup ?author.
                                             }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -553,7 +615,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 OPTIONAL{{ ?id vivo:description ?description}}
                                             }}ORDER BY DESC(?title) DESC(?id)  }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -611,7 +673,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id roh:membersProject  ?author.
                                             }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -671,7 +733,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 OPTIONAL{{ ?id dct:issued ?fecha}}
                                             }}ORDER BY DESC(?fecha) DESC(?id) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -731,7 +793,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                                 ?id roh:researchers ?author.
                                             }}ORDER BY DESC(?id) DESC(?author) }} LIMIT {limit} OFFSET {offset}";
 
-                                SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+                                SparqlObject resultadoQuery = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
                                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                                 {
@@ -861,7 +923,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
             }).Start();
@@ -1253,7 +1315,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             List<ResponseGetUrl> enlaces = new List<ResponseGetUrl>();
             if (ids.Count > 0)
             {
-                enlaces = mResourceApi.GetUrl(ids, pLang);
+                enlaces = resourceApi.GetUrl(ids, pLang);
             }
 
             foreach (string key in respuesta.Keys)

@@ -38,8 +38,10 @@ namespace Hercules.MA.Journals
             //Dictionary<string, Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas);
 
             // Diccionario de revistas.
+
             //List<Journal> listaRevistas = dicRevistasBBDD.Values.ToList();            
             List<Journal> listaRevistas = new List<Journal>();
+
             Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de revistas...");
             DataSet dataSet = LecturaExcel($@"{configS.GetRutaDatos()}/{nombreExcel}.xlsx");
 
@@ -825,9 +827,30 @@ namespace Hercules.MA.Journals
             {
                 // No debería entrar por aquí, porque significaría que hay una revista con mismo título/editorial y otra revista diferente con el mismo ISSN.
                 // Nos quedamos con la que tenga el mismo ISSN.
-                revista = revistasMismoISSN[0];
-                pListaRevistas.Remove(revistasMismoTituloYEditorial[0]);
-                var x = pListaRevistas.IndexOf(revistasMismoTituloYEditorial[0]);
+                if (revistasMismoISSN.Count > 0)
+                {
+                    revista = revistasMismoISSN[0];
+
+                    if(revistasMismoTituloYEditorial.Count > 0)
+                    {
+                        pListaRevistas.Remove(revistasMismoTituloYEditorial[0]);
+                    }
+
+                    if(revistasMismoTituloYEISSN.Count > 0)
+                    {
+                        pListaRevistas.Remove(revistasMismoTituloYEISSN[0]);
+                    }
+                }
+
+                if (revistasMismoTituloYEISSN.Count > 0)
+                {
+                    revista = revistasMismoTituloYEISSN[0];
+
+                    if (revistasMismoTituloYEditorial.Count > 0)
+                    {
+                        pListaRevistas.Remove(revistasMismoTituloYEditorial[0]);
+                    }
+                }
             }
 
             return revista;
@@ -873,17 +896,20 @@ namespace Hercules.MA.Journals
             }
             #endregion
 
-            #region --- Comprobar que no haya revistas con el mismo título y editorial.
+            #region --- Comprobar que no haya revistas con el mismo título y EISSN.
             Dictionary<string, Journal> eissns = new Dictionary<string, Journal>();
             foreach (Journal revista in pListaRevistas)
             {
-                try
+                if (!string.IsNullOrEmpty(revista.eissn))
                 {
-                    eissns.Add(revista.titulo.ToLower() + "|||" + revista.eissn, revista);
-                }
-                catch
-                {
-                    throw new Exception("Hay revistas con el mismo título y EISSN.");
+                    try
+                    {
+                        eissns.Add(revista.titulo.ToLower() + "|||" + revista.eissn, revista);
+                    }
+                    catch
+                    {
+                        throw new Exception("Hay revistas con el mismo título y EISSN.");
+                    }
                 }
             }
             #endregion

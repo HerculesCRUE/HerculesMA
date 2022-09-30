@@ -11,6 +11,7 @@ using System.Linq;
 using Hercules.MA.ServicioExterno.Controllers.Utilidades;
 using Microsoft.AspNetCore.Cors;
 using Hercules.MA.ServicioExterno.Models.Cluster;
+using System.Threading;
 
 namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 {
@@ -18,14 +19,77 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
     public class AccionesOferta
     {
         #region --- Constantes   
-        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
-        private static ResourceApi mResourceApi = new ResourceApi(RUTA_OAUTH);
-        private static CommunityApi mCommunityApi = new CommunityApi(RUTA_OAUTH);
-        private static Guid mIdComunidad = mCommunityApi.GetCommunityId();
-        private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models/JSON/prefijos.json";
+        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
+        private static ResourceApi mResourceAPI = null;
+        private static CommunityApi mCommunityAPI = null;
+        private static Guid? mIDComunidad = null;
+        private static string RUTA_PREFIJOS = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Models{Path.DirectorySeparatorChar}JSON{Path.DirectorySeparatorChar}prefijos.json";
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(RUTA_PREFIJOS)));
         private static string[] listTagsNotForvidden = new string[] { "<ol>", "<li>", "<b>", "<i>", "<u>", "<ul>", "<strike>", "<blockquote>", "<div>", "<hr>", "</ol>", "</li>", "</b>", "</i>", "</u>", "</ul>", "</strike>", "</blockquote>", "</div>", "<br/>" };
         private static string[] listTagsAttrNotForvidden = new string[] { "style" };
+
+        private static ResourceApi resourceApi
+        {
+            get
+            {
+                while (mResourceAPI == null)
+                {
+                    try
+                    {
+                        mResourceAPI = new ResourceApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar ResourceApi");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mResourceAPI;
+            }
+        }
+
+        private static CommunityApi communityApi
+        {
+            get
+            {
+                while (mCommunityAPI == null)
+                {
+                    try
+                    {
+                        mCommunityAPI = new CommunityApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar CommunityApi");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mCommunityAPI;
+            }
+        }
+
+        private static Guid idComunidad
+        {
+            get
+            {
+                while (!mIDComunidad.HasValue)
+                {
+                    try
+                    {
+                        mIDComunidad = communityApi.GetCommunityId();
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido obtener el ID de la comnunidad");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mIDComunidad.Value;
+            }
+        }
 
         private enum TipoUser
         {
@@ -72,12 +136,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
             catch (Exception ex)
             {
-                mResourceApi.Log.Error("El texto que ha introducido no corresponde a un json válido");
-                mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                resourceApi.Log.Error("El texto que ha introducido no corresponde a un json válido");
+                resourceApi.Log.Error("Excepcion: " + ex.Message);
             }
 
             //var thesaurus = GetTesauros(thesaurusTypes, lang);
-            var thesaurus = UtilidadesAPI.GetTesauros(mResourceApi, thesaurusTypes, lang);
+            var thesaurus = UtilidadesAPI.GetTesauros(resourceApi, thesaurusTypes, lang);
 
             return thesaurus;
         }
@@ -102,12 +166,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Dictionary<Guid, string> longsId = new();
             if (Guid.TryParse(idRecurso, out guid))
             {
-                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, resourceApi, "http://www.schema.org/Offer", "offer");
                 idRecurso = longsId[guid];
             }
             else
             {
-                guid = mResourceApi.GetShortGuid(idRecurso);
+                guid = resourceApi.GetShortGuid(idRecurso);
             }
 
             Offer oferta = null;
@@ -121,7 +185,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
                 }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "person");
             string userGnossId = string.Empty;
             bool isOtriManager = false;
             sparqlObject.results.bindings.ForEach(e =>
@@ -133,7 +197,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             });
 
@@ -164,14 +228,14 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     // Añadir cambio en el historial de la disponibilidad
                     // Comprueba si el id del recuro no está vacío
-                    mResourceApi.ChangeOntoly("offer");
+                    resourceApi.ChangeOntoly("offer");
 
                     // Inserto un historial en la base de datos
                     // Obtengo el guid del recurso
                     // Inicio el diccionario con el triplete
                     Dictionary<Guid, List<TriplesToInclude>> triples = new() { { guid, new List<TriplesToInclude>() } };
                     // Creo el id del recurso auxiliar para guardarlo
-                    string idAux = mResourceApi.GraphsUrl + "items/AvailabilityChangeEvent_" + guid.ToString().ToLower() + "_" + Guid.NewGuid().ToString().ToLower();
+                    string idAux = resourceApi.GraphsUrl + "items/AvailabilityChangeEvent_" + guid.ToString().ToLower() + "_" + Guid.NewGuid().ToString().ToLower();
 
                     // Creo los tripletes
                     TriplesToInclude t1 = new();
@@ -190,11 +254,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     try
                     {
                         // Guardo los tripletes
-                        var resultado = mResourceApi.InsertPropertiesLoadedResources(triples);
+                        var resultado = resourceApi.InsertPropertiesLoadedResources(triples);
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
 
                     // Modifico el estado
@@ -213,11 +277,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                         // Modificación.
                         dicModificacion.Add(guid, listaTriplesModificacion);
-                        mResourceApi.ModifyPropertiesLoadedResources(dicModificacion);
+                        resourceApi.ModifyPropertiesLoadedResources(dicModificacion);
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
 
@@ -228,24 +292,24 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     if (texto != "" && longsId != null && oferta != null)
                     {
                         texto = (nuevoEstado != estadoActual) ? "Nuevo estado de la oferta " + getEstado(nuevoEstado).ToString() + " " + texto : "Tienes un mensaje: " + texto;
-                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", texto);
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(resourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", texto);
                     }
 
                     // Avisamos al gestor otri de que hay nuevas ofertas disponibles para validar
-                    else if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_002")
+                    else if (resourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_002")
                     {
 
                         // Obtengo los usuarios otri disponibles para el usuario creador de la oferta, y les aviso de que ya pueden activarla
                         GetOtriId(oferta.creatorId).ForEach(idOtri =>
                         {
-                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
+                            bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(resourceApi, idRecurso, userGnossId, idOtri, "editOferta", "Hay una nueva oferta tecnológica disponible para validar");
                         });
                     }
 
                     // Avisamos al investigador creador de la oferta
-                    else if (mResourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
+                    else if (resourceApi != null && nuevoEstado == "http://gnoss.com/items/offerstate_003")
                     {
-                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(mResourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido validada");
+                        bool notificacionesEnviadas = UtilidadesAPI.GenerarNotificacion(resourceApi, idRecurso, userGnossId, oferta.creatorId, "editOferta", "La oferta tecnológica ha sido validada");
                     }
                 }
 
@@ -273,8 +337,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
             catch (Exception ex)
             {
-                mResourceApi.Log.Error("The id is't a correct guid");
-                mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                resourceApi.Log.Error("The id is't a correct guid");
+                resourceApi.Log.Error("Excepcion: " + ex.Message);
             }
 
             // Coonsulta para obtener la información del investigador
@@ -315,6 +379,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }}";
             SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "person","organization","group","department","document" });
 
+
             // Obtiene los datos de la consulta y rellena el diccionario de respuesta con los datos de cada investigador.
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
@@ -348,7 +413,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             }
 
@@ -381,8 +446,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
-                    mResourceApi.Log.Error("The id is't a correct guid");
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("The id is't a correct guid");
                 }
 
             }
@@ -399,7 +464,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         FILTER(?person in(<http://gnoss/{string.Join(">,<http://gnoss/", usersGUIDs.Select(x => x.ToString().ToUpper()))}>))
                     }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, mIdComunidad);
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, idComunidad);
 
             foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
             {
@@ -420,7 +485,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             }
             respuesta = new Tuple<List<string>, List<string>>(lineResearchs, grupos);
@@ -450,7 +515,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     ?s dc:identifier ?identifier.
                     FILTER( lang(?title) = '{lang}' OR lang(?title) = '')
                 }} ORDER BY ASC(?identifier)";
-                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "maturestate");
+                SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "maturestate");
 
                 foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
                 {
@@ -470,7 +535,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex) 
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
 
                 }
@@ -502,7 +567,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     ?s dc:identifier ?identifier.
                     FILTER( lang(?title) = '{lang}' OR lang(?title) = '')
                 }} ORDER BY ASC(?title)";
-                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "framingsector");
+                SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "framingsector");
 
                 foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
                 {
@@ -522,7 +587,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
 
                 }
@@ -552,7 +617,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     ?s dc:identifier ?identifier.
                     FILTER( lang(?title) = '{lang}' OR lang(?title) = '')
                 }} ORDER BY ASC(?identifier)";
-                SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offerstate");
+                SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "offerstate");
 
                 foreach (Dictionary<string, SparqlObject.Data> fila in sparqlObject.results.bindings)
                 {
@@ -568,7 +633,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
 
                 }
@@ -599,13 +664,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Si en cambio el ID es un id largo, obtengo el id corto
                 if (Guid.TryParse(pIdOfertaId, out pIdGnossUserGuid))
                 {
-                    Dictionary<Guid, string> longIdsResources = UtilidadesAPI.GetLongIds(new List<Guid>() { pIdGnossUserGuid }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                    Dictionary<Guid, string> longIdsResources = UtilidadesAPI.GetLongIds(new List<Guid>() { pIdGnossUserGuid }, resourceApi, "http://www.schema.org/Offer", "offer");
                     pIdOfertaId = longIdsResources[pIdGnossUserGuid];
                 }
                 else
                 {
                     // Obtengo el id corto del id largo pasado
-                    pIdGnossUserGuid = UtilidadesAPI.ObtenerIdCorto(mResourceApi, pIdOfertaId);
+                    pIdGnossUserGuid = UtilidadesAPI.ObtenerIdCorto(resourceApi, pIdOfertaId);
                 }
 
                 // Compruebo si el usuario tiene permisos 
@@ -619,7 +684,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }}";
                     try
                     {
-                        SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offer");
+                        SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "offer");
                         sparqlObject.results.bindings.ForEach(e =>
                         {
                             creatorId = e["creatorId"].value;
@@ -627,12 +692,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
 
 
                     // Obtengo el id del investigador relacionado con el usuario logueado que está intentando hacer la acción actual
-                    string actUserId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
+                    string actUserId = UtilidadesAPI.GetResearcherIdByGnossUser(resourceApi, pIdGnossUser);
                     // Compruebo si este usuario tiene permisos para hacer la acción actual
                     if (!CheckUpdateOffer(actUserId, creatorId, Accion.Borrar))
                     {
@@ -645,19 +710,19 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // Establezco las entidades secundarias a borrar
                 List<string> urlSecondaryListEntities = new() { "http://w3id.org/roh/availabilityChangeEvent", "http://w3id.org/roh/areaprocedencia", "http://w3id.org/roh/sectoraplicacion" };
                 // Establezco el ámbito a borrar
-                mResourceApi.ChangeOntoly("offer");
+                resourceApi.ChangeOntoly("offer");
                 try
                 {
-                    mResourceApi.CommunityShortName = mResourceApi.GetCommunityShortNameByResourceID(pIdGnossUserGuid);
+                    resourceApi.CommunityShortName = resourceApi.GetCommunityShortNameByResourceID(pIdGnossUserGuid);
 
                     // Establece las entidades secundarias a borrar
-                    mResourceApi.DeleteSecondaryEntitiesList(ref urlSecondaryListEntities);
+                    resourceApi.DeleteSecondaryEntitiesList(ref urlSecondaryListEntities);
                     // borra el recurso
-                    mResourceApi.PersistentDelete(pIdGnossUserGuid);
+                    resourceApi.PersistentDelete(pIdGnossUserGuid);
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                     return false;
                 }
             }
@@ -681,7 +746,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Guid guid = Guid.Empty;
             if (Guid.TryParse(pIdOfertaId, out guid))
             {
-                var longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                var longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guid }, resourceApi, "http://www.schema.org/Offer", "offer");
                 pIdOfertaId = longsId[guid];
             }
 
@@ -693,7 +758,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     ?s ?p ?o.
                     FILTER(?s = <{pIdOfertaId}>)
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offer");
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "offer");
 
             // Inicizalizamos el modelo del Cluster para devolver
             Models.Offer.Offer pDataOffer = new();
@@ -721,41 +786,41 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     case "http://w3id.org/roh/researchers":
                         try
                         {
-                            pDataOffer.researchers.Add(UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["o"].value), new UsersOffer() { id = e["o"].value, shortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["o"].value) });
+                            pDataOffer.researchers.Add(UtilidadesAPI.ObtenerIdCorto(resourceApi, e["o"].value), new UsersOffer() { id = e["o"].value, shortId = UtilidadesAPI.ObtenerIdCorto(resourceApi, e["o"].value) });
                         }
                         catch (Exception ex) 
                         {
-                            mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                            resourceApi.Log.Error("Excepcion: " + ex.Message);
                         }
                         break;
                     case "http://w3id.org/roh/document":
                         try
                         {
-                            pDataOffer.documents.Add(UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["o"].value), new DocumentsOffer() { id = e["o"].value, shortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["o"].value) });
+                            pDataOffer.documents.Add(UtilidadesAPI.ObtenerIdCorto(resourceApi, e["o"].value), new DocumentsOffer() { id = e["o"].value, shortId = UtilidadesAPI.ObtenerIdCorto(resourceApi, e["o"].value) });
                         }
                         catch (Exception ex)
                         {
-                            mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                            resourceApi.Log.Error("Excepcion: " + ex.Message);
                         }
                         break;
                     case "http://w3id.org/roh/project":
                         try
                         {
-                            pDataOffer.projects.Add(UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["o"].value), new ProjectsOffer() { id = e["o"].value, shortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["o"].value) });
+                            pDataOffer.projects.Add(UtilidadesAPI.ObtenerIdCorto(resourceApi, e["o"].value), new ProjectsOffer() { id = e["o"].value, shortId = UtilidadesAPI.ObtenerIdCorto(resourceApi, e["o"].value) });
                         }
                         catch (Exception ex)
                         {
-                            mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                            resourceApi.Log.Error("Excepcion: " + ex.Message);
                         }
                         break;
                     case "http://w3id.org/roh/patents":
                         try
                         {
-                            pDataOffer.pii.Add(UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["o"].value), new PIIOffer() { id = e["o"].value, shortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["o"].value) });
+                            pDataOffer.pii.Add(UtilidadesAPI.ObtenerIdCorto(resourceApi, e["o"].value), new PIIOffer() { id = e["o"].value, shortId = UtilidadesAPI.ObtenerIdCorto(resourceApi, e["o"].value) });
                         }
                         catch (Exception ex)
                         {
-                            mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                            resourceApi.Log.Error("Excepcion: " + ex.Message);
                         }
                         break;
                     case "http://vocab.data.gov/def/drm#origin":
@@ -798,7 +863,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }
                         catch (Exception ex)
                         {
-                            mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                            resourceApi.Log.Error("Excepcion: " + ex.Message);
                         }
                         break;
                     case "http://www.schema.org/offeredBy":
@@ -830,7 +895,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtenemos todos los datos de las areas temáticas
             if (pDataOffer.areaProcedencia.Count > 0)
             {
-                var tmp = UtilidadesAPI.LoadCurrentTerms(mResourceApi, pDataOffer.areaProcedencia.Values.ToList(), "offer");
+                var tmp = UtilidadesAPI.LoadCurrentTerms(resourceApi, pDataOffer.areaProcedencia.Values.ToList(), "offer");
                 pDataOffer.areaProcedencia = new();
                 tmp.ForEach(e => pDataOffer.areaProcedencia.TryAdd(e, e));
             }
@@ -839,7 +904,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // Obtenemos todos los datos de los sectores de aplicación
             if (pDataOffer.sectorAplicacion.Count > 0)
             {
-                var tmp = UtilidadesAPI.LoadCurrentTerms(mResourceApi, pDataOffer.sectorAplicacion.Values.ToList(), "offer");
+                var tmp = UtilidadesAPI.LoadCurrentTerms(resourceApi, pDataOffer.sectorAplicacion.Values.ToList(), "offer");
                 pDataOffer.sectorAplicacion = new();
                 tmp.ForEach(e => pDataOffer.sectorAplicacion.TryAdd(e, e));
             }
@@ -854,7 +919,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
                 // Obtenemos los resúmenes de los documentos y los añadimos al objeto de la oferta
@@ -864,7 +929,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
                 // Obtenemos los resúmenes de los projectos y los añadimos al objeto de la oferta
@@ -874,7 +939,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
                 // Obtenemos los resúmenes de las propiedades industriales intelectuales (PII) y los añadimos al objeto de la oferta
@@ -884,7 +949,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             }
 
@@ -911,7 +976,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             SparqlObject sparqlObject = null;
 
             // Obtener el id del usuario usando el id de la cuenta
-            string userGnossId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
+            string userGnossId = UtilidadesAPI.GetResearcherIdByGnossUser(resourceApi, pIdGnossUser);
 
             if (!string.IsNullOrEmpty(userGnossId))
             {
@@ -923,11 +988,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     try
                     {
-                        relationIDs = UtilidadesAPI.GetLongIds(oferta.researchers.Select(e => e.Key).ToList(), mResourceApi, "http://xmlns.com/foaf/0.1/Person", "person");
+                        relationIDs = UtilidadesAPI.GetLongIds(oferta.researchers.Select(e => e.Key).ToList(), resourceApi, "http://xmlns.com/foaf/0.1/Person", "person");
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
 
@@ -939,11 +1004,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     try
                     {
-                        relationProjIDs = UtilidadesAPI.GetLongIds(oferta.projects.Select(e => e.Key).ToList(), mResourceApi, "http://vivoweb.org/ontology/core#Project", "project");
+                        relationProjIDs = UtilidadesAPI.GetLongIds(oferta.projects.Select(e => e.Key).ToList(), resourceApi, "http://vivoweb.org/ontology/core#Project", "project");
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
 
@@ -956,11 +1021,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     try
                     {
-                        relationDocsIDs = UtilidadesAPI.GetLongIds(oferta.documents.Select(e => e.Key).ToList(), mResourceApi, "http://purl.org/ontology/bibo/Document", "document");
+                        relationDocsIDs = UtilidadesAPI.GetLongIds(oferta.documents.Select(e => e.Key).ToList(), resourceApi, "http://purl.org/ontology/bibo/Document", "document");
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
 
@@ -974,11 +1039,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 {
                     try
                     {
-                        relationPiiIDs = UtilidadesAPI.GetLongIds(oferta.pii.Select(e => e.Key).ToList(), mResourceApi, "http://purl.org/ontology/bibo/Patent", "patent");
+                        relationPiiIDs = UtilidadesAPI.GetLongIds(oferta.pii.Select(e => e.Key).ToList(), resourceApi, "http://purl.org/ontology/bibo/Patent", "patent");
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
                 }
 
@@ -1029,7 +1094,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
                 try
@@ -1039,7 +1104,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
                 // Agregando las taxonomías
@@ -1070,7 +1135,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
                 // Añadir los investigadores de la oferta
@@ -1080,7 +1145,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
                 // Añadir los grupos de la oferta
@@ -1090,7 +1155,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
 
@@ -1108,7 +1173,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                     cRsource.IdsRoh_project = null;
                 }
                 try
@@ -1124,7 +1189,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                     cRsource.IdsRoh_document = null;
                 }
                 try
@@ -1140,13 +1205,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                     cRsource.IdsRoh_patents = null;
                 }
 
 
                 // Guardando o actualizando el recurso
-                mResourceApi.ChangeOntoly("offer");
+                resourceApi.ChangeOntoly("offer");
                 // Comprueba si es una actualización o no
                 if (idRecurso != null && idRecurso != "")
                 {
@@ -1168,6 +1233,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     try
                     {
                         sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "offer" ," person", "offerstate" } );
+
                         sparqlObject.results.bindings.ForEach(e =>
                         {
 
@@ -1180,7 +1246,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             }
                             catch (Exception ex)
                             {
-                                mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                                resourceApi.Log.Error("Excepcion: " + ex.Message);
                             }
 
                             creatorId = e["creatorId"].value;
@@ -1196,7 +1262,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }
                     catch (Exception ex)
                     {
-                        mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
                     }
 
 
@@ -1210,7 +1276,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     string[] recursoSplit = idRecurso.Split('_');
 
                     // Modificación.
-                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null, new Guid(recursoSplit[recursoSplit.Length - 2]), new Guid(recursoSplit[recursoSplit.Length - 1]));
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(resourceApi, null, new Guid(recursoSplit[recursoSplit.Length - 2]), new Guid(recursoSplit[recursoSplit.Length - 1]));
                     int numIntentos = 0;
                     while (!resource.Modified)
                     {
@@ -1220,7 +1286,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                             break;
                         }
 
-                        mResourceApi.ModifyComplexOntologyResource(resource, false, false);
+                        resourceApi.ModifyComplexOntologyResource(resource, false, false);
                         uploadedR = resource.Modified;
                     }
 
@@ -1228,7 +1294,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 else
                 {
                     // Inserción.
-                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(mResourceApi, null);
+                    ComplexOntologyResource resource = cRsource.ToGnossApiResource(resourceApi, null);
                     int numIntentos = 0;
                     while (!resource.Uploaded)
                     {
@@ -1237,7 +1303,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         {
                             break;
                         }
-                        idRecurso = mResourceApi.LoadComplexSemanticResource(resource, true, true);
+                        idRecurso = resourceApi.LoadComplexSemanticResource(resource, false, true);
                         uploadedR = resource.Uploaded;
                     }
                 }
@@ -1274,11 +1340,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // 3. Selecciona únicamente los Ids largos
                 try
                 {
-                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://xmlns.com/foaf/0.1/Person", "person").Select(e => e.Value).ToList();
+                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), resourceApi, "http://xmlns.com/foaf/0.1/Person", "person").Select(e => e.Value).ToList();
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             }
 
@@ -1314,14 +1380,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?memberPerfil in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
 
+
             SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person" ,"document", "project", "organization" , "department" });
+
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
             {
                 try
                 {
-                    Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["memberPerfil"].value);
+                    Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(resourceApi, e["memberPerfil"].value);
                     result.Add(currentShortId, new UsersOffer()
                     {
                         id = e["memberPerfil"].value,
@@ -1366,11 +1434,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // 3. Selecciona únicamente los Ids largos
                 try
                 {
-                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://purl.org/ontology/bibo/Document", "document").Select(e => e.Value).ToList();
+                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), resourceApi, "http://purl.org/ontology/bibo/Document", "document").Select(e => e.Value).ToList();
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             }
 
@@ -1398,12 +1466,13 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
             SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document" ,"person", "organization" });
 
+
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
             {
                 try
                 {
-                    Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["s"].value);
+                    Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(resourceApi, e["s"].value);
                     result.Add(currentShortId, new DocumentsOffer()
                     {
                         id = e["s"].value,
@@ -1447,11 +1516,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // 3. Selecciona únicamente los Ids largos
                 try
                 {
-                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://vivoweb.org/ontology/core#Project", "project").Select(e => e.Value).ToList();
+                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), resourceApi, "http://vivoweb.org/ontology/core#Project", "project").Select(e => e.Value).ToList();
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             }
 
@@ -1485,14 +1554,16 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?s in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
 
+
             SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "project" , "organization" });
+
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
             {
                 try
                 {
-                    Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["s"].value);
+                    Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(resourceApi, e["s"].value);
                     string geographicRegion = e.ContainsKey("geographicRegion") ? e["geographicRegion"].value : "";
                     string organizacion = e.ContainsKey("organizacion") ? e["organizacion"].value : "";
                     var info = geographicRegion + ((geographicRegion != "" && organizacion != "") ? ", " : "") + organizacion;
@@ -1542,10 +1613,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 try
                 {
                     longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://vivoweb.org/ontology/core#Project", "project").Select(e => e.Value).ToList();
+
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             }
 
@@ -1578,6 +1650,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}
                 FILTER(?s in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
+
 
             SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "project" , "organization" });
 
@@ -1635,7 +1708,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     OPTIONAL {{?s <http://w3id.org/roh/isOtriManager> ?isOtriManager.}}
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "person");
             var userGnossId = string.Empty;
             var isOtriManager = false;
             sparqlObject.results.bindings.ForEach(e =>
@@ -1647,7 +1720,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             });
 
@@ -1658,11 +1731,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 // Añadir cambio en el historial de la disponibilidad
                 // Comprueba si el id del recuro no está vacío
-                mResourceApi.ChangeOntoly("person");
+                resourceApi.ChangeOntoly("person");
 
                 // Inserto un historial en la base de datos
                 // Obtengo el guid del recurso
-                Guid guid = mResourceApi.GetShortGuid(idRecurso);
+                Guid guid = resourceApi.GetShortGuid(idRecurso);
 
                 // Modifico el estado
                 try
@@ -1681,11 +1754,11 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     // Modificación.
                     dicModificacion.Add(guid, listaTriplesModificacion);
-                    mResourceApi.ModifyPropertiesLoadedResources(dicModificacion);
+                    resourceApi.ModifyPropertiesLoadedResources(dicModificacion);
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
 
@@ -1706,6 +1779,39 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
 
+        /// <summary>
+        /// Método que comprueba si el usuario es un usuario otri.
+        /// </summary>
+        /// <param name="pIdGnossUser">Id del usuario actual</param>
+        /// <returns>Retorna un listado de ids con los usuarios otri.</returns>
+        public bool CheckIfIsOtri(Guid pIdGnossUser)
+        {
+            string select = "select ?s ?isOtriManager";
+            string where = @$"where {{
+                    ?s a <http://xmlns.com/foaf/0.1/Person>.
+                    ?s <http://w3id.org/roh/gnossUser> ?idGnoss.
+                    OPTIONAL {{?s <http://w3id.org/roh/isOtriManager> ?isOtriManager.}}
+                    FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
+                }}";
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "person");
+            var userGnossId = string.Empty;
+            var isOtriManager = false;
+            sparqlObject.results.bindings.ForEach(e =>
+            {
+                try
+                {
+                    bool.TryParse(e["isOtriManager"].value, out isOtriManager);
+                }
+                catch (Exception ex)
+                {
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
+                }
+            });
+
+            return isOtriManager;
+
+        }
+
 
         /// <summary>
         /// Método que lista el perfil de usuarios al que pertenece el usuario actual respecto a una oferta tecnológica dada.
@@ -1720,12 +1826,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Guid guidOferta = Guid.Empty;
             if (Guid.TryParse(pIdOfertaId, out guidOferta))
             {
-                var longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidOferta }, mResourceApi, "http://www.schema.org/Offer", "offer");
+                var longsId = UtilidadesAPI.GetLongIds(new List<Guid>() { guidOferta }, resourceApi, "http://www.schema.org/Offer", "offer");
                 pIdOfertaId = longsId[guidOferta];
             }
 
             // Obtengo el id del investigador del usuario conectado
-            string longUserId = UtilidadesAPI.GetResearcherIdByGnossUser(mResourceApi, pIdGnossUser);
+            string longUserId = UtilidadesAPI.GetResearcherIdByGnossUser(resourceApi, pIdGnossUser);
 
             // Variables
             string ownUserId = "";
@@ -1741,7 +1847,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                         }}";
                 try
                 {
-                    SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "offer");
+                    SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "offer");
                     sparqlObject.results.bindings.ForEach(e =>
                     {
                         ownUserId = e["creatorId"].value;
@@ -1749,7 +1855,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
             }
@@ -1825,7 +1931,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
 
 
@@ -1979,6 +2085,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
             SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "person" , "organization", "offer" });
+
             List<string> users = new();
 
             sparqlObject.results.bindings.ForEach(e =>
@@ -1989,7 +2096,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             });
 
@@ -2099,7 +2206,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     Filter (?actUser = <{longIdCurrentUser}>).
 		        }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "person");
             bool isIp = false;
 
             sparqlObject.results.bindings.ForEach(e =>
@@ -2110,7 +2217,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }
                 catch (Exception ex)
                 {
-                    mResourceApi.Log.Error("Excepcion: " + ex.Message);
+                    resourceApi.Log.Error("Excepcion: " + ex.Message);
                 }
             });
 

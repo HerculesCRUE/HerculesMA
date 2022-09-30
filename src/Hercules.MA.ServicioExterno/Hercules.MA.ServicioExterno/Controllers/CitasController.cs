@@ -7,6 +7,8 @@ using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
 using Newtonsoft.Json;
 using System.Text;
+using System.IO;
+using System.Threading;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
@@ -16,9 +18,31 @@ namespace Hercules.MA.ServicioExterno.Controllers
     public class CitasController : ControllerBase
     {
         #region --- Constantes   
-        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config";
-        private static ResourceApi mResourceApi = new ResourceApi(RUTA_OAUTH);
+        private static string RUTA_OAUTH = $@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config";
+        private static ResourceApi mResourceAPI = null;
         #endregion
+
+        private static ResourceApi resourceApi
+        {
+            get
+            {
+                while (mResourceAPI == null)
+                {
+                    try
+                    {
+                        mResourceAPI = new ResourceApi(RUTA_OAUTH);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("No se ha podido iniciar ResourceApi");
+                        Console.WriteLine($"Contenido OAuth: {System.IO.File.ReadAllText(RUTA_OAUTH)}");
+                        Thread.Sleep(10000);
+                    }
+                }
+                return mResourceAPI;
+            }
+        }
+
         /// <summary>
         /// Este método obtiene un archivo en función de la publicación y formato de cita indicado.
         /// </summary>
@@ -46,6 +70,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
                 SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document" , "maindocument" });
+
                 string titulo = string.Empty;
                 List<string> autores = new List<string>();
                 string anio = string.Empty;
@@ -162,6 +187,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
                 SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document", "maindocument" });
+
                 string titulo = string.Empty;
                 List<string> autores = new List<string>();
                 string anio = string.Empty;
