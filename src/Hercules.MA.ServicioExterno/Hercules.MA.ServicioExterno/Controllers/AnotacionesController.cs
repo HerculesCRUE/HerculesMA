@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-
+using Hercules.MA.ServicioExterno.Models;
 namespace Hercules.MA.ServicioExterno.Controllers
 {
 
@@ -30,6 +30,11 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpPost("GetOwnAnnotationsInRO")]
         public IActionResult GetOwnAnnotationsInRO([FromForm] string idRO, [FromForm] string idUser, [FromForm] string rdfType, [FromForm] string ontology)
         {
+            //Solo puede obtener duplicados el propietario del CV
+            if (!Security.CheckUser(new Guid(idUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             List<Dictionary<string, string>> anotaciones;
 
             try
@@ -63,7 +68,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         public IActionResult CreateNewAnnotation([FromForm] string idRO, [FromForm] string idUser, [FromForm] string rdfType, [FromForm] string ontology, [FromForm] string texto, [FromForm] string idAnnotation = null)
         {
             string anotacionesId;
-
+            if (!Security.CheckUser(new Guid(idUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             try
             {
                 AccionesAnotaciones annotations = new AccionesAnotaciones();
@@ -84,10 +92,15 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpPost("DeleteAnnotation")]
         public IActionResult DeleteAnnotation([FromForm] string idAnnotation)
         {
+            AccionesAnotaciones annotations = new AccionesAnotaciones();
+            if (!Security.CheckUser(new Guid(annotations.getUserFromAnnotation(idAnnotation)), Request)) // TODO TEST
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
             try
             {
-                AccionesAnotaciones annotations = new AccionesAnotaciones();
-                annotations.DeleteAnnotation(idAnnotation);
+               annotations.DeleteAnnotation(idAnnotation);
             }
             catch (Exception)
             {

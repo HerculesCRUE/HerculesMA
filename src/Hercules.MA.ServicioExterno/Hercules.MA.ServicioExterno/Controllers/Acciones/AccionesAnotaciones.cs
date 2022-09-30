@@ -130,7 +130,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
             // Obtenemos todos los datos de los perfiles y Añadimos el perfil creado a los datos de la oferta
-            string select = "select distinct ?s ?date ?texto FROM <http://gnoss.com/annotation.owl>";
+            string select = "select distinct ?s ?date ?texto ";
 
             //string filterRO = "";
             //switch (ontology)
@@ -164,7 +164,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?user = <{userGnossId}>)
             }} ORDER BY DESC(?date)";
 
-            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string>() { "person" , "annotation" });
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
@@ -332,6 +332,28 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             Guid guidAnnotation;
             guidAnnotation = resourceApi.GetShortGuid(idAnnotation);
             return resourceApi.PersistentDelete(guidAnnotation);
+        }
+
+        public string getUserFromAnnotation(string idAnnotation)
+        {
+            string select = "SELECT DISTINCT ?usuario ";
+            string where = @$"WHERE 
+            {{
+                <{idAnnotation}> <http://w3id.org/roh/owner> ?person.
+                ?person <http://w3id.org/roh/gnossUser> ?usuario.
+            }}";
+
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string>() { "annotation", "person" });
+
+            // Carga los datos en el objeto
+            if (sparqlObject != null && sparqlObject.results != null && sparqlObject.results.bindings != null && sparqlObject.results.bindings.Count != 0)
+            {
+                return sparqlObject.results.bindings.FirstOrDefault()["usuario"].value.Split("/").LastOrDefault();
+            }
+            else
+            {
+                return "";
+            } 
         }
     }
 

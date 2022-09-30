@@ -2,7 +2,7 @@
 using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
-using Hercules.MA.Journals.Config;
+using Hercules.MA.Journals.Controllers;
 using Hercules.MA.Journals.Models;
 using System;
 using System.Collections.Generic;
@@ -18,9 +18,9 @@ namespace Hercules.MA.Journals
 {
     internal class Program
     {
-        private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config/ConfigOAuth/OAuthV3.config");
+        private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config\configOAuth\OAuthV3.config");
 
-        public static ConfigService configuracion = new ConfigService();
+        public static ConfigService configS;
 
         //Número de hilos para el paralelismo.
         public static int NUM_HILOS = 6;
@@ -32,16 +32,18 @@ namespace Hercules.MA.Journals
         {            
             string nombreExcel = "Revistas";
             string nombreHoja = "revistas";
-
+            configS = new ConfigService();
             // Obtención de revistas de BBDD.
-            List<string> idRecursosRevistas = ObtenerIDsRevistas();
-            Dictionary<string, Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas);
+            //List<string> idRecursosRevistas = ObtenerIDsRevistas();
+            //Dictionary<string, Journal> dicRevistasBBDD = ObtenerRevistaPorID(idRecursosRevistas);
 
             // Diccionario de revistas.
-            List<Journal> listaRevistas = dicRevistasBBDD.Values.ToList();            
+
+            //List<Journal> listaRevistas = dicRevistasBBDD.Values.ToList();            
+            List<Journal> listaRevistas = new List<Journal>();
 
             Console.WriteLine($@"{DateTime.Now} Leyendo EXCEL de revistas...");
-            DataSet dataSet = LecturaExcel($@"{configuracion.GetRutaDatos()}/revistas/{nombreExcel}.xlsx");
+            DataSet dataSet = LecturaExcel($@"{configS.GetRutaDatos()}/{nombreExcel}.xlsx");
 
             if (ComprobarColumnasExcel(dataSet, nombreHoja))
             {
@@ -56,7 +58,7 @@ namespace Hercules.MA.Journals
             ComprobarErrores(listaRevistas);
 
             // Carga/Modificación/Borrado de datos de BBDD. 
-            ModificarRevistas(listaRevistas);
+            //ModificarRevistas(listaRevistas);
 
             // TODO: Versión antigua. No borrar de momento.
             // Lectura del excel. 
@@ -825,9 +827,30 @@ namespace Hercules.MA.Journals
             {
                 // No debería entrar por aquí, porque significaría que hay una revista con mismo título/editorial y otra revista diferente con el mismo ISSN.
                 // Nos quedamos con la que tenga el mismo ISSN.
-                revista = revistasMismoISSN[0];
-                pListaRevistas.Remove(revistasMismoTituloYEditorial[0]);
-                var x = pListaRevistas.IndexOf(revistasMismoTituloYEditorial[0]);
+                if (revistasMismoISSN.Count > 0)
+                {
+                    revista = revistasMismoISSN[0];
+
+                    if(revistasMismoTituloYEditorial.Count > 0)
+                    {
+                        pListaRevistas.Remove(revistasMismoTituloYEditorial[0]);
+                    }
+
+                    if(revistasMismoTituloYEISSN.Count > 0)
+                    {
+                        pListaRevistas.Remove(revistasMismoTituloYEISSN[0]);
+                    }
+                }
+
+                if (revistasMismoTituloYEISSN.Count > 0)
+                {
+                    revista = revistasMismoTituloYEISSN[0];
+
+                    if (revistasMismoTituloYEditorial.Count > 0)
+                    {
+                        pListaRevistas.Remove(revistasMismoTituloYEditorial[0]);
+                    }
+                }
             }
 
             return revista;
@@ -873,17 +896,20 @@ namespace Hercules.MA.Journals
             }
             #endregion
 
-            #region --- Comprobar que no haya revistas con el mismo título y editorial.
+            #region --- Comprobar que no haya revistas con el mismo título y EISSN.
             Dictionary<string, Journal> eissns = new Dictionary<string, Journal>();
             foreach (Journal revista in pListaRevistas)
             {
-                try
+                if (!string.IsNullOrEmpty(revista.eissn))
                 {
-                    eissns.Add(revista.titulo.ToLower() + "|||" + revista.eissn, revista);
-                }
-                catch
-                {
-                    throw new Exception("Hay revistas con el mismo título y EISSN.");
+                    try
+                    {
+                        eissns.Add(revista.titulo.ToLower() + "|||" + revista.eissn, revista);
+                    }
+                    catch
+                    {
+                        throw new Exception("Hay revistas con el mismo título y EISSN.");
+                    }
                 }
             }
             #endregion

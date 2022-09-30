@@ -257,9 +257,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             // 2. Obtengo los ROs desde la propiedad http://w3id.org/roh/linkedRO o http://w3id.org/roh/linkedDocument dependiendo del tipo de recurso que sean
             // 3. Obtengo los ROs en los que el id del RO pasado es una referencia de las propiedades que corresponden a las del apartado anterior.
 
-            string select = "select DISTINCT ?s ?title ?issued ?origin ?isValidated  " +
-                " FROM <http://gnoss.com/document.owl> " +
-                "FROM <http://gnoss.com/researchobject.owl> ";
+            string select = "select DISTINCT ?s ?title ?issued ?origin ?isValidated  ";
             string where = @$"where {{
 
                     {{
@@ -380,7 +378,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     FILTER(?resource = <{idRecurso.ToString()}>)
                 }}";
-            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, typeResource.type);
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { typeResource.type , "document", "researchobject" });
+
 
             // Rellena el los clusters
             sparqlObject.results.bindings.ForEach(e =>
@@ -598,7 +597,23 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// <returns>Retorna un booleano indicando si puede o no ser actualizado.</returns>
         private bool CheckUpdateLink(string longUserId, string idCurrentResource, string idOtherResource)
         {
-            return true;
+            bool flag = false;
+            string select = $@"select distinct ?person 
+<http://gnoss.com/researchobject.owl> ";
+            string where = $@" where {{
+                                <{idOtherResource}> <http://purl.org/ontology/bibo/authorList> ?p.
+                                ?p <http://www.w3.org/1999/02/22-rdf-syntax-ns#member>?person.                                     
+                            }}";
+
+            SparqlObject sparqlObject1 = mResourceApi.VirtuosoQuery(select, where, "document");
+            where = $@" where {{
+                                <{idCurrentResource}> <http://purl.org/ontology/bibo/authorList> ?p.
+                                ?p <http://www.w3.org/1999/02/22-rdf-syntax-ns#member>?person.                                     
+                            }}";
+            SparqlObject sparqlObject2 = mResourceApi.VirtuosoQuery(select, where, "document");
+
+            return (sparqlObject1.results.bindings.Select(n => n["person"].value).Contains(longUserId) && sparqlObject2.results.bindings.Select(n => n["person"].value).Contains(longUserId));
+
         }
 
 
@@ -682,8 +697,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 minus = $@"FILTER(?s NOT IN(<{string.Join(">,<", listItemsRelated)}>))";
             }
 
-            string select = "select DISTINCT ?s ?issued ?title ?isValidated " +
-                "FROM <http://gnoss.com/document.owl> FROM <http://gnoss.com/researchobject.owl>";
+            string select = "select DISTINCT ?s ?issued ?title ?isValidated ";
             string where = @$"where {{
 
                     ?person a <http://xmlns.com/foaf/0.1/Person>.
@@ -717,7 +731,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
                     {minus}
                 }} ORDER BY DESC(?type) LIMIT 20";
-            SparqlObject sparqlObject = resourceApi.VirtuosoQuery(select, where, "person");
+            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person" , "document", "researchobject" });
+
 
             // Rellena el los clusters
             sparqlObject.results.bindings.ForEach(e =>

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Hercules.MA.ServicioExterno.Models.Cluster;
+using Hercules.MA.ServicioExterno.Models;
 using System.IO;
 
 namespace Hercules.MA.ServicioExterno.Controllers
@@ -34,7 +36,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpPost("DeleteLinked")]
         public IActionResult DeleteLinked([FromForm] string resourceRO, [FromForm] string pIdROId, [FromForm] Guid pIdGnossUser)
         {
-
+            if (!Security.CheckUser(pIdGnossUser, Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             bool borrado;
             try
             {
@@ -84,6 +89,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [Produces("application/json")]
         public IActionResult SearchROs([FromForm] string text, [FromForm] string pIdGnossUser, [FromForm] List<string> listItemsRelated)
         {
+            if (!Security.CheckUser(new Guid(pIdGnossUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             try
             {
                 AccionesRosVinculados accionesRosVinculados = new();
@@ -107,6 +116,11 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [Produces("application/json")]
         public IActionResult AddLink([FromForm] string resourceRO, [FromForm] string pIdROId, [FromForm] Guid pIdGnossUser)
         {
+
+            if (!Security.CheckUser(pIdGnossUser, Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             try
             {
                 AccionesRosVinculados accionesRosVinculados = new AccionesRosVinculados();

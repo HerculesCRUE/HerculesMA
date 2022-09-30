@@ -738,8 +738,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
 
-            select = $@"SELECT distinct ?s COUNT(distinct ?ro) as ?numOtrosR 
-                FROM <http://gnoss.com/person.owl>";
+            select = $@"SELECT distinct ?s COUNT(distinct ?ro) as ?numOtrosR";
 
             where = $@"WHERE {{
                     ?s a <http://xmlns.com/foaf/0.1/Person>.
@@ -751,7 +750,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
 
-            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "researchobject");
+            resultadoQuery = mResourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "researchobject" ,"person" });
+
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -763,8 +763,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
 
 
-            select = $@"SELECT distinct ?s COUNT(distinct ?doc2) as ?numPV
-                FROM <http://gnoss.com/person.owl>";
+            select = $@"SELECT distinct ?s COUNT(distinct ?doc2) as ?numPV";
 
             where = $@"WHERE {{
                     ?s a <http://xmlns.com/foaf/0.1/Person>.
@@ -778,7 +777,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
 
-            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "document");
+            resultadoQuery = mResourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "document" ,"person"});
+
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {
@@ -789,8 +789,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }
 
 
-            select = $@"SELECT distinct ?s COUNT(distinct ?doc) as ?numPublicaciones
-                FROM <http://gnoss.com/person.owl>";
+            select = $@"SELECT distinct ?s COUNT(distinct ?doc) as ?numPublicaciones";
 
             where = $@"WHERE {{
                     ?s a <http://xmlns.com/foaf/0.1/Person>.
@@ -802,8 +801,8 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 	                ?s <http://w3id.org/roh/gnossUser> <http://gnoss/{pIdGnossUser.ToUpper()}>
                 }}";
 
+            resultadoQuery = mResourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "document", "person" });
 
-            resultadoQuery = resourceApi.VirtuosoQuery(select.ToString(), where.ToString(), "document");
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
             {

@@ -1,9 +1,11 @@
 ﻿using Hercules.MA.ServicioExterno.Controllers.Acciones;
 using Hercules.MA.ServicioExterno.Models.RedesUsuario;
+using Hercules.MA.ServicioExterno.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace Hercules.MA.ServicioExterno.Controllers
 {
@@ -20,6 +22,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpGet("GetDatosRedesUsuario")]
         public IActionResult GetDatosRedesUsuario(string pIdGnossUser)
         {
+            if (!Security.CheckUser(new Guid(pIdGnossUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             List<DataUser> datosRedesUsuario = null;
 
             try
@@ -44,6 +50,10 @@ namespace Hercules.MA.ServicioExterno.Controllers
         [HttpPost("SetDatosRedesUsuario")]
         public IActionResult SetDatosRedesUsuario([FromForm] string pIdGnossUser, [FromForm] User pDataUser)
         {
+            if (!Security.CheckUser(new Guid(pIdGnossUser), Request))
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
             try
             {
                 AccionesRedesUsuario accionDocumento = new AccionesRedesUsuario();
