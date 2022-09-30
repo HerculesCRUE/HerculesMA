@@ -268,6 +268,80 @@ Controlador que sugiere etiquetas con la búsqueda dada
 *string[]* Listado de las etiquetas de resultado
 
 
+
+
+# RosVinculadosController
+La documentación funcional de los ROs vinculados está en [ROs vinculados](https://confluence.um.es/confluence/display/HERCULES/ROs+vinculados).
+
+Los métodos de éste controlador tendrán la siguiente url:
+> https://something.com/servicioexterno/RosVinculados/[METODO]
+
+Los métodos son los siguientes:
+
+
+## [POST] DeleteLinked
+Borra un vínculo
+
+*Parámetros:*
+ - **resourceRO** *(string)*: Id (Guid) del RO relacionado
+ - **pIdROId** *(string)*: Id (Guid) del RO a eliminar de vinculados
+ - **pIdGnossUser** *(string)*: Id del usuario que realiza la acción
+ 
+*Devuelve:*
+*Bool* 'true' or 'false' si ha sido borrado
+
+
+
+## [GET] LoadRosLinked
+Controlador para Obtener los ROs vinculados de un RO en concreto
+
+*Parámetros:*
+ - **pIdOfferID** *(string)*: ID del RO a obtener las relaciones
+ - **pIdGnossUser** *(string)*: Idioma de los literales para la consulta, por defecto "es"
+
+*Devuelve:*
+*Objects* Listado de los RO vinculados.
+
+
+
+
+## [POST] SearchROs
+Controlador para Obtener los ROs vinculados de un RO en concreto
+
+*Parámetros:*
+ - **text** *(string)*: String a buscar
+ - **pIdGnossUser** *(string)*: Id del usuario que modifica el estado, necesario para actualizar el historial
+ - **listItemsRelated** *(string[])*: Ids de ROs seleccionados
+
+*Devuelve:*
+*Objects* Listado de los RO vinculados.
+
+
+
+
+## [POST] AddLink
+Controlador para crear una vinculación
+
+*Parámetros:*
+ - **resourceRO** *(string)*: Id (Guid) del RO relacionado
+ - **pIdROId** *(string)*: Id (Guid) del RO a añadir a vinculados
+ - **pIdGnossUser** *(Guid)*: Id del usuario que realiza la acción
+
+*Devuelve:*
+*Objects* Id de la oferta creada o modificada.
+
+
+
+
+
+
+
+
+
+
+
+
+
 # HerculesController
 Es el encargado principalmente de obtener los datos de las gráficas en las diferentes fichas, como puedan ser las fichas de los investigadores, los grupos de investigación, las publicaciones, etc...
 
