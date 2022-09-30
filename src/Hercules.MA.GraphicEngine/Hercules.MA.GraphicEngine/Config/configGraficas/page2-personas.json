@@ -105,7 +105,6 @@
       "nombre": {
         "es": "Áreas temáticas de los PDI"
       },
-      "idGrupo": "grupo3",
       "tipo": "Barras",
       "propCategoryPath": "vivo:hasResearchArea",
       "anchura": 12,
