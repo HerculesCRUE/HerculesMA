@@ -6,14 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Config\configOAuth\" />
-    <Folder Include="Revistas\" />
+    <Compile Remove="Revistas\**" />
+    <EmbeddedResource Remove="Revistas\**" />
+    <None Remove="Revistas\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Config\ConfigOAuth\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
-    <PackageReference Include="GnossApiWrapper.NetCore" Version="6.0.2" />
+    <PackageReference Include="GnossApiWrapper.NetCore" Version="6.0.6" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,10 +29,10 @@
     <None Update="Config\appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Config\configOAuth\OAuthV3.config">
+    <None Update="Config\ConfigOAuth\OAuthV3.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Revistas\revistas\revistas.xlsx">
+    <None Update="Dataset\Revistas.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
