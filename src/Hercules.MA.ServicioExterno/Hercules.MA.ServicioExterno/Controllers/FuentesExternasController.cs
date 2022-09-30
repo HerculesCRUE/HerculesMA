@@ -78,16 +78,16 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         [HttpGet("InsertDoiToQueue")]
-        public bool InsertDoiToQueueFuentesExternas([Required] string pIdentificador, [Required] string pDoi, [Required] string pFecha, [Required] string pIdPersona, [Required] string pNombreCompletoAutor)
+        public bool InsertDoiToQueueFuentesExternas([Required] string pIdentificador, [Required] string pDoi, [Required] string pIdPersona, [Required] string pNombreCompletoAutor)
         {
             try
             {
                 ReadRabbitService rabbitMQService = new ReadRabbitService(_Configuracion);
                                 
-                if (!string.IsNullOrEmpty(pIdentificador) && !string.IsNullOrEmpty(pDoi) && !string.IsNullOrEmpty(pFecha) && !string.IsNullOrEmpty(pIdPersona) && !string.IsNullOrEmpty(pNombreCompletoAutor))
+                if (!string.IsNullOrEmpty(pIdentificador) && !string.IsNullOrEmpty(pDoi) && !string.IsNullOrEmpty(pIdPersona) && !string.IsNullOrEmpty(pNombreCompletoAutor))
                 {
                     // Inserción a la cola.
-                    List<string> listaDatos = new List<string>() { "doi", pDoi, pFecha, pIdPersona, pNombreCompletoAutor };
+                    List<string> listaDatos = new List<string>() { pIdentificador, pDoi, pIdPersona, pNombreCompletoAutor };
                     rabbitMQService.PublishMessage(listaDatos, _Configuracion.GetDoiQueueRabbit());
 
                     return true;
