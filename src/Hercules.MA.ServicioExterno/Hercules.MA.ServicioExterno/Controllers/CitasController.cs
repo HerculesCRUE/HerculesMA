@@ -69,7 +69,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
-                SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document" , "maindocument" });
+                SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document" , "maindocument" });
 
                 string titulo = string.Empty;
                 List<string> autores = new List<string>();
@@ -186,7 +186,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageStart> ?paginaInicio. }}
                 OPTIONAL {{ ?s <http://purl.org/ontology/bibo/pageEnd> ?paginaFin. }}
             }}";
-                SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document", "maindocument" });
+                SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document", "maindocument" });
 
                 string titulo = string.Empty;
                 List<string> autores = new List<string>();

@@ -427,7 +427,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     FILTER(?s = <{p}>)
                 }}";
-                sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster" ,"person"});
+                sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster" ,"person"});
 
 
                 PerfilCluster perfilCluster = new();
@@ -496,7 +496,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     FILTER(?s = <{p}>)
                 }}";
-                    sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string>{ "cluster","person","document","project","organization","department"});
+                    sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string>{ "cluster","person","document","project","organization","department"});
 
                     // Carga los datos en el objeto
                     sparqlObject.results.bindings.ForEach(e =>
@@ -844,7 +844,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     FILTER(?idGnoss = <http://gnoss/{userId.ToString().ToUpper()}>)
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person", "cluster", "clusterperfil" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person", "cluster", "clusterperfil" });
 
 
             // Rellena el los clusters
@@ -1216,16 +1216,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
         /// </summary>
         /// <param name="pSearch">parámetro que corresponde a la cadena de búsqueda.</param>
         /// <returns>Listado de etiquetas de resultado.</returns>
-        public List<string> memberList
-            
-            
-            
-            
-            
-            
-            
-            
-            Cluser(string pClusterId)
+        public List<string> memberListFromCluser(string pClusterId)
         {
             string select = "SELECT DISTINCT ?user";
             string where = $@"WHERE{{
@@ -1242,7 +1233,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}
             }}
             ";
-            SparqlObject sparqlObjectAux = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string>{"cluster","person"});
+            SparqlObject sparqlObjectAux = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string>{"cluster","person"});
             List<string> resultados = sparqlObjectAux.results.bindings.Select(x => x["user"].value).Distinct().ToList();
             return resultados;
         }
@@ -1258,7 +1249,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}
             }}
             ";
-            SparqlObject sparqlObjectAux = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster" ,"person"});
+            SparqlObject sparqlObjectAux = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster" ,"person"});
             List<string> resultados = sparqlObjectAux.results.bindings.Select(x => x["user"].value).Distinct().ToList();
             string user = resultados.ToList().FirstOrDefault();
             return user;
@@ -1513,7 +1504,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     }}
                     FILTER(?s in ({string.Join(',', listProfilesIds.Select(e => '<' + e + '>'))}))
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster", "person","document","project","organization", "department" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "cluster", "person","document","project","organization", "department" });
 
 
             // Carga los datos en el objeto

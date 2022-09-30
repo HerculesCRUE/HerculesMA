@@ -377,7 +377,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                 FILTER(?idGnoss = <http://gnoss/{userGUID.ToString().ToUpper()}>)
             }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "person","organization","group","department","document" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "person","organization","group","department","document" });
 
 
             // Obtiene los datos de la consulta y rellena el diccionario de respuesta con los datos de cada investigador.
@@ -1232,7 +1232,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     try
                     {
-                        sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "offer" ," person", "offerstate" } );
+                        sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "offer" ," person", "offerstate" } );
 
                         sparqlObject.results.bindings.ForEach(e =>
                         {
@@ -1381,7 +1381,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }}";
 
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person" ,"document", "project", "organization" , "department" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person" ,"document", "project", "organization" , "department" });
 
 
             // Carga los datos en el objeto
@@ -1464,7 +1464,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?s in ({string.Join(",", longIds.Select(x => "<" + x + ">")) }))
             }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document" ,"person", "organization" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "document" ,"person", "organization" });
 
 
             // Carga los datos en el objeto
@@ -1555,7 +1555,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }}";
 
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "project" , "organization" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "project" , "organization" });
 
 
             // Carga los datos en el objeto
@@ -1612,7 +1612,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 // 3. Selecciona únicamente los Ids largos
                 try
                 {
-                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), mResourceApi, "http://vivoweb.org/ontology/core#Project", "project").Select(e => e.Value).ToList();
+                    longIds = UtilidadesAPI.GetLongIds(ids.Select(e => new Guid(e)).ToList(), resourceApi, "http://vivoweb.org/ontology/core#Project", "project").Select(e => e.Value).ToList();
 
                 }
                 catch (Exception ex)
@@ -1652,32 +1652,45 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             }}";
 
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "project" , "organization" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "project" , "organization" });
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
             {
                 try
                 {
-                    Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(mResourceApi, e["s"].value);
-                    string geographicRegion = e.ContainsKey("geographicRegion") ? e["geographicRegion"].value : "";
-                    string organizacion = e.ContainsKey("organizacion") ? e["organizacion"].value : "";
-                    var info = geographicRegion + ((geographicRegion != "" && organizacion != "") ? ", " : "") + organizacion;
 
+                    var fecha = e.ContainsKey("dateFiled") ? e["dateFiled"].value : String.Empty;
+                    DateTime fechaDate = DateTime.Now;
+                    try
+                    {
+                        if (fecha != String.Empty)
+                        {
+                            fechaDate = DateTime.ParseExact(fecha, "yyyyMMddHHmmss", null);
+                            fecha = fechaDate.ToString("dd/MM/yyyy");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        resourceApi.Log.Error("Excepcion: " + ex.Message);
+                    }
+
+
+                    Guid currentShortId = UtilidadesAPI.ObtenerIdCorto(resourceApi, e["s"].value);
+                    string organizacion = e.ContainsKey("organizacion") ? e["organizacion"].value : "";
                     result.Add(currentShortId, new PIIOffer()
                     {
                         id = e["s"].value,
                         shortId = currentShortId,
                         name = e["title"].value,
-                        info = info,
+                        organizacion = organizacion,
                         description = e.ContainsKey("description") ? e["description"].value : "",
-                        dates = new string[] { e.ContainsKey("start") ? e["start"].value : "", e.ContainsKey("end") ? e["end"].value : "" },
-                        researchers = e.ContainsKey("autores") ? e["autores"].value.Split(",").ToList() : new List<string>(),
-
+                        fecha = fecha,
+                        researchers = e.ContainsKey("autores") ? e["autores"].value.Split(";").ToList() : new List<string>(),
+                        researchersIds = e.ContainsKey("listaAutoresIds") ? e["listaAutoresIds"].value.Split(";").ToList() : new List<string>(),
                     });
                 }
-                catch (Exception ext) { new Exception("Ha habido un error al procesar los datos de los proyectos:" + ext.Message); }
-
+                catch (Exception ext) { new Exception("Ha habido un error al procesar los datos de las patentes:" + ext.Message); }
             });
 
 
@@ -2084,7 +2097,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     FILTER (?creatorUser = <{longId}>)
                 }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "person" , "organization", "offer" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string> { "person" , "organization", "offer" });
 
             List<string> users = new();
 

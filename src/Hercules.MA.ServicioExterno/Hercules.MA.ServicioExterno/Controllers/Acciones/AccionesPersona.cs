@@ -750,7 +750,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
 
-            resultadoQuery = mResourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "researchobject" ,"person" });
+            resultadoQuery = resourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "researchobject" ,"person" });
 
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
@@ -777,7 +777,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 }}";
 
 
-            resultadoQuery = mResourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "document" ,"person"});
+            resultadoQuery = resourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "document" ,"person"});
 
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
@@ -801,7 +801,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 	                ?s <http://w3id.org/roh/gnossUser> <http://gnoss/{pIdGnossUser.ToUpper()}>
                 }}";
 
-            resultadoQuery = mResourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "document", "person" });
+            resultadoQuery = resourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "document", "person" });
 
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)

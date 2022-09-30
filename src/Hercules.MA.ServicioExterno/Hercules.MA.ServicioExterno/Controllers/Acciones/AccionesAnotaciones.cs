@@ -164,7 +164,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 FILTER(?user = <{userGnossId}>)
             }} ORDER BY DESC(?date)";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string>() { "person" , "annotation" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string>() { "person" , "annotation" });
 
             // Carga los datos en el objeto
             sparqlObject.results.bindings.ForEach(e =>
@@ -343,7 +343,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                 ?person <http://w3id.org/roh/gnossUser> ?usuario.
             }}";
 
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string>() { "annotation", "person" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where,new List<string>() { "annotation", "person" });
 
             // Carga los datos en el objeto
             if (sparqlObject != null && sparqlObject.results != null && sparqlObject.results.bindings != null && sparqlObject.results.bindings.Count != 0)

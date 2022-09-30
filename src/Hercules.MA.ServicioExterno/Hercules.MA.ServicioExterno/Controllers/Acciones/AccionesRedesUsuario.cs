@@ -132,7 +132,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
             where.Append($@"OPTIONAL{{?s roh:useMatching ?useMatching. }} ");
             where.Append("} ");
 
-            resultadoQuery = mResourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "person" , "curriculumvitae" });
+            resultadoQuery = resourceApi.VirtuosoQueryMultipleGraph(select.ToString(), where.ToString(), new List<string> { "person" , "curriculumvitae" });
 
 
             if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)

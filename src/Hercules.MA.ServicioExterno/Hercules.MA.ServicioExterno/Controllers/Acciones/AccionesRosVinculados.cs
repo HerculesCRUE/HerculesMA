@@ -378,7 +378,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     FILTER(?resource = <{idRecurso.ToString()}>)
                 }}";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { typeResource.type , "document", "researchobject" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { typeResource.type , "document", "researchobject" });
 
 
             // Rellena el los clusters
@@ -605,12 +605,12 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                                 ?p <http://www.w3.org/1999/02/22-rdf-syntax-ns#member>?person.                                     
                             }}";
 
-            SparqlObject sparqlObject1 = mResourceApi.VirtuosoQuery(select, where, "document");
+            SparqlObject sparqlObject1 = resourceApi.VirtuosoQuery(select, where, "document");
             where = $@" where {{
                                 <{idCurrentResource}> <http://purl.org/ontology/bibo/authorList> ?p.
                                 ?p <http://www.w3.org/1999/02/22-rdf-syntax-ns#member>?person.                                     
                             }}";
-            SparqlObject sparqlObject2 = mResourceApi.VirtuosoQuery(select, where, "document");
+            SparqlObject sparqlObject2 = resourceApi.VirtuosoQuery(select, where, "document");
 
             return (sparqlObject1.results.bindings.Select(n => n["person"].value).Contains(longUserId) && sparqlObject2.results.bindings.Select(n => n["person"].value).Contains(longUserId));
 
@@ -731,7 +731,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
                     FILTER(?idGnoss = <http://gnoss/{pIdGnossUser.ToString().ToUpper()}>)
                     {minus}
                 }} ORDER BY DESC(?type) LIMIT 20";
-            SparqlObject sparqlObject = mResourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person" , "document", "researchobject" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person" , "document", "researchobject" });
 
 
             // Rellena el los clusters
