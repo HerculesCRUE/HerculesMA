@@ -25,7 +25,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="idRO">Id del RO</param>
         /// <param name="idUser">Id del usuario </param>
         /// <param name="rdfType">rdfType de la ontología </param>
-        /// <param name="ontology">nombre de la ontología </param>
+        /// <param name="ontology">Nombre de la ontología </param>
         /// <returns>Diccionario con los datos.</returns>
         [HttpPost("GetOwnAnnotationsInRO")]
         public IActionResult GetOwnAnnotationsInRO([FromForm] string idRO, [FromForm] string idUser, [FromForm] string rdfType, [FromForm] string ontology)
@@ -47,7 +47,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
 
 
         /// <summary>
-        /// Controlador para obtener las anotaciones de un investigador en un RO concreto.
+        /// Controlador para crear una nueva anotación.
         /// Los valores posibles de la ontología serían actualmente:
         /// "http://purl.org/ontology/bibo/Document", "document"
         /// "http://w3id.org/roh/ResearchObject", "researchobject"
@@ -80,20 +80,19 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// Metodo para eliminar una anotacion 
         /// </summary>
         /// <param name="idAnnotation">Id de la anotacion a eliminar</param>
-        /// <returns></returns>
+        /// <returns>Bool si ha sido eliminada</returns>
         [HttpPost("DeleteAnnotation")]
         public IActionResult DeleteAnnotation([FromForm] string idAnnotation)
         {
             try
             {
                 AccionesAnotaciones annotations = new AccionesAnotaciones();
-                annotations.DeleteAnnotation(idAnnotation);
+                return Ok(annotations.DeleteAnnotation(idAnnotation));
             }
             catch (Exception)
             {
                 throw;
             }
-            return Ok();
         }
 
     }

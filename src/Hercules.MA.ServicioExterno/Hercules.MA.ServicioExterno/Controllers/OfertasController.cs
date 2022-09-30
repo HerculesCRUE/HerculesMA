@@ -24,7 +24,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="listThesaurus">Elemento padre que define el thesaurus</param>
         /// <param name="lang">Idioma para los thesaurus multiidioma </param>
-        /// <returns>Diccionario con los datos.</returns>
+        /// <returns>*Object* Diccionario con los datos. (Diccionario clave -> listado de thesaurus).</returns>
         [HttpPost("GetThesaurus")]
         public IActionResult GetThesaurus([FromForm] List<string> listThesaurus, [FromForm] string lang = "es")
         {
@@ -46,7 +46,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <summary>
         /// Borra una oferta
         /// </summary>
-        /// <param name="pIdOfferId">Id (Guid) de la oferta a borrar.</param>
+        /// <param name="pIdOfferId">Id de la oferta a borrar.</param>
         /// <param name="pIdGnossUser">Id del usuario que realiza la acción.</param>
         /// <returns>Un booleano si ha sido borrado.</returns>
         [HttpPost("BorrarOferta")]
@@ -76,7 +76,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="estado">Id del estado al que se quiere establecer.</param>
         /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo).</param>
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial.</param>
-        /// <param name="texto">Texto de la notificación.</param>
+        /// <param name="texto">Texto de la notificación (Opcional) que contiene el mensaje personalizado para la notificación.</param>
         /// <returns>String con el id del nuevo estado.</returns>
         [HttpPost("CambiarEstado")]
         public IActionResult CambiarEstado([FromForm] string pIdOfferId, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser, [FromForm] string texto = "")
@@ -105,7 +105,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="estadoActual">Id del estado que tiene actualmente (Necesario para la modificación del mismo).</param>
         /// <param name="pIdGnossUser">Id del usuario que modifica el estado, necesario para actualizar el historial.</param>
         /// <param name="texto">Texto de la notificación.</param>
-        /// <returns>String con el id del nuevo estado.</returns>
+        /// <returns>bool indicando si se han hecho los cambios o no.</returns>
         [HttpPost("CambiarEstadoAll")]
         public IActionResult CambiarEstadoAll([FromForm] Guid[] pIdOfferIds, [FromForm] string estado, [FromForm] string estadoActual, [FromForm] Guid pIdGnossUser, [FromForm] string texto = "")
         {
@@ -129,7 +129,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         /// <summary>
-        /// Controlador para guardar los datos de la oferta.
+        /// Controlador para cargar los datos de la oferta.
         /// </summary>
         /// <param name="pIdOfertaId">Id de la oferta.</param>
         /// <returns>Objeto "leible" de la oferta.</returns>
