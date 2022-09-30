@@ -336,9 +336,59 @@ Controlador para crear una vinculación
 
 
 
+# AnotacionesController
+La documentación funcional de los ROs vinculados está en [Anotaciones](https://confluence.um.es/confluence/display/HERCULES/Anotaciones+sobre+los+ROs).
+
+Los métodos de éste controlador tendrán la siguiente url:
+> https://something.com/servicioexterno/Anotaciones/[METODO]
+
+Los métodos son los siguientes:
+
+
+## [POST] GetOwnAnnotationsInRO
+Controlador para obtener las anotaciones de un investigador en un RO concreto.
+Los valores posibles de la ontología serían actualmente:
+"http://purl.org/ontology/bibo/Document", "document"
+"http://w3id.org/roh/ResearchObject", "researchobject"
+
+*Parámetros:*
+ - **idRO** *(string)*: Id del RO
+ - **idUser** *(string)*: Id del usuario
+ - **rdfType** *(string)*: rdfType de la ontología
+ - **ontology** *(string)*: Nombre de la ontología
+ 
+*Devuelve:*
+*Objects* Diccionario con los datos
 
 
 
+## [POST] CreateNewAnnotation
+Controlador para crear una nueva anotación
+Los valores posibles de la ontología serían actualmente:
+"http://purl.org/ontology/bibo/Document", "document"
+"http://w3id.org/roh/ResearchObject", "researchobject"
+
+*Parámetros:*
+ - **idRO** *(string)*: Id del RO
+ - **idUser** *(string)*: Id del usuario
+ - **rdfType** *(string)*: rdfType de la ontología
+ - **ontology** *(string)*: Nombre de la ontología
+ - **texto** *(string)*: Texto de la anotación
+ - **idAnnotation** *(string)*: Id de la anotación (si se guarda) (Puede ser nulo)
+ 
+*Devuelve:*
+*Objects* Diccionario con los datos
+
+
+
+## [POST] DeleteAnnotation
+Metodo para eliminar una anotacion
+
+*Parámetros:*
+ - **idAnnotation** *(string)*: Id de la anotacion a eliminar
+ 
+*Devuelve:*
+*Bool* 'true' o 'false' si ha sido eliminada
 
 
 
