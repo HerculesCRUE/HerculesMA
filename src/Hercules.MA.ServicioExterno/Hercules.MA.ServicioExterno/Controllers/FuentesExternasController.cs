@@ -78,26 +78,16 @@ namespace Hercules.MA.ServicioExterno.Controllers
         }
 
         [HttpGet("InsertDoiToQueue")]
-        public bool InsertDoiToQueueFuentesExternas([Required] string pDoi, [Required] string pNombreCompletoAutor, [Required] string pOrcid)
+        public bool InsertDoiToQueueFuentesExternas([Required] string pIdentificador, [Required] string pDoi, [Required] string pFecha, [Required] string pIdPersona, [Required] string pNombreCompletoAutor)
         {
             try
             {
                 ReadRabbitService rabbitMQService = new ReadRabbitService(_Configuracion);
-
-                // De momento, el DOI, ORCID y el nombre del autor son obligatorios. TODO: ¿ORCID en un futuro no va a ser obligatorio?
-                if (!string.IsNullOrEmpty(pDoi) && !string.IsNullOrEmpty(pNombreCompletoAutor) && !string.IsNullOrEmpty(pOrcid))
+                                
+                if (!string.IsNullOrEmpty(pIdentificador) && !string.IsNullOrEmpty(pDoi) && !string.IsNullOrEmpty(pFecha) && !string.IsNullOrEmpty(pIdPersona) && !string.IsNullOrEmpty(pNombreCompletoAutor))
                 {
-                    // Comprobación si el documento es válido o no. Para ello, hay que procesar dicho fichero para ver si corresponde algún autor al pasado por parámetro.
-                    // Aunque se haga la petición, no tarda. TODO: ¿Posible manera de mejorar esto?
-                    Uri url = new Uri(string.Format(_Configuracion.GetUrlPublicacion() + "GetRoPublication?pDoi={0}&pNombreCompletoAutor={1}", pDoi, pNombreCompletoAutor));
-                    string info_publication = httpCall(url.ToString(), "GET", new Dictionary<string, string>()).Result;
-                    if (string.IsNullOrEmpty(info_publication) || info_publication.Trim() == "[]")
-                    {
-                        return false;
-                    }
-
                     // Inserción a la cola.
-                    List<string> listaDatos = new List<string>() { pDoi, pNombreCompletoAutor, pOrcid };
+                    List<string> listaDatos = new List<string>() { "doi", pDoi, pFecha, pIdPersona, pNombreCompletoAutor };
                     rabbitMQService.PublishMessage(listaDatos, _Configuracion.GetDoiQueueRabbit());
 
                     return true;
