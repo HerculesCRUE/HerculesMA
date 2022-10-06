@@ -844,7 +844,7 @@ namespace Hercules.MA.ServicioExterno.Controllers.Acciones
 
                     FILTER(?idGnoss = <http://gnoss/{userId.ToString().ToUpper()}>)
                 }}";
-            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person", "cluster", "clusterperfil" });
+            SparqlObject sparqlObject = resourceApi.VirtuosoQueryMultipleGraph(select, where, new List<string> { "person", "cluster"});
 
 
             // Rellena el los clusters
