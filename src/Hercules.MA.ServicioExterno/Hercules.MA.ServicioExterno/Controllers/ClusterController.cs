@@ -115,21 +115,6 @@ namespace Hercules.MA.ServicioExterno.Controllers
         public IActionResult LoadProfiles([FromForm] Cluster pDataCluster, [FromForm] List<string> pPersons)
         {
 
-            bool flag = false;
-            foreach (PerfilCluster perfil in pDataCluster.profiles)
-            {
-                foreach (UserCluster idGnossUser in perfil.users ){
-                    if (Security.CheckUser(new Guid(idGnossUser.userID), Request))
-                    {
-                        flag = true;
-                    }
-                } 
-            }
-            if (!flag)
-            {
-                return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-
             try
             {
                 AccionesCluster accionCluster = new AccionesCluster();
@@ -147,7 +132,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// <param name="pIdUser">Id del usuario.</param>
         /// <param name="loadSavedProfiles">Booleano que determina si cargamos los investigadores de cada perfil.</param>
         /// <returns>Listado con los datos necesarios de los clusters y sus perfiles.</returns>
-        [HttpGet("loadSavedProfiles")]
+        [HttpGet("LoadSavedProfiles")]
         public IActionResult LoadSavedProfiles([Required] Guid pIdUser, bool loadSavedProfiles = false)
         {
 
@@ -248,7 +233,7 @@ namespace Hercules.MA.ServicioExterno.Controllers
         /// </summary>
         /// <param name="tagInput">Texto para la búsqueda de etiquetas.</param>
         /// <returns>Listado de las etiquetas de resultado.</returns>
-        [HttpGet("searchTags")]
+        [HttpGet("SearchTags")]
         public IActionResult SearchTags([Required] string tagInput)
         {
             List<string> idClusterRes = new();
