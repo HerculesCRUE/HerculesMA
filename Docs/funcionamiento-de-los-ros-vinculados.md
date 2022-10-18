@@ -49,19 +49,19 @@ Una vez que accedes en el menú a 'añadir ro vinculado', se hará una petición
 Los métodos disponibles en la API para la reación de ROs Vinculados son los siguientes:
 
 - Obtener los ROs vinculados de un RO en concreto:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** RosVinculadosController
 	- **Función:** [GET]LoadRosLinked
 - Creación de un RO Vinculado:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** RosVinculadosController
 	- **Función:** [POST]AddLink
 - Borra un RO Vinculado:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** RosVinculadosController
 	- **Función:** [POST]DeleteLinked
 - Buscar un RO:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** RosVinculadosController
 	- **Función:** [POST]SearchROs
 

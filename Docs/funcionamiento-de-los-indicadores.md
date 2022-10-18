@@ -32,91 +32,91 @@ Este último archivo funciona como librería para generar gráficas en Hércules
 ### Controladores
 Ambos indicadores consumen el mismo controlador. Ahora se repasarán las distintas peticiones que se realizan al controlador.
 - Obtención del objeto de la gráfica y sus datos:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]GetGrafica
 - Obtención de una lista de gráficas y sus datos específicos del usuario:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]GetGraficasUser
 - Crea una nueva página de indicadores personales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]CrearPagina
 - Crea un documento CSV de una gráfica:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]GetCSVGrafica
 - Obtención de las facetas o filtros de la página:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]GetFaceta
 - Obtiene las páginas de indicadores generales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]GetPaginasGraficas
 - Comprueba si el usuario es administrador de gráficas o no:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]IsAdmin
 - Obtiene las configuraciones de las páginas:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]ObtenerConfigs
 - Devuelve un archivo de configuración concreto para su descarga:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]DescargarConfig
 - Actualiza un archivo de configuración concreto:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [POST]SubirConfig
 - Edita la configuración de una gráfica de indicadores generales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]EditarConfig
 - Obtiene la configuración de una gráfica de indicadores generales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]ObtenerGraficaConfig
 - Obtiene las páginas de indicadores personales de un usuario específico:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]GetPaginasUsuario
 - Guarda una gráfica de indicadores generales en el panel de indicadores personales del usuario:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]GuardarGrafica
 - Borra la gráfica de indicadores personales del usuario:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]BorrarGrafica
 - Borra la página de indicadores personales del usuario:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]BorrarPagina
 - Edita el nombre de la página de indicadores personales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]EditarNombrePagina
 - Edita el orden de la página de indicadores personales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]EditarOrdenPagina
 - Edita el nombre de la gráfica de indicadores personales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]EditarNombreGrafica
 - Edita el orden de la gráfica de indicadores personales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]EditarOrdenGrafica
 - Edita la anchura de la gráfica de indicadores personales:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]EditarAnchuraGrafica
 - Edita las escalas/ejes de la gráfica de indicadores personales en función de si tiene 1 o 2 escalas:
-	- **API:** GraphicEngine
+	- **API:** [GraphicEngine](https://github.com/HerculesCRUE/HerculesMA/blob/main/src/Hercules.MA.GraphicEngine)
 	- **Controlador:** GraphicControllers
 	- **Función:** [GET]EditarEscalasGrafica
 

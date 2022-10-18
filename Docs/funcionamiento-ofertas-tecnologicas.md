@@ -109,51 +109,51 @@ Ver en https://confluence.um.es/confluence/pages/viewpage.action?pageId=56380627
 La lógica javascript se encuentra en el archivo offer.js (https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Estilos/theme/offer.js)
 Se realizan llamadas a los diferentes servicios para las diferentes funcionalidades, la lista de llamadas son las siguientes:
 - Controlador para obtener los thesaurus usados por las ofertas:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]GetThesaurus
 - Borra una oferta:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]BorrarOferta
 - Cambiar el estado de una oferta:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]CambiarEstado
 - Cambiar el estado de un listado de ofertas:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]CambiarEstadoAll
 - Controlador para guardar los datos de la oferta:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [GET]LoadOffer
 - Controlador para Obtener los usuarios del/los grupos de un investigador:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [GET]LoadUsers
 - Controlador para Obtener las líneas de invetigación de los grupos de los usuarios investigadores dados:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]LoadLineResearchs
 - Controlador para Obtener los sectores de encuadre:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [GET]LoadFramingSectors
 - Controlador para Obtener los estados de madurez de las ofertas tecnológicas:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [GET]LoadMatureStates
 - Controlador para crear/actualizar los datos de la oferta:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]SaveOffer
 - Controlador para crear/actualizar los datos de la oferta:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]ModificarTripleteUsuario
 - Controlador que lista el perfil de usuarios al que pertenece el usuario actual respecto a una oferta tecnológica dada:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]GetUserProfileInOffer
 
@@ -165,11 +165,11 @@ Para acceder a la edición de la misma, se puede acceder desde la página del li
 ### Resumen del desarrollo 
 Toda la lógica de edición de las ofertas y la de la creación de las mismas es igual, únicamente se carga el contenido de las ofertas si se le pasa el id como parámetro, y se llama a la API para obtener los datos necesarios para precargar los datos. Las llamadas a la API que no se encuentran en la creación del mismo son las siguientes:
 - Carga de la oferta:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [GET]LoadOffer
 - Guardado de la oferta (Igual que en la creación del cluster, pero con un parámetro más):
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** OfertasController
 	- **Función:** [POST]SaveOffer
 

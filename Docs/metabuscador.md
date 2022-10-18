@@ -33,7 +33,7 @@ Los componentes involucrados en el metabuscador son los siguientes:
  ### Peticiones
  La librería community_proy.js realiza las siguientes llamadas ajax para la funcionalidad del metabuscador:
 - Obtener los resultados del metabuscador:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** SearchController
 	- **Función:** [GET]DoMetaSearch
 

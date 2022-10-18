@@ -49,7 +49,7 @@ La lógica javascript se encuentra en el archivo annotation.js y en las vistas d
 Se realizan llamadas a los diferentes servicios para las diferentes funcionalidades, la lista de llamadas son las siguientes:
 
 - Carga de Anotaciones Existentes:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** AnotationController
 	- **Función:** [POST]GetOwnAnnotationsInRO
 
@@ -63,7 +63,7 @@ Se debe acceder a una publicacion o RO, despues en la esquina superior derecha h
 ### Resumen del desarrollo
 
 - Creacion de la anotacion:
-	 - **API:** ServicioExterno
+	 - **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** AnotationController
 	 - **Función:** [POST]CreateNewAnnotation
 
@@ -76,7 +76,7 @@ A la derecha de la anotación hay un menu expandible de acciones, una de las acc
 Toda la lógica de la edición de una anotación y la de la creación de la misma es igual, unicamente el guardado tiene un parametro mas, el id de la anotación existente.
 
 - Guardado de la anotación (Igual que en la creación de la anotacion, pero con un parámetro más):
-    - **API:** ServicioExterno
+    - **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** AnotationController
 	 - **Función:** [POST]CreateNewAnnotation
 
@@ -90,7 +90,7 @@ A la derecha de la anotación hay un menu expandible de acciones, una de las acc
 Se realizan llamadas a los diferentes servicios para las diferentes funcionalidades, la lista de llamadas son las siguientes: 
 
 - Borrado de la anotacion:
-    - **API:** ServicioExterno
+    - **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** AnotationController
 	 - **Función:** [POST]DeleteAnnotation
 

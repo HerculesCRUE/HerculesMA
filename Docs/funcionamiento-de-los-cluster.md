@@ -55,27 +55,27 @@ La vista de creación del cluster se encuentra 'Views/Views/CMS/Destacado/Creaci
 La lógica javascript se encuentra en el archivo cluster.js (https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Estilos/theme/offer.js)
 Se realizan llamadas a los diferentes servicios para las diferentes funcionalidades, la lista de llamadas son las siguientes:
 - Carga de taxonomías `Áreas temáticas`:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [GET]GetThesaurus
 - Carga de los `Descriptores específicos`:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [GET]SearchTags
 - Gráfica de las relaciones entre los investigadores:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [POST]DatosGraficaColaboradoresCluster
 - Carga de los perfiles de investigación creados:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [GET]LoadSavedProfiles
 - Carga de los perfiles de investigación y el porcentaje de acierto en cada usuario sugerido:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [POST]LoadProfiles
 - Creación del cluster:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [POST]SaveCluster
 
@@ -89,11 +89,11 @@ Para acceder a la edición del mimo, se puede acceder desde la página del lista
 ### Resumen del desarrollo
 Toda la lógica de edición del cluster y la de la creación del mismo es igual, únicamente se carga el contenido del cluster si se le pasa el id como parámetro, y se llama a la API para obtener los datos necesarios para precargar los datos. Las llamadas a la API que no se encuentran en la creación del mismo son las siguientes:
 - Carga del cluster:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [GET]LoadCluster
 - Guardado del cluster (Igual que en la creación del cluster, pero con un parámetro más):
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [POST]SaveCluster
 
@@ -118,15 +118,15 @@ Archivo: 'Views/Recursos/cluster.cshtml'.
 Javascript: El js mayormento se encuentra en el propio archivo de la ficha.
 Los métodos usados en el editor son los siguientes:
 - Grafo de relaciones con otros participantes:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [POST]DatosGraficaColaboradoresCluster
 - Gráfica de la distribución de los principales temas de investigación:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [POST]DatosGraficaAreasTematicasCluster
 - Borrar:
-	- **API:** ServicioExterno
+	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
 	- **Controlador:** ClusterController
 	- **Función:** [POST]BorrarCluster
 
