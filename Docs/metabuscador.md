@@ -30,6 +30,13 @@ Los componentes involucrados en el metabuscador son los siguientes:
  - Javascript: El comportamiento javascript está dentro del fichero [community_proy.js](https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Estilos/theme/community_proy.js) y para lanzarlo se ejecuta metabuscador.init()
  - [Servicio externo](https://github.com/HerculesCRUE/Commons-ED-MA/tree/main/src/Hercules.CommonsEDMA.ServicioExterno): Es el servicio que se utiliza para devolver los resultados del metabuscador 
 
+ ### Peticiones
+ La librería community_proy.js realiza las siguientes llamadas ajax para la funcionalidad del metabuscador:
+- Obtener los resultados del metabuscador:
+	- **API:** ServicioExterno
+	- **Controlador:** SearchController
+	- **Función:** [GET]DoMetaSearch
+
 ## Flujo
  - Al arrancar el servicio externo se ejecuta el método 'GenerateMetaShearch' dentro de la clase 'AccionesMetaBusqueda' que se encarga de cargar los datos para que posteriormente estén disponibles en las búsquedas. Carga en el objeto AccionesMetaBusqueda.textSearch todas las palabras que aparecen en los elementos buscables asociados a la propiedad, a un peso y al objeto en el que aparecen (Este proceso se repite cada 5 minutos).
  - Al cargar cualquier página se ejecuta metabuscador.init() que prepara el funcionamiento del metabuscador
