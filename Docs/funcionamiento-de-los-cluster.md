@@ -34,7 +34,7 @@ El listado de clusters contiene un listado simple de los clusters y un listado d
 
 ### Datos del gestor
 El listado de los clusters es una página del cms llamada 'Cluster'
-La vista de creación del cluster se encuentra '[\_ConsultaSPARQL_listadocluster$$$addf4aca-9147-4946-8f9b-d23fb07719a2.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/CMS/ConsultaSPARQL/_ConsultaSPARQL_listadocluster$$$addf4aca-9147-4946-8f9b-d23fb07719a2.cshtml)'. La vista de personalización en el gestor de GNOSS se encuentra en 'Plantillas de los componentes del CMS/Consulta SPARQL/Listado_Cluster'
+La vista de creación del cluster es '[\_ConsultaSPARQL_listadocluster$$$addf4aca-9147-4946-8f9b-d23fb07719a2.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/CMS/ConsultaSPARQL/_ConsultaSPARQL_listadocluster$$$addf4aca-9147-4946-8f9b-d23fb07719a2.cshtml)'. La vista de personalización en el gestor de GNOSS se encuentra en 'Plantillas de los componentes del CMS/Consulta SPARQL/Listado_Cluster'
 
 ## Creación del cluster
 Para la creación del cluster, debes de estar loguedado como personal investigador y acceder al menú lateral derecho > "Gestión de clusters" > "Nuevo Cluster".
@@ -49,7 +49,7 @@ La creación de un cluster consiste en un formaulario de varios pasos (o Stepper
 
 ### Datos del gestor
 La creación de los clusters es una página del cms llamada 'Nuevo Cluster'
-La vista de creación del cluster se encuentra '[\_Destacado_creacioncluster$$$f69da06a-9211-4722-abb6-a70bffb0a41e.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/CMS/Destacado/_Destacado_creacioncluster$$$f69da06a-9211-4722-abb6-a70bffb0a41e.cshtml)'. La vista de personalización en el gestor de GNOSS se encuentra en 'Plantillas de los componentes del CMS/Destacado/CreacionCluster'
+La vista de creación del cluster es '[\_Destacado_creacioncluster$$$f69da06a-9211-4722-abb6-a70bffb0a41e.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/CMS/Destacado/_Destacado_creacioncluster$$$f69da06a-9211-4722-abb6-a70bffb0a41e.cshtml)'. La vista de personalización en el gestor de GNOSS se encuentra en 'Plantillas de los componentes del CMS/Destacado/CreacionCluster'
 
 ### Resumen del desarrollo
 La lógica javascript se encuentra en el archivo [cluster.js](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Estilos/theme/cluster.js)
@@ -133,7 +133,7 @@ Los métodos usados en el editor son los siguientes:
 
 ### Datos del gestor
 La ficha del cluster es el recurso llamado 'cluster'
-La vista de la ficha del cluster se encuentra '[cluster.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Recursos/cluster.cshtml)'. La vista de personalización en el gestor de GNOSS se encuentra en 'Plantillas de la web/cluster'
+La vista de la ficha del cluster es '[cluster.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Recursos/cluster.cshtml)'. La vista de personalización en el gestor de GNOSS se encuentra en 'Plantillas de la web/cluster'
 
 ## Permisos
 Los permisos para la edición, creación y borrado de los clusters requieren ser un usuario registrado.
