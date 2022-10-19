@@ -37,6 +37,38 @@
     {
       "identificador": "grafica2",
       "nombre": {
+        "es": "Patentes por organismo"
+      },
+      "tipo": "Barras",
+      "anchura": 13,
+      "config": {
+        "orientacionVertical": true,
+        "ejeX": "roh:ownerOrganizationTitle",
+        "orderDesc": false,
+        "rellenarEjeX": false,
+        "yAxisPrint": [
+          {
+            "yAxisID": "y1",
+            "posicion": "left"
+          }
+        ],
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Número de patentes"
+            },
+            "filtro": "",
+            "tipoDimension": "bar",
+            "color": "#BF4858",
+            "yAxisID": "y1",
+            "orden": 1
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica3",
+      "nombre": {
         "es": "Región de las patentes"
       },
       "tipo": "Circular",
@@ -72,9 +104,15 @@
   "facetas": [
     {
       "nombre": {
-        "es": "Patentes con licencia"
+        "es": "Licencia"
       },
       "filtro": "roh:licenses"
+    },
+    {
+      "nombre": {
+        "es": "Derechos de autor"
+      },
+      "filtro": "roh:authorsRights"
     }
   ]
 }
