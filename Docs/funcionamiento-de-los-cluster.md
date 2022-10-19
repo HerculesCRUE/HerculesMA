@@ -52,7 +52,7 @@ La creación de los clusters es una página del cms llamada 'Nuevo Cluster'
 La vista de creación del cluster se encuentra '[\_Destacado_creacioncluster$$$f69da06a-9211-4722-abb6-a70bffb0a41e.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/CMS/Destacado/_Destacado_creacioncluster$$$f69da06a-9211-4722-abb6-a70bffb0a41e.cshtml)'. La vista de personalización en el gestor de GNOSS se encuentra en 'Plantillas de los componentes del CMS/Destacado/CreacionCluster'
 
 ### Resumen del desarrollo
-La lógica javascript se encuentra en el archivo cluster.js (https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Estilos/theme/offer.js)
+La lógica javascript se encuentra en el archivo [cluster.js](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Estilos/theme/cluster.js)
 Se realizan llamadas a los diferentes servicios para las diferentes funcionalidades, la lista de llamadas son las siguientes:
 - Carga de taxonomías `Áreas temáticas`:
 	- **API:** [ServicioExterno](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/src/Hercules.CommonsEDMA.ServicioExterno)
