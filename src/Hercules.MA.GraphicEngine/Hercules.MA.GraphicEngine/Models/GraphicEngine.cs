@@ -955,25 +955,33 @@ namespace Hercules.MA.GraphicEngine.Models
                     if (pGrafica.config.rango)
                     {
                         int indice;
-                        float[] sumaDatos = new float[4];
-                        string[] rangos = { "1-3", "4-10", "11-30", "30+" };
+                        float[] sumaDatos = new float[pGrafica.config.rangos.Length];
+                        string[] rangos = pGrafica.config.rangos;
                         foreach (Tuple<string, string, float> item2 in item.Value)
                         {
-                            indice = int.Parse(item2.Item1);
-                            switch (indice)
+                            string valor = item2.Item1;
+                            if (item2.Item1.Contains(','))
                             {
-                                case < 4:
-                                    sumaDatos[0] += item2.Item3;
-                                    break;
-                                case < 11:
-                                    sumaDatos[1] += item2.Item3;
-                                    break;
-                                case < 31:
-                                    sumaDatos[2] += item2.Item3;
-                                    break;
-                                default:
-                                    sumaDatos[3] += item2.Item3;
-                                    break;
+                                valor = item2.Item1.Replace(',', '.');
+                            }
+                            indice = Convert.ToInt32(Math.Floor(double.Parse(valor)));
+                            for (int i = 0; i < rangos.Length; i++)
+                            {
+                                int numeroComparar1, numeroComparar2;
+                                if (rangos[i].Contains('-'))
+                                {
+                                    numeroComparar1 = int.Parse(rangos[i].Split('-')[0]);
+                                    numeroComparar2 = int.Parse(rangos[i].Split('-')[1]);
+                                }
+                                else
+                                {
+                                    numeroComparar1 = int.Parse(rangos[i].Split('+')[0]);
+                                    numeroComparar2 = int.MaxValue;
+                                }
+                                if (indice >= numeroComparar1 && indice <= numeroComparar2)
+                                {
+                                    sumaDatos[i] += item2.Item3;
+                                }
                             }
                         }
                         for (int i = 0; i < sumaDatos.Length; i++)
@@ -1025,7 +1033,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                     if (isInt)
                     {
-                        resultadosDimension[item.Key] = item.Value.OrderBy(x => int.Parse(x.Item1)).ToList();
+                        resultadosDimension[item.Key] = item.Value.OrderBy(x => Convert.ToInt32(Math.Floor(double.Parse(x.Item1)))).ToList();
                     }
                     else
                     {
@@ -1524,25 +1532,28 @@ namespace Hercules.MA.GraphicEngine.Models
                     if (pGrafica.config.rango)
                     {
                         int indice;
-                        float[] sumaDatos = new float[4];
-                        string[] rangos = { "1-3", "4-10", "11-30", "30+" };
+                        float[] sumaDatos = new float[pGrafica.config.rangos.Length];
+                        string[] rangos = pGrafica.config.rangos;
                         foreach (Tuple<string, string, float> item2 in item.Value)
                         {
                             indice = int.Parse(item2.Item1);
-                            switch (indice)
+                            for (int i = 0; i < rangos.Length; i++)
                             {
-                                case < 4:
-                                    sumaDatos[0] += item2.Item3;
-                                    break;
-                                case < 11:
-                                    sumaDatos[1] += item2.Item3;
-                                    break;
-                                case < 31:
-                                    sumaDatos[2] += item2.Item3;
-                                    break;
-                                default:
-                                    sumaDatos[3] += item2.Item3;
-                                    break;
+                                int numeroComparar1, numeroComparar2;
+                                if (rangos[i].Contains('-'))
+                                {
+                                    numeroComparar1 = int.Parse(rangos[i].Split('-')[0]);
+                                    numeroComparar2 = int.Parse(rangos[i].Split('-')[1]);
+                                }
+                                else
+                                {
+                                    numeroComparar1 = int.Parse(rangos[i].Split('+')[0]);
+                                    numeroComparar2 = int.MaxValue;
+                                }
+                                if (indice >= numeroComparar1 && indice < numeroComparar2)
+                                {
+                                    sumaDatos[i] += item2.Item3;
+                                }
                             }
                         }
                         for (int i = 0; i < sumaDatos.Length; i++)

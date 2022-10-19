@@ -1,15 +1,80 @@
 {
-  // Sin gráficas
   "nombre": {
     "es": "Propiedad Industrial e Intelectual"
   },
-  "filtro": "rdf:type='patent'&roh:isValidated='true'",
+  "filtro": "rdf:type='patent'",
+  //"filtro": "rdf:type='patent'&roh:isValidated='true'",
   "orden": 4,
   "identificador": "pagina4",
   "graficas": [
-
+    {
+      "identificador": "grafica1",
+      "nombre": {
+        "es": "Patentes con licencia"
+      },
+      "tipo": "Circular",
+      "anchura": 13,
+      "config": {
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Con licencia"
+            },
+            "filtro": "roh:licenses='true'",
+            "orden": 1,
+            "color": "#BF4858"
+          },
+          {
+            "nombre": {
+              "es": "Sin licencia"
+            },
+            "filtro": "roh:licenses='false'",
+            "color": "#7CBFE3"
+          }
+        ]
+      }
+    },
+    {
+      "identificador": "grafica2",
+      "nombre": {
+        "es": "Región de las patentes"
+      },
+      "tipo": "Circular",
+      "anchura": 13,
+      "config": {
+        "dimensiones": [
+          {
+            "nombre": {
+              "es": "Española"
+            },
+            "filtro": "roh:spanishPatent='true'",
+            "orden": 1,
+            "color": "#BF4858"
+          },
+          {
+            "nombre": {
+              "es": "Europea"
+            },
+            "filtro": "roh:europeanPatent='true'",
+            "color": "#7CBFE3"
+          },
+          {
+            "nombre": {
+              "es": "Internacional"
+            },
+            "filtro": "roh:internationalPatent='true'",
+            "color": "#817E80"
+          }
+        ]
+      }
+    }
   ],
   "facetas": [
-
+    {
+      "nombre": {
+        "es": "Patentes con licencia"
+      },
+      "filtro": "roh:licenses"
+    }
   ]
 }

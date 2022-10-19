@@ -45,6 +45,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public string ejeX { get; set; }
         public string reciproco { get; set; }
         public bool rango { get; set; }
+        public string[] rangos { get; set; }
         public bool porcentual { get; set; }
         public bool abreviar { get; set; }
         public bool ocultarLeyenda { get; set; }
