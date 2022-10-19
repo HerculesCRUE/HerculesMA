@@ -42,14 +42,15 @@
       "tipo": "Barras",
       "anchura": 13,
       "config": {
-        "orientacionVertical": true,
+        "orientacionVertical": false,
         "ejeX": "roh:ownerOrganizationTitle",
         "orderDesc": false,
+        "abreviar": true,
         "rellenarEjeX": false,
-        "yAxisPrint": [
+        "xAxisPrint": [
           {
-            "yAxisID": "y1",
-            "posicion": "left"
+            "xAxisID": "x1",
+            "posicion": "bottom"
           }
         ],
         "dimensiones": [
@@ -59,8 +60,8 @@
             },
             "filtro": "",
             "tipoDimension": "bar",
-            "color": "#BF4858",
-            "yAxisID": "y1",
+            "color": "#7CBFE3",
+            "xAxisID": "x1",
             "orden": 1
           }
         ]
@@ -80,7 +81,6 @@
               "es": "Española"
             },
             "filtro": "roh:spanishPatent='true'",
-            "orden": 1,
             "color": "#BF4858"
           },
           {

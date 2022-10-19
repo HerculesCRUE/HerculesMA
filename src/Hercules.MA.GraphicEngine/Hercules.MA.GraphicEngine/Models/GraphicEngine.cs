@@ -1840,7 +1840,10 @@ namespace Hercules.MA.GraphicEngine.Models
                         {
                             try
                             {
-                                dicNombreData.TryAdd(fila["tipo"].value, Int32.Parse(fila["numero"].value));
+                                if (!dicNombreData.TryAdd(fila["tipo"].value, Int32.Parse(fila["numero"].value)))
+                                {
+                                    dicNombreData.TryAdd(fila["tipo"].value + "|@" + Guid.NewGuid(), Int32.Parse(fila["numero"].value));
+                                }
                             }
                             catch (Exception)
                             {
