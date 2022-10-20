@@ -3,7 +3,7 @@
 | Fecha         | 29/8/2022                                                   |
 | ------------- | ------------------------------------------------------------ |
 |Título|Funcionamiento de los investigadores|
-|Descripción|Guía de funcionamiento del investigador|
+|Descripción|Guía de funcionamiento del buscador y ficha de los investigadores|
 |Versión|1.0|
 |Módulo|Documentación|
 |Tipo|Especificación|
@@ -12,34 +12,34 @@
 # Funcionamiento de los Investigadores
 
 ## Descripción
-Los investigadores son un recurso en la plataforma de Hércules que cumple la funcionalidad de los diferentes investigadores disponibles en las universidades, y que son ejecutados por el personal investigador de las mismas. El objetivo de los mismos es la ejecución de tareas de investigación y desarrollo llevadas a cabo por las mismas universidades con o sin colaboración con otras entidades.
+Los investigadores son un recurso en la plataforma de Hércules que cumple la funcionalidad de ser el personal investigador de las universidades y disponible en la plataforma de Hércules. El personal investigador también tiene la posibilidad de realizar acciones en la platagorma tanto de MA como de ED en calidad de usuario registrado. 
 
 ### Información ontológica
-Los investigador hacen referencia al objeto de conocimiento de los Investigador (person.owl).
+Los investigadores hacen referencia al objeto de conocimiento de los Investigadores (person.owl).
 
 ### Resumen funcional
-Los publicación poseen un buscador público junto a una ficha de la misma
+Los investigadores poseen un buscador público junto a una ficha de la misma
 
 
 ## Buscador general de los investigadores
 Existe un buscador general de los investigadores
 
 ### Resumen funcional
-El buscador de investigadores contiene un listado facetado con un resumen de la información de los investigadores, junto a un buscador por texto de los mismos. El buscador carga 10 resúmenes del investigador por defecto, con un enlace en el título a cada ficha del mismo, y mientras haces scroll, se irán haciendo peticiones al servicio de resultados para ir cargando el resto. 
+El buscador del personal investigador contiene un listado facetado con un resumen de la información de los investigadores, junto a un buscador por texto de los mismos. El buscador carga 10 resúmenes del investigador por defecto, con un enlace en el título a cada ficha del mismo, y mientras haces scroll, se irán haciendo peticiones al servicio de resultados para ir cargando el resto. 
 Las facetas que se muestran están predefinidas y se irán mostrando en base al resultado de las búsqueda en sí disponible. Las facetas mostradas, como las opciones de las mismas y el número de resultados de las mismas, se muestran según haya resultados para la búsqueda actual.
 Mientras se vayan añadiendo filtros de las propias facetas, se irán mostrando las facetas añadidas, filtrando el resultado de la búsqueda y ajustando las facetas a las opciones con resultados de las mismas.
 
 ### Datos del gestor
-El buscador de los investigadores es una página de 'búsqueda semántica' llamada 'Personal investigador'.
+El buscador del personal investigador es una página de 'búsqueda semántica' llamada 'Personal investigador'.
 
 La vista personalizadas de la búsqueda de los investigadores es la general para las búsquedas, así como la 'minificha' del propio buscador, siendo éstas las rutas:
-- Buscador (general): https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/Busqueda/Index.cshtml
-- Carga de resultados: https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/CargadorResultados/CargarResultados.cshtml
-- Minificha: https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/CargadorResultados/_ResultadoRecurso.cshtml
+- Buscador (general): [Index.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/Busqueda/Index.cshtml)
+- Carga de resultados: [CargarResultados.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/CargadorResultados/CargarResultados.cshtml)
+- Minificha: [\_ResultadoRecurso.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/CargadorResultados/_ResultadoRecurso.cshtml)
 
 Las vistas de personalización de las facetas son las siguentes:
-- Faceta: https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/CargadorFacetas/_Faceta.cshtml
-- Elemento de la facetas: https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/CargadorFacetas/_ItemFaceta.cshtml
+- Faceta: [\_Faceta.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/CargadorFacetas/_Faceta.cshtml)
+- Elemento de la facetas: [\_ItemFaceta.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/CargadorFacetas/_ItemFaceta.cshtml)
 
 
 ### Resumen del desarrollo
@@ -51,7 +51,7 @@ Las vistas de personalización de las facetas son las siguentes:
 
 
 ## Ficha del investigador
-Se accede desde el listado de los investigadores o desde el listado de los mismos.
+Se accede desde el listado de los investigadores o desde el listado de los mismos, también se puede llegar desde los datos enriquecidos y otro recurso dentro de la plataforma de Hércules desde el que se le haga referencia.
 ### Resumen funcional
 En esta pantalla nos encontramos con las funciones típicas de las fichas de los diferentes contenidos; nos encontramos con el título, la fecha de creación de la página, la descripción del mismo y las areas temáticas.
 Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
@@ -67,4 +67,4 @@ Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
  
 
 ### Datos del gestor
-La ficha de los investigadores es un recurso, y la vista personalizada se encuentra en "https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Recursos/person.cshtml".
+La ficha de los investigadores es un recurso, y la vista personalizada se encuentra en "[person.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Recursos/person.cshtml)".
