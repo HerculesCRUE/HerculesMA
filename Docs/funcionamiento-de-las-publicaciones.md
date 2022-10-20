@@ -54,8 +54,12 @@ Las vistas de personalización de las facetas son las siguentes:
 Se accede desde el listado de las publicaciones o desde el listado de los mismos.
 ### Resumen funcional
 En esta pantalla nos encontramos con las funciones típicas de las fichas de los diferentes contenidos; nos encontramos con el título, la fecha de creación de la página, la descripción del mismo y las areas temáticas.
-Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
 
+Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
+- [Nueva anotación](https://github.com/HerculesCRUE/HerculesMA/blob/main/Docs/funcionamiento-de-las-anotaciones.md)
+- Citar publicación
+- [Vincular RO](https://github.com/HerculesCRUE/HerculesMA/blob/main/Docs/funcionamiento-de-los-ros-vinculados.md) (Si eres autor de la publicación)
+- Editar (si eres autor de la publicación)
 
 **Datos enriquecidos:**
 - **Relacionados**: Pestaña con un listado de publicaciones relacionadas.
