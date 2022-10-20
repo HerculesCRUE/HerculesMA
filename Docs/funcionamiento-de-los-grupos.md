@@ -25,7 +25,7 @@ Los publicación poseen un buscador público junto a una ficha de la misma
 Existe un buscador general de los grupos
 
 ### Resumen funcional
-El buscador de grupos de investigación contiene un listado facetado con un resumen de la información de los grupos, junto a un buscador por texto de los mismos. El buscador carga 10 resúmenes de grupos de invetigación por defecto, con un enlace en el título a cada ficha del mismo, y mientras haces scroll, se irán haciendo peticiones al servicio de resultados para ir cargando el resto. 
+El buscador de grupos de investigación contiene un listado facetado con un resumen de la información de los grupos, junto a un buscador por texto de los mismos. El buscador carga 10 resúmenes de grupos de investigación por defecto, con un enlace en el título a cada ficha del mismo, y mientras haces scroll, se irán haciendo peticiones al servicio de resultados para ir cargando el resto. 
 Las facetas que se muestran están predefinidas y se irán mostrando en base al resultado de las búsqueda en sí disponible. Las facetas mostradas, como las opciones de las mismas y el número de resultados de las mismas, se muestran según haya resultados para la búsqueda actual.
 Mientras se vayan añadiendo filtros de las propias facetas, se irán mostrando las facetas añadidas, filtrando el resultado de la búsqueda y ajustando las facetas a las opciones con resultados de las mismas.
 
