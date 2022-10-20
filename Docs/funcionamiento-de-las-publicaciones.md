@@ -25,7 +25,7 @@ Los publicación poseen un buscador público junto a una ficha de la misma
 Existe un buscador general de las publicaciones
 
 ### Resumen funcional
-El buscador de publicaciones contiene un listado facetado con un resumen de la información de las publicaciones, junto a un buscador por texto de los mismos. El buscador carga 10 resúmenes del publicación por defecto, con un enlace en el título a cada ficha del mismo, y mientras haces scroll, se irán haciendo peticiones al servicio de resultados para ir cargando el resto. 
+El buscador de publicaciones contiene un listado facetado con un resumen de la información de las publicaciones, junto a un buscador por texto de los mismos. El buscador carga 10 resúmenes de las publicaciones por defecto, con un enlace en el título a cada ficha del mismo, y mientras haces scroll, se irán haciendo peticiones al servicio de resultados para ir cargando el resto. 
 Las facetas que se muestran están predefinidas y se irán mostrando en base al resultado de las búsqueda en sí disponible. Las facetas mostradas, como las opciones de las mismas y el número de resultados de las mismas, se muestran según haya resultados para la búsqueda actual.
 Mientras se vayan añadiendo filtros de las propias facetas, se irán mostrando las facetas añadidas, filtrando el resultado de la búsqueda y ajustando las facetas a las opciones con resultados de las mismas.
 
@@ -50,7 +50,7 @@ Las vistas de personalización de las facetas son las siguentes:
 
 
 
-## Ficha del publicación
+## Ficha de la publicación
 Se accede desde el listado de las publicaciones o desde el listado de los mismos.
 ### Resumen funcional
 En esta pantalla nos encontramos con las funciones típicas de las fichas de los diferentes contenidos; nos encontramos con el título, la fecha de creación de la página, la descripción del mismo y las areas temáticas.
@@ -58,10 +58,10 @@ Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
 
 
 **Datos enriquecidos:**
-- **Participantes**: Pestaña con una gráfica de las relaciones de los participantes elegidos para el publicación y un listado del personal investigador seleccionado indicando a qué perfil se ha añadido.
-- **Publicaciones**: Gráfica que pone de relieve las publicaciones y las citas por año, segmentando los resultados por cuartiles, junto a una búsqueda facetada de las publicaciones. Las publicaciones mostradas son las publicaciones que se encuentran en el marco del publicación
-- **Áreas temáticas**: Gráfica que pone de relieve los Áreas temáticas que se encuentran en la publicaciones científicas correspondientes al publicación actual.
-- **Colaboradores externos**: Gráfica con el personal investigador, junto sus relaciones, y junto a un buscador los mismos, que han colaborado de forma externa en el publicación.
+- **Relacionados**: Pestaña con un listado de publicaciones relacionadas.
+- **Referencias**: Enlace a publicaciones externas que han hecho referencias a la publicación.
+- **Mis notas**: Pestaña que muestra las anotaciones que el usuario que se encuentra 'logueado' actualmente en el portal ha realizado sobre esa publicación.
+- **ROs vinculados**: Muestra las relaciones que haya podido hacer desde esta publicación sobre otro RO (Research Objects y publicaciones).
  
 
 ### Datos del gestor
