@@ -3,7 +3,7 @@
 | Fecha         | 29/8/2022                                                   |
 | ------------- | ------------------------------------------------------------ |
 |Título|Funcionamiento de los proyectos|
-|Descripción|Guía de funcionamiento de los proyecto|
+|Descripción|Guía de funcionamiento de los proyectos|
 |Versión|1.0|
 |Módulo|Documentación|
 |Tipo|Especificación|
@@ -15,7 +15,7 @@
 Los proyectos son un recurso en la plataforma de Hércules que cumple la funcionalidad de los diferentes proyectos disponibles en las universidades, y que son ejecutados por el personal investigador de las mismas. El objetivo de los mismos es la ejecución de tareas de investigación y desarrollo llevadas a cabo por las mismas universidades con o sin colaboración con otras entidades.
 
 ### Información ontológica
-Los proyecto hacen referencia al objeto de conocimiento de los Proyecto (project.owl).
+Los proyectos hacen referencia al objeto de conocimiento de los Proyectos (project.owl).
 
 ### Resumen funcional
 Los publicación poseen un buscador público junto a una ficha de la misma
@@ -33,14 +33,13 @@ Mientras se vayan añadiendo filtros de las propias facetas, se irán mostrando 
 El buscador de los proyectos es una página de 'búsqueda semántica' llamada 'Proyectos'.
 
 La vista personalizadas de la búsqueda de los proyectos es la general para las búsquedas, así como la 'minificha' del propio buscador, siendo éstas las rutas:
-- Buscador (general): https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/Busqueda/Index.cshtml
-- Carga de resultados: https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/CargadorResultados/CargarResultados.cshtml
-- Minificha: https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/CargadorResultados/_ResultadoRecurso.cshtml
+- Buscador (general): [Index.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/Busqueda/Index.cshtml)
+- Carga de resultados: [CargarResultados.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/CargadorResultados/CargarResultados.cshtml)
+- Minificha: [\_ResultadoRecurso.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/CargadorResultados/_ResultadoRecurso.cshtml)
 
 Las vistas de personalización de las facetas son las siguentes:
-- Faceta: https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/CargadorFacetas/_Faceta.cshtml
-- Elemento de la facetas: https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Views/CargadorFacetas/_ItemFaceta.cshtml
-
+- Faceta: [\_Faceta.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/CargadorFacetas/_Faceta.cshtml)
+- Elemento de la facetas: [\_ItemFaceta.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Views/CargadorFacetas/_ItemFaceta.cshtml)
 
 ### Resumen del desarrollo
 
@@ -65,4 +64,4 @@ Respecto al menú de acciones, nos encontramos con los siguientes enlaces:
  
 
 ### Datos del gestor
-La ficha de los proyectos es un recurso, y la vista personalizada se encuentra en "https://github.com/HerculesCRUE/HerculesED/blob/main/Web/Views/Recursos/project.cshtml".
+La ficha de los proyectos es un recurso, y la vista personalizada se encuentra en "[project.cshtml](https://github.com/HerculesCRUE/Commons-ED-MA/blob/main/Web/Views/Recursos/project.cshtml)".
