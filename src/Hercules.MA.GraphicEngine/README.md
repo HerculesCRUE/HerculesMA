@@ -124,7 +124,8 @@ Dentro de la lista de gráficas, se van a configurar cada una de las gráficas q
   - datosNodos: Representa si la gráfica obtiene los datos como una gráfica de nodos. Opcional. Boolean.
   - numMaxNodos: Representa la máxima cantidad de nodos que se mostrarán, quitando el resto de nodos menos relevantes. Opcional, únicamente poner si datosNodos es true. Número.
   - ejeX: Es el filtro de los datos del eje X. Obligatorio. String.
-  - rango: El eje X de la gráfica se agrupa tomando los valores 1-3, 4-10, 11-30, 30+. Opcional. Boolean.
+  - rango: El eje X de la gráfica se agrupa tomando los valores de la propiedad rangos. Opcional. Boolean.
+  - rangos: Rangos que tomará la propiedad anterior. Los formatos permitidos son: "100-200" (De 100 a 200) y "300+" (300 o más). Opcional. Array de strings.
   - abreviar: Abrevia los labels del eje X. Opcional. Boolean.
   - orderDesc: Representa si los datos están ordenados de forma descendente o ascendente. Opcional. Boolean.
   - rellenarEjeX: Representa si en el eje X se rellenan los datos sin valor. Opcional. Boolean.
