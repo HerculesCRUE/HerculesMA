@@ -46,10 +46,9 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <summary>
         /// Obtiene si el usuario es admin o no
         /// </summary>
-        /// <param name="pIdPagina">Identificador de la página.</param>
-        /// <param name="pLang">Idioma.</param>
+        /// <param name="pUserId">Identificador del usuario</param>
         /// <returns></returns>
-        public static bool IsAdmin(string pLang, string pUserId = "")
+        public static bool IsAdmin(string pUserId = "")
         {
             bool isAdmin = false;
             if (pUserId == "")
@@ -87,7 +86,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static List<string> ObtenerConfigs(string pLang, string pUserId = "")
         {
             // Compruebo si es administrador
-            bool isAdmin = IsAdmin(pLang, pUserId);
+            bool isAdmin = IsAdmin(pUserId);
             if (!isAdmin)
             {
                 return null;
@@ -108,7 +107,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static bool SubirConfig(string pLang, string pConfigName, IFormFile pConfigFile, string pUserId = "")
         {
             // Compruebo si es administrador
-            bool isAdmin = IsAdmin(pLang, pUserId);
+            bool isAdmin = IsAdmin(pUserId);
             if (!isAdmin || pConfigFile == null)
             {
                 return false;
@@ -167,7 +166,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static Grafica ObtenerGraficaConfig(string pLang, string pUserId, string pPageId, string pGraphicId)
         {
             // Compruebo si es administrador
-            bool isAdmin = IsAdmin(pLang, pUserId);
+            bool isAdmin = IsAdmin(pUserId);
             ConfigModel configModel = mTabTemplates.Where(x => x.identificador == pPageId).FirstOrDefault();
             if (!isAdmin || configModel == null)
             {
@@ -188,7 +187,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static bool EditarConfig(string pLang, string pUserId, string pGraphicId, string pPageId, string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0, string pBlockId = "")
         {
             // Compruebo si es administrador
-            bool isAdmin = IsAdmin(pLang, pUserId);
+            bool isAdmin = IsAdmin(pUserId);
             ConfigModel configModel = mTabTemplates.Where(x => x.identificador == pPageId).FirstOrDefault();
             if (!isAdmin || configModel == null)
             {
@@ -323,7 +322,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static byte[] DescargarConfig(string pLang, string pConfigName, string pUserId = "")
         {
             // Compruebo si es administrador
-            bool isAdmin = IsAdmin(pLang, pUserId);
+            bool isAdmin = IsAdmin(pUserId);
             if (!isAdmin)
             {
                 return null;

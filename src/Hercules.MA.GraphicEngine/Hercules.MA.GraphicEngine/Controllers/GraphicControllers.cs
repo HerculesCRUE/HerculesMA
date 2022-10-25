@@ -125,7 +125,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public bool IsAdmin(string pLang, string pUserId = "")
         {
-            return Models.GraphicEngine.IsAdmin(pLang, pUserId);
+            return Models.GraphicEngine.IsAdmin(pUserId);
         }
         /// <summary>
         /// Obtiene las configuraciones de las páginas
