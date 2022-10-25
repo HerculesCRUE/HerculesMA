@@ -10,6 +10,17 @@
 |Cambios de la Versión|Versión inicial|
 
 # Hércules MA. Configuración de las gráficas de indicadores.
+
+
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
+
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Hercules.CommonsEDMA.Harvester&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.CommonsEDMA.Harvester&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.CommonsEDMA.Harvester&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Hercules.CommonsEDMA.Harvester&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
+
+
+
 [Introducción](#introducción)
 
 [Configuración de las gráficas de indicadores](#configuración-de-las-gráficas-de-indicadores)
