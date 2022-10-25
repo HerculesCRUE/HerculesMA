@@ -14,7 +14,7 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
         public DataCircular data { get; set; }
         public override byte[] GenerateCSV()
         {
-            if (data.datasets.Count == 1)
+            if (data != null && data.datasets != null && data.datasets.Count == 1)
             {
                 StringBuilder csv = new StringBuilder("");
                 csv.AppendLine("\"" + String.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
