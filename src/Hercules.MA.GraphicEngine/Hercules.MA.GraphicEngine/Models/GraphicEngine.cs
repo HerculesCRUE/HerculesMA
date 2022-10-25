@@ -49,7 +49,6 @@ namespace Hercules.MA.GraphicEngine.Models
         public static bool IsAdmin(string pLang, string pUserId = "")
         {
             bool isAdmin = false;
-            return true;
             if (pUserId == "")
             {
                 return false;
