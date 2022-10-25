@@ -192,7 +192,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 grafica = configModel.graficas.Where(x => x.identificador == pBlockId).FirstOrDefault();
             }
             // Edito la anchura de la gráfica.
-            if (pGraphicWidth != 0)
+            if (pGraphicWidth != 0 && grafica != null)
             {
                 grafica.anchura = pGraphicWidth;
             }
