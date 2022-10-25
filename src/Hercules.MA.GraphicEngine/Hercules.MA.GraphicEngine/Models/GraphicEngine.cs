@@ -105,7 +105,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pConfigFile">Fichero a subir.</param>
         /// <param name="pUserId">Identificador del usuario.</param>
         /// <returns></returns>
-        public static bool SubirConfig(string pLang, int pConfigNum, IFormFile pConfigFile, string pUserId = "")
+        public static bool SubirConfig(string pLang, string pConfigName, IFormFile pConfigFile, string pUserId = "")
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
@@ -124,18 +124,18 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
                 string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
                 string path = "";
-                bool found = false;
+                string fileName = pConfigName;
                 foreach (string file in Directory.EnumerateFiles(pathConfig))
                 {
-                    if (Path.GetFileName(file).Contains(pConfigNum.ToString()))
+                    if (Path.GetFileName(file).Contains(fileName))
                     {
                         path = file;
-                        found = true;
+                        break;
                     }
                 }
-                if (!found)
+                if (path == "")
                 {
-                    return found;
+                    return false;
                 }
                 using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
@@ -320,7 +320,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pConfig">Nombre del fichero.</param>
         /// <param name="pUserId">Identificador del usuario.</param>
         /// <returns></returns>
-        public static byte[] DescargarConfig(string pLang, int pConfigNum, string pUserId = "")
+        public static byte[] DescargarConfig(string pLang, string pConfigName, string pUserId = "")
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pLang, pUserId);
@@ -330,11 +330,13 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             string pathConfig = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
             string path = "";
+            string fileName = pConfigName;
             foreach (string file in Directory.EnumerateFiles(pathConfig))
             {
-                if (Path.GetFileName(file).Contains(pConfigNum.ToString()))
+                if (Path.GetFileName(file).Contains(fileName))
                 {
                     path = file;
+                    break;
                 }
             }
             string config = File.ReadAllText(path, Encoding.UTF8);
