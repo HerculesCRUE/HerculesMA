@@ -154,7 +154,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult DescargarConfig(string pLang, string pConfig, string pUserId = "")
         {
-            return File(Models.GraphicEngine.DescargarConfig(pLang, 1, pUserId), "application/json", pConfig);
+            return File(Models.GraphicEngine.DescargarConfig(pLang, pConfig, pUserId), "application/json", pConfig);
         }
         /// <summary>
         /// Actualiza un archivo de configuración concreto
@@ -168,7 +168,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public bool SubirConfig([FromForm]string pLang, [FromForm] int pConfigName, IFormFile pConfigFile, [FromForm] string pUserId = "")
+        public bool SubirConfig([FromForm]string pLang, [FromForm] string pConfigName, IFormFile pConfigFile, [FromForm] string pUserId = "")
         {
             return Models.GraphicEngine.SubirConfig(pLang, pConfigName, pConfigFile, pUserId);
         }
