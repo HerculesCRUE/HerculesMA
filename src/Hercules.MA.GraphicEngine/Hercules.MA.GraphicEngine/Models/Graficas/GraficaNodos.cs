@@ -25,6 +25,7 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
             // Nombre/Id de los nodos
             List<string> nombres = new List<string>();
             List<string> ids = new List<string>();
+
             // Recorro los elementos para obtener los nombres e ids
             foreach (DataItemRelacion item in elements)
             {
@@ -34,8 +35,10 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
                     ids.Add(item.data.id);
                 }
             }
+
             double?[,] valorRelaciones = new double?[nombres.Count, nombres.Count];
             int cont = 0;
+
             // Recorro los elementos para obtener los valores
             foreach (DataItemRelacion item in elements)
             {
@@ -53,6 +56,7 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
                     valorRelaciones[target, source] = valor;
                 }
             }
+
             // Paso los valores de la gráfica a una lista
             List<List<string>> valores = new List<List<string>>();
             for (int i = 0; i < nombres.Count; i++)
@@ -71,6 +75,7 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
                 }
                 valores.Add(aux);
             }
+
             // Añado al string los nombres de los nodos
             csv.AppendLine(";\"" + String.Join(";", nombres).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
 

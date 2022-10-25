@@ -28,11 +28,13 @@ namespace Hercules.MA.GraphicEngine.Models
         private const int NUM_HILOS = 5;
 
         #region --- Páginas
+
         /// <summary>
         /// Obtiene los datos de la página.
         /// </summary>
         /// <param name="pIdPagina">Identificador de la página.</param>
         /// <param name="pLang">Idioma</param>
+        /// <param name="userId">Identificador del usuario</param>
         /// <returns></returns>
         public static Pagina GetPage(string pIdPagina, string pLang, string userId = "")
         {
@@ -40,6 +42,7 @@ namespace Hercules.MA.GraphicEngine.Models
             ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.identificador == pIdPagina);
             return CrearPagina(configModel, pLang, userId);
         }
+
         /// <summary>
         /// Obtiene si el usuario es admin o no
         /// </summary>
@@ -53,31 +56,28 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return false;
             }
-            // Filtro de página.
-            SparqlObject resultadoQuery = null;
-            StringBuilder select = new StringBuilder(), where = new StringBuilder();
 
             // Consulta sparql.
-            select = new StringBuilder();
-            where = new StringBuilder();
+            string selectIsAdmin = mPrefijos;
+            selectIsAdmin += "SELECT ?permisos ";
+            string whereIsAdmin = $@"WHERE {{
+                                ?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}> . 
+                                ?s roh:isOtriManager ?permisos . 
+                            }}";
 
-            select.Append(mPrefijos);
-            select.Append($@"SELECT ?permisos ");
-            where.Append("WHERE { ");
-            where.Append($@"?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}>. ");
-            where.Append($@"?s roh:isOtriManager ?permisos. ");
-            where.Append("} ");
 
-            resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            SparqlObject resultadoQueryIsAdmin = mResourceApi.VirtuosoQuery(selectIsAdmin, whereIsAdmin, mCommunityID);
+            if (resultadoQueryIsAdmin != null && resultadoQueryIsAdmin.results != null &&
+                resultadoQueryIsAdmin.results.bindings != null && resultadoQueryIsAdmin.results.bindings.Count > 0)
             {
-                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryIsAdmin.results.bindings)
                 {
-                    isAdmin = Boolean.Parse(fila["permisos"].value);
+                    isAdmin = bool.Parse(fila["permisos"].value);
                 }
             }
             return isAdmin;
         }
+
         /// <summary>
         /// Obtiene los nombres de los json de configuración.
         /// </summary>
@@ -97,6 +97,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             return nombres;
         }
+
         /// <summary>
         /// Sobreescribe la configuración de la página.
         /// </summary>
@@ -154,6 +155,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             return true;
         }
+
         /// <summary>
         /// Edita la configuración de la página.
         /// </summary>
@@ -173,6 +175,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             return configModel.graficas.Where(x => x.identificador == pGraphicId).FirstOrDefault();
         }
+
         /// <summary>
         /// Edita la configuración de la página.
         /// </summary>
@@ -191,20 +194,24 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return false;
             }
+
             Grafica grafica = configModel.graficas.Where(x => x.identificador == pGraphicId).FirstOrDefault();
             if (grafica == null)
             {
                 return false;
             }
+
             // Edito el nombre de la gráfica.
             if (pGraphicName != "")
             {
                 grafica.nombre[pLang] = pGraphicName;
             }
+
             if (!string.IsNullOrEmpty(pBlockId))
             {
                 grafica = configModel.graficas.Where(x => x.identificador == pBlockId).FirstOrDefault();
             }
+
             // Edito la anchura de la gráfica.
             if (pGraphicWidth != 0 && grafica != null)
             {
@@ -217,6 +224,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 pGraphicOrder--;
                 Dictionary<string, List<Grafica>> dicGraficasGrupos = new Dictionary<string, List<Grafica>>();
                 List<Grafica> listaRemove = new List<Grafica>();
+
                 foreach (Grafica item in configModel.graficas)
                 {
                     if (!string.IsNullOrEmpty(item.idGrupo))
@@ -232,11 +240,14 @@ namespace Hercules.MA.GraphicEngine.Models
                         }
                     }
                 }
+
                 foreach (Grafica item in listaRemove)
                 {
                     configModel.graficas.Remove(item);
                 }
+
                 configModel.graficas.Remove(grafica);
+
                 if (pGraphicOrder > configModel.graficas.Count)
                 {
                     configModel.graficas.Add(grafica);
@@ -245,6 +256,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     configModel.graficas.Insert(pGraphicOrder, grafica);
                 }
+
                 if (dicGraficasGrupos.Count > 0)
                 {
                     foreach (KeyValuePair<string, List<Grafica>> item in dicGraficasGrupos)
@@ -261,8 +273,9 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                 }
             }
+
             // Guardo la configuración en el JSON.
-            string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+            string pathConfig = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
             string jsonName = "";
             foreach (string file in Directory.EnumerateFiles(pathConfig))
             {
@@ -273,20 +286,26 @@ namespace Hercules.MA.GraphicEngine.Models
                     break;
                 }
             }
-            string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", jsonName);
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.DefaultValueHandling = DefaultValueHandling.Ignore;
-            settings.NullValueHandling = NullValueHandling.Ignore;
-            settings.Formatting = Formatting.Indented;
+
+            string path = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", jsonName);
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                DefaultValueHandling = DefaultValueHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented
+            };
+
             configModel.graficas.ForEach(x => x.identificador = x.identificador.Contains('-') ? x.identificador.Split('-').LastOrDefault() : x.identificador);
             string json = JsonConvert.SerializeObject(configModel, settings);
             File.WriteAllText(path, json);
+
             mTabTemplates = new List<ConfigModel>();
             foreach (string file in Directory.EnumerateFiles(pathConfig))
             {
                 ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
                 mTabTemplates.Add(tab);
             }
+
             if (!string.IsNullOrEmpty(pBlockId))
             {
                 EditarConfig(pLang, pUserId, pGraphicId, pPageId, pGraphicName);
@@ -309,7 +328,7 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return null;
             }
-            string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+            string pathConfig = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
             string path = "";
             foreach (string file in Directory.EnumerateFiles(pathConfig))
             {
@@ -737,7 +756,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                     // Creamos los nodos y las relaciones en función de pNumAreas.
                     int pNumAreas = pGrafica.config.numMaxNodos;
-                    
+
                     Dictionary<string, int> numRelaciones = new Dictionary<string, int>();
                     foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
                     {
@@ -1309,6 +1328,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                     }
                 }
+
                 if (filtroEspecial)
                 {
                     filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "aux"));
@@ -1317,6 +1337,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
                 }
+
                 if (pNodos)
                 {
                     //Nodos            
@@ -3815,7 +3836,7 @@ namespace Hercules.MA.GraphicEngine.Models
             string user = resultados.ToList().FirstOrDefault();
             return user;
 
-         
+
         }
 
         /// <summary>

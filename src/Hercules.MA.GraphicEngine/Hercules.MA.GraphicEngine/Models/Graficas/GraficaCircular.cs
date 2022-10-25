@@ -22,14 +22,14 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
                     return null;
                 }
                 StringBuilder csv = new StringBuilder("");
-                csv.AppendLine("\"" + String.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
-                csv.AppendLine("\"" + String.Join(";", dataset.data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                csv.AppendLine("\"" + string.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                csv.AppendLine("\"" + string.Join(";", dataset.data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
                 return Encoding.Latin1.GetBytes(csv.ToString());
             }
             else
             {
                 StringBuilder csv = new StringBuilder("");
-                csv.AppendLine(";\"" + String.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                csv.AppendLine(";\"" + string.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
                 Dictionary<string, List<float>> dic = new Dictionary<string, List<float>>();
 
                 foreach (DatasetCircular datasetCircular in data.datasets.Where(x => x.grupos != null))
@@ -52,7 +52,7 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
                 }
                 foreach (KeyValuePair<string, List<float>> item in dic)
                 {
-                    csv.AppendLine("\"" + item.Key + "\";\"" + String.Join(";", item.Value).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                    csv.AppendLine("\"" + item.Key + "\";\"" + string.Join(";", item.Value).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
                 }
                 return Encoding.Latin1.GetBytes(csv.ToString());
             }

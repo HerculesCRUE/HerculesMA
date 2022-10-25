@@ -172,6 +172,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.SubirConfig(pLang, pConfigName, pConfigFile, pUserId);
         }
+
         /// <summary>
         /// Edita la configuración de una gráfica de indicadores generales
         /// </summary>
@@ -192,6 +193,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.EditarConfig(pLang, pUserId, pGraphicId, pPageId, pGraphicName, pGraphicOrder, pGraphicWidth, pBlockId);
         }
+
         /// <summary>
         /// Obtiene la configuración de una gráfica de indicadores generales
         /// </summary>
@@ -208,6 +210,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.ObtenerGraficaConfig(pLang, pUserId, pPageId, pGraphicId);
         }
+
         /// <summary>
         /// Obtención de una lista de gráficas y sus datos específicos del usuario
         /// </summary>
@@ -222,6 +225,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.GetPages(pLang, userId);
         }
+
         /// <summary>
         /// Obtiene las páginas de indicadores personales de un usuario específico
         /// </summary>
@@ -235,6 +239,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.GetPagesUser(pUserId);
         }
+
         /// <summary>
         /// Guarda una gráfica de indicadores generales en el panel de indicadores personales del usuario
         /// </summary>
@@ -256,6 +261,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.GuardarGrafica(pTitulo, pAnchura, pIdPaginaGrafica, pIdGrafica, pFiltros, pUserId, pIdRecursoPagina, pTituloPagina, pEscalas);
         }
+
         /// <summary>
         /// Borra la gráfica de indicadores personales del usuario
         /// </summary>
@@ -270,6 +276,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             Models.GraphicEngine.BorrarGrafica(pUserId, pPageID, pGraphicID);
         }
+
         /// <summary>
         /// Borra la página de indicadores personales del usuario
         /// </summary>
@@ -283,6 +290,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             Models.GraphicEngine.BorrarPagina(pUserId, pPageID);
         }
+
         /// <summary>
         /// Edita el nombre de la página de indicadores personales
         /// </summary>
@@ -313,6 +321,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             Models.GraphicEngine.EditarOrdenPagina(pUserId, pPageID, pNewOrder, pOldOrder);
         }
+
         /// <summary>
         /// Edita el nombre de la gráfica de indicadores personales
         /// </summary>
@@ -329,6 +338,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             Models.GraphicEngine.EditarNombreGrafica(pUserId, pPageID, pGraphicID, pNewTitle, pOldTitle);
         }
+
         /// <summary>
         /// Edita el orden de la gráfica de indicadores personales
         /// </summary>
@@ -345,6 +355,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             Models.GraphicEngine.EditarOrdenGrafica(pUserId, pPageID, pGraphicID, pNewOrder, pOldOrder);
         }
+
         /// <summary>
         /// Edita la anchura de la gráfica de indicadores personales
         /// </summary>
@@ -361,6 +372,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             Models.GraphicEngine.EditarAnchuraGrafica(pUserId, pPageID, pGraphicID, pNewWidth, pOldWidth);
         }
+
         /// <summary>
         /// Edita las escalas/ejes de la gráfica de indicadores personales en función de si tiene 1 o 2 escalas
         /// </summary>
