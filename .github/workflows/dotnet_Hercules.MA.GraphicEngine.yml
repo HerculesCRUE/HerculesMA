@@ -42,6 +42,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_HERCULES_MA_GRAPHICENGINE }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"Hercules.MA.GraphicEngine" /o:"herculescrue" /d:sonar.ServicioExterno="${{ secrets.SONAR_TOKEN_HERCULES_MA_GRAPHICENGINE }}" /d:sonar.host.url="https://sonarcloud.io"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"Hercules.MA.GraphicEngine" /o:"herculescrue" /d:sonar.login="${{ secrets.SONAR_TOKEN_HERCULES_MA_GRAPHICENGINE }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build src/Hercules.MA.GraphicEngine
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.ServicioExterno="${{ secrets.SONAR_TOKEN_HERCULES_MA_GRAPHICENGINE }}"
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN_HERCULES_MA_GRAPHICENGINE }}"
