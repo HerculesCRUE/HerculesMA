@@ -16,9 +16,14 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
         {
             if (data != null && data.datasets != null && data.datasets.Count == 1)
             {
+                DatasetCircular dataset = data.datasets.FirstOrDefault();
+                if (dataset == null)
+                {
+                    return null;
+                }
                 StringBuilder csv = new StringBuilder("");
                 csv.AppendLine("\"" + String.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
-                csv.AppendLine("\"" + String.Join(";", data.datasets.FirstOrDefault().data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                csv.AppendLine("\"" + String.Join(";", dataset.data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
                 return Encoding.Latin1.GetBytes(csv.ToString());
             }
             else
