@@ -121,12 +121,17 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     return false;
                 }
-                string path = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", pConfigName);
+                string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+                if (!Directory.EnumerateFiles(pathConfig).Any(x => x.EndsWith(pConfigName)))
+                {
+                    return false;
+                }
+                string path = Path.Combine(pathConfig, pConfigName);
                 using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
                     pConfigFile.CopyTo(fileStream);
                 }
-                string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
+
                 mTabTemplates = new List<ConfigModel>();
                 foreach (string file in Directory.EnumerateFiles(pathConfig))
                 {
