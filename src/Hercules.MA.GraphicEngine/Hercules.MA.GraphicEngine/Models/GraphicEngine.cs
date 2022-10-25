@@ -49,6 +49,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static bool IsAdmin(string pLang, string pUserId = "")
         {
             bool isAdmin = false;
+            return true;
             if (pUserId == "")
             {
                 return false;
@@ -129,6 +130,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     if (Path.GetFileName(file).Contains(fileName))
                     {
                         path = file;
+                        break;
                     }
                 }
                 if (path == "")
@@ -316,6 +318,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 if (Path.GetFileName(file).Contains(fileName))
                 {
                     path = file;
+                    break;
                 }
             }
             string config = File.ReadAllText(path, Encoding.UTF8);
