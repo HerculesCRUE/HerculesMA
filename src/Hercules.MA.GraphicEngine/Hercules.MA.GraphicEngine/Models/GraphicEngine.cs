@@ -122,11 +122,11 @@ namespace Hercules.MA.GraphicEngine.Models
                     return false;
                 }
                 string pathConfig = Path.Combine(System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas");
-                if (!Directory.EnumerateFiles(pathConfig).Any(x => x.EndsWith(pConfigName)))
+                string path = "";
+                if (Directory.EnumerateFiles(pathConfig).Any(x => x.EndsWith(pConfigName)))
                 {
-                    return false;
+                    path = Path.Combine(pathConfig, pConfigName);
                 }
-                string path = Path.Combine(pathConfig, pConfigName);
                 using (Stream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
                     pConfigFile.CopyTo(fileStream);
