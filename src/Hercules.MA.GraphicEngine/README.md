@@ -12,12 +12,13 @@
 # Hércules MA. Configuración de las gráficas de indicadores.
 
 
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
 
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Hercules.CommonsEDMA.Harvester&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.CommonsEDMA.Harvester&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.CommonsEDMA.Harvester&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Hercules.CommonsEDMA.Harvester&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Hercules.CommonsEDMA.Harvester)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
+
 
 
 
