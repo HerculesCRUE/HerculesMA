@@ -32,7 +32,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// Obtiene los datos de la página.
         /// </summary>
         /// <param name="pIdPagina">Identificador de la página.</param>
-        /// <param name="pLang">Idioma.</param>
+        /// <param name="pLang">Idioma</param>
         /// <returns></returns>
         public static Pagina GetPage(string pIdPagina, string pLang, string userId = "")
         {
