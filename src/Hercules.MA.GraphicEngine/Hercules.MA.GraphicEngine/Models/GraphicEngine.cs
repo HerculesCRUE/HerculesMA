@@ -178,6 +178,10 @@ namespace Hercules.MA.GraphicEngine.Models
                 return false;
             }
             Grafica grafica = configModel.graficas.Where(x => x.identificador == pGraphicId).FirstOrDefault();
+            if (grafica == null)
+            {
+                return false;
+            }
             // Edito el nombre de la gráfica.
             if (pGraphicName != "")
             {
@@ -406,28 +410,6 @@ namespace Hercules.MA.GraphicEngine.Models
         }
         #endregion
 
-        #region --- CSV
-        /// <summary>
-        /// Obtiene los datos del CSV.
-        /// </summary>
-        /// <param name="pIdPagina">Identificador de la página.</param>
-        /// <param name="pLang">Idioma.</param>
-        /// <returns></returns>
-        public static void GetCSV(string pIdPagina, string pIdGrafica, string pFiltroFacetas, string pLang)
-        {
-            // Lectura del JSON de configuración.
-            ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.identificador == pIdPagina);
-
-            // Obtiene los filtros relacionados con las fechas.
-            List<string> listaFacetasAnios = configModel.facetas.Where(x => x.rangoAnio).Select(x => x.filtro).ToList();
-
-            if (configModel != null)
-            {
-                Grafica grafica = configModel.graficas.FirstOrDefault(x => x.identificador == pIdGrafica);
-            }
-        }
-        #endregion
-
         #region --- Gráficas
         /// <summary>
         /// Lee la configuración y obtiene los datos necesarios para el servicio de gráficas.
@@ -441,17 +423,14 @@ namespace Hercules.MA.GraphicEngine.Models
         {
             // Lectura del JSON de configuración.
             ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.identificador == pIdPagina);
-
+            if (configModel == null)
+            {
+                return null;
+            }
             // Obtiene los filtros relacionados con las fechas.
             List<string> listaFacetasAnios = configModel.facetas.Where(x => x.rangoAnio).Select(x => x.filtro).ToList();
-
-            if (configModel != null)
-            {
-                Grafica grafica = configModel.graficas.FirstOrDefault(x => x.identificador.Split('-').LastOrDefault() == pIdGrafica.Split('-').LastOrDefault());
-                return CrearGrafica(grafica, configModel.filtro, pFiltroFacetas, pLang, listaFacetasAnios);
-            }
-
-            return null;
+            Grafica grafica = configModel.graficas.FirstOrDefault(x => x.identificador.Split('-').LastOrDefault() == pIdGrafica.Split('-').LastOrDefault());
+            return CrearGrafica(grafica, configModel.filtro, pFiltroFacetas, pLang, listaFacetasAnios);
         }
 
         /// <summary>
@@ -2284,8 +2263,12 @@ namespace Hercules.MA.GraphicEngine.Models
             grafica.layout.minTemp = 1.0f;
 
             // Titulo
-            grafica.title = pGrafica.config.dimensiones.FirstOrDefault().nombre.Values.FirstOrDefault();
-
+            Dimension dimension = pGrafica.config.dimensiones.FirstOrDefault();
+            if (dimension == null)
+            {
+                dimension = new Dimension();
+            }
+            grafica.title = dimension.nombre.Values.FirstOrDefault();
             // Layout Nodos/Lineas
             grafica.style = new List<Style>();
             Style estiloNodo = new Style();
@@ -2297,7 +2280,7 @@ namespace Hercules.MA.GraphicEngine.Models
             layoutNodos.content = "data(name)";
             layoutNodos.font_size = "12px";
             layoutNodos.font_family = "Roboto";
-            layoutNodos.background_color = pGrafica.config.dimensiones.FirstOrDefault().colorNodo;
+            layoutNodos.background_color = dimension.colorNodo;
             layoutNodos.text_outline_width = "0px";
             layoutNodos.overlay_padding = "6px";
             layoutNodos.line_color = "";
@@ -2321,7 +2304,7 @@ namespace Hercules.MA.GraphicEngine.Models
             layoutLineas.width = "mapData(weight, 0, 10, 0, 10)";
             layoutLineas.overlay_padding = "1px";
             layoutLineas.z_index = "11";
-            layoutLineas.line_color = pGrafica.config.dimensiones.FirstOrDefault().colorLinea;
+            layoutLineas.line_color = dimension.colorLinea;
             estiloLinea.style = layoutLineas;
             grafica.style.Add(estiloLinea);
             #endregion
@@ -2435,7 +2418,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
 
                 // Creamos los nodos y las relaciones en función de pNumAreas.
-                int pNumAreas = pGrafica.config.dimensiones.FirstOrDefault().numMaxNodos;
+                int pNumAreas = dimension.numMaxNodos;
 
                 Dictionary<string, int> numRelaciones = new Dictionary<string, int>();
                 foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
@@ -2557,18 +2540,15 @@ namespace Hercules.MA.GraphicEngine.Models
 
             // Lectura del JSON de configuración.
             ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.identificador == pIdPagina);
-
+            if (configModel == null)
+            {
+                return null;
+            }
             // Obtiene los filtros relacionados con las fechas.
             List<string> listaFacetasAnios = configModel.facetas.Where(x => x.rangoAnio).Select(x => x.filtro).ToList();
-
-            if (configModel != null)
-            {
-                //FacetaConf faceta = configModel.facetas.FirstOrDefault(x => x.filtro.Contains(pIdFaceta));
-                FacetaConf faceta = configModel.facetas.FirstOrDefault(x => x.filtro == pIdFaceta);
-                return CrearFaceta(faceta, configModel.filtro, pFiltroFacetas, pLang, listaFacetasAnios, pGetAll);
-            }
-
-            return null;
+            //FacetaConf faceta = configModel.facetas.FirstOrDefault(x => x.filtro.Contains(pIdFaceta));
+            FacetaConf faceta = configModel.facetas.FirstOrDefault(x => x.filtro == pIdFaceta);
+            return CrearFaceta(faceta, configModel.filtro, pFiltroFacetas, pLang, listaFacetasAnios, pGetAll);
         }
 
         /// <summary>
