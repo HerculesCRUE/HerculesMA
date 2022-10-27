@@ -20,9 +20,9 @@ namespace Hercules.MA.GraphicEngine.Models
     public static class GraphicEngine
     {
         // Prefijos.
-        private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}configJson{Path.DirectorySeparatorChar}prefijos.json")));
-        private static ResourceApi mResourceApi = new ResourceApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
-        private static CommunityApi mCommunityApi = new CommunityApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
+        private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configJson", "prefijos.json"))));
+        private static ResourceApi mResourceApi = new ResourceApi(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
+        private static CommunityApi mCommunityApi = new CommunityApi(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
         private static Guid mCommunityID = mCommunityApi.GetCommunityId();
         private static List<ConfigModel> mTabTemplates;
         private const int NUM_HILOS = 5;
@@ -80,8 +80,8 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <summary>
         /// Obtiene los nombres de los json de configuración.
         /// </summary>
-        /// <param name="pIdPagina">Identificador de la página.</param>
         /// <param name="pLang">Idioma.</param>
+        /// <param name="pUserId">Identificador del usuario.</param>
         /// <returns></returns>
         public static List<string> ObtenerConfigs(string pLang, string pUserId = "")
         {
@@ -156,13 +156,12 @@ namespace Hercules.MA.GraphicEngine.Models
         }
 
         /// <summary>
-        /// Edita la configuración de la página.
+        /// Obtiene la configuración de una gráfica
         /// </summary>
         /// <param name="pLang">Idioma.</param>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pConfig">Nombre del JSON a editar.</param>
-        /// <param name="pPageName">Nuevo nombre de la página.</param>
-        /// <param name="pPageOrder">Nuevo orden de la página.</param>
+        /// <param name="pPageId">ID de la página</param>
+        /// <param name="pGraphicId">ID de la gráfica</param>
         public static Grafica ObtenerGraficaConfig(string pLang, string pUserId, string pPageId, string pGraphicId)
         {
             // Compruebo si es administrador
@@ -176,14 +175,16 @@ namespace Hercules.MA.GraphicEngine.Models
         }
 
         /// <summary>
-        /// Edita la configuración de la página.
+        /// Edita la configuración de la gráfica.
         /// </summary>
         /// <param name="pLang">Idioma.</param>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pPageId">Página a editar.</param>
+        /// <param name="pGraphicId">ID de la gráfica a editar</param>
+        /// <param name="pPageId">ID de la página de la gráfica.</param>
         /// <param name="pGraphicName">Nuevo nombre de la gráfica.</param>
         /// <param name="pGraphicOrder">Nuevo orden de la gráfica.</param>
         /// <param name="pGraphicWidth">Nuevo ancho de la gráfica.</param>
+        /// <param name="pBlockId">ID de grupo de la gráfica si tiene grupo</param>
         public static bool EditarConfig(string pLang, string pUserId, string pGraphicId, string pPageId, string pGraphicName = "", int pGraphicOrder = 0, int pGraphicWidth = 0, string pBlockId = "")
         {
             // Compruebo si es administrador
@@ -193,7 +194,7 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 return false;
             }
-
+            // Obtengo la gráfica
             Grafica grafica = configModel.graficas.Where(x => x.identificador == pGraphicId).FirstOrDefault();
             if (grafica == null)
             {
@@ -205,7 +206,8 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 grafica.nombre[pLang] = pGraphicName;
             }
-
+            
+            // Si la gráfica pertenece a un grupo edito su anchura y orden también.
             if (!string.IsNullOrEmpty(pBlockId))
             {
                 grafica = configModel.graficas.Where(x => x.identificador == pBlockId).FirstOrDefault();
@@ -305,6 +307,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 mTabTemplates.Add(tab);
             }
 
+            // Si la gráfica pertenece a un grupo ahora edito la anchura y orden de las demás gráficas del grupo.
             if (!string.IsNullOrEmpty(pBlockId))
             {
                 EditarConfig(pLang, pUserId, pGraphicId, pPageId, pGraphicName);
@@ -316,7 +319,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// Descarga el fichero json correspondiente.
         /// </summary>
         /// <param name="pLang">Idioma.</param>
-        /// <param name="pConfig">Nombre del fichero.</param>
+        /// <param name="pConfigName">Nombre del fichero.</param>
         /// <param name="pUserId">Identificador del usuario.</param>
         /// <returns></returns>
         public static byte[] DescargarConfig(string pLang, string pConfigName, string pUserId = "")
@@ -346,7 +349,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <summary>
         /// Obtiene los datos de las páginas.
         /// </summary>
-        /// <param name="pIdPagina">Identificador de la página.</param>
+        /// <param name="userId">Identificador del usuario</param>
         /// <param name="pLang">Idioma.</param>
         /// <returns></returns>
         public static List<Pagina> GetPages(string pLang, string userId = "")
@@ -385,7 +388,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                 };
 
-                if (itemGrafica.isPrivate && !GetPersonIsGraphicManagerByGnossUser(userId))
+                if (itemGrafica.isPrivate && !IsGraphicManager(userId))
                 {
                     continue;
                 }
@@ -483,6 +486,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pFiltroBase">Filtros base.</param>
         /// <param name="pFiltroFacetas">Filtros de las facetas.</param>
         /// <param name="pLang">Idioma.</param>
+        /// <param name="pListaDates">Lista de valores que corresponden a fechas</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public static GraficaBase CrearGrafica(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates)
@@ -524,6 +528,8 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pFiltroBase">Filtros base.</param>
         /// <param name="pFiltroFacetas">Filtros de las facetas.</param>
         /// <param name="pLang">Idioma.</param>
+        /// <param name="pListaDates">Lista de valores que corresponden a fechas</param>
+        /// <param name="pNodos">Indica si la gráfica obtiene los datos como una de nodos</param>
         /// <returns></returns>
         public static GraficaBarras CrearGraficaBarrasVertical(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pNodos)
         {
@@ -1175,6 +1181,8 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pFiltroBase">Filtros base.</param>
         /// <param name="pFiltroFacetas">Filtros de las facetas.</param>
         /// <param name="pLang">Idioma.</param>
+        /// <param name="pListaDates">Lista de valores que corresponden a fechas</param>
+        /// <param name="pNodos">Indica si la gráfica obtiene los datos como una de nodos</param>
         /// <returns></returns>
         public static GraficaBarrasY CrearGraficaBarrasHorizontal(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pNodos)
         {
@@ -1749,6 +1757,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pFiltroBase">Filtros base.</param>
         /// <param name="pFiltroFacetas">Filtros de las facetas.</param>
         /// <param name="pLang">Idioma.</param>
+        /// <param name="pListaDates">Lista de valores que corresponden a fechas</param>
         /// <returns></returns>
         public static GraficaCircular CrearGraficaCircular(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates)
         {
@@ -2255,6 +2264,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pFiltroBase">Filtros base.</param>
         /// <param name="pFiltroFacetas">Filtros de las facetas.</param>
         /// <param name="pLang">Idioma.</param>
+        /// <param name="pListaDates">Lista de valores que corresponden a fechas</param>
         /// <returns></returns>
         public static GraficaNodos CrearGraficaNodos(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates)
         {
@@ -2573,6 +2583,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pIdFaceta">Identificador de la faceta.</param>
         /// <param name="pFiltroFacetas">Filtros de la URL.</param>
         /// <param name="pLang">Idioma.</param>
+        /// <param name="pGetAll">Indica si obtener todas las facetas</param>
         /// <returns></returns>
         public static Faceta GetFaceta(string pIdPagina, string pIdFaceta, string pFiltroFacetas, string pLang, bool pGetAll = false)
         {
@@ -2603,6 +2614,8 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pFiltroBase">Filtros base.</param>
         /// <param name="pFiltroFacetas">Filtros de las facetas.</param>
         /// <param name="pLang">Idioma.</param>
+        /// <param name="pGetAll">Indica si obtener todas las facetas</param>
+        /// <param name="pListaDates">Lista de valores que corresponden a fechas</param>
         /// <returns></returns>
         public static Faceta CrearFaceta(FacetaConf pFacetaConf, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pGetAll = false)
         {
@@ -2870,7 +2883,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// </summary>
         /// <param name="pUserId"></param>
         /// <returns></returns>
-        public static bool GetPersonIsGraphicManagerByGnossUser(string pUserId)
+        public static bool IsGraphicManager(string pUserId)
         {
             // ID de la persona.
             bool idRecurso = false;
@@ -3012,6 +3025,8 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pIdGrafica">ID de la gráfica.</param>
         /// <param name="pFiltros">Filtros a aplicar en la gráfica.</param>
         /// <param name="pUserId">ID del usuario conectado.</param>
+        /// <param name="pEscalas">Escalas de la gráfica</param>
+        /// <param name="pTituloPagina">Título de la página nueva</param>
         public static bool GuardarGrafica(string pTitulo, string pAnchura, string pIdPaginaGrafica, string pIdGrafica, string pFiltros, string pUserId, string pIdRecursoPagina = null, string pTituloPagina = null, string pEscalas = null)
         {
             string idRecursoPagina = pIdRecursoPagina;
@@ -3123,12 +3138,10 @@ namespace Hercules.MA.GraphicEngine.Models
         }
 
         /// <summary>
-        /// Permite guardar los datos de una gráfica asignados a un usuario.
+        /// Crea una página de indicadores personales.
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pIdPagina">ID de la página de la gráfica.</param>
-        /// <param name="pIdGrafica">ID de la gráfica.</param>
-        /// <param name="pFiltro">Filtro de la gráfica.</param>
+        /// <param name="pTitulo">Título de la página</param>
         public static string CrearPaginaUsuario(string pUserId, string pTitulo)
         {
             mResourceApi.ChangeOntoly("person");
@@ -3184,10 +3197,11 @@ namespace Hercules.MA.GraphicEngine.Models
         }
 
         /// <summary>
-        /// Borra la relación de la gráfica.
+        /// Borra la gráfica.
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pRecursoId">ID del recurso a borrar el triple.</param>
+        /// <param name="pPageID">ID de la página</param>
+        /// <param name="pGraphicID">ID de la gráfica</param>
         public static void BorrarGrafica(string pUserId, string pPageID, string pGraphicID)
         {
             mResourceApi.ChangeOntoly("person");
@@ -3212,7 +3226,7 @@ namespace Hercules.MA.GraphicEngine.Models
         }
 
         /// <summary>
-        /// Borra la relación de la página.
+        /// Borra la página de indicadores personal
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
         /// <param name="pPageID">ID del recurso a borrar el triple.</param>
@@ -3300,10 +3314,12 @@ namespace Hercules.MA.GraphicEngine.Models
         }
 
         /// <summary>
-        /// Borra la relación de la página.
+        /// Edita el orden de la página
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pRecursoId">ID del recurso a borrar el triple.</param>
+        /// <param name="pPageID">ID de la página.</param>
+        /// <param name="pOldOrder">Orden anterior de la página.</param>
+        /// <param name="pNewOrder">Orden nuevo de la página</param>
         public static void EditarOrdenPagina(string pUserId, string pPageID, int pNewOrder, int pOldOrder)
         {
             mResourceApi.ChangeOntoly("person");
@@ -3346,10 +3362,13 @@ namespace Hercules.MA.GraphicEngine.Models
         }
 
         /// <summary>
-        /// Borra la relación de la página.
+        /// Edita el nombre de la gráfica
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pRecursoId">ID del recurso a borrar el triple.</param>
+        /// <param name="pGraphicID">ID de la gráfica</param>
+        /// <param name="pPageID">ID de la página</param>
+        /// <param name="pNewTitle">Nuevo título</param>
+        /// <param name="pOldTitle">Antiguo título</param>
         public static void EditarNombreGrafica(string pUserId, string pPageID, string pGraphicID, string pNewTitle, string pOldTitle)
         {
             mResourceApi.ChangeOntoly("person");
@@ -3371,10 +3390,13 @@ namespace Hercules.MA.GraphicEngine.Models
         }
 
         /// <summary>
-        /// Borra la relación de la página.
+        /// Edita el orden de la gráfica
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pRecursoId">ID del recurso a borrar el triple.</param>
+        /// <param name="pPageID">ID de la página</param>
+        /// <param name="pGraphicID">ID de la gráfica</param>
+        /// <param name="pNewOrder">El orden nuevo</param>
+        /// <param name="pOldOrder">El orden antiguo</param>
         public static void EditarOrdenGrafica(string pUserId, string pPageID, string pGraphicID, int pNewOrder, int pOldOrder)
         {
             mResourceApi.ChangeOntoly("person");
@@ -3419,6 +3441,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// Reordena las gráficas después de un cambio
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
+        /// <param name="pPageID">ID de la página.</param>
         public static void ReordenarGráficas(string pUserId, string pPageID)
         {
             string idRecurso = GetIdPersonByGnossUser(pUserId);
@@ -3450,7 +3473,10 @@ namespace Hercules.MA.GraphicEngine.Models
         /// Borra la relación de la página.
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pRecursoId">ID del recurso a borrar el triple.</param>
+        /// <param name="pPageID">ID de la página</param>
+        /// <param name="pGraphicID">ID de la gráfica</param>
+        /// <param name="pNewWidth">Nueva anchura</param>
+        /// <param name="pOldWidth">Antigua anchura</param>
         public static void EditarAnchuraGrafica(string pUserId, string pPageID, string pGraphicID, int pNewWidth, int pOldWidth)
         {
             mResourceApi.ChangeOntoly("person");
@@ -3475,7 +3501,9 @@ namespace Hercules.MA.GraphicEngine.Models
         /// Borra la relación de la página.
         /// </summary>
         /// <param name="pUserId">ID del usuario.</param>
-        /// <param name="pRecursoId">ID del recurso a borrar el triple.</param>
+        /// <param name="pGraphicID">ID de la gráfica</param>
+        /// <param name="pNewScales">Valor de la escala nueva</param>
+        /// <param name="pOldScales">Valor de la escala antigua</param>
         public static void EditarEscalasGrafica(string pUserId, string pPageID, string pGraphicID, string pNewScales, string pOldScales)
         {
             mResourceApi.ChangeOntoly("person");
@@ -3535,6 +3563,8 @@ namespace Hercules.MA.GraphicEngine.Models
         /// </summary>
         /// <param name="pListaFiltros">Listado de filtros.</param>
         /// <param name="pNombreVar">Nombre a poner a la última variable.</param>
+        /// <param name="pListaDates">Lista de valores que corresponden a fechas</param>
+        /// <param name="pReciproco">Valor de la propiedad recíproca</param>
         /// <returns></returns>
         public static List<string> ObtenerFiltros(List<string> pListaFiltros, string pNombreVar = null, List<string> pListaDates = null, string pReciproco = null)
         {
@@ -3576,6 +3606,8 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <param name="pVarAnterior">Sujeto.</param>
         /// <param name="pAux">Iterador incremental.</param>
         /// <param name="pNombreVar">Nombre de la última variable.</param>
+        /// <param name="pIsDate">Indica si es una fecha</param>
+        /// <param name="pReciproco">Indica si la consulta es recíproca</param>
         /// <returns></returns>
         public static string TratarParametros(string pFiltro, string pVarAnterior, int pAux, string pNombreVar = null, bool pIsDate = false, string pReciproco = null)
         {

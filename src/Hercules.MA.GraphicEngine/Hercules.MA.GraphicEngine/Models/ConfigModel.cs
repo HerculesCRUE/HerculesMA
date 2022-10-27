@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Hercules.MA.GraphicEngine.Models.Graficas;
+using System.Collections.Generic;
 
 namespace Hercules.MA.GraphicEngine.Models
 {

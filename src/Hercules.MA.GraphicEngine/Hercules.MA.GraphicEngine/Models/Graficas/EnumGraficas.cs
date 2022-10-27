@@ -1,4 +1,4 @@
-﻿namespace Hercules.MA.GraphicEngine
+﻿namespace Hercules.MA.GraphicEngine.Models.Graficas
 {
     public enum EnumGraficas
     {
