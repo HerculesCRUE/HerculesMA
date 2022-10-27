@@ -14,10 +14,12 @@
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
 
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Hercules.MA.GraphicEngine&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=Hercules.MA.GraphicEngine)
 
 
 
