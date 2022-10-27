@@ -3,6 +3,7 @@ using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
 using Hercules.MA.GraphicEngine.Models.Graficas;
 using Hercules.MA.GraphicEngine.Models.Paginas;
+using Hercules.MA.GraphicEngine.Utils;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -619,13 +620,9 @@ namespace Hercules.MA.GraphicEngine.Models
             bool ejeFechas = false;
             Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
-                // Determina si en el filtro contiene '=' para tratarlo de manera especial.
-                bool filtroEspecial = false;
-                if (!string.IsNullOrEmpty(itemGrafica.filtro) && !itemGrafica.filtro.Contains("="))
-                {
-                    filtroEspecial = true;
-                }
-
+                List<Tuple<string, string, float>> listaTuplas = new List<Tuple<string, string, float>>();
+                SparqlObject resultadoQuery = null;
+                StringBuilder select = new StringBuilder(), where = new StringBuilder();
                 // Orden.               
                 string orden = "DESC";
                 if (pGrafica.config.orderDesc == true)
@@ -641,58 +638,8 @@ namespace Hercules.MA.GraphicEngine.Models
                         break;
                     }
                 }
-
-                // Filtro de página.
-                List<string> filtros = new List<string>();
-
-                List<Tuple<string, string, float>> listaTuplas = new List<Tuple<string, string, float>>();
-                SparqlObject resultadoQuery = null;
-                StringBuilder select = new StringBuilder(), where = new StringBuilder();
-                if (!string.IsNullOrEmpty(pGrafica.config.reciproco))
-                {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { pGrafica.config.ejeX }, "ejeX", null, pGrafica.config.reciproco));
-                }
-                else
-                {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { pGrafica.config.ejeX }, "ejeX"));
-                }
-                filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
-                if (!string.IsNullOrEmpty(pFiltroFacetas))
-                {
-                    if (pFiltroFacetas.Contains("((("))
-                    {
-                        if (pFiltroFacetas.Contains('&'))
-                        {
-                            foreach (string filtro in pFiltroFacetas.Split('&'))
-                            {
-                                if (filtro.Contains("((("))
-                                {
-                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
-                                }
-                                else
-                                {
-                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
-                                }
-                            }
-                        }
-                        else
-                        {
-                            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
-                        }
-                    }
-                    else
-                    {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
-                    }
-                }
-                if (filtroEspecial)
-                {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "aux"));
-                }
-                else if (!string.IsNullOrEmpty(itemGrafica.filtro))
-                {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
-                }
+                bool filtroEspecial = UtilsGraficas.IsFiltroEspecial(itemGrafica);
+                List<string> filtros = UtilsGraficas.GetFiltrosBarras(pGrafica, itemGrafica, pFiltroFacetas, pFiltroBase, pListaDates);
                 if (pNodos)
                 {
                     //Nodos
@@ -1271,13 +1218,9 @@ namespace Hercules.MA.GraphicEngine.Models
             bool ejeFechas = false;
             Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
-                // Determina si en el filtro contiene '=' para tratarlo de manera especial.
-                bool filtroEspecial = false;
-                if (!string.IsNullOrEmpty(itemGrafica.filtro) && !itemGrafica.filtro.Contains("="))
-                {
-                    filtroEspecial = true;
-                }
-
+                List<Tuple<string, string, float>> listaTuplas = new List<Tuple<string, string, float>>();
+                SparqlObject resultadoQuery = null;
+                StringBuilder select = new StringBuilder(), where = new StringBuilder();
                 // Orden.                
                 string orden = "DESC";
                 if (pGrafica.config.orderDesc == true)
@@ -1293,60 +1236,10 @@ namespace Hercules.MA.GraphicEngine.Models
                         break;
                     }
                 }
-
                 // Filtro de página.
-                List<string> filtros = new List<string>();
-
-                List<Tuple<string, string, float>> listaTuplas = new List<Tuple<string, string, float>>();
-                SparqlObject resultadoQuery = null;
-                StringBuilder select = new StringBuilder(), where = new StringBuilder();
-                if (!string.IsNullOrEmpty(pGrafica.config.reciproco))
-                {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { pGrafica.config.ejeX }, "ejeX", null, pGrafica.config.reciproco));
-                }
-                else
-                {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { pGrafica.config.ejeX }, "ejeX"));
-                }
-                filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
-                if (!string.IsNullOrEmpty(pFiltroFacetas))
-                {
-                    if (pFiltroFacetas.Contains("((("))
-                    {
-                        if (pFiltroFacetas.Contains('&'))
-                        {
-                            foreach (string filtro in pFiltroFacetas.Split('&'))
-                            {
-                                if (filtro.Contains("((("))
-                                {
-                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
-                                }
-                                else
-                                {
-                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
-                                }
-                            }
-                        }
-                        else
-                        {
-                            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
-                        }
-                    }
-                    else
-                    {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
-                    }
-                }
-
-                if (filtroEspecial)
-                {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "aux"));
-                }
-                else if (!string.IsNullOrEmpty(itemGrafica.filtro))
-                {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
-                }
-
+                bool filtroEspecial = UtilsGraficas.IsFiltroEspecial(itemGrafica);
+                List<string> filtros = UtilsGraficas.GetFiltrosBarras(pGrafica, itemGrafica, pFiltroFacetas, pFiltroBase, pListaDates);
+                
                 if (pNodos)
                 {
                     //Nodos            
@@ -1820,7 +1713,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     // Consulta sparql.
                     List<string> filtros = new List<string>();
                     Dictionary<string, float> dicResultados = new Dictionary<string, float>();
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
+                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                     if (!string.IsNullOrEmpty(pFiltroFacetas))
                     {
                         if (pFiltroFacetas.Contains("((("))
@@ -1831,28 +1724,28 @@ namespace Hercules.MA.GraphicEngine.Models
                                 {
                                     if (filtro.Contains("((("))
                                     {
-                                        filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
                                     }
                                     else
                                     {
-                                        filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
                                     }
                                 }
                             }
                             else
                             {
-                                filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
                             }
                         }
                         else
                         {
-                            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                         }
                     }
                     if (!string.IsNullOrEmpty(itemGrafica.filtro))
                     {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
+                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
+                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
                     }
 
                     select.Append(mPrefijos);
@@ -1946,7 +1839,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 List<string> filtroInterior = new List<string>();
                 foreach (Dimension item in listaDimensiones)
                 {
-                    filtroInterior.AddRange(ObtenerFiltros(new List<string>() { item.filtro }, "aux"));
+                    filtroInterior.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { item.filtro }, "aux"));
                 }
                 ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
                 Dictionary<Dimension, DatasetCircular> dimensionesDatasetExt = new Dictionary<Dimension, DatasetCircular>();
@@ -1962,7 +1855,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         // Consulta sparql.
                         List<string> filtros = new List<string>();
                         Dictionary<string, float> dicResultados = new Dictionary<string, float>();
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
+                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                         if (!string.IsNullOrEmpty(pFiltroFacetas))
                         {
                             if (pFiltroFacetas.Contains("((("))
@@ -1973,28 +1866,28 @@ namespace Hercules.MA.GraphicEngine.Models
                                     {
                                         if (filtro.Contains("((("))
                                         {
-                                            filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
                                         }
                                         else
                                         {
-                                            filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
                                 }
                             }
                             else
                             {
-                                filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
+                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                             }
                         }
                         if (!string.IsNullOrEmpty(itemGrafica.filtro))
                         {
-                            filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
-                            filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
                             filtros.AddRange(filtroInterior);
                         }
 
@@ -2033,7 +1926,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         // Consulta sparql.
                         List<string> filtros = new List<string>();
                         Dictionary<string, float> dicResultados = new Dictionary<string, float>();
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
+                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                         if (!string.IsNullOrEmpty(pFiltroFacetas))
                         {
                             if (pFiltroFacetas.Contains("((("))
@@ -2044,28 +1937,28 @@ namespace Hercules.MA.GraphicEngine.Models
                                     {
                                         if (filtro.Contains("((("))
                                         {
-                                            filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
                                         }
                                         else
                                         {
-                                            filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
                                 }
                             }
                             else
                             {
-                                filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
+                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                             }
                         }
                         if (!string.IsNullOrEmpty(itemGrafica.filtro))
                         {
-                            filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
-                            filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
                         }
 
                         select.Append(mPrefijos);
@@ -2384,7 +2277,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 // Consulta sparql.
                 List<string> filtros = new List<string>();
                 Dictionary<string, float> dicResultados = new Dictionary<string, float>();
-                filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
+                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                 if (!string.IsNullOrEmpty(pFiltroFacetas))
                 {
                     if (pFiltroFacetas.Contains("((("))
@@ -2395,27 +2288,27 @@ namespace Hercules.MA.GraphicEngine.Models
                             {
                                 if (filtro.Contains("((("))
                                 {
-                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
                                 }
                                 else
                                 {
-                                    filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
                                 }
                             }
                         }
                         else
                         {
-                            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
                         }
                     }
                     else
                     {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
+                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                     }
                 }
                 if (!string.IsNullOrEmpty(itemGrafica.filtro))
                 {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
+                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
                 }
 
                 // Consulta sparql.
@@ -2658,18 +2551,18 @@ namespace Hercules.MA.GraphicEngine.Models
 
             // Filtro de página.
             List<string> filtros = new List<string>();
-            filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
+            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
             if (!string.IsNullOrEmpty(pFacetaConf.reciproca))
             {
-                filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta", null, pFacetaConf.reciproca));
+                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta", null, pFacetaConf.reciproca));
             }
             else if (!faceta.tesauro)
             {
-                filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta"));
+                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta"));
             }
             else
             {
-                filtros.AddRange(ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "categoria"));
+                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "categoria"));
             }
             if (!string.IsNullOrEmpty(pFiltroFacetas))
             {
@@ -2681,22 +2574,22 @@ namespace Hercules.MA.GraphicEngine.Models
                         {
                             if (filtro.Contains("((("))
                             {
-                                filtros.AddRange(ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
+                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
                             }
                             else
                             {
-                                filtros.AddRange(ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
+                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
                             }
                         }
                     }
                     else
                     {
-                        filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
+                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
                     }
                 }
                 else
                 {
-                    filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
+                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                 }
             }
             Dictionary<string, float> dicResultados = new Dictionary<string, float>();
@@ -3557,187 +3450,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             return colores;
         }
-
-        /// <summary>
-        /// Splitea los filtros para tratarlos.
-        /// </summary>
-        /// <param name="pListaFiltros">Listado de filtros.</param>
-        /// <param name="pNombreVar">Nombre a poner a la última variable.</param>
-        /// <param name="pListaDates">Lista de valores que corresponden a fechas</param>
-        /// <param name="pReciproco">Valor de la propiedad recíproca</param>
-        /// <returns></returns>
-        public static List<string> ObtenerFiltros(List<string> pListaFiltros, string pNombreVar = null, List<string> pListaDates = null, string pReciproco = null)
-        {
-            // Split por filtro.
-            List<string> listaAux = new List<string>();
-            foreach (string filtro in pListaFiltros)
-            {
-                // --- ÑAPA
-                string aux = filtro.Replace(" & ", "|||");
-                string[] array = aux.Split("&", StringSplitOptions.RemoveEmptyEntries);
-                List<string> lista = array.Select(x => x.Replace("|||", " & ")).ToList();
-                listaAux.AddRange(lista);
-            }
-
-            List<string> filtrosQuery = new List<string>();
-
-            // Split por salto de ontología.
-            int i = 0;
-            foreach (string item in listaAux)
-            {
-                bool isDate = false;
-                if (pListaDates != null && pListaDates.Any() && pListaDates.Contains(item.Split("=")[0]))
-                {
-                    isDate = true;
-                }
-
-                filtrosQuery.Add(TratarParametros(item, "?s", i, pNombreVar, isDate, pReciproco));
-
-                i += 10;
-            }
-
-            return filtrosQuery;
-        }
-
-        /// <summary>
-        /// Según el tipo de parametros, los trata de una manera u otra para el filtro.
-        /// </summary>
-        /// <param name="pFiltro">Filtro a tratar.</param>
-        /// <param name="pVarAnterior">Sujeto.</param>
-        /// <param name="pAux">Iterador incremental.</param>
-        /// <param name="pNombreVar">Nombre de la última variable.</param>
-        /// <param name="pIsDate">Indica si es una fecha</param>
-        /// <param name="pReciproco">Indica si la consulta es recíproca</param>
-        /// <returns></returns>
-        public static string TratarParametros(string pFiltro, string pVarAnterior, int pAux, string pNombreVar = null, bool pIsDate = false, string pReciproco = null)
-        {
-            StringBuilder filtro = new StringBuilder();
-            string[] filtros = pFiltro.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries);
-            int i = 0;
-
-            string[] filtrosReciproco = null;
-            // TODO Revisar con más casos o ejemplos para ver si funciona totalmente bien
-            if (!string.IsNullOrEmpty(pReciproco))
-            {
-                filtrosReciproco = pReciproco.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries);
-                filtro.Append($@"?aux {filtrosReciproco[0].Split('=').FirstOrDefault()} {filtrosReciproco[0].Split('=').LastOrDefault()}. ");
-                int j = 0;
-                pVarAnterior = "?aux";
-                foreach (string filtroReciproco in filtrosReciproco)
-                {
-                    j++;
-                    if (j == 1)
-                    {
-                        continue;
-                    }
-                    int pAuxR = pAux;
-                    if (!filtroReciproco.Contains("="))
-                    {
-                        string varActual = $@"?{filtroReciproco.Substring(filtroReciproco.IndexOf(":") + 1)}{pAuxR}";
-                        filtro.Append($@"{pVarAnterior} ");
-                        filtro.Append($@"{filtroReciproco} ");
-                        // Si es el último, le asignamos el nombre que queramos.
-                        if (j == filtrosReciproco.Length)
-                        {
-                            filtro.Append($@"?s. ");
-                        }
-                        else
-                        {
-                            filtro.Append($@"{varActual}. ");
-                        }
-                        pVarAnterior = varActual;
-                        pAuxR++;
-                    }
-                }
-                pVarAnterior = "?aux";
-            }
-            foreach (string parteFiltro in filtros)
-            {
-                i++;
-                if (!parteFiltro.Contains("="))
-                {
-                    string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                    filtro.Append($@"{pVarAnterior} ");
-                    filtro.Append($@"{parteFiltro} ");
-                    // Si es el último, le asignamos el nombre que queramos.
-                    if (i == filtros.Length && !string.IsNullOrEmpty(pNombreVar))
-                    {
-                        filtro.Append($@"?{pNombreVar}. ");
-                    }
-                    else
-                    {
-                        filtro.Append($@"{varActual}. ");
-                    }
-                    pVarAnterior = varActual;
-                    pAux++;
-                }
-                else
-                {
-                    string varActual = $@"{parteFiltro.Split("=")[1]}";
-                    if (varActual.StartsWith("'"))
-                    {
-                        filtro.Append($@"{pVarAnterior} ");
-                        filtro.Append($@"{parteFiltro.Split("=")[0]} ");
-
-                        if (pNombreVar != null)
-                        {
-                            filtro.Append($@"?{pNombreVar}. ");
-                        }
-                        else
-                        {
-                            filtro.Append($@"{varActual}. ");
-                        }
-                    }
-                    else if (pIsDate && (varActual.Contains("-") || varActual.Equals("lastyear") || varActual.Equals("fiveyears")))
-                    {
-                        string fechaInicio = "";
-                        string fechaFin = "";
-                        string varActualAux = $@"?{parteFiltro.Split("=")[0].Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                        if (varActual.Contains("-"))
-                        {
-                            fechaInicio = varActual.Split("-")[0];
-                            fechaFin = varActual.Split("-")[1];
-                        }
-                        else if (varActual.Equals("lastyear"))
-                        {
-                            fechaInicio = DateTime.Now.Year.ToString();
-                            fechaFin = DateTime.Now.Year.ToString();
-                        }
-                        else if (varActual.Equals("fiveyears"))
-                        {
-                            fechaInicio = (DateTime.Now.Year - 4).ToString();
-                            fechaFin = DateTime.Now.Year.ToString();
-                        }
-                        filtro.Append($@"{pVarAnterior} ");
-                        filtro.Append($@"{parteFiltro.Split("=")[0]} ");
-                        filtro.Append($@"{varActualAux}. ");
-                        filtro.Append($@"FILTER({varActualAux} >= {fechaInicio} && {varActualAux} <= {fechaFin}) ");
-                    }
-                    else
-                    {
-                        // Si el valor es númerico, se le asigna con el FILTER.
-                        string varActualAux = $@"?{parteFiltro.Split("=")[0].Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                        filtro.Append($@"{pVarAnterior} ");
-                        filtro.Append($@"{parteFiltro.Split("=")[0]} ");
-                        filtro.Append($@"{varActualAux}. ");
-
-                        // Si es un tesauro.
-                        if (varActual.StartsWith($@"http://"))
-                        {
-                            filtro.Append($@"FILTER({varActualAux} = <{varActual}>) ");
-                        }
-                        else
-                        {
-                            filtro.Append($@"FILTER({varActualAux} = {varActual}) ");
-                        }
-                    }
-
-                }
-            }
-
-            return filtro.ToString();
-        }
-
+        
         /// <summary>
         /// Obtiene el idioma de del diccionario de idiomas.
         /// </summary>
