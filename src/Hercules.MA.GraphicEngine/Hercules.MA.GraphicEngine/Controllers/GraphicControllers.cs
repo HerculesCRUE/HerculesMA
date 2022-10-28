@@ -22,6 +22,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             _Configuracion = pConfig;
         }
+
         #region Gráficas generales
         /// <summary>
         /// Obtiene la gráfica y sus datos
@@ -39,6 +40,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.GetGrafica(pIdPagina, pIdGrafica, pFiltroFacetas, pLang);
         }
+
         /// <summary>
         /// Obtiene las páginas de indicadores generales
         /// </summary>
@@ -54,6 +56,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.GetPage(pIdPagina, pLang, userId);
         }
+
         /// <summary>
         /// Crea una nueva página de indicadores personales.
         /// </summary>
@@ -67,6 +70,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             Models.GraphicEngine.CrearPaginaUsuario(pUserId, pTitulo);
         }
+
         /// <summary>
         /// Obtención de las facetas o filtros de la página
         /// </summary>
@@ -84,6 +88,7 @@ namespace Hercules.MA.GraphicEngine.Controllers
         {
             return Models.GraphicEngine.GetFaceta(pIdPagina, pIdFaceta, pFiltroFacetas, pLang, pGetAll);
         }
+
         /// <summary>
         /// Edita la configuración de una gráfica de indicadores generales
         /// </summary>
