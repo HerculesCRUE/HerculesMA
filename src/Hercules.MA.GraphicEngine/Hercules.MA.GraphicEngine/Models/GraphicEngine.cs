@@ -1,6 +1,7 @@
 ﻿using Gnoss.ApiWrapper;
 using Gnoss.ApiWrapper.ApiModel;
 using Gnoss.ApiWrapper.Model;
+using Hercules.MA.GraphicEngine.Models.Facetas;
 using Hercules.MA.GraphicEngine.Models.Graficas;
 using Hercules.MA.GraphicEngine.Models.Paginas;
 using Hercules.MA.GraphicEngine.Utils;
@@ -377,6 +378,7 @@ namespace Hercules.MA.GraphicEngine.Models
             Pagina pagina = new Pagina();
             pagina.id = pConfigModel.identificador;
             pagina.nombre = GetTextLang(pLang, pConfigModel.nombre);
+            
             pagina.listaConfigGraficas = new List<ConfigPagina>();
             foreach (Grafica itemGrafica in pConfigModel.graficas)
             {
@@ -447,6 +449,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                 pagina.listaConfigGraficas.Add(configPagina);
             }
+            
             pagina.listaIdsFacetas = new List<string>();
             foreach (FacetaConf itemFaceta in pConfigModel.facetas)
             {
@@ -541,53 +544,42 @@ namespace Hercules.MA.GraphicEngine.Models
             // Tipo.
             grafica.isHorizontal = true;
 
-            // Abreviación.
-            if (pGrafica.config.abreviar)
-            {
-                grafica.isAbr = pGrafica.config.abreviar;
-            }
+            // Abreviación.            
+            grafica.isAbr = pGrafica.config.abreviar;
 
             // Porcentaje.
-            if (pGrafica.config.porcentual)
-            {
-                grafica.isPercentage = pGrafica.config.porcentual;
-            }
+            grafica.isPercentage = pGrafica.config.porcentual;
 
-            if (pGrafica.config.ocultarLeyenda)
-            {
-                grafica.hideLeyend = true;
-            }
+            //Ocultar leyenda
+            grafica.hideLeyend = pGrafica.config.ocultarLeyenda;
+
             // ID Grupo.
             if (!string.IsNullOrEmpty(pGrafica.idGrupo))
             {
                 grafica.groupId = pGrafica.idGrupo;
             }
 
-            // Es fecha.
-            if (pListaDates != null && pListaDates.Any() && pListaDates.Contains(pGrafica.config.ejeX))
-            {
-                grafica.isDate = true;
-            }
+            // Es fecha
+            grafica.isDate = (pListaDates != null && pListaDates.Any() && pListaDates.Contains(pGrafica.config.ejeX));
 
             // Asignación de Data.
-            DataBarras data = new DataBarras();
+            DataBarras data = new();
             data.datasets = new ConcurrentBag<DatasetBarras>();
             grafica.data = data;
 
             // Asignación de Options.
-            Options options = new Options();
+            Options options = new();
 
             // Orientación
             options.indexAxis = "x";
-
             options.scales = new Dictionary<string, Eje>();
 
             // Ejes Y
             foreach (EjeYConf item in pGrafica.config.yAxisPrint)
             {
-                Eje eje = new Eje();
+                Eje eje = new();
                 eje.position = item.posicion;
-                eje.title = new Title();
+                eje.title = new();
                 eje.title.display = true;
 
                 if (item.nombreEje != null)
@@ -603,12 +595,12 @@ namespace Hercules.MA.GraphicEngine.Models
             }
 
             // Animación
-            options.animation = new Animation();
+            options.animation = new();
             options.animation.duration = 2000;
 
             // Título
-            options.plugins = new Plugin();
-            options.plugins.title = new Title();
+            options.plugins = new();
+            options.plugins.title = new();
             options.plugins.title.display = true;
             options.plugins.title.text = GetTextLang(pLang, pGrafica.nombre);
 
@@ -2035,7 +2027,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                 // HoverOffset por defecto.
                 dataset.hoverOffset = 4;
-                dataset.label = String.Join('|', data.labels);
+                dataset.label = string.Join('|', data.labels);
 
                 // Lista de los ordenes de las revistas.
                 List<string> listaNombresExt = new List<string>();
@@ -2503,42 +2495,12 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static Faceta CrearFaceta(FacetaConf pFacetaConf, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pGetAll = false)
         {
-            Faceta faceta = new Faceta();
+            Faceta faceta = new (pFacetaConf.filtro, pFacetaConf.rangoAnio, GetTextLang(pLang, pFacetaConf.nombre), pFacetaConf.ordenAlfaNum, pFacetaConf.verTodos, pFacetaConf.tesauro,pFacetaConf.reciproca);
 
-            faceta.isDate = false;
-            if (pFacetaConf.rangoAnio)
-            {
-                faceta.isDate = true;
-            }
-
-            faceta.verTodos = false;
-            if (pFacetaConf.verTodos)
-            {
-                faceta.verTodos = true;
-            }
-
-            faceta.numeroItemsFaceta = 10000;
             if (pFacetaConf.numeroItemsFaceta != 0 && !pGetAll)
             {
                 faceta.numeroItemsFaceta = pFacetaConf.numeroItemsFaceta;
             }
-
-            faceta.ordenAlfaNum = false;
-            if (pFacetaConf.ordenAlfaNum)
-            {
-                faceta.ordenAlfaNum = true;
-            }
-
-            faceta.tesauro = false;
-            if (pFacetaConf.tesauro)
-            {
-                faceta.tesauro = true;
-            }
-
-            faceta.reciproca = pFacetaConf.reciproca;
-            faceta.id = pFacetaConf.filtro;
-            faceta.nombre = GetTextLang(pLang, pFacetaConf.nombre);
-            faceta.items = new List<ItemFaceta>();
 
             // Filtro de página.
             List<string> filtros = new List<string>();
@@ -2586,7 +2548,6 @@ namespace Hercules.MA.GraphicEngine.Models
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder(), where = new StringBuilder();
 
-
             if (!faceta.tesauro)
             {
                 select.Append(mPrefijos);
@@ -2615,7 +2576,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     {
                         ItemFaceta itemFaceta = new ItemFaceta();
                         itemFaceta.nombre = fila["nombreFaceta"].value;
-                        itemFaceta.numero = Int32.Parse(fila["numero"].value);
+                        itemFaceta.numero = int.Parse(fila["numero"].value);
 
                         // Comprobación si tiene idioma asignado.
                         string lang = "";
