@@ -10,7 +10,7 @@
     {
       "identificador": "grafica1",
       "nombre": {
-        "es": "Número de publicaciones y citas por año"
+        "es": "Número de publicaciones y citas por año (con cuartiles)"
       },
       "tipo": "Barras",
       "anchura": 23,
