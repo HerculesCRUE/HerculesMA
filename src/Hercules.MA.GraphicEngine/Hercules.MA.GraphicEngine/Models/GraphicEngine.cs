@@ -635,16 +635,16 @@ namespace Hercules.MA.GraphicEngine.Models
                 if (pNodos)
                 {
                     //Nodos
-                    Dictionary<string, string> dicNodos = new Dictionary<string, string>();
+                    Dictionary<string, string> dicNodos = new ();
 
                     //Relaciones
-                    Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new Dictionary<string, List<DataQueryRelaciones>>();
+                    Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new ();
 
                     //Respuesta
-                    List<DataItemRelacion> itemsRelacion = new List<DataItemRelacion>();
+                    List<DataItemRelacion> itemsRelacion = new ();
 
-                    Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new Dictionary<string, List<string>>();
-                    Dictionary<string, int> scoreNodes = new Dictionary<string, int>();
+                    Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new ();
+                    Dictionary<string, int> scoreNodes = new ();
                     // Consulta sparql.
                     select.Append(mPrefijos);
                     select.Append("SELECT ?s group_concat(?categoria;separator=\",\") AS ?idCategorias ");
