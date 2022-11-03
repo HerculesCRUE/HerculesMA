@@ -23,8 +23,8 @@ namespace Hercules.MA.GraphicEngine.Models
     {
         // Prefijos.
         private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configJson", "prefijos.json"))));
-        private static ResourceApi mResourceApi = new ResourceApi(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
-        private static CommunityApi mCommunityApi = new CommunityApi(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
+        private static ResourceApi mResourceApi = new(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
+        private static CommunityApi mCommunityApi = new(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
         private static Guid mCommunityID = mCommunityApi.GetCommunityId();
         private static List<ConfigModel> mTabTemplates;
         private const int NUM_HILOS = 5;
@@ -225,8 +225,8 @@ namespace Hercules.MA.GraphicEngine.Models
             if (pGraphicOrder != 0)
             {
                 pGraphicOrder--;
-                Dictionary<string, List<Grafica>> dicGraficasGrupos = new Dictionary<string, List<Grafica>>();
-                List<Grafica> listaRemove = new List<Grafica>();
+                Dictionary<string, List<Grafica>> dicGraficasGrupos = new();
+                List<Grafica> listaRemove = new();
 
                 foreach (Grafica item in configModel.Graficas)
                 {
@@ -291,7 +291,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
 
             string path = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configGraficas", jsonName);
-            JsonSerializerSettings settings = new JsonSerializerSettings
+            JsonSerializerSettings settings = new()
             {
                 DefaultValueHandling = DefaultValueHandling.Ignore,
                 NullValueHandling = NullValueHandling.Ignore,
@@ -356,7 +356,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static List<Pagina> GetPages(string pLang, string userId = "")
         {
-            List<Pagina> listaPaginas = new List<Pagina>();
+            List<Pagina> listaPaginas = new();
 
             // Lectura de los JSON de configuración.
             List<ConfigModel> listaConfigModels = TabTemplates;
@@ -375,14 +375,14 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static Pagina CrearPagina(ConfigModel pConfigModel, string pLang, string userId = "")
         {
-            Pagina pagina = new Pagina();
+            Pagina pagina = new();
             pagina.id = pConfigModel.Identificador;
             pagina.nombre = GetTextLang(pLang, pConfigModel.Nombre);
             
             pagina.listaConfigGraficas = new List<ConfigPagina>();
             foreach (Grafica itemGrafica in pConfigModel.Graficas)
             {
-                ConfigPagina configPagina = new ConfigPagina()
+                ConfigPagina configPagina = new()
                 {
                     id = itemGrafica.Identificador,
                     anchura = itemGrafica.Anchura,
@@ -441,7 +441,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
 
                 // Si la anchura no contiene un valor aceptado, se le asigna 1/2 por defecto.
-                List<int> valoresAceptados = new List<int>() { 11, 12, 13, 14, 16, 23, 34, 38, 58 };
+                List<int> valoresAceptados = new() { 11, 12, 13, 14, 16, 23, 34, 38, 58 };
                 if (!valoresAceptados.Contains(configPagina.anchura))
                 {
                     configPagina.anchura = 12;
@@ -538,7 +538,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static GraficaBarras CrearGraficaBarrasVertical(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pNodos)
         {
             // Objeto a devolver.
-            GraficaBarras grafica = new GraficaBarras();
+            GraficaBarras grafica = new();
             grafica.Type = "bar"; // Por defecto, de tipo bar.
 
             // Tipo.
@@ -606,15 +606,15 @@ namespace Hercules.MA.GraphicEngine.Models
 
             grafica.Options = options;
 
-            ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>> resultadosDimension = new ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>>();
-            Dictionary<Dimension, DatasetBarras> dimensionesDataset = new Dictionary<Dimension, DatasetBarras>();
+            ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>> resultadosDimension = new();
+            Dictionary<Dimension, DatasetBarras> dimensionesDataset = new();
 
             bool ejeFechas = false;
             Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
-                List<Tuple<string, string, float>> listaTuplas = new List<Tuple<string, string, float>>();
+                List<Tuple<string, string, float>> listaTuplas = new();
                 SparqlObject resultadoQuery = null;
-                StringBuilder select = new StringBuilder(), where = new StringBuilder();
+                StringBuilder select = new(), where = new();
                 // Orden.               
                 string orden = "DESC";
                 if (pGrafica.Config.OrderDesc)
@@ -664,7 +664,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
                             string idCategorias = fila["idCategorias"].value;
-                            HashSet<string> categorias = new HashSet<string>(idCategorias.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                            HashSet<string> categorias = new(idCategorias.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 
                             foreach (string categoria in categorias)
                             {
@@ -702,7 +702,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     // Creamos los nodos y las relaciones en función de pNumAreas.
                     int pNumAreas = pGrafica.Config.NumMaxNodos;
 
-                    Dictionary<string, int> numRelaciones = new Dictionary<string, int>();
+                    Dictionary<string, int> numRelaciones = new();
                     foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
                     {
                         if (!numRelaciones.ContainsKey(sujeto.Key))
@@ -760,13 +760,13 @@ namespace Hercules.MA.GraphicEngine.Models
                             foreach (KeyValuePair<string, string> nodo in dicNodos)
                             {
                                 string clave = nodo.Key;
-                                Data data = new Data(clave, nodo.Value, null, null, null, "nodes", Data.Type.icon_area);
+                                Data data = new(clave, nodo.Value, null, null, null, "nodes", Data.Type.icon_area);
                                 if (scoreNodes.ContainsKey(clave))
                                 {
                                     data.score = scoreNodes[clave];
                                     data.name = $"{data.name} ({data.score})";
                                 }
-                                DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
+                                DataItemRelacion dataColabo = new(data, true, true);
                                 itemsRelacion.Add(dataColabo);
                             }
                         }
@@ -867,7 +867,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
                 if (itemGrafica.DividirDatos)
                 {
-                    HashSet<string> listaAux = new HashSet<string>();
+                    HashSet<string> listaAux = new();
                     foreach (Tuple<string, string, float> tupla in listaTuplas)
                     {
                         listaAux.Add(tupla.Item2);
@@ -893,10 +893,10 @@ namespace Hercules.MA.GraphicEngine.Models
             });
 
             #region --- Cálculo de los valores del Eje X
-            HashSet<string> valuesEje = new HashSet<string>();
-            HashSet<string> tipos = new HashSet<string>();
+            HashSet<string> valuesEje = new();
+            HashSet<string> tipos = new();
 
-            List<Tuple<string, float>> rangoValor = new List<Tuple<string, float>>();
+            List<Tuple<string, float>> rangoValor = new();
 
             foreach (KeyValuePair<Dimension, List<Tuple<string, string, float>>> item in resultadosDimension)
             {
@@ -1009,7 +1009,7 @@ namespace Hercules.MA.GraphicEngine.Models
             #endregion
 
             // Obtención del objeto de la gráfica.
-            List<string> listaLabels = new List<string>();
+            List<string> listaLabels = new();
             if (pGrafica.Config.Rango)
             {
                 foreach (Tuple<string, float> itemAux in rangoValor)
@@ -1024,8 +1024,8 @@ namespace Hercules.MA.GraphicEngine.Models
 
             foreach (KeyValuePair<Dimension, List<Tuple<string, string, float>>> item in resultadosDimension)
             {
-                DatasetBarras dataset = new DatasetBarras();
-                List<float> listaData = new List<float>();
+                DatasetBarras dataset = new();
+                List<float> listaData = new();
                 if (pGrafica.Config.Rango)
                 {
                     foreach (Tuple<string, float> itemAux in rangoValor)
@@ -1109,7 +1109,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static GraficaBarrasY CrearGraficaBarrasHorizontal(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pNodos)
         {
             // Objeto a devolver.
-            GraficaBarrasY grafica = new GraficaBarrasY();
+            GraficaBarrasY grafica = new();
             grafica.Type = "bar"; // Por defecto, de tipo bar.
 
             // Tipo.
@@ -1143,12 +1143,12 @@ namespace Hercules.MA.GraphicEngine.Models
             }
 
             // Asignación de Data.
-            DataBarrasY data = new DataBarrasY();
+            DataBarrasY data = new();
             data.Datasets = new ConcurrentBag<DatasetBarrasY>();
             grafica.Data = data;
 
             // Asignación de Options.
-            Options options = new Options();
+            Options options = new();
 
             // Orientación
             options.indexAxis = "y";
@@ -1158,7 +1158,7 @@ namespace Hercules.MA.GraphicEngine.Models
             // Ejes X
             foreach (EjeXConf item in pGrafica.Config.XAxisPrint)
             {
-                Eje eje = new Eje();
+                Eje eje = new();
                 eje.position = item.Posicion;
                 eje.title = new Title();
                 eje.title.display = true;
@@ -1187,15 +1187,15 @@ namespace Hercules.MA.GraphicEngine.Models
 
             grafica.Options = options;
 
-            ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>> resultadosDimension = new ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>>();
-            Dictionary<Dimension, DatasetBarrasY> dimensionesDataset = new Dictionary<Dimension, DatasetBarrasY>();
+            ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>> resultadosDimension = new();
+            Dictionary<Dimension, DatasetBarrasY> dimensionesDataset = new();
 
             bool ejeFechas = false;
             Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
-                List<Tuple<string, string, float>> listaTuplas = new List<Tuple<string, string, float>>();
+                List<Tuple<string, string, float>> listaTuplas = new();
                 SparqlObject resultadoQuery = null;
-                StringBuilder select = new StringBuilder(), where = new StringBuilder();
+                StringBuilder select = new(), where = new();
                 // Orden.                
                 string orden = "DESC";
                 if (pGrafica.Config.OrderDesc)
@@ -1218,8 +1218,8 @@ namespace Hercules.MA.GraphicEngine.Models
                 if (pNodos)
                 {
                     //Nodos            
-                    Dictionary<string, string> dicNodos = new Dictionary<string, string>();
-                    Dictionary<string, int> scoreNodes = new Dictionary<string, int>();
+                    Dictionary<string, string> dicNodos = new();
+                    Dictionary<string, int> scoreNodes = new();
 
                     // Consulta sparql.
                     select.Append(mPrefijos);
@@ -1240,7 +1240,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
                             string idCategorias = fila["idCategorias"].value;
-                            HashSet<string> categorias = new HashSet<string>(idCategorias.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                            HashSet<string> categorias = new(idCategorias.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 
                             foreach (string categoria in categorias)
                             {
@@ -1377,7 +1377,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                     if (itemGrafica.DividirDatos)
                     {
-                        HashSet<string> listaAux = new HashSet<string>();
+                        HashSet<string> listaAux = new();
                         foreach (Tuple<string, string, float> tupla in listaTuplas)
                         {
                             listaAux.Add(tupla.Item2);
@@ -1404,10 +1404,10 @@ namespace Hercules.MA.GraphicEngine.Models
             });
 
             #region --- Cálculo de los valores del Eje X
-            HashSet<string> valuesEje = new HashSet<string>();
-            HashSet<string> tipos = new HashSet<string>();
+            HashSet<string> valuesEje = new();
+            HashSet<string> tipos = new();
 
-            List<Tuple<string, float>> rangoValor = new List<Tuple<string, float>>();
+            List<Tuple<string, float>> rangoValor = new();
 
             foreach (KeyValuePair<Dimension, List<Tuple<string, string, float>>> item in resultadosDimension)
             {
@@ -1515,7 +1515,7 @@ namespace Hercules.MA.GraphicEngine.Models
             #endregion
 
             // Obtención del objeto de la gráfica.
-            List<string> listaLabels = new List<string>();
+            List<string> listaLabels = new();
             if (pGrafica.Config.Rango)
             {
                 foreach (Tuple<string, float> itemAux in rangoValor)
@@ -1530,8 +1530,8 @@ namespace Hercules.MA.GraphicEngine.Models
 
             foreach (KeyValuePair<Dimension, List<Tuple<string, string, float>>> item in resultadosDimension)
             {
-                DatasetBarrasY dataset = new DatasetBarrasY();
-                List<float> listaData = new List<float>();
+                DatasetBarrasY dataset = new();
+                List<float> listaData = new();
                 if (pGrafica.Config.Rango)
                 {
                     foreach (Tuple<string, float> itemAux in rangoValor)
@@ -1614,7 +1614,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static GraficaCircular CrearGraficaCircular(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates)
         {
             // Objeto a devolver.
-            GraficaCircular grafica = new GraficaCircular();
+            GraficaCircular grafica = new();
             grafica.type = "pie"; // Por defecto, de tipo pie.
 
             // Abreviación.
@@ -1636,12 +1636,12 @@ namespace Hercules.MA.GraphicEngine.Models
             }
 
             // Asignación de Data.
-            DataCircular data = new DataCircular();
+            DataCircular data = new();
             data.datasets = new ConcurrentBag<DatasetCircular>();
             grafica.data = data;
 
             // Asignación de Options.
-            Options options = new Options();
+            Options options = new();
 
             // Animación
             options.animation = new Animation();
@@ -1655,8 +1655,8 @@ namespace Hercules.MA.GraphicEngine.Models
 
             grafica.options = options;
 
-            ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimension = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
-            ConcurrentDictionary<string, float> dicNombreData = new ConcurrentDictionary<string, float>();
+            ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimension = new();
+            ConcurrentDictionary<string, float> dicNombreData = new();
             List<Dimension> listaDimensiones = pGrafica.Config.Dimensiones.Where(x => !x.Exterior).ToList();
 
             // Compruebo si es una gráfica circular de dos dimensiones.
@@ -1666,10 +1666,10 @@ namespace Hercules.MA.GraphicEngine.Models
                 Parallel.ForEach(listaDimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
                 {
                     SparqlObject resultadoQuery = null;
-                    StringBuilder select = new StringBuilder(), where = new StringBuilder();
+                    StringBuilder select = new(), where = new();
 
                     // Consulta sparql.
-                    List<string> filtros = new List<string>();
+                    List<string> filtros = new ();
                     filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                     if (!string.IsNullOrEmpty(pFiltroFacetas))
                     {
@@ -1723,9 +1723,9 @@ namespace Hercules.MA.GraphicEngine.Models
                         {
                             try
                             {
-                                if (!dicNombreData.TryAdd(fila["tipo"].value, Int32.Parse(fila["numero"].value)))
+                                if (!dicNombreData.TryAdd(fila["tipo"].value, int.Parse(fila["numero"].value)))
                                 {
-                                    dicNombreData.TryAdd(fila["tipo"].value + "|@" + Guid.NewGuid(), Int32.Parse(fila["numero"].value));
+                                    dicNombreData.TryAdd(fila["tipo"].value + "|@" + Guid.NewGuid(), int.Parse(fila["numero"].value));
                                 }
                             }
                             catch (Exception)
@@ -1737,22 +1737,22 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                 });
                 // Lista de los ordenes de las revistas.
-                List<string> listaNombres = new List<string>();
-                List<string> listaLabels = new List<string>();
+                List<string> listaNombres = new();
+                List<string> listaLabels = new();
 
                 // Ordeno los datos
                 Dictionary<string, float> ordered = dicNombreData.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-                List<float> listaData = new List<float>();
+                List<float> listaData = new();
                 foreach (KeyValuePair<string, float> nombreData in ordered)
                 {
                     listaNombres.Add(nombreData.Key);
                     listaData.Add(nombreData.Value);
                 }
 
-                DatasetCircular dataset = new DatasetCircular();
+                DatasetCircular dataset = new();
                 dataset.data = listaData;
 
-                List<string> listaColores = new List<string>();
+                List<string> listaColores = new();
 
                 foreach (string orden in listaNombres)
                 {
@@ -1793,23 +1793,23 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             else // Gráficas con 2 dimensiones
             {
-                List<string> filtroInterior = new List<string>();
+                List<string> filtroInterior = new();
                 foreach (Dimension item in listaDimensiones)
                 {
                     filtroInterior.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { item.Filtro }, "aux"));
                 }
-                ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
-                ConcurrentDictionary<string, float> dicNombreDataExt = new ConcurrentDictionary<string, float>();
+                ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new();
+                ConcurrentDictionary<string, float> dicNombreDataExt = new();
 
                 Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
                 {
                     if (itemGrafica.Exterior)
                     {
                         SparqlObject resultadoQuery = null;
-                        StringBuilder select = new StringBuilder(), where = new StringBuilder();
+                        StringBuilder select = new(), where = new();
 
                         // Consulta sparql.
-                        List<string> filtros = new List<string>();
+                        List<string> filtros = new();
                         filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                         if (!string.IsNullOrEmpty(pFiltroFacetas))
                         {
@@ -1863,7 +1863,7 @@ namespace Hercules.MA.GraphicEngine.Models
                             {
                                 try
                                 {
-                                    dicNombreDataExt.TryAdd(fila["aux"].value + "---" + fila["tipo"].value, Int32.Parse(fila["numero"].value));
+                                    dicNombreDataExt.TryAdd(fila["aux"].value + "---" + fila["tipo"].value, int.Parse(fila["numero"].value));
                                 }
                                 catch (Exception)
                                 {
@@ -1876,10 +1876,10 @@ namespace Hercules.MA.GraphicEngine.Models
                     else
                     {
                         SparqlObject resultadoQuery = null;
-                        StringBuilder select = new StringBuilder(), where = new StringBuilder();
+                        StringBuilder select = new(), where = new();
 
                         // Consulta sparql.
-                        List<string> filtros = new List<string>();
+                        List<string> filtros = new();
                         filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                         if (!string.IsNullOrEmpty(pFiltroFacetas))
                         {
@@ -1933,7 +1933,7 @@ namespace Hercules.MA.GraphicEngine.Models
                             {
                                 try
                                 {
-                                    dicNombreData.TryAdd(fila["tipo"].value, Int32.Parse(fila["numero"].value));
+                                    dicNombreData.TryAdd(fila["tipo"].value, int.Parse(fila["numero"].value));
                                 }
                                 catch (Exception)
                                 {
@@ -1945,21 +1945,21 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                 });
                 // Lista de los ordenes de las revistas.
-                List<string> listaNombres = new List<string>();
-                List<string> listaLabels = new List<string>();
+                List<string> listaNombres = new();
+                List<string> listaLabels = new();
                 // Ordeno los datos
                 Dictionary<string, float> ordered = dicNombreData.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
-                List<float> listaData = new List<float>();
+                List<float> listaData = new();
                 foreach (KeyValuePair<string, float> nombreData in ordered)
                 {
                     listaNombres.Add(nombreData.Key);
                     listaData.Add(nombreData.Value);
                 }
 
-                DatasetCircular dataset = new DatasetCircular();
+                DatasetCircular dataset = new();
                 dataset.data = listaData;
 
-                List<string> listaColores = new List<string>();
+                List<string> listaColores = new();
 
                 foreach (string orden in listaNombres)
                 {
@@ -1998,11 +1998,11 @@ namespace Hercules.MA.GraphicEngine.Models
                 dataset.label = string.Join('|', data.labels);
 
                 // Lista de los ordenes de las revistas.
-                List<string> listaNombresExt = new List<string>();
-                List<string> listaLabelsExt = new List<string>();
+                List<string> listaNombresExt = new();
+                List<string> listaLabelsExt = new();
                 // Ordeno los datos
-                Dictionary<string, float> parteIzq = new Dictionary<string, float>();
-                Dictionary<string, float> parteDcha = new Dictionary<string, float>();
+                Dictionary<string, float> parteIzq = new();
+                Dictionary<string, float> parteDcha = new();
 
                 int cont = 0;
                 foreach (KeyValuePair<string, float> nombreData in dicNombreDataExt.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value))
@@ -2030,18 +2030,18 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     orderedExt.TryAdd(item.Key, item.Value);
                 }
-                List<float> listaDataExt = new List<float>();
+                List<float> listaDataExt = new();
                 foreach (KeyValuePair<string, float> nombreData in orderedExt)
                 {
                     listaNombresExt.Add(nombreData.Key.Split("---").LastOrDefault());
                     listaDataExt.Add(nombreData.Value);
                 }
 
-                DatasetCircular datasetExt = new DatasetCircular();
+                DatasetCircular datasetExt = new();
                 datasetExt.data = listaDataExt;
 
-                List<string> listaColoresExt = new List<string>();
-                List<int> listaGrupos = new List<int>();
+                List<string> listaColoresExt = new();
+                List<int> listaGrupos = new();
                 string auxLeyenda = "~~~";
                 foreach (string orden in listaNombresExt)
                 {
@@ -2114,7 +2114,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static GraficaNodos CrearGraficaNodos(Grafica pGrafica, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates)
         {
-            GraficaNodos grafica = new GraficaNodos();
+            GraficaNodos grafica = new();
 
             // Abreviación.
             if (pGrafica.Config.Abreviar)
@@ -2172,10 +2172,10 @@ namespace Hercules.MA.GraphicEngine.Models
             grafica.title = dimension.Nombre.Values.FirstOrDefault();
             // Layout Nodos/Lineas
             grafica.style = new List<Style>();
-            Style estiloNodo = new Style();
+            Style estiloNodo = new();
 
             // Nodos
-            LayoutStyle layoutNodos = new LayoutStyle();
+            LayoutStyle layoutNodos = new();
             layoutNodos.Width = "mapData(score, 0, 80, 10, 90)";
             layoutNodos.Height = "mapData(score, 0, 80, 10, 90)";
             layoutNodos.Content = "data(name)";
@@ -2192,8 +2192,8 @@ namespace Hercules.MA.GraphicEngine.Models
             grafica.style.Add(estiloNodo);
 
             // Líneas
-            LayoutStyle layoutLineas = new LayoutStyle();
-            Style estiloLinea = new Style();
+            LayoutStyle layoutLineas = new();
+            Style estiloLinea = new();
             estiloLinea.Selector = "edge";
             layoutLineas.CurveStyle = "haystack";
             layoutLineas.Content = "data(name)";
@@ -2211,24 +2211,24 @@ namespace Hercules.MA.GraphicEngine.Models
             #endregion
 
             //Nodos            
-            Dictionary<string, string> dicNodos = new Dictionary<string, string>();
+            Dictionary<string, string> dicNodos = new();
 
             //Relaciones
-            Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new Dictionary<string, List<DataQueryRelaciones>>();
+            Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new();
 
             //Respuesta
-            List<DataItemRelacion> itemsRelacion = new List<DataItemRelacion>();
+            List<DataItemRelacion> itemsRelacion = new();
 
-            Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new Dictionary<string, List<string>>();
-            Dictionary<string, int> scoreNodes = new Dictionary<string, int>();
+            Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new();
+            Dictionary<string, int> scoreNodes = new();
 
             SparqlObject resultadoQuery = null;
-            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+            StringBuilder select = new(), where = new();
 
             Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
                 // Consulta sparql.
-                List<string> filtros = new List<string>();
+                List<string> filtros = new();
                 filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                 if (!string.IsNullOrEmpty(pFiltroFacetas))
                 {
@@ -2282,7 +2282,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                     {
                         string idCategorias = fila["idCategorias"].value;
-                        HashSet<string> categorias = new HashSet<string>(idCategorias.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                        HashSet<string> categorias = new(idCategorias.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 
                         foreach (string categoria in categorias)
                         {
@@ -2320,7 +2320,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 // Creamos los nodos y las relaciones en función de pNumAreas.
                 int pNumAreas = dimension.NumMaxNodos;
 
-                Dictionary<string, int> numRelaciones = new Dictionary<string, int>();
+                Dictionary<string, int> numRelaciones = new();
                 foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
                 {
                     if (!numRelaciones.ContainsKey(sujeto.Key))
@@ -2378,13 +2378,13 @@ namespace Hercules.MA.GraphicEngine.Models
                         foreach (KeyValuePair<string, string> nodo in dicNodos)
                         {
                             string clave = nodo.Key;
-                            Data data = new Data(clave, nodo.Value, null, null, null, "nodes", Data.Type.icon_area);
+                            Data data = new(clave, nodo.Value, null, null, null, "nodes", Data.Type.icon_area);
                             if (scoreNodes.ContainsKey(clave))
                             {
                                 data.score = scoreNodes[clave];
                                 data.name = $"{data.name} ({data.score})";
                             }
-                            DataItemRelacion dataColabo = new DataItemRelacion(data, true, true);
+                            DataItemRelacion dataColabo = new(data, true, true);
                             itemsRelacion.Add(dataColabo);
                         }
                     }
@@ -2403,8 +2403,8 @@ namespace Hercules.MA.GraphicEngine.Models
                                         if (itemsSeleccionados.Contains(relaciones2.idRelacionado))
                                         {
                                             string id = $@"{sujeto.Key}~{relaciones.nombreRelacion}~{relaciones2.idRelacionado}~{relaciones2.numVeces}";
-                                            Data data = new Data(id, relaciones.nombreRelacion, sujeto.Key, relaciones2.idRelacionado, CalcularGrosor(maximasRelaciones, relaciones2.numVeces), "edges", Data.Type.relation_document);
-                                            DataItemRelacion dataColabo = new DataItemRelacion(data, null, null);
+                                            Data data = new(id, relaciones.nombreRelacion, sujeto.Key, relaciones2.idRelacionado, CalcularGrosor(maximasRelaciones, relaciones2.numVeces), "edges", Data.Type.relation_document);
+                                            DataItemRelacion dataColabo = new(data, null, null);
                                             itemsRelacion.Add(dataColabo);
                                         }
                                     }
@@ -2471,7 +2471,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
 
             // Filtro de página.
-            List<string> filtros = new List<string>();
+            List<string> filtros = new();
             filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
             if (!string.IsNullOrEmpty(pFacetaConf.Reciproca))
             {
@@ -2514,7 +2514,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
             }
             SparqlObject resultadoQuery = null;
-            StringBuilder select = new StringBuilder(), where = new StringBuilder();
+            StringBuilder select = new(), where = new();
 
             if (!faceta.tesauro)
             {
@@ -2542,7 +2542,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                     {
-                        ItemFaceta itemFaceta = new ItemFaceta();
+                        ItemFaceta itemFaceta = new();
                         itemFaceta.nombre = fila["nombreFaceta"].value;
                         itemFaceta.numero = int.Parse(fila["numero"].value);
 
@@ -2580,14 +2580,14 @@ namespace Hercules.MA.GraphicEngine.Models
                 resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
                 if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
                 {
-                    Dictionary<ItemFaceta, int> itemsFaceta = new Dictionary<ItemFaceta, int>();
+                    Dictionary<ItemFaceta, int> itemsFaceta = new();
                     int maxNivel = 0;
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                     {
-                        ItemFaceta itemFaceta = new ItemFaceta();
+                        ItemFaceta itemFaceta = new();
                         itemFaceta.idTesauro = fila["categoria"].value.Substring(fila["categoria"].value.LastIndexOf("_") + 1);
                         itemFaceta.nombre = fila["nombre"].value;
-                        itemFaceta.numero = Int32.Parse(fila["numero"].value);
+                        itemFaceta.numero = int.Parse(fila["numero"].value);
                         itemFaceta.filtro = $@"{pFacetaConf.Filtro}={fila["categoria"].value}";
                         itemFaceta.childsTesauro = new List<ItemFaceta>();
                         // Asigno el nivel del item.
@@ -2634,7 +2634,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static bool IncluirTriplesRecurso(ResourceApi pResourceApi, Guid pRecursoID, List<TriplesToInclude> pTriples)
         {
-            List<TriplesToInclude> triplesIncluir = new List<TriplesToInclude>();
+            List<TriplesToInclude> triplesIncluir = new();
 
             foreach (TriplesToInclude triple in pTriples)
             {
@@ -2645,7 +2645,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 triplesIncluir.Add(triple);
             }
 
-            Dictionary<Guid, List<TriplesToInclude>> dicTriplesInsertar = new Dictionary<Guid, List<TriplesToInclude>>();
+            Dictionary<Guid, List<TriplesToInclude>> dicTriplesInsertar = new();
             dicTriplesInsertar.Add(pRecursoID, triplesIncluir);
             Dictionary<Guid, bool> dicInsertado = pResourceApi.InsertPropertiesLoadedResources(dicTriplesInsertar);
             return (dicInsertado != null && dicInsertado.ContainsKey(pRecursoID) && dicInsertado[pRecursoID]);
@@ -2717,7 +2717,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static List<DataGraphicUser> GetGraficasUserByPageId(string pIdPage)
         {
             // Lista de datos de las gráficas.
-            List<DataGraphicUser> listaGraficas = new List<DataGraphicUser>();
+            List<DataGraphicUser> listaGraficas = new();
 
             string select = mPrefijos;
             select += "SELECT distinct ?datosGraficas ?titulo ?orden ?idPagina ?idGrafica ?filtro ?anchura ?escalas";
@@ -2767,7 +2767,7 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             // Lista de datos de las páginas.
-            List<DataPageUser> listaPaginas = new List<DataPageUser>();
+            List<DataPageUser> listaPaginas = new();
 
             string select = mPrefijos;
             select += "SELECT ?datosPagina ?titulo ?orden ";
@@ -2782,10 +2782,10 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                 {
-                    DataPageUser data = new DataPageUser();
+                    DataPageUser data = new();
                     data.idRecurso = fila["datosPagina"].value;
                     data.titulo = fila["titulo"].value;
-                    data.orden = Int32.Parse(fila["orden"].value);
+                    data.orden = int.Parse(fila["orden"].value);
                     listaPaginas.Add(data);
                 }
             }
@@ -2820,7 +2820,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             Guid shortId = mResourceApi.GetShortGuid(idRecurso);
             Guid entidadGuid = Guid.NewGuid();
-            List<TriplesToInclude> triplesInclude = new List<TriplesToInclude>();
+            List<TriplesToInclude> triplesInclude = new();
             string predicadoBase = "http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic|";
             string idRecursoGrafica = $@"{mResourceApi.GraphsUrl}items/MetricGraphic_{shortId}_{entidadGuid}";
             string valorEntidadAuxiliar = $@"{idRecursoPagina}|{idRecursoGrafica}";
@@ -2929,7 +2929,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             Guid shortId = mResourceApi.GetShortGuid(idRecurso);
             Guid entidadGuid = Guid.NewGuid();
-            List<TriplesToInclude> triplesInclude = new List<TriplesToInclude>();
+            List<TriplesToInclude> triplesInclude = new();
             string predicadoBase = "http://w3id.org/roh/metricPage|";
             string valorEntidadAuxiliar = $@"{mResourceApi.GraphsUrl}items/MetricPage_{shortId}_{entidadGuid}";
             string valorBase = $@"{valorEntidadAuxiliar}|";
@@ -2988,10 +2988,10 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<RemoveTriples>> dicBorrado = new Dictionary<Guid, List<RemoveTriples>>();
-            List<RemoveTriples> listaTriplesBorrado = new List<RemoveTriples>();
+            Dictionary<Guid, List<RemoveTriples>> dicBorrado = new();
+            List<RemoveTriples> listaTriplesBorrado = new();
 
-            RemoveTriples triple = new RemoveTriples();
+            RemoveTriples triple = new();
             triple.Title = false;
             triple.Description = false;
             triple.Predicate = $@"http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic";
@@ -3016,10 +3016,10 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<RemoveTriples>> dicBorrado = new Dictionary<Guid, List<RemoveTriples>>();
-            List<RemoveTriples> listaTriplesBorrado = new List<RemoveTriples>();
+            Dictionary<Guid, List<RemoveTriples>> dicBorrado = new();
+            List<RemoveTriples> listaTriplesBorrado = new();
 
-            RemoveTriples triple = new RemoveTriples();
+            RemoveTriples triple = new();
             triple.Title = false;
             triple.Description = false;
             triple.Predicate = $@"http://w3id.org/roh/metricPage";
@@ -3040,8 +3040,8 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new();
+            List<TriplesToModify> listaTriplesModificacion = new();
             List<DataPageUser> listaPaginas = GetPagesUser(pUserId).OrderBy(x => x.orden).ToList();
 
             int index = 1;
@@ -3049,7 +3049,7 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 if (pagina.orden != index)
                 {
-                    TriplesToModify triple = new TriplesToModify();
+                    TriplesToModify triple = new();
                     triple.Predicate = "http://w3id.org/roh/metricPage|http://w3id.org/roh/order";
                     triple.NewValue = pagina.idRecurso + "|" + index;
                     triple.OldValue = pagina.idRecurso + "|" + pagina.orden;
@@ -3078,10 +3078,10 @@ namespace Hercules.MA.GraphicEngine.Models
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
 
-            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new();
+            List<TriplesToModify> listaTriplesModificacion = new();
 
-            TriplesToModify triple = new TriplesToModify();
+            TriplesToModify triple = new();
             triple.Predicate = "http://w3id.org/roh/metricPage|http://w3id.org/roh/title";
             triple.NewValue = pPageID + "|" + pNewTitle;
             triple.OldValue = pPageID + "|" + pOldTitle;
@@ -3106,8 +3106,8 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new();
+            List<TriplesToModify> listaTriplesModificacion = new();
             List<DataPageUser> listaPaginas = GetPagesUser(pUserId).OrderBy(x => x.orden).ToList();
             foreach (DataPageUser pagina in listaPaginas)
             {
@@ -3126,7 +3126,7 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 if (pagina.orden != index)
                 {
-                    TriplesToModify triple = new TriplesToModify();
+                    TriplesToModify triple = new();
                     triple.Predicate = "http://w3id.org/roh/metricPage|http://w3id.org/roh/order";
                     triple.NewValue = pagina.idRecurso + "|" + pagina.orden;
                     triple.OldValue = pagina.idRecurso + "|" + index;
@@ -3155,9 +3155,9 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
-            TriplesToModify triple = new TriplesToModify();
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new();
+            List<TriplesToModify> listaTriplesModificacion = new();
+            TriplesToModify triple = new();
             triple.Predicate = $@"http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic|http://w3id.org/roh/title";
             triple.NewValue = pPageID + "|" + pGraphicID + "|" + pNewTitle;
             triple.OldValue = pPageID + "|" + pGraphicID + "|" + pOldTitle;
@@ -3183,8 +3183,8 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new();
+            List<TriplesToModify> listaTriplesModificacion = new();
             List<DataGraphicUser> listaGraficas = GetGraficasUserByPageId(pPageID).OrderBy(x => x.orden).ToList();
             foreach (DataGraphicUser grafica in listaGraficas)
             {
@@ -3203,7 +3203,7 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 if (grafica.orden != index)
                 {
-                    TriplesToModify triple = new TriplesToModify();
+                    TriplesToModify triple = new();
                     triple.Predicate = "http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic|http://w3id.org/roh/order";
                     triple.NewValue = pPageID + "|" + grafica.idRecurso + "|" + grafica.orden;
                     triple.OldValue = pPageID + "|" + grafica.idRecurso + "|" + index;
@@ -3225,8 +3225,8 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new();
+            List<TriplesToModify> listaTriplesModificacion = new();
             List<DataGraphicUser> listaGraficas = GetGraficasUserByPageId(pPageID).OrderBy(x => x.orden).ToList();
 
             int index = 1;
@@ -3234,7 +3234,7 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 if (grafica.orden != index)
                 {
-                    TriplesToModify triple = new TriplesToModify();
+                    TriplesToModify triple = new();
                     triple.Predicate = "http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic|http://w3id.org/roh/order";
                     triple.NewValue = pPageID + "|" + grafica.idRecurso + "|" + index;
                     triple.OldValue = pPageID + "|" + grafica.idRecurso + "|" + grafica.orden;
@@ -3263,9 +3263,9 @@ namespace Hercules.MA.GraphicEngine.Models
             string idRecurso = GetIdPersonByGnossUser(pUserId);
 
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
-            TriplesToModify triple = new TriplesToModify();
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new();
+            List<TriplesToModify> listaTriplesModificacion = new();
+            TriplesToModify triple = new();
             triple.Predicate = $@"http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic|http://w3id.org/roh/width";
             triple.NewValue = pPageID + "|" + pGraphicID + "|" + pNewWidth;
             triple.OldValue = pPageID + "|" + pGraphicID + "|" + pOldWidth;
@@ -3288,9 +3288,9 @@ namespace Hercules.MA.GraphicEngine.Models
             // ID del recurso del usuario.
             string idRecurso = GetIdPersonByGnossUser(pUserId);
             Guid guid = mResourceApi.GetShortGuid(idRecurso);
-            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new Dictionary<Guid, List<TriplesToModify>>();
-            List<TriplesToModify> listaTriplesModificacion = new List<TriplesToModify>();
-            TriplesToModify triple = new TriplesToModify();
+            Dictionary<Guid, List<TriplesToModify>> dicModificacion = new();
+            List<TriplesToModify> listaTriplesModificacion = new();
+            TriplesToModify triple = new();
             triple.Predicate = $@"http://w3id.org/roh/metricPage|http://w3id.org/roh/metricGraphic|http://w3id.org/roh/scales";
             triple.NewValue = pPageID + "|" + pGraphicID + "|" + pNewScales;
             triple.OldValue = pPageID + "|" + pGraphicID + "|" + pOldScales;
@@ -3328,7 +3328,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static List<string> ObtenerColores(int pNumVeces, string pColorHex)
         {
-            List<string> colores = new List<string>();
+            List<string> colores = new();
             for (int i = 0; i < pNumVeces; i++)
             {
                 colores.Add(pColorHex);
@@ -3375,7 +3375,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static List<string> ObtenerDegradadoColores(string pColorMax, string pColorMin, int pNumColores)
         {
-            List<string> listaColores = new List<string>();
+            List<string> listaColores = new();
             if (pColorMax.Length < 7 || pColorMin.Length < 7)
             {
                 pColorMax = "#FFFFFF";

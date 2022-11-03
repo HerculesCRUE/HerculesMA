@@ -21,16 +21,16 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
                 {
                     return null;
                 }
-                StringBuilder csv = new StringBuilder("");
+                StringBuilder csv = new("");
                 csv.AppendLine("\"" + string.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
                 csv.AppendLine("\"" + string.Join(";", dataset.data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
                 return Encoding.Latin1.GetBytes(csv.ToString());
             }
             else
             {
-                StringBuilder csv = new StringBuilder("");
+                StringBuilder csv = new("");
                 csv.AppendLine(";\"" + string.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
-                Dictionary<string, List<float>> dic = new Dictionary<string, List<float>>();
+                Dictionary<string, List<float>> dic = new();
 
                 foreach (DatasetCircular datasetCircular in data.datasets.Where(x => x.grupos != null))
                 {
