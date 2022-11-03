@@ -378,7 +378,7 @@ namespace Hercules.MA.GraphicEngine.Models
             Pagina pagina = new();
             pagina.id = pConfigModel.Identificador;
             pagina.nombre = GetTextLang(pLang, pConfigModel.Nombre);
-            
+
             pagina.listaConfigGraficas = new List<ConfigPagina>();
             foreach (Grafica itemGrafica in pConfigModel.Graficas)
             {
@@ -449,7 +449,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                 pagina.listaConfigGraficas.Add(configPagina);
             }
-            
+
             pagina.listaIdsFacetas = new List<string>();
             foreach (FacetaConf itemFaceta in pConfigModel.Facetas)
             {
@@ -635,16 +635,16 @@ namespace Hercules.MA.GraphicEngine.Models
                 if (pNodos)
                 {
                     //Nodos
-                    Dictionary<string, string> dicNodos = new ();
+                    Dictionary<string, string> dicNodos = new();
 
                     //Relaciones
-                    Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new ();
+                    Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new();
 
                     //Respuesta
-                    List<DataItemRelacion> itemsRelacion = new ();
+                    List<DataItemRelacion> itemsRelacion = new();
 
-                    Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new ();
-                    Dictionary<string, int> scoreNodes = new ();
+                    Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new();
+                    Dictionary<string, int> scoreNodes = new();
                     // Consulta sparql.
                     select.Append(mPrefijos);
                     select.Append("SELECT ?s group_concat(?categoria;separator=\",\") AS ?idCategorias ");
@@ -879,7 +879,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         foreach (KeyValuePair<string, string> item in itemAux.Nombre)
                         {
                             itemAux.Nombre[item.Key] = item.Value + " " + aux;
-                            itemAux.Color = Utility.SeleccionarColor(aux);                            
+                            itemAux.Color = Utility.SeleccionarColor(aux);
                         }
                         itemAux.Orden = ordenAux;
                         ordenAux++;
@@ -1389,7 +1389,7 @@ namespace Hercules.MA.GraphicEngine.Models
                             foreach (KeyValuePair<string, string> item in itemAux.Nombre)
                             {
                                 itemAux.Nombre[item.Key] = item.Value + " " + aux;
-                                itemAux.Color = Utility.SeleccionarColor(aux);                                
+                                itemAux.Color = Utility.SeleccionarColor(aux);
                             }
                             itemAux.Orden = ordenAux;
                             ordenAux++;
@@ -1669,7 +1669,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     StringBuilder select = new(), where = new();
 
                     // Consulta sparql.
-                    List<string> filtros = new ();
+                    List<string> filtros = new();
                     filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                     if (!string.IsNullOrEmpty(pFiltroFacetas))
                     {
@@ -2463,7 +2463,7 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static Faceta CrearFaceta(FacetaConf pFacetaConf, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pGetAll = false)
         {
-            Faceta faceta = new (pFacetaConf.Filtro, pFacetaConf.RangoAnio, GetTextLang(pLang, pFacetaConf.Nombre), pFacetaConf.OrdenAlfaNum, pFacetaConf.VerTodos, pFacetaConf.Tesauro,pFacetaConf.Reciproca);
+            Faceta faceta = new(pFacetaConf.Filtro, pFacetaConf.RangoAnio, GetTextLang(pLang, pFacetaConf.Nombre), pFacetaConf.OrdenAlfaNum, pFacetaConf.VerTodos, pFacetaConf.Tesauro, pFacetaConf.Reciproca);
 
             if (pFacetaConf.NumeroItemsFaceta != 0 && !pGetAll)
             {
@@ -2513,38 +2513,38 @@ namespace Hercules.MA.GraphicEngine.Models
                     filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                 }
             }
-            SparqlObject resultadoQuery = null;
-            StringBuilder select = new(), where = new();
 
             if (!faceta.tesauro)
             {
-                select.Append(mPrefijos);
-                select.Append($@"SELECT DISTINCT ?nombreFaceta LANG(?nombreFaceta) AS ?lang COUNT(DISTINCT ?s) AS ?numero ");
-                where.Append("WHERE { ");
+                string selectFacetaSinTesauro = mPrefijos;
+                selectFacetaSinTesauro += "SELECT DISTINCT ?nombreFaceta LANG(?nombreFaceta) AS ?lang COUNT(DISTINCT ?s) AS ?numero ";
+                string whereFacetaSinTesauro = "WHERE { ";
                 foreach (string item in filtros)
                 {
-                    where.Append(item);
+                    whereFacetaSinTesauro += item;
                 }
-                where.Append($@"FILTER(LANG(?nombreFaceta) = '{pLang}' OR LANG(?nombreFaceta) = '' OR !isLiteral(?nombreFaceta)) ");
+                whereFacetaSinTesauro += $"FILTER(LANG(?nombreFaceta) = '{pLang}' OR LANG(?nombreFaceta) = '' OR !isLiteral(?nombreFaceta)) ";
                 if (faceta.ordenAlfaNum)
                 {
-                    where.Append($@"}} ORDER BY ASC (?nombreFaceta) ");
+                    whereFacetaSinTesauro += "} ORDER BY ASC (?nombreFaceta) ";
                 }
                 else
                 {
-                    where.Append($@"}} ORDER BY DESC (?numero) ");
+                    whereFacetaSinTesauro += "} ORDER BY DESC (?numero) ";
                 }
 
-                where.Append($@"LIMIT {faceta.numeroItemsFaceta} ");
+                whereFacetaSinTesauro += $"LIMIT {faceta.numeroItemsFaceta} ";
 
-                resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                SparqlObject resultadoQueryFacetaSinTesauro = mResourceApi.VirtuosoQuery(selectFacetaSinTesauro.ToString(), whereFacetaSinTesauro.ToString(), mCommunityID);
+                if (resultadoQueryFacetaSinTesauro != null && resultadoQueryFacetaSinTesauro.results != null && resultadoQueryFacetaSinTesauro.results.bindings != null && resultadoQueryFacetaSinTesauro.results.bindings.Count > 0)
                 {
-                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryFacetaSinTesauro.results.bindings)
                     {
-                        ItemFaceta itemFaceta = new();
-                        itemFaceta.nombre = fila["nombreFaceta"].value;
-                        itemFaceta.numero = int.Parse(fila["numero"].value);
+                        ItemFaceta itemFaceta = new()
+                        {
+                            nombre = fila["nombreFaceta"].value,
+                            numero = int.Parse(fila["numero"].value)
+                        };
 
                         // Comprobación si tiene idioma asignado.
                         string lang = "";
@@ -2567,22 +2567,22 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             else
             {
-                select.Append(mPrefijos);
-                select.Append($@"SELECT ?categoria ?nombre COUNT(DISTINCT (?s)) AS ?numero ");
-                where.Append("WHERE { ");
+                string selectFacetaTesauro = mPrefijos;
+                selectFacetaTesauro += "SELECT ?categoria ?nombre COUNT(DISTINCT (?s)) AS ?numero ";
+                string whereFacetaTesauro = "WHERE { ";
                 foreach (string item in filtros)
                 {
-                    where.Append(item);
+                    whereFacetaTesauro += item;
                 }
-                where.Append("?categoria skos:prefLabel ?nombre. ");
-                where.Append($@"}} ORDER BY ASC (?categoria) ");
+                whereFacetaTesauro += "?categoria skos:prefLabel ?nombre. ";
+                whereFacetaTesauro += "} ORDER BY ASC (?categoria) ";
 
-                resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                SparqlObject resultadoQueryFacetaTesauro = mResourceApi.VirtuosoQuery(selectFacetaTesauro.ToString(), whereFacetaTesauro.ToString(), mCommunityID);
+                if (resultadoQueryFacetaTesauro != null && resultadoQueryFacetaTesauro.results != null && resultadoQueryFacetaTesauro.results.bindings != null && resultadoQueryFacetaTesauro.results.bindings.Count > 0)
                 {
                     Dictionary<ItemFaceta, int> itemsFaceta = new();
                     int maxNivel = 0;
-                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryFacetaTesauro.results.bindings)
                     {
                         ItemFaceta itemFaceta = new();
                         itemFaceta.idTesauro = fila["categoria"].value.Substring(fila["categoria"].value.LastIndexOf("_") + 1);
@@ -3461,7 +3461,7 @@ namespace Hercules.MA.GraphicEngine.Models
             ";
             SparqlObject sparqlObjectAux = mResourceApi.VirtuosoQuery(select, where, "person");
             List<string> resultados = sparqlObjectAux.results.bindings.Select(x => x["user"].value).Distinct().ToList();
-            string user = resultados.ToList().FirstOrDefault();
+            string user = resultados.FirstOrDefault();
             return user;
 
 
