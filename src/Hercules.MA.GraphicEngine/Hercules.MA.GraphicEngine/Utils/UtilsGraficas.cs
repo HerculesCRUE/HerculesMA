@@ -26,15 +26,15 @@ namespace Hercules.MA.GraphicEngine.Utils
             // Determina si en el filtro contiene '=' para tratarlo de manera especial.
             bool filtroEspecial = IsFiltroEspecial(itemGrafica);
             // Filtro de página.
-            List<string> filtros = new List<string>();
+            List<string> filtros = new ();
 
-            if (!string.IsNullOrEmpty(pGrafica.config.reciproco))
+            if (!string.IsNullOrEmpty(pGrafica.Config.Reciproco))
             {
-                filtros.AddRange(ObtenerFiltros(new List<string>() { pGrafica.config.ejeX }, "ejeX", null, pGrafica.config.reciproco));
+                filtros.AddRange(ObtenerFiltros(new List<string>() { pGrafica.Config.EjeX }, "ejeX", null, pGrafica.Config.Reciproco));
             }
             else
             {
-                filtros.AddRange(ObtenerFiltros(new List<string>() { pGrafica.config.ejeX }, "ejeX"));
+                filtros.AddRange(ObtenerFiltros(new List<string>() { pGrafica.Config.EjeX }, "ejeX"));
             }
             filtros.AddRange(ObtenerFiltros(new List<string>() { pFiltroBase }));
             if (!string.IsNullOrEmpty(pFiltroFacetas))
@@ -67,18 +67,18 @@ namespace Hercules.MA.GraphicEngine.Utils
             }
             if (filtroEspecial)
             {
-                filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "aux"));
+                filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.Filtro }, "aux"));
             }
-            else if (!string.IsNullOrEmpty(itemGrafica.filtro))
+            else if (!string.IsNullOrEmpty(itemGrafica.Filtro))
             {
-                filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
+                filtros.AddRange(ObtenerFiltros(new List<string>() { itemGrafica.Filtro }));
             }
 
             return filtros;
         }
         public static bool IsFiltroEspecial(Dimension itemGrafica) {
             // Determina si en el filtro contiene '=' para tratarlo de manera especial.
-            return !string.IsNullOrEmpty(itemGrafica.filtro) && !itemGrafica.filtro.Contains("=");
+            return !string.IsNullOrEmpty(itemGrafica.Filtro) && !itemGrafica.Filtro.Contains('=');
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Hercules.MA.GraphicEngine.Utils
         public static List<string> ObtenerFiltros(List<string> pListaFiltros, string pNombreVar = null, List<string> pListaDates = null, string pReciproco = null)
         {
             // Split por filtro.
-            List<string> listaAux = new List<string>();
+            List<string> listaAux = new();
             foreach (string filtro in pListaFiltros)
             {
                 // --- ÑAPA
@@ -102,7 +102,7 @@ namespace Hercules.MA.GraphicEngine.Utils
                 listaAux.AddRange(lista);
             }
 
-            List<string> filtrosQuery = new List<string>();
+            List<string> filtrosQuery = new();
 
             // Split por salto de ontología.
             int i = 0;
@@ -134,15 +134,12 @@ namespace Hercules.MA.GraphicEngine.Utils
         /// <returns></returns>
         public static string TratarParametros(string pFiltro, string pVarAnterior, int pAux, string pNombreVar = null, bool pIsDate = false, string pReciproco = null)
         {
-            StringBuilder filtro = new StringBuilder();
+            StringBuilder filtro = new ();
             string[] filtros = pFiltro.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries);
             int i = 0;
-
-            string[] filtrosReciproco = null;
-            // TODO Revisar con más casos o ejemplos para ver si funciona totalmente bien
             if (!string.IsNullOrEmpty(pReciproco))
             {
-                filtrosReciproco = pReciproco.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] filtrosReciproco = pReciproco.Split(new string[] { "@@@" }, StringSplitOptions.RemoveEmptyEntries);
                 filtro.Append($@"?aux {filtrosReciproco[0].Split('=').FirstOrDefault()} {filtrosReciproco[0].Split('=').LastOrDefault()}. ");
                 int j = 0;
                 pVarAnterior = "?aux";
@@ -154,7 +151,7 @@ namespace Hercules.MA.GraphicEngine.Utils
                         continue;
                     }
                     int pAuxR = pAux;
-                    if (!filtroReciproco.Contains("="))
+                    if (!filtroReciproco.Contains('='))
                     {
                         string varActual = $@"?{filtroReciproco.Substring(filtroReciproco.IndexOf(":") + 1)}{pAuxR}";
                         filtro.Append($@"{pVarAnterior} ");
@@ -177,7 +174,7 @@ namespace Hercules.MA.GraphicEngine.Utils
             foreach (string parteFiltro in filtros)
             {
                 i++;
-                if (!parteFiltro.Contains("="))
+                if (!parteFiltro.Contains('='))
                 {
                     string varActual = $@"?{parteFiltro.Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
                     filtro.Append($@"{pVarAnterior} ");
@@ -211,12 +208,12 @@ namespace Hercules.MA.GraphicEngine.Utils
                             filtro.Append($@"{varActual}. ");
                         }
                     }
-                    else if (pIsDate && (varActual.Contains("-") || varActual.Equals("lastyear") || varActual.Equals("fiveyears")))
+                    else if (pIsDate && (varActual.Contains('-') || varActual.Equals("lastyear") || varActual.Equals("fiveyears")))
                     {
                         string fechaInicio = "";
                         string fechaFin = "";
                         string varActualAux = $@"?{parteFiltro.Split("=")[0].Substring(parteFiltro.IndexOf(":") + 1)}{pAux}";
-                        if (varActual.Contains("-"))
+                        if (varActual.Contains('-'))
                         {
                             fechaInicio = varActual.Split("-")[0];
                             fechaFin = varActual.Split("-")[1];

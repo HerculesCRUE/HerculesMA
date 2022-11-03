@@ -8,7 +8,7 @@ namespace Hercules.MA.GraphicEngine.Models
 {
     public static class Security
     {
-        static UserApi mUserApi = new UserApi($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
+        static UserApi mUserApi = new ($@"{AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
 
         public static bool CheckUser(Guid pUserId, HttpRequest pHttpRequest)
         {
@@ -24,7 +24,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             catch (Exception ex)
             {
-
+                mUserApi.Log.Error(ex.Message);
             }
             return userIdCookie == pUserId;
         }
@@ -43,7 +43,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             catch (Exception ex)
             {
-
+                mUserApi.Log.Error(ex.Message);
             }
             return pUsersId.Contains(userIdCookie);
         }
