@@ -729,7 +729,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         itemsSeleccionados = itemsSeleccionados.GetRange(0, pNumAreas);
                     }
 
-                    if (itemsSeleccionados.Count > 0)
+                    if (itemsSeleccionados.Any())
                     {
                         // Recuperamos los nombres de categorías y creamos los nodos.
                         select = new StringBuilder();
@@ -879,23 +879,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         foreach (KeyValuePair<string, string> item in itemAux.Nombre)
                         {
                             itemAux.Nombre[item.Key] = item.Value + " " + aux;
-                            switch (aux)
-                            {
-                                case "1":
-                                    itemAux.Color = "#45DCB4";
-                                    break;
-                                case "2":
-                                    itemAux.Color = "#EAF112";
-                                    break;
-                                case "3":
-                                    itemAux.Color = "#DE921E";
-                                    break;
-                                case "4":
-                                    itemAux.Color = "#DC4545";
-                                    break;
-                                default:
-                                    break;
-                            }
+                            itemAux.Color = Utility.SeleccionarColor(aux);                            
                         }
                         itemAux.Orden = ordenAux;
                         ordenAux++;
@@ -1405,23 +1389,7 @@ namespace Hercules.MA.GraphicEngine.Models
                             foreach (KeyValuePair<string, string> item in itemAux.Nombre)
                             {
                                 itemAux.Nombre[item.Key] = item.Value + " " + aux;
-                                switch (aux)
-                                {
-                                    case "1":
-                                        itemAux.Color = "#45DCB4";
-                                        break;
-                                    case "2":
-                                        itemAux.Color = "#EAF112";
-                                        break;
-                                    case "3":
-                                        itemAux.Color = "#DE921E";
-                                        break;
-                                    case "4":
-                                        itemAux.Color = "#DC4545";
-                                        break;
-                                    default:
-                                        break;
-                                }
+                                itemAux.Color = Utility.SeleccionarColor(aux);                                
                             }
                             itemAux.Orden = ordenAux;
                             ordenAux++;
