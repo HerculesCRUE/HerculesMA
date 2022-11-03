@@ -21,18 +21,18 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
 
         public override byte[] GenerateCSV()
         {
-            StringBuilder csv = new StringBuilder("");
+            StringBuilder csv = new ("");
             // Nombre/Id de los nodos
-            List<string> nombres = new List<string>();
-            List<string> ids = new List<string>();
+            List<string> nombres = new ();
+            List<string> ids = new ();
 
             // Recorro los elementos para obtener los nombres e ids
             foreach (DataItemRelacion item in elements)
             {
-                if (item.data.group == "nodes")
+                if (item.Data.group == "nodes")
                 {
-                    nombres.Add(item.data.name.Split('(').First().TrimEnd());
-                    ids.Add(item.data.id);
+                    nombres.Add(item.Data.name.Split('(').First().TrimEnd());
+                    ids.Add(item.Data.id);
                 }
             }
 
@@ -42,26 +42,26 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
             // Recorro los elementos para obtener los valores
             foreach (DataItemRelacion item in elements)
             {
-                if (item.data.group == "nodes")
+                if (item.Data.group == "nodes")
                 {
-                    valorRelaciones[cont, cont] = item.data.score;
+                    valorRelaciones[cont, cont] = item.Data.score;
                     cont++;
                 }
                 else
                 {
-                    int source = ids.IndexOf(item.data.source);
-                    int target = ids.IndexOf(item.data.target);
-                    double valor = Double.Parse(item.data.id.Split('~').Last());
+                    int source = ids.IndexOf(item.Data.source);
+                    int target = ids.IndexOf(item.Data.target);
+                    double valor = double.Parse(item.Data.id.Split('~').Last());
                     valorRelaciones[source, target] = valor;
                     valorRelaciones[target, source] = valor;
                 }
             }
 
             // Paso los valores de la gráfica a una lista
-            List<List<string>> valores = new List<List<string>>();
+            List<List<string>> valores = new();
             for (int i = 0; i < nombres.Count; i++)
             {
-                List<string> aux = new List<string>();
+                List<string> aux = new();
                 for (int j = 0; j < nombres.Count; j++)
                 {
                     if (valorRelaciones[i, j] == null)
@@ -77,12 +77,12 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
             }
 
             // Añado al string los nombres de los nodos
-            csv.AppendLine(";\"" + String.Join(";", nombres).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+            csv.AppendLine(";\"" + string.Join(";", nombres).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
 
             // Añado al string los valores de los nodos y sus relaciones
             for (int i = 0; i < nombres.Count; i++)
             {
-                csv.AppendLine("\"" + nombres[i] + "\";\"" + String.Join(";", valores[i]).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                csv.AppendLine("\"" + nombres[i] + "\";\"" + string.Join(";", valores[i]).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
             }
             return Encoding.Latin1.GetBytes(csv.ToString());
         }
@@ -110,47 +110,47 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
 
     public class Style
     {
-        public string selector { get; set; }
+        public string Selector { get; set; }
         public LayoutStyle style { get; set; }
     }
 
     public class LayoutStyle
     {
-        public string width { get; set; }
-        public string content { get; set; }
+        public string Width { get; set; }
+        public string Content { get; set; }
         [JsonPropertyName("font-size")]
-        public string font_size { get; set; }
+        public string FontSize { get; set; }
         [JsonPropertyName("font-family")]
-        public string font_family { get; set; }
+        public string FontFamily { get; set; }
         [JsonPropertyName("background-color")]
-        public string background_color { get; set; }
+        public string BackgroundColor { get; set; }
         [JsonPropertyName("overlay-padding")]
-        public string overlay_padding { get; set; }
+        public string OverlayPadding { get; set; }
         [JsonPropertyName("z-index")]
-        public string z_index { get; set; }
-        public string height { get; set; }
+        public string ZIndex { get; set; }
+        public string Height { get; set; }
         [JsonPropertyName("text-outline-width")]
-        public string text_outline_width { get; set; }
+        public string TextOutlineWidth { get; set; }
         [JsonPropertyName("curve-style")]
-        public string curve_style { get; set; }
+        public string CurveStyle { get; set; }
         [JsonPropertyName("haystack-radius")]
-        public string haystack_radius { get; set; }
-        public string opacity { get; set; }
+        public string HaystackRadius { get; set; }
+        public string Opacity { get; set; }
         [JsonPropertyName("line-color")]
-        public string line_color { get; set; }
+        public string LineColor { get; set; }
     }
 
     public class DataItemRelacion
     {
-        public Data data { get; set; }
-        public bool? selectable { get; set; }
-        public bool? grabbable { get; set; }
+        public Data Data { get; set; }
+        public bool? Selectable { get; set; }
+        public bool? Grabbable { get; set; }
 
         public DataItemRelacion(Data pData, bool? pSelectable, bool? pGrabbable)
         {
-            this.data = pData;
-            this.selectable = pSelectable;
-            this.grabbable = pGrabbable;
+            this.Data = pData;
+            this.Selectable = pSelectable;
+            this.Grabbable = pGrabbable;
         }
     }
 

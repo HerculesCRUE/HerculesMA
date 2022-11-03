@@ -5,113 +5,113 @@ namespace Hercules.MA.GraphicEngine.Models
 {
     public class ConfigModel
     {
-        public int orden { get; set; }
-        public Dictionary<string, string> nombre { get; set; }
-        public string filtro { get; set; }
-        public string identificador { get; set; }
-        public List<Grafica> graficas { get; set; }
-        public List<FacetaConf> facetas { get; set; }
+        public int Orden { get; set; }
+        public Dictionary<string, string> Nombre { get; set; }
+        public string Filtro { get; set; }
+        public string Identificador { get; set; }
+        public List<Grafica> Graficas { get; set; }
+        public List<FacetaConf> Facetas { get; set; }
     }
 
     public class FacetaConf
     {
-        public Dictionary<string, string> nombre { get; set; }
-        public bool rangoAnio { get; set; }
-        public string filtro { get; set; }
-        public bool ordenAlfaNum { get; set; }
-        public bool tesauro { get; set; }
-        public int numeroItemsFaceta { get; set; }
-        public bool verTodos { get; set; }
-        public string reciproca { get; set; }
+        public Dictionary<string, string> Nombre { get; set; }
+        public bool RangoAnio { get; set; }
+        public string Filtro { get; set; }
+        public bool OrdenAlfaNum { get; set; }
+        public bool Tesauro { get; set; }
+        public int NumeroItemsFaceta { get; set; }
+        public bool VerTodos { get; set; }
+        public string Reciproca { get; set; }
     }
 
     public class Grafica
     {
-        public string identificador { get; set; }
-        public Dictionary<string, string> nombre { get; set; }
-        public EnumGraficas tipo { get; set; }
-        public int anchura { get; set; }
-        public string idGrupo { get; set; }
-        public string propCategoryPath { get; set; }
-        public bool isPrivate { get; set; }
+        public string Identificador { get; set; }
+        public Dictionary<string, string> Nombre { get; set; }
+        public EnumGraficas Tipo { get; set; }
+        public int Anchura { get; set; }
+        public string IdGrupo { get; set; }
+        public string PropCategoryPath { get; set; }
+        public bool IsPrivate { get; set; }
 
-        public Config config { get; set; }
+        public Config Config { get; set; }
     }
 
     public class Config
     {
-        public bool datosNodos { get; set; }
-        public int numMaxNodos { get; set; }
-        public bool orientacionVertical { get; set; }
-        public string ejeX { get; set; }
-        public string reciproco { get; set; }
-        public bool rango { get; set; }
-        public string[] rangos { get; set; }
-        public bool porcentual { get; set; }
-        public bool abreviar { get; set; }
-        public bool ocultarLeyenda { get; set; }
-        public bool orderDesc { get; set; }
-        public string color { get; set; }
-        public bool rellenarEjeX { get; set; }
-        public List<EjeYConf> yAxisPrint { get; set; }
-        public List<EjeXConf> xAxisPrint { get; set; }
-        public List<Dimension> dimensiones { get; set; }
+        public bool DatosNodos { get; set; }
+        public int NumMaxNodos { get; set; }
+        public bool OrientacionVertical { get; set; }
+        public string EjeX { get; set; }
+        public string Reciproco { get; set; }
+        public bool Rango { get; set; }
+        public string[] Rangos { get; set; }
+        public bool Porcentual { get; set; }
+        public bool Abreviar { get; set; }
+        public bool OcultarLeyenda { get; set; }
+        public bool OrderDesc { get; set; }
+        public string Color { get; set; }
+        public bool RellenarEjeX { get; set; }
+        public List<EjeYConf> YAxisPrint { get; set; }
+        public List<EjeXConf> XAxisPrint { get; set; }
+        public List<Dimension> Dimensiones { get; set; }
     }
 
     public class EjeYConf
     {
-        public string yAxisID { get; set; }
-        public string posicion { get; set; }
-        public Dictionary<string, string> nombreEje { get; set; }
+        public string YAxisID { get; set; }
+        public string Posicion { get; set; }
+        public Dictionary<string, string> NombreEje { get; set; }
     }
     public class EjeXConf
     {
-        public string xAxisID { get; set; }
-        public string posicion { get; set; }
-        public Dictionary<string, string> nombreEje { get; set; }
+        public string XAxisID { get; set; }
+        public string Posicion { get; set; }
+        public Dictionary<string, string> NombreEje { get; set; }
     }
 
     public class Dimension
     {
-        public Dictionary<string, string> nombre { get; set; }        
-        public string filtro { get; set; }
-        public int limite { get; set; }
-        public string color { get; set; }
-        public string colorMaximo { get; set; }
-        public string tipoDimension { get; set; }
-        public bool dividirDatos { get; set; }
-        public string minus { get; set; }
-        public bool exterior { get; set; }
-        public string calculo { get; set; }
-        public string stack { get; set; }
-        public float anchura { get; set; }
-        public string yAxisID { get; set; }
-        public string xAxisID { get; set; }
-        public int orden { get; set; }
-        public int numMaxNodos { get; set; }
-        public string colorNodo { get; set; }
-        public string colorLinea { get; set; }
+        public Dictionary<string, string> Nombre { get; set; }        
+        public string Filtro { get; set; }
+        public int Limite { get; set; }
+        public string Color { get; set; }
+        public string ColorMaximo { get; set; }
+        public string TipoDimension { get; set; }
+        public bool DividirDatos { get; set; }
+        public string Minus { get; set; }
+        public bool Exterior { get; set; }
+        public string Calculo { get; set; }
+        public string Stack { get; set; }
+        public float Anchura { get; set; }
+        public string YAxisID { get; set; }
+        public string XAxisID { get; set; }
+        public int Orden { get; set; }
+        public int NumMaxNodos { get; set; }
+        public string ColorNodo { get; set; }
+        public string ColorLinea { get; set; }
         public Dimension DeepCopy()
         {
-            Dimension copia = new Dimension();
-            copia.nombre = new Dictionary<string, string>(this.nombre);
-            copia.filtro = this.filtro;
-            copia.limite = this.limite;
-            copia.color = this.color;
-            copia.colorMaximo = this.colorMaximo;
-            copia.tipoDimension = this.tipoDimension;
-            copia.dividirDatos = this.dividirDatos;
-            copia.minus = this.minus;
-            copia.exterior = this.exterior;
-            copia.calculo = this.calculo;
-            copia.stack = this.stack;
-            copia.anchura = this.anchura;
-            copia.yAxisID = this.yAxisID;
-            copia.xAxisID = this.xAxisID;
-            copia.orden = this.orden;
-            copia.numMaxNodos = this.numMaxNodos;
-            copia.colorNodo = this.colorNodo;
-            copia.colorLinea = this.colorLinea;
+            Dimension copia = new ();
+            copia.Nombre = new Dictionary<string, string>(this.Nombre);
+            copia.Filtro = this.Filtro;
+            copia.Limite = this.Limite;
+            copia.Color = this.Color;
+            copia.ColorMaximo = this.ColorMaximo;
+            copia.TipoDimension = this.TipoDimension;
+            copia.DividirDatos = this.DividirDatos;
+            copia.Minus = this.Minus;
+            copia.Exterior = this.Exterior;
+            copia.Calculo = this.Calculo;
+            copia.Stack = this.Stack;
+            copia.Anchura = this.Anchura;
+            copia.YAxisID = this.YAxisID;
+            copia.XAxisID = this.XAxisID;
+            copia.Orden = this.Orden;
+            copia.NumMaxNodos = this.NumMaxNodos;
+            copia.ColorNodo = this.ColorNodo;
+            copia.ColorLinea = this.ColorLinea;
             return copia;
         }
     }

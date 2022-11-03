@@ -9,37 +9,37 @@ namespace Hercules.MA.GraphicEngine.Models.Graficas
 {
     public class GraficaBarrasY : GraficaBase
     {
-        public string type { get; set; }
-        public Options options { get; set; }
-        public DataBarrasY data { get; set; }
+        public string Type { get; set; }
+        public Options Options { get; set; }
+        public DataBarrasY Data { get; set; }
 
         public override byte[] GenerateCSV()
         {
-            StringBuilder csv = new StringBuilder("");
-            csv.AppendLine(";\"" + String.Join(";", data.labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
-            foreach (DatasetBarrasY datasetBarras in data.datasets)
+            StringBuilder csv = new ("");
+            csv.AppendLine(";\"" + string.Join(";", Data.Labels).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+            foreach (DatasetBarrasY datasetBarras in Data.Datasets)
             {
-                csv.AppendLine("\"" + datasetBarras.label + "\";\"" + String.Join(";", datasetBarras.data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
+                csv.AppendLine("\"" + datasetBarras.Label + "\";\"" + string.Join(";", datasetBarras.Data).Replace("\"", "\"\"").Replace(";", "\";\"") + "\"");
             }
             return Encoding.Latin1.GetBytes(csv.ToString());
         }
     }
     public class DataBarrasY
     {
-        public List<string> labels { get; set; }
-        public ConcurrentBag<DatasetBarrasY> datasets { get; set; }
-        public string type { get; set; }
+        public List<string> Labels { get; set; }
+        public ConcurrentBag<DatasetBarrasY> Datasets { get; set; }
+        public string Type { get; set; }
     }
     public class DatasetBarrasY
     {
-        public string label { get; set; }
-        public List<float> data { get; set; }
-        public List<string> backgroundColor { get; set; }
-        public string type { get; set; }
-        public string stack { get; set; }
-        public float barPercentage { get; set; }
-        public float maxBarThickness { get; set; }
-        public string xAxisID { get; set; }
-        public int order { get; set; }
+        public string Label { get; set; }
+        public List<float> Data { get; set; }
+        public List<string> BackgroundColor { get; set; }
+        public string Type { get; set; }
+        public string Stack { get; set; }
+        public float BarPercentage { get; set; }
+        public float MaxBarThickness { get; set; }
+        public string XAxisID { get; set; }
+        public int Order { get; set; }
     }
 }

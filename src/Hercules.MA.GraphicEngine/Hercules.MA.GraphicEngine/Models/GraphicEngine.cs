@@ -41,7 +41,7 @@ namespace Hercules.MA.GraphicEngine.Models
         public static Pagina GetPage(string pIdPagina, string pLang, string userId = "")
         {
             // Lectura del JSON de configuración.
-            ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.identificador == pIdPagina);
+            ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.Identificador == pIdPagina);
             return CrearPagina(configModel, pLang, userId);
         }
 
@@ -168,12 +168,12 @@ namespace Hercules.MA.GraphicEngine.Models
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pUserId);
-            ConfigModel configModel = mTabTemplates.FirstOrDefault(x => x.identificador == pPageId);
+            ConfigModel configModel = mTabTemplates.FirstOrDefault(x => x.Identificador == pPageId);
             if (!isAdmin || configModel == null)
             {
                 return null;
             }
-            return configModel.graficas.FirstOrDefault(x => x.identificador == pGraphicId);
+            return configModel.Graficas.FirstOrDefault(x => x.Identificador == pGraphicId);
         }
 
         /// <summary>
@@ -191,13 +191,13 @@ namespace Hercules.MA.GraphicEngine.Models
         {
             // Compruebo si es administrador
             bool isAdmin = IsAdmin(pUserId);
-            ConfigModel configModel = mTabTemplates.FirstOrDefault(x => x.identificador == pPageId);
+            ConfigModel configModel = mTabTemplates.FirstOrDefault(x => x.Identificador == pPageId);
             if (!isAdmin || configModel == null)
             {
                 return false;
             }
             // Obtengo la gráfica
-            Grafica grafica = configModel.graficas.FirstOrDefault(x => x.identificador == pGraphicId);
+            Grafica grafica = configModel.Graficas.FirstOrDefault(x => x.Identificador == pGraphicId);
             if (grafica == null)
             {
                 return false;
@@ -206,19 +206,19 @@ namespace Hercules.MA.GraphicEngine.Models
             // Edito el nombre de la gráfica.
             if (pGraphicName != "")
             {
-                grafica.nombre[pLang] = pGraphicName;
+                grafica.Nombre[pLang] = pGraphicName;
             }
 
             // Si la gráfica pertenece a un grupo edito su anchura y orden también.
             if (!string.IsNullOrEmpty(pBlockId))
             {
-                grafica = configModel.graficas.FirstOrDefault(x => x.identificador == pBlockId);
+                grafica = configModel.Graficas.FirstOrDefault(x => x.Identificador == pBlockId);
             }
 
             // Edito la anchura de la gráfica.
             if (pGraphicWidth != 0 && grafica != null)
             {
-                grafica.anchura = pGraphicWidth;
+                grafica.Anchura = pGraphicWidth;
             }
 
             // Edito el orden de la gráfica.
@@ -228,50 +228,50 @@ namespace Hercules.MA.GraphicEngine.Models
                 Dictionary<string, List<Grafica>> dicGraficasGrupos = new Dictionary<string, List<Grafica>>();
                 List<Grafica> listaRemove = new List<Grafica>();
 
-                foreach (Grafica item in configModel.graficas)
+                foreach (Grafica item in configModel.Graficas)
                 {
-                    if (!string.IsNullOrEmpty(item.idGrupo))
+                    if (!string.IsNullOrEmpty(item.IdGrupo))
                     {
-                        if (dicGraficasGrupos.ContainsKey(item.idGrupo))
+                        if (dicGraficasGrupos.ContainsKey(item.IdGrupo))
                         {
-                            dicGraficasGrupos[item.idGrupo].Add(item);
+                            dicGraficasGrupos[item.IdGrupo].Add(item);
                             listaRemove.Add(item);
                         }
                         else
                         {
-                            dicGraficasGrupos.Add(item.idGrupo, new List<Grafica>() { });
+                            dicGraficasGrupos.Add(item.IdGrupo, new List<Grafica>() { });
                         }
                     }
                 }
 
                 foreach (Grafica item in listaRemove)
                 {
-                    configModel.graficas.Remove(item);
+                    configModel.Graficas.Remove(item);
                 }
 
-                configModel.graficas.Remove(grafica);
+                configModel.Graficas.Remove(grafica);
 
-                if (pGraphicOrder > configModel.graficas.Count)
+                if (pGraphicOrder > configModel.Graficas.Count)
                 {
-                    configModel.graficas.Add(grafica);
+                    configModel.Graficas.Add(grafica);
                 }
                 else
                 {
-                    configModel.graficas.Insert(pGraphicOrder, grafica);
+                    configModel.Graficas.Insert(pGraphicOrder, grafica);
                 }
 
                 if (dicGraficasGrupos.Count > 0)
                 {
                     foreach (KeyValuePair<string, List<Grafica>> item in dicGraficasGrupos)
                     {
-                        int index = configModel.graficas.IndexOf(configModel.graficas.FirstOrDefault(x => x.idGrupo == item.Key));
-                        if (index + 1 > configModel.graficas.Count)
+                        int index = configModel.Graficas.IndexOf(configModel.Graficas.FirstOrDefault(x => x.IdGrupo == item.Key));
+                        if (index + 1 > configModel.Graficas.Count)
                         {
-                            configModel.graficas.AddRange(item.Value);
+                            configModel.Graficas.AddRange(item.Value);
                         }
                         else
                         {
-                            configModel.graficas.InsertRange(index + 1, item.Value);
+                            configModel.Graficas.InsertRange(index + 1, item.Value);
                         }
                     }
                 }
@@ -283,7 +283,7 @@ namespace Hercules.MA.GraphicEngine.Models
             foreach (string file in Directory.EnumerateFiles(pathConfig))
             {
                 ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
-                if (tab.identificador == configModel.identificador)
+                if (tab.Identificador == configModel.Identificador)
                 {
                     jsonName = file.Split("\\").LastOrDefault();
                     break;
@@ -298,7 +298,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 Formatting = Formatting.Indented
             };
 
-            configModel.graficas.ForEach(x => x.identificador = x.identificador.Contains('-') ? x.identificador.Split('-').LastOrDefault() : x.identificador);
+            configModel.Graficas.ForEach(x => x.Identificador = x.Identificador.Contains('-') ? x.Identificador.Split('-').LastOrDefault() : x.Identificador);
             string json = JsonConvert.SerializeObject(configModel, settings);
             File.WriteAllText(path, json);
 
@@ -376,22 +376,22 @@ namespace Hercules.MA.GraphicEngine.Models
         public static Pagina CrearPagina(ConfigModel pConfigModel, string pLang, string userId = "")
         {
             Pagina pagina = new Pagina();
-            pagina.id = pConfigModel.identificador;
-            pagina.nombre = GetTextLang(pLang, pConfigModel.nombre);
+            pagina.id = pConfigModel.Identificador;
+            pagina.nombre = GetTextLang(pLang, pConfigModel.Nombre);
             
             pagina.listaConfigGraficas = new List<ConfigPagina>();
-            foreach (Grafica itemGrafica in pConfigModel.graficas)
+            foreach (Grafica itemGrafica in pConfigModel.Graficas)
             {
                 ConfigPagina configPagina = new ConfigPagina()
                 {
-                    id = itemGrafica.identificador,
-                    anchura = itemGrafica.anchura,
-                    idGrupo = itemGrafica.idGrupo,
-                    isPrivate = itemGrafica.isPrivate
+                    id = itemGrafica.Identificador,
+                    anchura = itemGrafica.Anchura,
+                    idGrupo = itemGrafica.IdGrupo,
+                    isPrivate = itemGrafica.IsPrivate
 
                 };
 
-                if (itemGrafica.isPrivate && !IsGraphicManager(userId))
+                if (itemGrafica.IsPrivate && !IsGraphicManager(userId))
                 {
                     continue;
                 }
@@ -402,40 +402,40 @@ namespace Hercules.MA.GraphicEngine.Models
                 string prefijoAbreviar = "abr";
                 string prefijoPorcentaje = "prc";
 
-                configPagina.isCircular = itemGrafica.tipo == EnumGraficas.Circular;
-                configPagina.isAbr = itemGrafica.config.abreviar;
-                configPagina.hideLegend = itemGrafica.config.ocultarLeyenda;
-                configPagina.isNodes = itemGrafica.tipo == EnumGraficas.Nodos;
-                configPagina.isHorizontal = !(itemGrafica.tipo == EnumGraficas.Circular || itemGrafica.config.orientacionVertical);
-                configPagina.isCircular = itemGrafica.tipo == EnumGraficas.Circular;
-                configPagina.isPercentage = itemGrafica.config.porcentual;
+                configPagina.isCircular = itemGrafica.Tipo == EnumGraficas.Circular;
+                configPagina.isAbr = itemGrafica.Config.Abreviar;
+                configPagina.hideLegend = itemGrafica.Config.OcultarLeyenda;
+                configPagina.isNodes = itemGrafica.Tipo == EnumGraficas.Nodos;
+                configPagina.isHorizontal = !(itemGrafica.Tipo == EnumGraficas.Circular || itemGrafica.Config.OrientacionVertical);
+                configPagina.isCircular = itemGrafica.Tipo == EnumGraficas.Circular;
+                configPagina.isPercentage = itemGrafica.Config.Porcentual;
 
-                if (itemGrafica.config.abreviar && !itemGrafica.identificador.Contains(prefijoAbreviar))
+                if (itemGrafica.Config.Abreviar && !itemGrafica.Identificador.Contains(prefijoAbreviar))
                 {
-                    itemGrafica.identificador = prefijoAbreviar + "-" + itemGrafica.identificador;
+                    itemGrafica.Identificador = prefijoAbreviar + "-" + itemGrafica.Identificador;
                     configPagina.id = prefijoAbreviar + "-" + configPagina.id;
                 }
 
-                if (itemGrafica.tipo == EnumGraficas.Nodos && !itemGrafica.identificador.Contains(prefijoNodos))
+                if (itemGrafica.Tipo == EnumGraficas.Nodos && !itemGrafica.Identificador.Contains(prefijoNodos))
                 {
-                    itemGrafica.identificador = prefijoNodos + "-" + itemGrafica.identificador;
+                    itemGrafica.Identificador = prefijoNodos + "-" + itemGrafica.Identificador;
                     configPagina.id = prefijoNodos + "-" + configPagina.id;
                 }
-                else if (!(itemGrafica.tipo == EnumGraficas.Circular || itemGrafica.config.orientacionVertical) && !itemGrafica.identificador.Contains(prefijoBarraHorizonal) && !itemGrafica.identificador.Contains(prefijoNodos))
+                else if (!(itemGrafica.Tipo == EnumGraficas.Circular || itemGrafica.Config.OrientacionVertical) && !itemGrafica.Identificador.Contains(prefijoBarraHorizonal) && !itemGrafica.Identificador.Contains(prefijoNodos))
                 {
-                    itemGrafica.identificador = prefijoBarraHorizonal + "-" + itemGrafica.identificador;
+                    itemGrafica.Identificador = prefijoBarraHorizonal + "-" + itemGrafica.Identificador;
                     configPagina.id = prefijoBarraHorizonal + "-" + configPagina.id;
 
                 }
-                else if (itemGrafica.tipo == EnumGraficas.Circular && !itemGrafica.identificador.Contains(prefijoCircular))
+                else if (itemGrafica.Tipo == EnumGraficas.Circular && !itemGrafica.Identificador.Contains(prefijoCircular))
                 {
-                    itemGrafica.identificador = prefijoCircular + "-" + itemGrafica.identificador;
+                    itemGrafica.Identificador = prefijoCircular + "-" + itemGrafica.Identificador;
                     configPagina.id = prefijoCircular + "-" + configPagina.id;
 
                 }
-                if (itemGrafica.config.porcentual && !itemGrafica.identificador.Contains(prefijoPorcentaje))
+                if (itemGrafica.Config.Porcentual && !itemGrafica.Identificador.Contains(prefijoPorcentaje))
                 {
-                    itemGrafica.identificador = prefijoPorcentaje + "-" + itemGrafica.identificador;
+                    itemGrafica.Identificador = prefijoPorcentaje + "-" + itemGrafica.Identificador;
                     configPagina.id = prefijoPorcentaje + "-" + configPagina.id;
 
                 }
@@ -451,10 +451,10 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             
             pagina.listaIdsFacetas = new List<string>();
-            foreach (FacetaConf itemFaceta in pConfigModel.facetas)
+            foreach (FacetaConf itemFaceta in pConfigModel.Facetas)
             {
-                string reciproca = string.IsNullOrEmpty(itemFaceta.reciproca) ? "" : "(((" + itemFaceta.reciproca;
-                pagina.listaIdsFacetas.Add(itemFaceta.filtro + reciproca);
+                string reciproca = string.IsNullOrEmpty(itemFaceta.Reciproca) ? "" : "(((" + itemFaceta.Reciproca;
+                pagina.listaIdsFacetas.Add(itemFaceta.Filtro + reciproca);
             }
             return pagina;
         }
@@ -472,15 +472,15 @@ namespace Hercules.MA.GraphicEngine.Models
         public static GraficaBase GetGrafica(string pIdPagina, string pIdGrafica, string pFiltroFacetas, string pLang)
         {
             // Lectura del JSON de configuración.
-            ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.identificador == pIdPagina);
+            ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.Identificador == pIdPagina);
             if (configModel == null)
             {
                 return null;
             }
             // Obtiene los filtros relacionados con las fechas.
-            List<string> listaFacetasAnios = configModel.facetas.Where(x => x.rangoAnio).Select(x => x.filtro).ToList();
-            Grafica grafica = configModel.graficas.FirstOrDefault(x => x.identificador.Split('-').LastOrDefault() == pIdGrafica.Split('-').LastOrDefault());
-            return CrearGrafica(grafica, configModel.filtro, pFiltroFacetas, pLang, listaFacetasAnios);
+            List<string> listaFacetasAnios = configModel.Facetas.Where(x => x.RangoAnio).Select(x => x.Filtro).ToList();
+            Grafica grafica = configModel.Graficas.FirstOrDefault(x => x.Identificador.Split('-').LastOrDefault() == pIdGrafica.Split('-').LastOrDefault());
+            return CrearGrafica(grafica, configModel.Filtro, pFiltroFacetas, pLang, listaFacetasAnios);
         }
 
         /// <summary>
@@ -502,18 +502,18 @@ namespace Hercules.MA.GraphicEngine.Models
                 pFiltroFacetas = pFiltroFacetas.Replace("simbolomasdecodificar", "+");
             }
 
-            switch (pGrafica.tipo)
+            switch (pGrafica.Tipo)
             {
                 case EnumGraficas.Barras:
-                    if (pGrafica.config.orientacionVertical)
+                    if (pGrafica.Config.OrientacionVertical)
                     {
                         ControlarExcepcionesBarrasX(pGrafica);
-                        return CrearGraficaBarrasVertical(pGrafica, pFiltroBase, pFiltroFacetas, pLang, pListaDates, pGrafica.config.datosNodos);
+                        return CrearGraficaBarrasVertical(pGrafica, pFiltroBase, pFiltroFacetas, pLang, pListaDates, pGrafica.Config.DatosNodos);
                     }
                     else
                     {
                         ControlarExcepcionesBarrasY(pGrafica);
-                        return CrearGraficaBarrasHorizontal(pGrafica, pFiltroBase, pFiltroFacetas, pLang, pListaDates, pGrafica.config.datosNodos);
+                        return CrearGraficaBarrasHorizontal(pGrafica, pFiltroBase, pFiltroFacetas, pLang, pListaDates, pGrafica.Config.DatosNodos);
                     }
                 case EnumGraficas.Circular:
                     ControlarExcepcionesCircular(pGrafica);
@@ -539,33 +539,33 @@ namespace Hercules.MA.GraphicEngine.Models
         {
             // Objeto a devolver.
             GraficaBarras grafica = new GraficaBarras();
-            grafica.type = "bar"; // Por defecto, de tipo bar.
+            grafica.Type = "bar"; // Por defecto, de tipo bar.
 
             // Tipo.
             grafica.isHorizontal = true;
 
             // Abreviación.            
-            grafica.isAbr = pGrafica.config.abreviar;
+            grafica.isAbr = pGrafica.Config.Abreviar;
 
             // Porcentaje.
-            grafica.isPercentage = pGrafica.config.porcentual;
+            grafica.isPercentage = pGrafica.Config.Porcentual;
 
             //Ocultar leyenda
-            grafica.hideLeyend = pGrafica.config.ocultarLeyenda;
+            grafica.hideLeyend = pGrafica.Config.OcultarLeyenda;
 
             // ID Grupo.
-            if (!string.IsNullOrEmpty(pGrafica.idGrupo))
+            if (!string.IsNullOrEmpty(pGrafica.IdGrupo))
             {
-                grafica.groupId = pGrafica.idGrupo;
+                grafica.groupId = pGrafica.IdGrupo;
             }
 
             // Es fecha
-            grafica.isDate = (pListaDates != null && pListaDates.Any() && pListaDates.Contains(pGrafica.config.ejeX));
+            grafica.isDate = (pListaDates != null && pListaDates.Any() && pListaDates.Contains(pGrafica.Config.EjeX));
 
             // Asignación de Data.
             DataBarras data = new();
-            data.datasets = new ConcurrentBag<DatasetBarras>();
-            grafica.data = data;
+            data.Datasets = new ConcurrentBag<DatasetBarras>();
+            grafica.Data = data;
 
             // Asignación de Options.
             Options options = new();
@@ -575,23 +575,23 @@ namespace Hercules.MA.GraphicEngine.Models
             options.scales = new Dictionary<string, Eje>();
 
             // Ejes Y
-            foreach (EjeYConf item in pGrafica.config.yAxisPrint)
+            foreach (EjeYConf item in pGrafica.Config.YAxisPrint)
             {
                 Eje eje = new();
-                eje.position = item.posicion;
+                eje.position = item.Posicion;
                 eje.title = new();
                 eje.title.display = true;
 
-                if (item.nombreEje != null)
+                if (item.NombreEje != null)
                 {
-                    eje.title.text = GetTextLang(pLang, item.nombreEje);
+                    eje.title.text = GetTextLang(pLang, item.NombreEje);
                 }
                 else
                 {
                     eje.title.text = string.Empty;
                 }
 
-                options.scales.Add(item.yAxisID, eje);
+                options.scales.Add(item.YAxisID, eje);
             }
 
             // Animación
@@ -602,28 +602,28 @@ namespace Hercules.MA.GraphicEngine.Models
             options.plugins = new();
             options.plugins.title = new();
             options.plugins.title.display = true;
-            options.plugins.title.text = GetTextLang(pLang, pGrafica.nombre);
+            options.plugins.title.text = GetTextLang(pLang, pGrafica.Nombre);
 
-            grafica.options = options;
+            grafica.Options = options;
 
             ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>> resultadosDimension = new ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>>();
             Dictionary<Dimension, DatasetBarras> dimensionesDataset = new Dictionary<Dimension, DatasetBarras>();
 
             bool ejeFechas = false;
-            Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
+            Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
                 List<Tuple<string, string, float>> listaTuplas = new List<Tuple<string, string, float>>();
                 SparqlObject resultadoQuery = null;
                 StringBuilder select = new StringBuilder(), where = new StringBuilder();
                 // Orden.               
                 string orden = "DESC";
-                if (pGrafica.config.orderDesc)
+                if (pGrafica.Config.OrderDesc)
                 {
                     orden = "ASC";
                 }
                 foreach (string item in pListaDates)
                 {
-                    if (item.Contains(pGrafica.config.ejeX))
+                    if (item.Contains(pGrafica.Config.EjeX))
                     {
                         orden = "ASC";
                         ejeFechas = true;
@@ -653,7 +653,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     {
                         where.Append(item);
                     }
-                    where.Append($@"?s {pGrafica.propCategoryPath} ?area. ");
+                    where.Append($@"?s {pGrafica.PropCategoryPath} ?area. ");
                     where.Append("?area roh:categoryNode ?categoria. ");
                     where.Append("MINUS { ?categoria skos:narrower ?hijos } ");
                     where.Append("} ");
@@ -700,7 +700,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
 
                     // Creamos los nodos y las relaciones en función de pNumAreas.
-                    int pNumAreas = pGrafica.config.numMaxNodos;
+                    int pNumAreas = pGrafica.Config.NumMaxNodos;
 
                     Dictionary<string, int> numRelaciones = new Dictionary<string, int>();
                     foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
@@ -774,7 +774,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                     resultadosDimension[itemGrafica] = listaTuplas;
                 }
-                else if (string.IsNullOrEmpty(itemGrafica.calculo))
+                else if (string.IsNullOrEmpty(itemGrafica.Calculo))
                 {
                     // Consulta sparql.                    
                     select = new StringBuilder();
@@ -794,9 +794,9 @@ namespace Hercules.MA.GraphicEngine.Models
                     {
                         where.Append(item);
                     }
-                    if (!string.IsNullOrEmpty(itemGrafica.minus))
+                    if (!string.IsNullOrEmpty(itemGrafica.Minus))
                     {
-                        where.Append($@"MINUS {{ ?s {itemGrafica.minus} ?menos }}");
+                        where.Append($@"MINUS {{ ?s {itemGrafica.Minus} ?menos }}");
                     }
                     if (filtroEspecial)
                     {
@@ -818,7 +818,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 else
                 {
                     // Cálculo (SUM|AVG|MIN|MAX)
-                    string calculo = itemGrafica.calculo;
+                    string calculo = itemGrafica.Calculo;
 
                     // Consulta sparql.
                     select = new StringBuilder();
@@ -847,13 +847,13 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                     {
-                        if (filtroEspecial && string.IsNullOrEmpty(itemGrafica.calculo))
+                        if (filtroEspecial && string.IsNullOrEmpty(itemGrafica.Calculo))
                         {
                             listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, fila["aux"].value, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture)));
                         }
                         else
                         {
-                            if (itemGrafica.filtro == "" && itemGrafica.color == "#817E80")
+                            if (itemGrafica.Filtro == "" && itemGrafica.Color == "#817E80")
                             {
                                 // --- ÑAPA
                                 listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, string.Empty, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture) + 5.0f));
@@ -865,39 +865,39 @@ namespace Hercules.MA.GraphicEngine.Models
                         }
                     }
                 }
-                if (itemGrafica.dividirDatos)
+                if (itemGrafica.DividirDatos)
                 {
                     HashSet<string> listaAux = new HashSet<string>();
                     foreach (Tuple<string, string, float> tupla in listaTuplas)
                     {
                         listaAux.Add(tupla.Item2);
                     }
-                    int ordenAux = itemGrafica.orden;
+                    int ordenAux = itemGrafica.Orden;
                     foreach (string aux in listaAux.OrderBy(x => x))
                     {
                         Dimension itemAux = itemGrafica.DeepCopy();
-                        foreach (KeyValuePair<string, string> item in itemAux.nombre)
+                        foreach (KeyValuePair<string, string> item in itemAux.Nombre)
                         {
-                            itemAux.nombre[item.Key] = item.Value + " " + aux;
+                            itemAux.Nombre[item.Key] = item.Value + " " + aux;
                             switch (aux)
                             {
                                 case "1":
-                                    itemAux.color = "#45DCB4";
+                                    itemAux.Color = "#45DCB4";
                                     break;
                                 case "2":
-                                    itemAux.color = "#EAF112";
+                                    itemAux.Color = "#EAF112";
                                     break;
                                 case "3":
-                                    itemAux.color = "#DE921E";
+                                    itemAux.Color = "#DE921E";
                                     break;
                                 case "4":
-                                    itemAux.color = "#DC4545";
+                                    itemAux.Color = "#DC4545";
                                     break;
                                 default:
                                     break;
                             }
                         }
-                        itemAux.orden = ordenAux;
+                        itemAux.Orden = ordenAux;
                         ordenAux++;
                         resultadosDimension[itemAux] = listaTuplas.Where(x => x.Item2 == aux).ToList();
                     }
@@ -918,11 +918,11 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 if (item.Value != null && item.Value.Any())
                 {
-                    if (pGrafica.config.rango)
+                    if (pGrafica.Config.Rango)
                     {
                         int indice;
-                        float[] sumaDatos = new float[pGrafica.config.rangos.Length];
-                        string[] rangos = pGrafica.config.rangos;
+                        float[] sumaDatos = new float[pGrafica.Config.Rangos.Length];
+                        string[] rangos = pGrafica.Config.Rangos;
                         foreach (Tuple<string, string, float> item2 in item.Value)
                         {
                             string valor = item2.Item1;
@@ -971,7 +971,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             bool isInt = !valuesEje.Any(x => !int.TryParse(x, out int aux));
 
-            if (pGrafica.config.rellenarEjeX && isInt && valuesEje.Count > 0)
+            if (pGrafica.Config.RellenarEjeX && isInt && valuesEje.Count > 0)
             {
                 int numMin = valuesEje.Min(x => int.Parse(x));
                 int numMax = valuesEje.Max(x => int.Parse(x));
@@ -981,7 +981,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
             }
 
-            if (ejeFechas || pGrafica.config.rango)
+            if (ejeFechas || pGrafica.Config.Rango)
             {
                 foreach (KeyValuePair<Dimension, List<Tuple<string, string, float>>> item in resultadosDimension)
                 {
@@ -1003,7 +1003,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                     else
                     {
-                        if (!string.IsNullOrEmpty(pGrafica.config.ejeX))
+                        if (!string.IsNullOrEmpty(pGrafica.Config.EjeX))
                         {
                             resultadosDimension[item.Key] = item.Value.OrderBy(x => x.Item1).ToList();
                         }
@@ -1016,7 +1016,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(pGrafica.config.ejeX))
+                    if (!string.IsNullOrEmpty(pGrafica.Config.EjeX))
                     {
                         valuesEje = new HashSet<string>(valuesEje.OrderBy(item => item));
                     }
@@ -1026,7 +1026,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             // Obtención del objeto de la gráfica.
             List<string> listaLabels = new List<string>();
-            if (pGrafica.config.rango)
+            if (pGrafica.Config.Rango)
             {
                 foreach (Tuple<string, float> itemAux in rangoValor)
                 {
@@ -1042,7 +1042,7 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 DatasetBarras dataset = new DatasetBarras();
                 List<float> listaData = new List<float>();
-                if (pGrafica.config.rango)
+                if (pGrafica.Config.Rango)
                 {
                     foreach (Tuple<string, float> itemAux in rangoValor)
                     {
@@ -1056,57 +1056,57 @@ namespace Hercules.MA.GraphicEngine.Models
                         listaData.Add(itemAux.Item3);
                     }
                 }
-                dataset.data = listaData;
+                dataset.Data = listaData;
 
                 // Nombre del dato en leyenda.
-                dataset.label = GetTextLang(pLang, item.Key.nombre);
+                dataset.Label = GetTextLang(pLang, item.Key.Nombre);
 
                 // Color.
-                dataset.backgroundColor = ObtenerColores(dataset.data.Count, item.Key.color);
-                dataset.type = item.Key.tipoDimension;
+                dataset.BackgroundColor = ObtenerColores(dataset.Data.Count, item.Key.Color);
+                dataset.Type = item.Key.TipoDimension;
 
                 // Anchura.
-                dataset.barPercentage = 1;
-                if (item.Key.anchura != 0)
+                dataset.BarPercentage = 1;
+                if (item.Key.Anchura != 0)
                 {
-                    dataset.barPercentage = item.Key.anchura;
+                    dataset.BarPercentage = item.Key.Anchura;
                 }
                 // Anchura máxima.
-                dataset.maxBarThickness = 300;
+                dataset.MaxBarThickness = 300;
 
                 // Stack.
-                if (!string.IsNullOrEmpty(item.Key.stack))
+                if (!string.IsNullOrEmpty(item.Key.Stack))
                 {
-                    dataset.stack = item.Key.stack;
+                    dataset.Stack = item.Key.Stack;
                 }
                 else
                 {
-                    dataset.stack = Guid.NewGuid().ToString();
+                    dataset.Stack = Guid.NewGuid().ToString();
                 }
 
                 // Eje Y.
-                dataset.yAxisID = item.Key.yAxisID;
+                dataset.YAxisID = item.Key.YAxisID;
 
                 // Orden
-                dataset.order = item.Key.orden;
+                dataset.Order = item.Key.Orden;
 
-                data.labels = listaLabels;
-                data.type = item.Key.tipoDimension;
+                data.Labels = listaLabels;
+                data.Type = item.Key.TipoDimension;
                 dimensionesDataset[item.Key] = dataset;
             }
 
-            if (pGrafica.config.dimensiones.Any(x => x.dividirDatos))
+            if (pGrafica.Config.Dimensiones.Any(x => x.DividirDatos))
             {
-                foreach (Dimension dim in resultadosDimension.Keys.OrderBy(x => x.orden))
+                foreach (Dimension dim in resultadosDimension.Keys.OrderBy(x => x.Orden))
                 {
-                    grafica.data.datasets.Add(dimensionesDataset[dim]);
+                    grafica.Data.Datasets.Add(dimensionesDataset[dim]);
                 }
             }
             else
             {
-                foreach (Dimension dim in pGrafica.config.dimensiones)
+                foreach (Dimension dim in pGrafica.Config.Dimensiones)
                 {
-                    grafica.data.datasets.Add(dimensionesDataset[dim]);
+                    grafica.Data.Datasets.Add(dimensionesDataset[dim]);
                 }
             }
             return grafica;
@@ -1126,42 +1126,42 @@ namespace Hercules.MA.GraphicEngine.Models
         {
             // Objeto a devolver.
             GraficaBarrasY grafica = new GraficaBarrasY();
-            grafica.type = "bar"; // Por defecto, de tipo bar.
+            grafica.Type = "bar"; // Por defecto, de tipo bar.
 
             // Tipo.
             grafica.isVertical = true;
 
             // Abreviación.
-            if (pGrafica.config.abreviar)
+            if (pGrafica.Config.Abreviar)
             {
-                grafica.isAbr = pGrafica.config.abreviar;
+                grafica.isAbr = pGrafica.Config.Abreviar;
             }
-            if (pGrafica.config.ocultarLeyenda)
+            if (pGrafica.Config.OcultarLeyenda)
             {
                 grafica.hideLeyend = true;
             }
             // Porcentaje.
-            if (pGrafica.config.porcentual)
+            if (pGrafica.Config.Porcentual)
             {
-                grafica.isPercentage = pGrafica.config.porcentual;
+                grafica.isPercentage = pGrafica.Config.Porcentual;
             }
 
             // ID Grupo.
-            if (!string.IsNullOrEmpty(pGrafica.idGrupo))
+            if (!string.IsNullOrEmpty(pGrafica.IdGrupo))
             {
-                grafica.groupId = pGrafica.idGrupo;
+                grafica.groupId = pGrafica.IdGrupo;
             }
 
             // Es fecha.
-            if (pListaDates != null && pListaDates.Any() && pListaDates.Contains(pGrafica.config.ejeX))
+            if (pListaDates != null && pListaDates.Any() && pListaDates.Contains(pGrafica.Config.EjeX))
             {
                 grafica.isDate = true;
             }
 
             // Asignación de Data.
             DataBarrasY data = new DataBarrasY();
-            data.datasets = new ConcurrentBag<DatasetBarrasY>();
-            grafica.data = data;
+            data.Datasets = new ConcurrentBag<DatasetBarrasY>();
+            grafica.Data = data;
 
             // Asignación de Options.
             Options options = new Options();
@@ -1172,23 +1172,23 @@ namespace Hercules.MA.GraphicEngine.Models
             options.scales = new Dictionary<string, Eje>();
 
             // Ejes X
-            foreach (EjeXConf item in pGrafica.config.xAxisPrint)
+            foreach (EjeXConf item in pGrafica.Config.XAxisPrint)
             {
                 Eje eje = new Eje();
-                eje.position = item.posicion;
+                eje.position = item.Posicion;
                 eje.title = new Title();
                 eje.title.display = true;
 
-                if (item.nombreEje != null)
+                if (item.NombreEje != null)
                 {
-                    eje.title.text = GetTextLang(pLang, item.nombreEje);
+                    eje.title.text = GetTextLang(pLang, item.NombreEje);
                 }
                 else
                 {
                     eje.title.text = string.Empty;
                 }
 
-                options.scales.Add(item.xAxisID, eje);
+                options.scales.Add(item.XAxisID, eje);
             }
 
             // Animación
@@ -1199,28 +1199,28 @@ namespace Hercules.MA.GraphicEngine.Models
             options.plugins = new Plugin();
             options.plugins.title = new Title();
             options.plugins.title.display = true;
-            options.plugins.title.text = GetTextLang(pLang, pGrafica.nombre);
+            options.plugins.title.text = GetTextLang(pLang, pGrafica.Nombre);
 
-            grafica.options = options;
+            grafica.Options = options;
 
             ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>> resultadosDimension = new ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>>();
             Dictionary<Dimension, DatasetBarrasY> dimensionesDataset = new Dictionary<Dimension, DatasetBarrasY>();
 
             bool ejeFechas = false;
-            Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
+            Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
                 List<Tuple<string, string, float>> listaTuplas = new List<Tuple<string, string, float>>();
                 SparqlObject resultadoQuery = null;
                 StringBuilder select = new StringBuilder(), where = new StringBuilder();
                 // Orden.                
                 string orden = "DESC";
-                if (pGrafica.config.orderDesc)
+                if (pGrafica.Config.OrderDesc)
                 {
                     orden = "ASC";
                 }
                 foreach (string item in pListaDates)
                 {
-                    if (item.Contains(pGrafica.config.ejeX))
+                    if (item.Contains(pGrafica.Config.EjeX))
                     {
                         orden = "ASC";
                         ejeFechas = true;
@@ -1245,7 +1245,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     {
                         where.Append(item);
                     }
-                    where.Append($@"?s {pGrafica.propCategoryPath} ?area. ");
+                    where.Append($@"?s {pGrafica.PropCategoryPath} ?area. ");
                     where.Append("?area roh:categoryNode ?categoria. ");
                     where.Append("MINUS { ?categoria skos:narrower ?hijos } ");
                     where.Append("} ");
@@ -1270,7 +1270,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         }
                     }
                     List<string> itemsSeleccionados = scoreNodes.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value).Keys.Distinct().ToList();
-                    int pNumAreas = pGrafica.config.numMaxNodos;
+                    int pNumAreas = pGrafica.Config.NumMaxNodos;
                     if (itemsSeleccionados.Count > pNumAreas && pNumAreas != 0)
                     {
                         itemsSeleccionados = itemsSeleccionados.GetRange(0, pNumAreas);
@@ -1311,7 +1311,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                     resultadosDimension[itemGrafica] = listaTuplas.OrderByDescending(x => x.Item3).ToList();
                 }
-                else if (string.IsNullOrEmpty(itemGrafica.calculo))
+                else if (string.IsNullOrEmpty(itemGrafica.Calculo))
                 {
                     // Consulta sparql.                    
                     select = new StringBuilder();
@@ -1351,7 +1351,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 else
                 {
                     // Cálculo (SUM|AVG|MIN|MAX)
-                    string calculo = itemGrafica.calculo;
+                    string calculo = itemGrafica.Calculo;
 
                     // Consulta sparql.
                     select = new StringBuilder();
@@ -1381,7 +1381,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     {
                         foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
                         {
-                            if (filtroEspecial && string.IsNullOrEmpty(itemGrafica.calculo))
+                            if (filtroEspecial && string.IsNullOrEmpty(itemGrafica.Calculo))
                             {
                                 listaTuplas.Add(new Tuple<string, string, float>(fila["ejeX"].value, fila["aux"].value, float.Parse(fila["numero"].value.Replace(",", "."), CultureInfo.InvariantCulture)));
                             }
@@ -1391,39 +1391,39 @@ namespace Hercules.MA.GraphicEngine.Models
                             }
                         }
                     }
-                    if (itemGrafica.dividirDatos)
+                    if (itemGrafica.DividirDatos)
                     {
                         HashSet<string> listaAux = new HashSet<string>();
                         foreach (Tuple<string, string, float> tupla in listaTuplas)
                         {
                             listaAux.Add(tupla.Item2);
                         }
-                        int ordenAux = itemGrafica.orden;
+                        int ordenAux = itemGrafica.Orden;
                         foreach (string aux in listaAux.OrderBy(x => x))
                         {
                             Dimension itemAux = itemGrafica.DeepCopy();
-                            foreach (KeyValuePair<string, string> item in itemAux.nombre)
+                            foreach (KeyValuePair<string, string> item in itemAux.Nombre)
                             {
-                                itemAux.nombre[item.Key] = item.Value + " " + aux;
+                                itemAux.Nombre[item.Key] = item.Value + " " + aux;
                                 switch (aux)
                                 {
                                     case "1":
-                                        itemAux.color = "#45DCB4";
+                                        itemAux.Color = "#45DCB4";
                                         break;
                                     case "2":
-                                        itemAux.color = "#EAF112";
+                                        itemAux.Color = "#EAF112";
                                         break;
                                     case "3":
-                                        itemAux.color = "#DE921E";
+                                        itemAux.Color = "#DE921E";
                                         break;
                                     case "4":
-                                        itemAux.color = "#DC4545";
+                                        itemAux.Color = "#DC4545";
                                         break;
                                     default:
                                         break;
                                 }
                             }
-                            itemAux.orden = ordenAux;
+                            itemAux.Orden = ordenAux;
                             ordenAux++;
                             resultadosDimension[itemAux] = listaTuplas.Where(x => x.Item2 == aux).ToList();
                         }
@@ -1445,11 +1445,11 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 if (item.Value != null && item.Value.Any())
                 {
-                    if (pGrafica.config.rango)
+                    if (pGrafica.Config.Rango)
                     {
                         int indice;
-                        float[] sumaDatos = new float[pGrafica.config.rangos.Length];
-                        string[] rangos = pGrafica.config.rangos;
+                        float[] sumaDatos = new float[pGrafica.Config.Rangos.Length];
+                        string[] rangos = pGrafica.Config.Rangos;
                         foreach (Tuple<string, string, float> item2 in item.Value)
                         {
                             indice = int.Parse(item2.Item1);
@@ -1493,7 +1493,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             bool isInt = !valuesEje.Any(x => !int.TryParse(x, out int aux));
 
-            if (pGrafica.config.rellenarEjeX && isInt && valuesEje.Count > 0)
+            if (pGrafica.Config.RellenarEjeX && isInt && valuesEje.Count > 0)
             {
                 int numMin = valuesEje.Min(x => int.Parse(x));
                 int numMax = valuesEje.Max(x => int.Parse(x));
@@ -1503,7 +1503,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
             }
 
-            if (ejeFechas || pGrafica.config.rango)
+            if (ejeFechas || pGrafica.Config.Rango)
             {
                 foreach (KeyValuePair<Dimension, List<Tuple<string, string, float>>> item in resultadosDimension)
                 {
@@ -1525,7 +1525,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                     else
                     {
-                        if (!string.IsNullOrEmpty(pGrafica.config.ejeX))
+                        if (!string.IsNullOrEmpty(pGrafica.Config.EjeX))
                         {
                             resultadosDimension[item.Key] = item.Value.OrderBy(x => x.Item1).ToList();
                         }
@@ -1538,7 +1538,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(pGrafica.config.ejeX))
+                    if (!string.IsNullOrEmpty(pGrafica.Config.EjeX))
                     {
                         valuesEje = new HashSet<string>(valuesEje.OrderBy(item => item));
                     }
@@ -1548,7 +1548,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
             // Obtención del objeto de la gráfica.
             List<string> listaLabels = new List<string>();
-            if (pGrafica.config.rango)
+            if (pGrafica.Config.Rango)
             {
                 foreach (Tuple<string, float> itemAux in rangoValor)
                 {
@@ -1564,7 +1564,7 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 DatasetBarrasY dataset = new DatasetBarrasY();
                 List<float> listaData = new List<float>();
-                if (pGrafica.config.rango)
+                if (pGrafica.Config.Rango)
                 {
                     foreach (Tuple<string, float> itemAux in rangoValor)
                     {
@@ -1578,57 +1578,57 @@ namespace Hercules.MA.GraphicEngine.Models
                         listaData.Add(itemAux.Item3);
                     }
                 }
-                dataset.data = listaData;
+                dataset.Data = listaData;
 
                 // Nombre del dato en leyenda.
-                dataset.label = GetTextLang(pLang, item.Key.nombre);
+                dataset.Label = GetTextLang(pLang, item.Key.Nombre);
 
                 // Color.
-                dataset.backgroundColor = ObtenerColores(dataset.data.Count, item.Key.color);
-                dataset.type = item.Key.tipoDimension;
+                dataset.BackgroundColor = ObtenerColores(dataset.Data.Count, item.Key.Color);
+                dataset.Type = item.Key.TipoDimension;
 
                 // Anchura.
-                dataset.barPercentage = 1;
-                if (item.Key.anchura != 0)
+                dataset.BarPercentage = 1;
+                if (item.Key.Anchura != 0)
                 {
-                    dataset.barPercentage = item.Key.anchura;
+                    dataset.BarPercentage = item.Key.Anchura;
                 }
                 // Anchura máxima.
-                dataset.maxBarThickness = 300;
+                dataset.MaxBarThickness = 300;
 
                 // Stack.
-                if (!string.IsNullOrEmpty(item.Key.stack))
+                if (!string.IsNullOrEmpty(item.Key.Stack))
                 {
-                    dataset.stack = item.Key.stack;
+                    dataset.Stack = item.Key.Stack;
                 }
                 else
                 {
-                    dataset.stack = Guid.NewGuid().ToString();
+                    dataset.Stack = Guid.NewGuid().ToString();
                 }
 
                 // Eje X.
-                dataset.xAxisID = item.Key.xAxisID;
+                dataset.XAxisID = item.Key.XAxisID;
 
                 // Orden
-                dataset.order = item.Key.orden;
+                dataset.Order = item.Key.Orden;
 
-                data.labels = listaLabels;
-                data.type = item.Key.tipoDimension;
+                data.Labels = listaLabels;
+                data.Type = item.Key.TipoDimension;
                 dimensionesDataset[item.Key] = dataset;
             }
 
-            if (pGrafica.config.dimensiones.Any(x => x.dividirDatos))
+            if (pGrafica.Config.Dimensiones.Any(x => x.DividirDatos))
             {
-                foreach (Dimension dim in resultadosDimension.Keys.OrderBy(x => x.orden))
+                foreach (Dimension dim in resultadosDimension.Keys.OrderBy(x => x.Orden))
                 {
-                    grafica.data.datasets.Add(dimensionesDataset[dim]);
+                    grafica.Data.Datasets.Add(dimensionesDataset[dim]);
                 }
             }
             else
             {
-                foreach (Dimension dim in pGrafica.config.dimensiones)
+                foreach (Dimension dim in pGrafica.Config.Dimensiones)
                 {
-                    grafica.data.datasets.Add(dimensionesDataset[dim]);
+                    grafica.Data.Datasets.Add(dimensionesDataset[dim]);
                 }
             }
             return grafica;
@@ -1650,21 +1650,21 @@ namespace Hercules.MA.GraphicEngine.Models
             grafica.type = "pie"; // Por defecto, de tipo pie.
 
             // Abreviación.
-            if (pGrafica.config.abreviar)
+            if (pGrafica.Config.Abreviar)
             {
-                grafica.isAbr = pGrafica.config.abreviar;
+                grafica.isAbr = pGrafica.Config.Abreviar;
             }
 
             // Porcentaje.
-            if (pGrafica.config.porcentual)
+            if (pGrafica.Config.Porcentual)
             {
-                grafica.isPercentage = pGrafica.config.porcentual;
+                grafica.isPercentage = pGrafica.Config.Porcentual;
             }
 
             // ID Grupo.
-            if (!string.IsNullOrEmpty(pGrafica.idGrupo))
+            if (!string.IsNullOrEmpty(pGrafica.IdGrupo))
             {
-                grafica.groupId = pGrafica.idGrupo;
+                grafica.groupId = pGrafica.IdGrupo;
             }
 
             // Asignación de Data.
@@ -1683,16 +1683,16 @@ namespace Hercules.MA.GraphicEngine.Models
             options.plugins = new Plugin();
             options.plugins.title = new Title();
             options.plugins.title.display = true;
-            options.plugins.title.text = GetTextLang(pLang, pGrafica.nombre);
+            options.plugins.title.text = GetTextLang(pLang, pGrafica.Nombre);
 
             grafica.options = options;
 
             ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimension = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
             ConcurrentDictionary<string, float> dicNombreData = new ConcurrentDictionary<string, float>();
-            List<Dimension> listaDimensiones = pGrafica.config.dimensiones.Where(x => !x.exterior).ToList();
+            List<Dimension> listaDimensiones = pGrafica.Config.Dimensiones.Where(x => !x.Exterior).ToList();
 
             // Compruebo si es una gráfica circular de dos dimensiones.
-            bool anidado = pGrafica.config.dimensiones.Any(x => x.exterior);
+            bool anidado = pGrafica.Config.Dimensiones.Any(x => x.Exterior);
             if (!anidado) // Gráficas con 1 dimensión
             {
                 Parallel.ForEach(listaDimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
@@ -1731,10 +1731,10 @@ namespace Hercules.MA.GraphicEngine.Models
                             filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                         }
                     }
-                    if (!string.IsNullOrEmpty(itemGrafica.filtro))
+                    if (!string.IsNullOrEmpty(itemGrafica.Filtro))
                     {
-                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
-                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
+                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }));
+                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }, "tipo"));
                     }
 
                     select.Append(mPrefijos);
@@ -1744,7 +1744,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     {
                         where.Append(item);
                     }
-                    string limite = itemGrafica.limite == 0 ? "" : "LIMIT " + itemGrafica.limite;
+                    string limite = itemGrafica.Limite == 0 ? "" : "LIMIT " + itemGrafica.Limite;
                     where.Append($@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) ");
                     where.Append($@"}} ORDER BY DESC (?numero) {limite}");
 
@@ -1790,20 +1790,20 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     foreach (KeyValuePair<Dimension, ConcurrentDictionary<string, float>> item in resultadosDimension)
                     {
-                        if (item.Key.colorMaximo != null)
+                        if (item.Key.ColorMaximo != null)
                         {
-                            listaColores = ObtenerDegradadoColores(item.Key.colorMaximo, item.Key.color, item.Value.Count);
+                            listaColores = ObtenerDegradadoColores(item.Key.ColorMaximo, item.Key.Color, item.Value.Count);
                         }
                         else
                         {
-                            string nombreRevista = item.Key.filtro.Contains('=') ? item.Key.filtro.Split("=")[1].Split("@")[0].Substring(1, item.Key.filtro.Split("=")[1].Split("@")[0].Length - 2) : "";
+                            string nombreRevista = item.Key.Filtro.Contains('=') ? item.Key.Filtro.Split("=")[1].Split("@")[0].Substring(1, item.Key.Filtro.Split("=")[1].Split("@")[0].Length - 2) : "";
                             if (nombreRevista == orden)
                             {
                                 // Nombre del dato en leyenda.
-                                dataset.label = GetTextLang(pLang, item.Key.nombre);
-                                listaLabels.Add(GetTextLang(pLang, item.Key.nombre));
+                                dataset.label = GetTextLang(pLang, item.Key.Nombre);
+                                listaLabels.Add(GetTextLang(pLang, item.Key.Nombre));
                                 // Color. 
-                                listaColores.Add(item.Key.color);
+                                listaColores.Add(item.Key.Color);
                             }
                         }
                     }
@@ -1828,14 +1828,14 @@ namespace Hercules.MA.GraphicEngine.Models
                 List<string> filtroInterior = new List<string>();
                 foreach (Dimension item in listaDimensiones)
                 {
-                    filtroInterior.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { item.filtro }, "aux"));
+                    filtroInterior.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { item.Filtro }, "aux"));
                 }
                 ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>>();
                 ConcurrentDictionary<string, float> dicNombreDataExt = new ConcurrentDictionary<string, float>();
 
-                Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
+                Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
                 {
-                    if (itemGrafica.exterior)
+                    if (itemGrafica.Exterior)
                     {
                         SparqlObject resultadoQuery = null;
                         StringBuilder select = new StringBuilder(), where = new StringBuilder();
@@ -1871,10 +1871,10 @@ namespace Hercules.MA.GraphicEngine.Models
                                 filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                             }
                         }
-                        if (!string.IsNullOrEmpty(itemGrafica.filtro))
+                        if (!string.IsNullOrEmpty(itemGrafica.Filtro))
                         {
-                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
-                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }, "tipo"));
                             filtros.AddRange(filtroInterior);
                         }
 
@@ -1885,7 +1885,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         {
                             where.Append(item);
                         }
-                        string limite = itemGrafica.limite == 0 ? "" : "LIMIT " + itemGrafica.limite;
+                        string limite = itemGrafica.Limite == 0 ? "" : "LIMIT " + itemGrafica.Limite;
                         where.Append($@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) ");
                         where.Append($@"}} ORDER BY DESC (?numero) {limite}");
                         resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
@@ -1941,10 +1941,10 @@ namespace Hercules.MA.GraphicEngine.Models
                                 filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                             }
                         }
-                        if (!string.IsNullOrEmpty(itemGrafica.filtro))
+                        if (!string.IsNullOrEmpty(itemGrafica.Filtro))
                         {
-                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
-                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }, "tipo"));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }));
+                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }, "tipo"));
                         }
 
                         select.Append(mPrefijos);
@@ -1954,7 +1954,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         {
                             where.Append(item);
                         }
-                        string limite = itemGrafica.limite == 0 ? "" : "LIMIT " + itemGrafica.limite;
+                        string limite = itemGrafica.Limite == 0 ? "" : "LIMIT " + itemGrafica.Limite;
                         where.Append($@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) ");
                         where.Append($@"}} ORDER BY DESC (?numero) {limite}");
 
@@ -1997,20 +1997,20 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     foreach (KeyValuePair<Dimension, ConcurrentDictionary<string, float>> item in resultadosDimension)
                     {
-                        if (item.Key.colorMaximo != null)
+                        if (item.Key.ColorMaximo != null)
                         {
-                            listaColores = ObtenerDegradadoColores(item.Key.colorMaximo, item.Key.color, item.Value.Count);
+                            listaColores = ObtenerDegradadoColores(item.Key.ColorMaximo, item.Key.Color, item.Value.Count);
                         }
                         else
                         {
-                            string nombreRevista = item.Key.filtro.Contains('=') ? item.Key.filtro.Split("=")[1].Split("@")[0].Substring(1, item.Key.filtro.Split("=")[1].Split("@")[0].Length - 2) : "";
+                            string nombreRevista = item.Key.Filtro.Contains('=') ? item.Key.Filtro.Split("=")[1].Split("@")[0].Substring(1, item.Key.Filtro.Split("=")[1].Split("@")[0].Length - 2) : "";
                             if (nombreRevista == orden)
                             {
                                 // Nombre del dato en leyenda.
-                                dataset.label = GetTextLang(pLang, item.Key.nombre);
-                                listaLabels.Add(GetTextLang(pLang, item.Key.nombre));
+                                dataset.label = GetTextLang(pLang, item.Key.Nombre);
+                                listaLabels.Add(GetTextLang(pLang, item.Key.Nombre));
                                 // Color. 
-                                listaColores.Add(item.Key.color);
+                                listaColores.Add(item.Key.Color);
                             }
                         }
                     }
@@ -2079,22 +2079,22 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     foreach (KeyValuePair<Dimension, ConcurrentDictionary<string, float>> item in resultadosDimensionExt)
                     {
-                        if (item.Key.colorMaximo != null)
+                        if (item.Key.ColorMaximo != null)
                         {
-                            listaColoresExt = ObtenerDegradadoColores(item.Key.colorMaximo, item.Key.color, item.Value.Count);
+                            listaColoresExt = ObtenerDegradadoColores(item.Key.ColorMaximo, item.Key.Color, item.Value.Count);
                         }
                         else
                         {
-                            string nombreRevista = item.Key.filtro.Contains('=') ? item.Key.filtro.Split("=")[1].Split("@")[0].Substring(1, item.Key.filtro.Split("=")[1].Split("@")[0].Length - 2) : "";
+                            string nombreRevista = item.Key.Filtro.Contains('=') ? item.Key.Filtro.Split("=")[1].Split("@")[0].Substring(1, item.Key.Filtro.Split("=")[1].Split("@")[0].Length - 2) : "";
                             if (nombreRevista == orden)
                             {
                                 // Nombre del dato en leyenda.
-                                listaLabelsExt.Add(GetTextLang(pLang, item.Key.nombre));
+                                listaLabelsExt.Add(GetTextLang(pLang, item.Key.Nombre));
                                 // Obtengo los colores
-                                listaColoresExt.Add(item.Key.color);
-                                if (!auxLeyenda.Contains(GetTextLang(pLang, item.Key.nombre)))
+                                listaColoresExt.Add(item.Key.Color);
+                                if (!auxLeyenda.Contains(GetTextLang(pLang, item.Key.Nombre)))
                                 {
-                                    auxLeyenda += $"{GetTextLang(pLang, item.Key.nombre)}|{item.Key.color}---";
+                                    auxLeyenda += $"{GetTextLang(pLang, item.Key.Nombre)}|{item.Key.Color}---";
                                 }
                             }
                         }
@@ -2149,21 +2149,21 @@ namespace Hercules.MA.GraphicEngine.Models
             GraficaNodos grafica = new GraficaNodos();
 
             // Abreviación.
-            if (pGrafica.config.abreviar)
+            if (pGrafica.Config.Abreviar)
             {
-                grafica.isAbr = pGrafica.config.abreviar;
+                grafica.isAbr = pGrafica.Config.Abreviar;
             }
 
             // Porcentaje.
-            if (pGrafica.config.porcentual)
+            if (pGrafica.Config.Porcentual)
             {
-                grafica.isPercentage = pGrafica.config.porcentual;
+                grafica.isPercentage = pGrafica.Config.Porcentual;
             }
 
             // ID Grupo.
-            if (!string.IsNullOrEmpty(pGrafica.idGrupo))
+            if (!string.IsNullOrEmpty(pGrafica.IdGrupo))
             {
-                grafica.groupId = pGrafica.idGrupo;
+                grafica.groupId = pGrafica.IdGrupo;
             }
 
             // Tipo.
@@ -2196,48 +2196,48 @@ namespace Hercules.MA.GraphicEngine.Models
             grafica.layout.minTemp = 1.0f;
 
             // Titulo
-            Dimension dimension = pGrafica.config.dimensiones.FirstOrDefault();
+            Dimension dimension = pGrafica.Config.Dimensiones.FirstOrDefault();
             if (dimension == null)
             {
                 dimension = new Dimension();
             }
-            grafica.title = dimension.nombre.Values.FirstOrDefault();
+            grafica.title = dimension.Nombre.Values.FirstOrDefault();
             // Layout Nodos/Lineas
             grafica.style = new List<Style>();
             Style estiloNodo = new Style();
 
             // Nodos
             LayoutStyle layoutNodos = new LayoutStyle();
-            layoutNodos.width = "mapData(score, 0, 80, 10, 90)";
-            layoutNodos.height = "mapData(score, 0, 80, 10, 90)";
-            layoutNodos.content = "data(name)";
-            layoutNodos.font_size = "12px";
-            layoutNodos.font_family = "Roboto";
-            layoutNodos.background_color = dimension.colorNodo;
-            layoutNodos.text_outline_width = "0px";
-            layoutNodos.overlay_padding = "6px";
-            layoutNodos.line_color = "";
-            layoutNodos.z_index = "10";
+            layoutNodos.Width = "mapData(score, 0, 80, 10, 90)";
+            layoutNodos.Height = "mapData(score, 0, 80, 10, 90)";
+            layoutNodos.Content = "data(name)";
+            layoutNodos.FontSize = "12px";
+            layoutNodos.FontFamily = "Roboto";
+            layoutNodos.BackgroundColor = dimension.ColorNodo;
+            layoutNodos.TextOutlineWidth = "0px";
+            layoutNodos.OverlayPadding = "6px";
+            layoutNodos.LineColor = "";
+            layoutNodos.ZIndex = "10";
 
-            estiloNodo.selector = "node";
+            estiloNodo.Selector = "node";
             estiloNodo.style = layoutNodos;
             grafica.style.Add(estiloNodo);
 
             // Líneas
             LayoutStyle layoutLineas = new LayoutStyle();
             Style estiloLinea = new Style();
-            estiloLinea.selector = "edge";
-            layoutLineas.curve_style = "haystack";
-            layoutLineas.content = "data(name)";
-            layoutLineas.font_size = "24px";
-            layoutLineas.font_family = "Roboto";
-            layoutLineas.background_color = "#6cafd3";
-            layoutLineas.haystack_radius = "0.5";
-            layoutLineas.opacity = "0.5";
-            layoutLineas.width = "mapData(weight, 0, 10, 0, 10)";
-            layoutLineas.overlay_padding = "1px";
-            layoutLineas.z_index = "11";
-            layoutLineas.line_color = dimension.colorLinea;
+            estiloLinea.Selector = "edge";
+            layoutLineas.CurveStyle = "haystack";
+            layoutLineas.Content = "data(name)";
+            layoutLineas.FontSize = "24px";
+            layoutLineas.FontFamily = "Roboto";
+            layoutLineas.BackgroundColor = "#6cafd3";
+            layoutLineas.HaystackRadius = "0.5";
+            layoutLineas.Opacity = "0.5";
+            layoutLineas.Width = "mapData(weight, 0, 10, 0, 10)";
+            layoutLineas.OverlayPadding = "1px";
+            layoutLineas.ZIndex = "11";
+            layoutLineas.LineColor = dimension.ColorLinea;
             estiloLinea.style = layoutLineas;
             grafica.style.Add(estiloLinea);
             #endregion
@@ -2257,7 +2257,7 @@ namespace Hercules.MA.GraphicEngine.Models
             SparqlObject resultadoQuery = null;
             StringBuilder select = new StringBuilder(), where = new StringBuilder();
 
-            Parallel.ForEach(pGrafica.config.dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
+            Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
                 // Consulta sparql.
                 List<string> filtros = new List<string>();
@@ -2290,9 +2290,9 @@ namespace Hercules.MA.GraphicEngine.Models
                         filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
                     }
                 }
-                if (!string.IsNullOrEmpty(itemGrafica.filtro))
+                if (!string.IsNullOrEmpty(itemGrafica.Filtro))
                 {
-                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.filtro }));
+                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }));
                 }
 
                 // Consulta sparql.
@@ -2303,7 +2303,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     where.Append(item);
                 }
-                where.Append($@"?s {pGrafica.propCategoryPath} ?area. ");
+                where.Append($@"?s {pGrafica.PropCategoryPath} ?area. ");
                 where.Append("?area roh:categoryNode ?categoria. ");
                 where.Append("MINUS { ?categoria skos:narrower ?hijos } ");
                 where.Append("} ");
@@ -2350,7 +2350,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
 
                 // Creamos los nodos y las relaciones en función de pNumAreas.
-                int pNumAreas = dimension.numMaxNodos;
+                int pNumAreas = dimension.NumMaxNodos;
 
                 Dictionary<string, int> numRelaciones = new Dictionary<string, int>();
                 foreach (KeyValuePair<string, List<DataQueryRelaciones>> sujeto in dicRelaciones)
@@ -2472,15 +2472,15 @@ namespace Hercules.MA.GraphicEngine.Models
             }
 
             // Lectura del JSON de configuración.
-            ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.identificador == pIdPagina);
+            ConfigModel configModel = TabTemplates.FirstOrDefault(x => x.Identificador == pIdPagina);
             if (configModel == null)
             {
                 return null;
             }
             // Obtiene los filtros relacionados con las fechas.
-            List<string> listaFacetasAnios = configModel.facetas.Where(x => x.rangoAnio).Select(x => x.filtro).ToList();
-            FacetaConf faceta = configModel.facetas.FirstOrDefault(x => x.filtro == pIdFaceta);
-            return CrearFaceta(faceta, configModel.filtro, pFiltroFacetas, pLang, listaFacetasAnios, pGetAll);
+            List<string> listaFacetasAnios = configModel.Facetas.Where(x => x.RangoAnio).Select(x => x.Filtro).ToList();
+            FacetaConf faceta = configModel.Facetas.FirstOrDefault(x => x.Filtro == pIdFaceta);
+            return CrearFaceta(faceta, configModel.Filtro, pFiltroFacetas, pLang, listaFacetasAnios, pGetAll);
         }
 
         /// <summary>
@@ -2495,27 +2495,27 @@ namespace Hercules.MA.GraphicEngine.Models
         /// <returns></returns>
         public static Faceta CrearFaceta(FacetaConf pFacetaConf, string pFiltroBase, string pFiltroFacetas, string pLang, List<string> pListaDates, bool pGetAll = false)
         {
-            Faceta faceta = new (pFacetaConf.filtro, pFacetaConf.rangoAnio, GetTextLang(pLang, pFacetaConf.nombre), pFacetaConf.ordenAlfaNum, pFacetaConf.verTodos, pFacetaConf.tesauro,pFacetaConf.reciproca);
+            Faceta faceta = new (pFacetaConf.Filtro, pFacetaConf.RangoAnio, GetTextLang(pLang, pFacetaConf.Nombre), pFacetaConf.OrdenAlfaNum, pFacetaConf.VerTodos, pFacetaConf.Tesauro,pFacetaConf.Reciproca);
 
-            if (pFacetaConf.numeroItemsFaceta != 0 && !pGetAll)
+            if (pFacetaConf.NumeroItemsFaceta != 0 && !pGetAll)
             {
-                faceta.numeroItemsFaceta = pFacetaConf.numeroItemsFaceta;
+                faceta.numeroItemsFaceta = pFacetaConf.NumeroItemsFaceta;
             }
 
             // Filtro de página.
             List<string> filtros = new List<string>();
             filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
-            if (!string.IsNullOrEmpty(pFacetaConf.reciproca))
+            if (!string.IsNullOrEmpty(pFacetaConf.Reciproca))
             {
-                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta", null, pFacetaConf.reciproca));
+                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.Filtro }, "nombreFaceta", null, pFacetaConf.Reciproca));
             }
             else if (!faceta.tesauro)
             {
-                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "nombreFaceta"));
+                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.Filtro }, "nombreFaceta"));
             }
             else
             {
-                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.filtro }, "categoria"));
+                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFacetaConf.Filtro }, "categoria"));
             }
             if (!string.IsNullOrEmpty(pFiltroFacetas))
             {
@@ -2592,7 +2592,7 @@ namespace Hercules.MA.GraphicEngine.Models
                             filtro = $@"'{filtro}'";
                         }
 
-                        itemFaceta.filtro = $@"{pFacetaConf.filtro}={filtro}{lang}";
+                        itemFaceta.filtro = $@"{pFacetaConf.Filtro}={filtro}{lang}";
                         faceta.items.Add(itemFaceta);
                     }
                 }
@@ -2620,7 +2620,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         itemFaceta.idTesauro = fila["categoria"].value.Substring(fila["categoria"].value.LastIndexOf("_") + 1);
                         itemFaceta.nombre = fila["nombre"].value;
                         itemFaceta.numero = Int32.Parse(fila["numero"].value);
-                        itemFaceta.filtro = $@"{pFacetaConf.filtro}={fila["categoria"].value}";
+                        itemFaceta.filtro = $@"{pFacetaConf.Filtro}={fila["categoria"].value}";
                         itemFaceta.childsTesauro = new List<ItemFaceta>();
                         // Asigno el nivel del item.
                         int nivel = 0;
@@ -3348,7 +3348,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         mTabTemplates.Add(tab);
                     }
                 }
-                return mTabTemplates.OrderBy(x => x.orden).ToList();
+                return mTabTemplates.OrderBy(x => x.Orden).ToList();
             }
         }
 
@@ -3514,41 +3514,41 @@ namespace Hercules.MA.GraphicEngine.Models
         #region --- Excepciones
         public static void ControlarExcepcionesBarrasX(Grafica pGrafica)
         {
-            if (pGrafica.config == null)
+            if (pGrafica.Config == null)
             {
                 throw new ArgumentException("La gráfica no tiene configuración");
             }
-            if (pGrafica.config.yAxisPrint == null)
+            if (pGrafica.Config.YAxisPrint == null)
             {
                 throw new ArgumentException("No está configurada la propiedad yAxisPrint");
             }
-            if (pGrafica.config.dimensiones == null || !pGrafica.config.dimensiones.Any())
+            if (pGrafica.Config.Dimensiones == null || !pGrafica.Config.Dimensiones.Any())
             {
                 throw new ArgumentException("No se ha configurado dimensiones.");
             }
         }
         public static void ControlarExcepcionesBarrasY(Grafica pGrafica)
         {
-            if (pGrafica.config == null)
+            if (pGrafica.Config == null)
             {
                 throw new ArgumentException("La gráfica no tiene configuración");
             }
-            if (pGrafica.config.xAxisPrint == null)
+            if (pGrafica.Config.XAxisPrint == null)
             {
                 throw new ArgumentException("No está configurada la propiedad xAxisPrint");
             }
-            if (pGrafica.config.dimensiones == null || !pGrafica.config.dimensiones.Any())
+            if (pGrafica.Config.Dimensiones == null || !pGrafica.Config.Dimensiones.Any())
             {
                 throw new ArgumentException("No se ha configurado dimensiones.");
             }
         }
         public static void ControlarExcepcionesCircular(Grafica pGrafica)
         {
-            if (pGrafica.config == null)
+            if (pGrafica.Config == null)
             {
                 throw new ArgumentException("La gráfica no tiene configuración");
             }
-            if (pGrafica.config.dimensiones == null || !pGrafica.config.dimensiones.Any())
+            if (pGrafica.Config.Dimensiones == null || !pGrafica.Config.Dimensiones.Any())
             {
                 throw new ArgumentException("No se ha configurado dimensiones.");
             }
