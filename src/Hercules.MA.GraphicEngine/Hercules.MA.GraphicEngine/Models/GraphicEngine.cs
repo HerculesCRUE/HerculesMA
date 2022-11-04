@@ -1806,10 +1806,6 @@ namespace Hercules.MA.GraphicEngine.Models
                 {
                     if (itemGrafica.Exterior)
                     {
-                        SparqlObject resultadoQuery = null;
-                        StringBuilder select = new(), where = new();
-
-                        // Consulta sparql.
                         List<string> filtros = new();
                         filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                         if (!string.IsNullOrEmpty(pFiltroFacetas))
@@ -1847,20 +1843,21 @@ namespace Hercules.MA.GraphicEngine.Models
                             filtros.AddRange(filtroInterior);
                         }
 
-                        select.Append(mPrefijos);
-                        select.Append($@"SELECT ?tipo ?aux COUNT(DISTINCT ?s) AS ?numero ");
-                        where.Append("WHERE { ");
+                        string selectDimensionExt = mPrefijos;
+                        selectDimensionExt += "SELECT ?tipo ?aux COUNT(DISTINCT ?s) AS ?numero ";
+                        string whereDimensionExt = "WHERE { ";
                         foreach (string item in filtros)
                         {
-                            where.Append(item);
+                            whereDimensionExt += item;
                         }
                         string limite = itemGrafica.Limite == 0 ? "" : "LIMIT " + itemGrafica.Limite;
-                        where.Append($@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) ");
-                        where.Append($@"}} ORDER BY DESC (?numero) {limite}");
-                        resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-                        if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                        whereDimensionExt += $@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo))
+                            }} ORDER BY DESC (?numero) {limite}";
+
+                        SparqlObject resultadoQueryDimensionExt = mResourceApi.VirtuosoQuery(selectDimensionExt.ToString(), whereDimensionExt.ToString(), mCommunityID);
+                        if (resultadoQueryDimensionExt != null && resultadoQueryDimensionExt.results != null && resultadoQueryDimensionExt.results.bindings != null && resultadoQueryDimensionExt.results.bindings.Count > 0)
                         {
-                            foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                            foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryDimensionExt.results.bindings)
                             {
                                 try
                                 {
@@ -1876,10 +1873,6 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                     else
                     {
-                        SparqlObject resultadoQuery = null;
-                        StringBuilder select = new(), where = new();
-
-                        // Consulta sparql.
                         List<string> filtros = new();
                         filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                         if (!string.IsNullOrEmpty(pFiltroFacetas))
@@ -1916,21 +1909,21 @@ namespace Hercules.MA.GraphicEngine.Models
                             filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }, "tipo"));
                         }
 
-                        select.Append(mPrefijos);
-                        select.Append($@"SELECT ?tipo COUNT(DISTINCT ?s) AS ?numero ");
-                        where.Append("WHERE { ");
+                        string selectDimension = mPrefijos;
+                        selectDimension += "SELECT ?tipo COUNT(DISTINCT ?s) AS ?numero ";
+                        string whereDimension = "WHERE { ";
                         foreach (string item in filtros)
                         {
-                            where.Append(item);
+                            whereDimension += item;
                         }
                         string limite = itemGrafica.Limite == 0 ? "" : "LIMIT " + itemGrafica.Limite;
-                        where.Append($@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) ");
-                        where.Append($@"}} ORDER BY DESC (?numero) {limite}");
+                        whereDimension += $@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) 
+                            }} ORDER BY DESC (?numero) {limite}";
 
-                        resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-                        if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                        SparqlObject resultadoQueryDimension = mResourceApi.VirtuosoQuery(selectDimension.ToString(), whereDimension.ToString(), mCommunityID);
+                        if (resultadoQueryDimension != null && resultadoQueryDimension.results != null && resultadoQueryDimension.results.bindings != null && resultadoQueryDimension.results.bindings.Count > 0)
                         {
-                            foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                            foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryDimension.results.bindings)
                             {
                                 try
                                 {
