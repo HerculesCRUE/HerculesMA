@@ -1188,7 +1188,6 @@ namespace Hercules.MA.GraphicEngine.Models
             grafica.Options = options;
 
             ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>> resultadosDimension = new();
-            Dictionary<Dimension, DatasetBarrasY> dimensionesDataset = new();
 
             bool ejeFechas = false;
             Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
@@ -1527,6 +1526,8 @@ namespace Hercules.MA.GraphicEngine.Models
             {
                 listaLabels = valuesEje.ToList();
             }
+
+            Dictionary<Dimension, DatasetBarrasY> dimensionesDataset = new();
 
             foreach (KeyValuePair<Dimension, List<Tuple<string, string, float>>> item in resultadosDimension)
             {
