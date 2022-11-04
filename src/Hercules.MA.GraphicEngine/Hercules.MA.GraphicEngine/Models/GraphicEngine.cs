@@ -1665,11 +1665,7 @@ namespace Hercules.MA.GraphicEngine.Models
             if (!anidado) // Gráficas con 1 dimensión
             {
                 Parallel.ForEach(listaDimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
-                {
-                    SparqlObject resultadoQuery = null;
-                    StringBuilder select = new(), where = new();
-
-                    // Consulta sparql.
+                {                    
                     List<string> filtros = new();
                     filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                     if (!string.IsNullOrEmpty(pFiltroFacetas))
@@ -1706,21 +1702,21 @@ namespace Hercules.MA.GraphicEngine.Models
                         filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }, "tipo"));
                     }
 
-                    select.Append(mPrefijos);
-                    select.Append($@"SELECT ?tipo COUNT(DISTINCT ?s) AS ?numero ");
-                    where.Append("WHERE { ");
+                   string  selectUnaDim =mPrefijos;
+                    selectUnaDim += "SELECT ?tipo COUNT(DISTINCT ?s) AS ?numero ";
+                   string  whereUnaDim ="WHERE { ";
                     foreach (string item in filtros)
                     {
-                        where.Append(item);
+                        whereUnaDim+=item;
                     }
                     string limite = itemGrafica.Limite == 0 ? "" : "LIMIT " + itemGrafica.Limite;
-                    where.Append($@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) ");
-                    where.Append($@"}} ORDER BY DESC (?numero) {limite}");
+                    whereUnaDim+=$@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) 
+                        }} ORDER BY DESC (?numero) {limite}";
 
-                    resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-                    if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                    SparqlObject resultadoQueryUnaDim = mResourceApi.VirtuosoQuery(selectUnaDim, whereUnaDim, mCommunityID);
+                    if (resultadoQueryUnaDim != null && resultadoQueryUnaDim.results != null && resultadoQueryUnaDim.results.bindings != null && resultadoQueryUnaDim.results.bindings.Count > 0)
                     {
-                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryUnaDim.results.bindings)
                         {
                             try
                             {
@@ -1854,7 +1850,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         whereDimensionExt += $@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo))
                             }} ORDER BY DESC (?numero) {limite}";
 
-                        SparqlObject resultadoQueryDimensionExt = mResourceApi.VirtuosoQuery(selectDimensionExt.ToString(), whereDimensionExt.ToString(), mCommunityID);
+                        SparqlObject resultadoQueryDimensionExt = mResourceApi.VirtuosoQuery(selectDimensionExt, whereDimensionExt, mCommunityID);
                         if (resultadoQueryDimensionExt != null && resultadoQueryDimensionExt.results != null && resultadoQueryDimensionExt.results.bindings != null && resultadoQueryDimensionExt.results.bindings.Count > 0)
                         {
                             foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryDimensionExt.results.bindings)
@@ -1920,7 +1916,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         whereDimension += $@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) 
                             }} ORDER BY DESC (?numero) {limite}";
 
-                        SparqlObject resultadoQueryDimension = mResourceApi.VirtuosoQuery(selectDimension.ToString(), whereDimension.ToString(), mCommunityID);
+                        SparqlObject resultadoQueryDimension = mResourceApi.VirtuosoQuery(selectDimension, whereDimension, mCommunityID);
                         if (resultadoQueryDimension != null && resultadoQueryDimension.results != null && resultadoQueryDimension.results.bindings != null && resultadoQueryDimension.results.bindings.Count > 0)
                         {
                             foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryDimension.results.bindings)
@@ -2270,7 +2266,7 @@ namespace Hercules.MA.GraphicEngine.Models
                             MINUS {{ ?categoria skos:narrower ?hijos }}
                             }} ";
 
-                SparqlObject resultadoQueryResulAreaRelArea = mResourceApi.VirtuosoQuery(selectResulAreaRelArea.ToString(), whereResulAreaRelArea.ToString(), mCommunityID);
+                SparqlObject resultadoQueryResulAreaRelArea = mResourceApi.VirtuosoQuery(selectResulAreaRelArea, whereResulAreaRelArea, mCommunityID);
                 if (resultadoQueryResulAreaRelArea != null && resultadoQueryResulAreaRelArea.results != null && resultadoQueryResulAreaRelArea.results.bindings != null && resultadoQueryResulAreaRelArea.results.bindings.Count > 0)
                 {
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryResulAreaRelArea.results.bindings)
@@ -2527,7 +2523,7 @@ namespace Hercules.MA.GraphicEngine.Models
 
                 whereFacetaSinTesauro += $"LIMIT {faceta.numeroItemsFaceta} ";
 
-                SparqlObject resultadoQueryFacetaSinTesauro = mResourceApi.VirtuosoQuery(selectFacetaSinTesauro.ToString(), whereFacetaSinTesauro.ToString(), mCommunityID);
+                SparqlObject resultadoQueryFacetaSinTesauro = mResourceApi.VirtuosoQuery(selectFacetaSinTesauro, whereFacetaSinTesauro, mCommunityID);
                 if (resultadoQueryFacetaSinTesauro != null && resultadoQueryFacetaSinTesauro.results != null && resultadoQueryFacetaSinTesauro.results.bindings != null && resultadoQueryFacetaSinTesauro.results.bindings.Count > 0)
                 {
                     foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryFacetaSinTesauro.results.bindings)
@@ -2569,7 +2565,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 whereFacetaTesauro += "?categoria skos:prefLabel ?nombre. ";
                 whereFacetaTesauro += "} ORDER BY ASC (?categoria) ";
 
-                SparqlObject resultadoQueryFacetaTesauro = mResourceApi.VirtuosoQuery(selectFacetaTesauro.ToString(), whereFacetaTesauro.ToString(), mCommunityID);
+                SparqlObject resultadoQueryFacetaTesauro = mResourceApi.VirtuosoQuery(selectFacetaTesauro, whereFacetaTesauro, mCommunityID);
                 if (resultadoQueryFacetaTesauro != null && resultadoQueryFacetaTesauro.results != null && resultadoQueryFacetaTesauro.results.bindings != null && resultadoQueryFacetaTesauro.results.bindings.Count > 0)
                 {
                     Dictionary<ItemFaceta, int> itemsFaceta = new();
@@ -2761,18 +2757,18 @@ namespace Hercules.MA.GraphicEngine.Models
             // Lista de datos de las páginas.
             List<DataPageUser> listaPaginas = new();
 
-            string select = mPrefijos;
-            select += "SELECT ?datosPagina ?titulo ?orden ";
-            string where = $@"WHERE {{ 
+            string selectPagUser = mPrefijos;
+            selectPagUser += "SELECT ?datosPagina ?titulo ?orden ";
+            string wherePagUser = $@"WHERE {{ 
                                 <{idRecurso}> roh:metricPage ?datosPagina. 
                                 ?datosPagina roh:title ?titulo. 
                                 ?datosPagina roh:order ?orden. 
                             }} ";
 
-            SparqlObject resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-            if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+            SparqlObject resultadoQueryPagUser = mResourceApi.VirtuosoQuery(selectPagUser, wherePagUser, mCommunityID);
+            if (resultadoQueryPagUser != null && resultadoQueryPagUser.results != null && resultadoQueryPagUser.results.bindings != null && resultadoQueryPagUser.results.bindings.Count > 0)
             {
-                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryPagUser.results.bindings)
                 {
                     DataPageUser data = new();
                     data.idRecurso = fila["datosPagina"].value;
@@ -2839,31 +2835,13 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             orden++;
 
-            triplesInclude.Add(new TriplesToInclude
-            {
-                Description = false,
-                Title = false,
-                Predicate = predicadoBase + "http://w3id.org/roh/order",
-                NewValue = valorBase + orden
-            });
+            triplesInclude.Add(new TriplesToInclude(valorBase + orden, predicadoBase + "http://w3id.org/roh/order"));
 
             // ID de la página de la gráfica
-            triplesInclude.Add(new TriplesToInclude
-            {
-                Description = false,
-                Title = false,
-                Predicate = predicadoBase + "http://w3id.org/roh/pageId",
-                NewValue = valorBase + pIdPaginaGrafica
-            });
+            triplesInclude.Add(new TriplesToInclude(valorBase + pIdPaginaGrafica, predicadoBase + "http://w3id.org/roh/pageId"));
 
             // ID de la gráfica
-            triplesInclude.Add(new TriplesToInclude
-            {
-                Description = false,
-                Title = false,
-                Predicate = predicadoBase + "http://w3id.org/roh/graphicId",
-                NewValue = valorBase + pIdGrafica
-            });
+            triplesInclude.Add(new TriplesToInclude(valorBase + pIdGrafica, predicadoBase + "http://w3id.org/roh/graphicId"));
 
             // Filtros
             if (!string.IsNullOrEmpty(pFiltros))
@@ -2874,34 +2852,16 @@ namespace Hercules.MA.GraphicEngine.Models
                     pFiltros = pFiltros + "_filter";
                 }
 
-                triplesInclude.Add(new TriplesToInclude
-                {
-                    Description = false,
-                    Title = false,
-                    Predicate = predicadoBase + "http://w3id.org/roh/filters",
-                    NewValue = valorBase + pFiltros
-                });
+                triplesInclude.Add(new TriplesToInclude(valorBase + pFiltros, predicadoBase + "http://w3id.org/roh/filters"));
             }
 
             // Anchura
-            triplesInclude.Add(new TriplesToInclude
-            {
-                Description = false,
-                Title = false,
-                Predicate = predicadoBase + "http://w3id.org/roh/width",
-                NewValue = valorBase + pAnchura
-            });
+            triplesInclude.Add(new TriplesToInclude(valorBase + pAnchura, predicadoBase + "http://w3id.org/roh/width"));
 
             // Escalas
             if (pEscalas != null)
             {
-                triplesInclude.Add(new TriplesToInclude
-                {
-                    Description = false,
-                    Title = false,
-                    Predicate = predicadoBase + "http://w3id.org/roh/scales",
-                    NewValue = valorBase + pEscalas
-                });
+                triplesInclude.Add(new TriplesToInclude(valorBase + pEscalas, predicadoBase + "http://w3id.org/roh/scales"));
             }
             bool insertado = IncluirTriplesRecurso(mResourceApi, shortId, triplesInclude);
             return insertado;
@@ -2927,13 +2887,7 @@ namespace Hercules.MA.GraphicEngine.Models
             string valorBase = $@"{valorEntidadAuxiliar}|";
 
             // Título de la página
-            triplesInclude.Add(new TriplesToInclude
-            {
-                Description = false,
-                Title = false,
-                Predicate = predicadoBase + "http://w3id.org/roh/title",
-                NewValue = valorBase + pTitulo
-            });
+            triplesInclude.Add(new TriplesToInclude(valorBase + pTitulo, predicadoBase + "http://w3id.org/roh/title"));
 
             // Orden de la página
             int orden = 0;
@@ -2947,13 +2901,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             orden++;
 
-            triplesInclude.Add(new TriplesToInclude
-            {
-                Description = false,
-                Title = false,
-                Predicate = predicadoBase + "http://w3id.org/roh/order",
-                NewValue = valorBase + orden
-            });
+            triplesInclude.Add(new TriplesToInclude(valorBase + orden, predicadoBase + "http://w3id.org/roh/order"));
 
             bool insertado = IncluirTriplesRecurso(mResourceApi, shortId, triplesInclude);
             if (insertado)
