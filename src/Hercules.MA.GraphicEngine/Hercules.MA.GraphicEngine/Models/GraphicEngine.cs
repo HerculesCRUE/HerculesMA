@@ -609,6 +609,7 @@ namespace Hercules.MA.GraphicEngine.Models
             ConcurrentDictionary<Dimension, List<Tuple<string, string, float>>> resultadosDimension = new();
             Dictionary<Dimension, DatasetBarras> dimensionesDataset = new();
 
+            ConcurrentBag<DataItemRelacion> itemsRelacion = new();
             bool ejeFechas = false;
             Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
@@ -641,7 +642,6 @@ namespace Hercules.MA.GraphicEngine.Models
                     Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new();
 
                     //Respuesta
-                    List<DataItemRelacion> itemsRelacion = new();
 
                     Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new();
                     Dictionary<string, int> scoreNodes = new();
@@ -757,18 +757,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         // Nodos. 
                         if (dicNodos != null && dicNodos.Count > 0)
                         {
-                            foreach (KeyValuePair<string, string> nodo in dicNodos)
-                            {
-                                string clave = nodo.Key;
-                                Data data = new(clave, nodo.Value, null, null, null, "nodes", Data.Type.icon_area);
-                                if (scoreNodes.ContainsKey(clave))
-                                {
-                                    data.score = scoreNodes[clave];
-                                    data.name = $"{data.name} ({data.score})";
-                                }
-                                DataItemRelacion dataColabo = new(data, true, true);
-                                itemsRelacion.Add(dataColabo);
-                            }
+                            Utility.GetDataNodes(dicNodos, scoreNodes, ref itemsRelacion);
                         }
                     }
 
@@ -2267,18 +2256,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     // Nodos. 
                     if (dicNodos != null && dicNodos.Count > 0)
                     {
-                        foreach (KeyValuePair<string, string> nodo in dicNodos)
-                        {
-                            string clave = nodo.Key;
-                            Data data = new(clave, nodo.Value, null, null, null, "nodes", Data.Type.icon_area);
-                            if (scoreNodes.ContainsKey(clave))
-                            {
-                                data.score = scoreNodes[clave];
-                                data.name = $"{data.name} ({data.score})";
-                            }
-                            DataItemRelacion dataColabo = new(data, true, true);
-                            itemsRelacion.Add(dataColabo);
-                        }
+                        Utility.GetDataNodes(dicNodos, scoreNodes, ref itemsRelacion);
                     }
 
                     // Relaciones.

@@ -47,6 +47,22 @@ namespace Hercules.MA.GraphicEngine.Utils
             }
         }
 
+        public static void GetDataNodes(Dictionary<string,string> dicNodos, Dictionary<string,int> scoreNodes, ref ConcurrentBag<DataItemRelacion> itemsRelacion)
+        {
+            foreach (KeyValuePair<string, string> nodo in dicNodos)
+            {
+                string clave = nodo.Key;
+                Data data = new(clave, nodo.Value, null, null, null, "nodes", Data.Type.icon_area);
+                if (scoreNodes.ContainsKey(clave))
+                {
+                    data.score = scoreNodes[clave];
+                    data.name = $"{data.name} ({data.score})";
+                }
+                DataItemRelacion dataColabo = new(data, true, true);
+                itemsRelacion.Add(dataColabo);
+            }
+        }
+
         public static void ObtenerFiltros(string pFiltroFacetas, List<string> pListaDates, ref List<string> filtros)
         {
             if (pFiltroFacetas.Contains("((("))
