@@ -2210,23 +2210,23 @@ namespace Hercules.MA.GraphicEngine.Models
             grafica.style.Add(estiloLinea);
             #endregion
 
-            //Nodos            
-            Dictionary<string, string> dicNodos = new();
 
-            //Relaciones
-            Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new();
 
             //Respuesta
-            List<DataItemRelacion> itemsRelacion = new();
+            ConcurrentBag<DataItemRelacion> itemsRelacion = new();
 
-            Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new();
-            Dictionary<string, int> scoreNodes = new();
 
-            SparqlObject resultadoQuery = null;
-            StringBuilder select = new(), where = new();
 
             Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
             {
+                //Nodos            
+                Dictionary<string, string> dicNodos = new();
+                //Relaciones
+                Dictionary<string, List<DataQueryRelaciones>> dicRelaciones = new();
+
+                Dictionary<string, List<string>> dicResultadosAreaRelacionAreas = new();
+                Dictionary<string, int> scoreNodes = new();
+
                 // Consulta sparql.
                 List<string> filtros = new();
                 filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
@@ -2264,22 +2264,22 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
 
                 // Consulta sparql.
-                select.Append(mPrefijos);
-                select.Append("SELECT ?s group_concat(?categoria;separator=\",\") AS ?idCategorias ");
-                where.Append("WHERE { ");
+                string selectResulAreaRelArea = mPrefijos;
+                selectResulAreaRelArea += "SELECT ?s group_concat(?categoria;separator=\",\") AS ?idCategorias ";
+                string whereResulAreaRelArea = "WHERE { ";
                 foreach (string item in filtros)
                 {
-                    where.Append(item);
+                    whereResulAreaRelArea += item;
                 }
-                where.Append($@"?s {pGrafica.PropCategoryPath} ?area. ");
-                where.Append("?area roh:categoryNode ?categoria. ");
-                where.Append("MINUS { ?categoria skos:narrower ?hijos } ");
-                where.Append("} ");
+                whereResulAreaRelArea += $@"?s {pGrafica.PropCategoryPath} ?area.
+                            ?area roh:categoryNode ?categoria. 
+                            MINUS {{ ?categoria skos:narrower ?hijos }}
+                            }} ";
 
-                resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-                if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                SparqlObject resultadoQueryResulAreaRelArea = mResourceApi.VirtuosoQuery(selectResulAreaRelArea.ToString(), whereResulAreaRelArea.ToString(), mCommunityID);
+                if (resultadoQueryResulAreaRelArea != null && resultadoQueryResulAreaRelArea.results != null && resultadoQueryResulAreaRelArea.results.bindings != null && resultadoQueryResulAreaRelArea.results.bindings.Count > 0)
                 {
-                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                    foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryResulAreaRelArea.results.bindings)
                     {
                         string idCategorias = fila["idCategorias"].value;
                         HashSet<string> categorias = new(idCategorias.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
@@ -2350,20 +2350,18 @@ namespace Hercules.MA.GraphicEngine.Models
                 if (itemsSeleccionados.Count > 0)
                 {
                     // Recuperamos los nombres de categorías y creamos los nodos.
-                    select = new StringBuilder();
-                    where = new StringBuilder();
 
-                    select.Append(mPrefijos);
-                    select.Append("SELECT ?categoria ?nombreCategoria ");
-                    where.Append("WHERE { ");
-                    where.Append("?categoria skos:prefLabel ?nombreCategoria. ");
-                    where.Append($@"FILTER(?categoria IN (<{string.Join(">,<", itemsSeleccionados)}>)) ");
-                    where.Append("} ");
+                    string selectNomCatCreaNodo = mPrefijos;
+                    selectNomCatCreaNodo += "SELECT ?categoria ?nombreCategoria ";
+                    string whereNomCatCreaNodo = $@"WHERE {{ 
+                                                           ?categoria skos:prefLabel ?nombreCategoria. 
+                                                           FILTER(?categoria IN (<{string.Join(">,<", itemsSeleccionados)}>))
+                                                       }} ";
 
-                    resultadoQuery = mResourceApi.VirtuosoQuery(select.ToString(), where.ToString(), mCommunityID);
-                    if (resultadoQuery != null && resultadoQuery.results != null && resultadoQuery.results.bindings != null && resultadoQuery.results.bindings.Count > 0)
+                    SparqlObject resultadoQueryNomCatCreaNodo = mResourceApi.VirtuosoQuery(selectNomCatCreaNodo, whereNomCatCreaNodo, mCommunityID);
+                    if (resultadoQueryNomCatCreaNodo != null && resultadoQueryNomCatCreaNodo.results != null && resultadoQueryNomCatCreaNodo.results.bindings != null && resultadoQueryNomCatCreaNodo.results.bindings.Count > 0)
                     {
-                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQuery.results.bindings)
+                        foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryNomCatCreaNodo.results.bindings)
                         {
                             if (!dicNodos.ContainsKey(fila["categoria"].value))
                             {
@@ -2398,12 +2396,12 @@ namespace Hercules.MA.GraphicEngine.Models
                             {
                                 foreach (DataQueryRelaciones relaciones in sujeto.Value)
                                 {
-                                    foreach (Datos relaciones2 in relaciones.idRelacionados)
+                                    foreach (Datos relacionesRelacionados in relaciones.idRelacionados)
                                     {
-                                        if (itemsSeleccionados.Contains(relaciones2.idRelacionado))
+                                        if (itemsSeleccionados.Contains(relacionesRelacionados.idRelacionado))
                                         {
-                                            string id = $@"{sujeto.Key}~{relaciones.nombreRelacion}~{relaciones2.idRelacionado}~{relaciones2.numVeces}";
-                                            Data data = new(id, relaciones.nombreRelacion, sujeto.Key, relaciones2.idRelacionado, CalcularGrosor(maximasRelaciones, relaciones2.numVeces), "edges", Data.Type.relation_document);
+                                            string id = $@"{sujeto.Key}~{relaciones.nombreRelacion}~{relacionesRelacionados.idRelacionado}~{relacionesRelacionados.numVeces}";
+                                            Data data = new(id, relaciones.nombreRelacion, sujeto.Key, relacionesRelacionados.idRelacionado, CalcularGrosor(maximasRelaciones, relacionesRelacionados.numVeces), "edges", Data.Type.relation_document);
                                             DataItemRelacion dataColabo = new(data, null, null);
                                             itemsRelacion.Add(dataColabo);
                                         }
