@@ -2414,7 +2414,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
             });
 
-            grafica.elements = itemsRelacion;
+            grafica.elements = itemsRelacion.ToList();
             return grafica;
         }
         #endregion
