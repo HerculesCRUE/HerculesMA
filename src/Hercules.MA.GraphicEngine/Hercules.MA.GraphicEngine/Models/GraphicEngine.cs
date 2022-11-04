@@ -1670,31 +1670,7 @@ namespace Hercules.MA.GraphicEngine.Models
                     filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                     if (!string.IsNullOrEmpty(pFiltroFacetas))
                     {
-                        if (pFiltroFacetas.Contains("((("))
-                        {
-                            if (pFiltroFacetas.Contains('&'))
-                            {
-                                foreach (string filtro in pFiltroFacetas.Split('&'))
-                                {
-                                    if (filtro.Contains("((("))
-                                    {
-                                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
-                                    }
-                                    else
-                                    {
-                                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
-                            }
-                        }
-                        else
-                        {
-                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
-                        }
+                        Utility.ObtenerFiltros(pFiltroFacetas, pListaDates, ref filtros);
                     }
                     if (!string.IsNullOrEmpty(itemGrafica.Filtro))
                     {
@@ -1806,31 +1782,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                         if (!string.IsNullOrEmpty(pFiltroFacetas))
                         {
-                            if (pFiltroFacetas.Contains("((("))
-                            {
-                                if (pFiltroFacetas.Contains('&'))
-                                {
-                                    foreach (string filtro in pFiltroFacetas.Split('&'))
-                                    {
-                                        if (filtro.Contains("((("))
-                                        {
-                                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
-                                        }
-                                        else
-                                        {
-                                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
-                                }
-                            }
-                            else
-                            {
-                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
-                            }
+                            Utility.ObtenerFiltros(pFiltroFacetas, pListaDates, ref filtros);
                         }
                         if (!string.IsNullOrEmpty(itemGrafica.Filtro))
                         {
@@ -1873,31 +1825,7 @@ namespace Hercules.MA.GraphicEngine.Models
                         filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                         if (!string.IsNullOrEmpty(pFiltroFacetas))
                         {
-                            if (pFiltroFacetas.Contains("((("))
-                            {
-                                if (pFiltroFacetas.Contains('&'))
-                                {
-                                    foreach (string filtro in pFiltroFacetas.Split('&'))
-                                    {
-                                        if (filtro.Contains("((("))
-                                        {
-                                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
-                                        }
-                                        else
-                                        {
-                                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
-                                }
-                            }
-                            else
-                            {
-                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
-                            }
+                            Utility.ObtenerFiltros(pFiltroFacetas, pListaDates, ref filtros);
                         }
                         if (!string.IsNullOrEmpty(itemGrafica.Filtro))
                         {
@@ -2222,31 +2150,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
                 if (!string.IsNullOrEmpty(pFiltroFacetas))
                 {
-                    if (pFiltroFacetas.Contains("((("))
-                    {
-                        if (pFiltroFacetas.Contains('&'))
-                        {
-                            foreach (string filtro in pFiltroFacetas.Split('&'))
-                            {
-                                if (filtro.Contains("((("))
-                                {
-                                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
-                                }
-                                else
-                                {
-                                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
-                                }
-                            }
-                        }
-                        else
-                        {
-                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
-                        }
-                    }
-                    else
-                    {
-                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
-                    }
+                    Utility.ObtenerFiltros(pFiltroFacetas, pListaDates, ref filtros);
                 }
                 if (!string.IsNullOrEmpty(itemGrafica.Filtro))
                 {
@@ -2475,31 +2379,7 @@ namespace Hercules.MA.GraphicEngine.Models
             }
             if (!string.IsNullOrEmpty(pFiltroFacetas))
             {
-                if (pFiltroFacetas.Contains("((("))
-                {
-                    if (pFiltroFacetas.Contains('&'))
-                    {
-                        foreach (string filtro in pFiltroFacetas.Split('&'))
-                        {
-                            if (filtro.Contains("((("))
-                            {
-                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: filtro.Split("(((")[1]));
-                            }
-                            else
-                            {
-                                filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { filtro }, pListaDates: pListaDates));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas.Split("(((")[0] }, pListaDates: pListaDates, pReciproco: pFiltroFacetas.Split("(((")[1]));
-                    }
-                }
-                else
-                {
-                    filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroFacetas }, pListaDates: pListaDates));
-                }
+                Utility.ObtenerFiltros(pFiltroFacetas, pListaDates, ref filtros);
             }
 
             if (!faceta.tesauro)
