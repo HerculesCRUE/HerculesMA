@@ -4,6 +4,7 @@ using Hercules.MA.GraphicEngine.Models;
 using Hercules.MA.GraphicEngine.Models.Graficas;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -13,10 +14,10 @@ namespace Hercules.MA.GraphicEngine.Utils
 {
     public static class Utility
     {
-        private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}configJson{Path.DirectorySeparatorChar}prefijos.json")));
-        private static ResourceApi mResourceApi = new ($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
-        private static CommunityApi mCommunityApi = new ($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
-        private static Guid mCommunityID = mCommunityApi.GetCommunityId();
+        private static readonly string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}configJson{Path.DirectorySeparatorChar}prefijos.json")));
+        private static readonly ResourceApi mResourceApi = new ($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
+        private static readonly CommunityApi mCommunityApi = new ($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
+        private static readonly Guid mCommunityID = mCommunityApi.GetCommunityId();
 
         /// <summary>
         /// Devuelve un string con el color en hexadecimal

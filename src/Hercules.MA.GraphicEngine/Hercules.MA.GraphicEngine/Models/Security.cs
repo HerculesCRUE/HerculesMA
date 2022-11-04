@@ -8,7 +8,7 @@ namespace Hercules.MA.GraphicEngine.Models
 {
     public static class Security
     {
-        static UserApi mUserApi = new ($@"{AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
+        static readonly UserApi mUserApi = new ($@"{AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}ConfigOAuth{Path.DirectorySeparatorChar}OAuthV3.config");
 
         public static bool CheckUser(Guid pUserId, HttpRequest pHttpRequest)
         {

@@ -22,10 +22,10 @@ namespace Hercules.MA.GraphicEngine.Models
     public static class GraphicEngine
     {
         // Prefijos.
-        private static string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configJson", "prefijos.json"))));
-        private static ResourceApi mResourceApi = new(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
-        private static CommunityApi mCommunityApi = new(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
-        private static Guid mCommunityID = mCommunityApi.GetCommunityId();
+        private static readonly string mPrefijos = string.Join(" ", JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "configJson", "prefijos.json"))));
+        private static readonly ResourceApi mResourceApi = new(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
+        private static readonly CommunityApi mCommunityApi = new(Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Config", "ConfigOAuth", "OAuthV3.config"));
+        private static readonly Guid mCommunityID = mCommunityApi.GetCommunityId();
         private static List<ConfigModel> mTabTemplates;
         private const int NUM_HILOS = 5;
 
