@@ -1762,6 +1762,7 @@ namespace Hercules.MA.GraphicEngine.Models
                 }
                 ConcurrentDictionary<Dimension, ConcurrentDictionary<string, float>> resultadosDimensionExt = new();
                 ConcurrentDictionary<string, float> dicNombreDataExt = new();
+                ConcurrentBag<Dimension> listaDimensionesInt = new();
 
                 Parallel.ForEach(pGrafica.Config.Dimensiones, new ParallelOptions { MaxDegreeOfParallelism = NUM_HILOS }, itemGrafica =>
                 {
@@ -1810,47 +1811,22 @@ namespace Hercules.MA.GraphicEngine.Models
                     }
                     else
                     {
-                        List<string> filtros = new();
-                        filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { pFiltroBase }));
-                        if (!string.IsNullOrEmpty(pFiltroFacetas))
-                        {
-                            Utility.ObtenerFiltros(pFiltroFacetas, pListaDates, ref filtros);
-                        }
-                        if (!string.IsNullOrEmpty(itemGrafica.Filtro))
-                        {
-                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }));
-                            filtros.AddRange(UtilsGraficas.ObtenerFiltros(new List<string>() { itemGrafica.Filtro }, "tipo"));
-                        }
-
-                        string selectDimension = mPrefijos;
-                        selectDimension += "SELECT ?tipo COUNT(DISTINCT ?s) AS ?numero ";
-                        string whereDimension = "WHERE { ";
-                        foreach (string item in filtros)
-                        {
-                            whereDimension += item;
-                        }
-                        string limite = itemGrafica.Limite == 0 ? "" : "LIMIT " + itemGrafica.Limite;
-                        whereDimension += $@"FILTER(LANG(?tipo) = '{pLang}' OR LANG(?tipo) = '' OR !isLiteral(?tipo)) 
-                            }} ORDER BY DESC (?numero) {limite}";
-
-                        SparqlObject resultadoQueryDimension = mResourceApi.VirtuosoQuery(selectDimension, whereDimension, mCommunityID);
-                        if (resultadoQueryDimension != null && resultadoQueryDimension.results != null && resultadoQueryDimension.results.bindings != null && resultadoQueryDimension.results.bindings.Count > 0)
-                        {
-                            foreach (Dictionary<string, SparqlObject.Data> fila in resultadoQueryDimension.results.bindings)
-                            {
-                                try
-                                {
-                                    dicNombreData.TryAdd(fila["tipo"].value, int.Parse(fila["numero"].value));
-                                }
-                                catch (Exception)
-                                {
-                                    throw new ArgumentException("No se ha configurado el apartado de dimensiones.");
-                                }
-                            }
-                            resultadosDimension[itemGrafica] = dicNombreData;
-                        }
+                        listaDimensionesInt.Add(itemGrafica);
                     }
                 });
+                // Sumo los datos del exterior para sacar los del interior
+                foreach (KeyValuePair<string, float> nombreData in dicNombreDataExt)
+                {
+                    if (!dicNombreData.TryAdd(nombreData.Key.Split("---")[0], nombreData.Value))
+                    {
+                        dicNombreData[nombreData.Key.Split("---")[0]] += nombreData.Value;
+                    }
+                }
+                foreach (Dimension itemGrafica in listaDimensionesInt)
+                {
+                    resultadosDimension[itemGrafica] = dicNombreData;
+                }
+
                 // Lista de los ordenes de las revistas.
                 List<string> listaNombres = new();
                 List<string> listaLabels = new();
