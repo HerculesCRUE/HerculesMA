@@ -3081,16 +3081,27 @@ namespace Hercules.MA.GraphicEngine.Models
         {
             get
             {
-                if (mTabTemplates == null || mTabTemplates.Count != Directory.EnumerateFiles($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}configGraficas").Count())
+                while (mTabTemplates == null)
                 {
-                    mTabTemplates = new List<ConfigModel>();
-                    foreach (string file in Directory.EnumerateFiles($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}configGraficas"))
+                    try
                     {
-                        ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
-                        mTabTemplates.Add(tab);
+                        if (mTabTemplates == null || mTabTemplates.Count != Directory.EnumerateFiles($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}configGraficas").Count())
+                        {
+                            mTabTemplates = new List<ConfigModel>();
+                            foreach (string file in Directory.EnumerateFiles($@"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}Config{Path.DirectorySeparatorChar}configGraficas"))
+                            {
+                                ConfigModel tab = JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(file));
+                                mTabTemplates.Add(tab);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        mResourceApi.Log.Error(ex.Message);
+                        Thread.Sleep(10000);
                     }
                 }
-                return mTabTemplates.OrderBy(x => x.Orden).ToList();
+                return mTabTemplates.OrderBy(x => x.orden).ToList();
             }
         }
 
