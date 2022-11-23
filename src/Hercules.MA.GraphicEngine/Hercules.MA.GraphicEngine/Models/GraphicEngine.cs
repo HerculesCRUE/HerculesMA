@@ -64,7 +64,7 @@ namespace Hercules.MA.GraphicEngine.Models
             selectIsAdmin += "SELECT ?permisos ";
             string whereIsAdmin = $@"WHERE {{
                                 ?s roh:gnossUser <http://gnoss/{pUserId.ToUpper()}> . 
-                                ?s roh:isOtriManager ?permisos . 
+                                ?s roh:isGraphicManager ?permisos . 
                             }}";
 
 
